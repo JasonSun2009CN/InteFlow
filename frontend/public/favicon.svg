@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#2563eb"/>
-  <text x="32" y="42" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="bold" fill="#ffffff" text-anchor="middle">SA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="InteFlow">
+  <defs>
+    <linearGradient id="iflow" x1="14" y1="8" x2="51" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset=".5" stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- Staggered "IF" mark: I rides high-left, F drops low-right -->
+  <g fill="url(#iflow)">
+    <rect x="14" y="8" width="9" height="29" rx="4.5"/>
+    <rect x="28" y="24" width="9" height="32" rx="4.5"/>
+    <rect x="28" y="24" width="23" height="9" rx="4.5"/>
+    <rect x="28" y="37" width="17" height="9" rx="4.5"/>
+  </g>
 </svg>
