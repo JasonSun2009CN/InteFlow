@@ -31,6 +31,24 @@
   --color-danger-600: #dc2626;
   --color-danger-700: #b91c1c;
 
+  /* Paper & ink — the home screen's editorial palette (warm, low-chrome). */
+  --color-paper-50: #faf8f3;
+  --color-paper-100: #f5f1e8;
+  --color-paper-200: #ece5d8;
+  --color-paper-300: #dad1bf;
+  --color-ink-300: #b6afa1;
+  --color-ink-400: #8d8678;
+  --color-ink-500: #6d665a;
+  --color-ink-600: #504a41;
+  --color-ink-700: #3a352f;
+  --color-ink-800: #292521;
+  --color-ink-900: #1c1916;
+  --color-seal-50: #fbf1ee;
+  --color-seal-100: #f5ded6;
+  --color-seal-500: #b04d36;
+  --color-seal-600: #9a402c;
+  --color-seal-700: #7e3424;
+
   /* Spacing scale (4px base) */
   --spacing-0: 0;
   --spacing-1: 0.25rem;  /* 4px */
@@ -66,6 +84,8 @@
   /* Typography */
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* Serif display face for the home screen's headings — printed-book feel. */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
 
   --text-xs: 0.75rem;     /* 12px */
   --text-sm: 0.875rem;    /* 14px */
@@ -136,4 +156,129 @@ body {
 .visually-hidden {
   @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
   clip: rect(0, 0, 0, 0);
+}
+
+/* ------------------------------------------------------------------ *
+ * Paper & ink theme scope.
+ *
+ * Every non-exam screen lives inside `.paper-app`. Remapping the Tailwind
+ * colour variables there re-skins all existing `slate-* / blue-* / red-* …`
+ * utilities to the warm paper palette without touching each page.
+ * The practice screen renders outside this scope and keeps the original
+ * cool slate + blue look.
+ * ------------------------------------------------------------------ */
+.paper-app {
+  --color-white: #fffdf8;
+
+  /* neutrals: warm paper → ink */
+  --color-slate-50: #faf8f3;
+  --color-slate-100: #f5f1e8;
+  --color-slate-200: #ece5d8;
+  --color-slate-300: #dad1bf;
+  --color-slate-400: #b6afa1;
+  --color-slate-500: #8d8678;
+  --color-slate-600: #6d665a;
+  --color-slate-700: #504a41;
+  --color-slate-800: #3a352f;
+  --color-slate-900: #1c1916;
+
+  /* accent / actions: blue & primary → ink */
+  --color-blue-50: #f7f5f0;
+  --color-blue-200: #e2dbcd;
+  --color-blue-400: #8d8678;
+  --color-blue-500: #504a41;
+  --color-blue-600: #1c1916;
+  --color-blue-700: #000000;
+  --color-blue-800: #000000;
+  --color-blue-900: #000000;
+  --color-primary-50: #f7f5f0;
+  --color-primary-100: #ece5d8;
+  --color-primary-200: #dad1bf;
+  --color-primary-500: #6d665a;
+  --color-primary-600: #1c1916;
+  --color-primary-700: #000000;
+  --color-primary-800: #000000;
+
+  /* AI / secondary accents: muted denim & plum */
+  --color-indigo-50: #f0f1f2;
+  --color-indigo-600: #3f4a52;
+  --color-indigo-700: #333c43;
+  --color-violet-600: #4a4152;
+  --color-violet-700: #3d3545;
+
+  /* errors: seal red */
+  --color-red-50: #fbf1ee;
+  --color-red-100: #f5ded6;
+  --color-red-200: #ecc4b8;
+  --color-red-300: #dda291;
+  --color-red-400: #ca7a63;
+  --color-red-500: #b04d36;
+  --color-red-600: #9a402c;
+  --color-red-700: #7e3424;
+  --color-red-800: #65291c;
+  --color-danger-50: #fbf1ee;
+  --color-danger-100: #f5ded6;
+  --color-danger-200: #ecc4b8;
+  --color-danger-500: #b04d36;
+  --color-danger-600: #9a402c;
+  --color-danger-700: #7e3424;
+  --color-danger-800: #65291c;
+
+  /* success: sage */
+  --color-emerald-50: #f2f3ec;
+  --color-emerald-100: #e4e7d8;
+  --color-emerald-300: #b1ba95;
+  --color-emerald-500: #6f7d4f;
+  --color-emerald-600: #5b6840;
+  --color-emerald-700: #475232;
+  --color-emerald-800: #38412a;
+  --color-emerald-900: #2c3320;
+  --color-green-50: #f2f3ec;
+  --color-green-300: #b1ba95;
+  --color-green-800: #38412a;
+  --color-success-50: #f2f3ec;
+  --color-success-100: #e4e7d8;
+  --color-success-200: #cfd5bb;
+  --color-success-600: #5b6840;
+  --color-success-700: #475232;
+  --color-success-800: #38412a;
+
+  /* warning: ochre */
+  --color-amber-50: #faf5ea;
+  --color-amber-100: #f3e7cd;
+  --color-amber-300: #d5b97c;
+  --color-amber-400: #bf9b52;
+  --color-amber-500: #a67f3a;
+  --color-amber-600: #8c6730;
+  --color-amber-700: #6f5128;
+  --color-amber-800: #5a4322;
+  --color-amber-900: #4a3820;
+  --color-warning-50: #faf5ea;
+  --color-warning-100: #f3e7cd;
+  --color-warning-200: #e7d3a8;
+  --color-warning-600: #8c6730;
+  --color-warning-700: #6f5128;
+  --color-warning-800: #5a4322;
+}
+
+/* Warm paper ground with one soft light pooling from the top. */
+.paper-wash {
+  background-color: var(--color-paper-50);
+  background-image: radial-gradient(
+    1100px 480px at 50% -160px,
+    #f0e9da 0%,
+    rgba(250, 248, 243, 0) 72%
+  );
+}
+
+/* Keyboard focus inside the workspace should read as ink, not the app's blue. */
+.paper-app :focus-visible {
+  @apply ring-ink-900 ring-offset-paper-50;
+}
+
+/* Headings inside the workspace use the serif display face. */
+.paper-app h1,
+.paper-app h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
 }

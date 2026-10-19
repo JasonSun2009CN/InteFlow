@@ -22,7 +22,7 @@ def clean_settings() -> None:
 
 def test_defaults(client: TestClient) -> None:
     body = client.get("/api/settings").json()
-    assert body["provider"] == "openai"
+    assert body["provider"] == "orcarouter"      # the built-in default service
     assert body["protocol"] == "openai"
     assert body["api_key_set"] is False
     assert body["api_key_masked"] == ""
@@ -64,9 +64,9 @@ def test_unknown_provider_rejected(client: TestClient) -> None:
 def test_put_provider_derives_protocol(client: TestClient) -> None:
     body = client.put(
         "/api/settings",
-        json={"provider": "deepseek", "api_key": KEY, "model": "deepseek-chat"},
+        json={"provider": "deepseek-openai", "api_key": KEY, "model": "deepseek-flash"},
     ).json()
-    assert body["provider"] == "deepseek"
+    assert body["provider"] == "deepseek-openai"
     assert body["protocol"] == "openai"
 
 
@@ -90,14 +90,42 @@ def test_providers_catalog_orcarouter_first(client: TestClient) -> None:
     providers = body.json()
     ids = [p["id"] for p in providers]
     assert ids[0] == "orcarouter"
-    for wanted in ("openai", "groq", "mistral", "deepseek", "together", "fireworks",
-                   "nvidia", "ollama", "moonshot", "minimax", "dashscope",
-                   "openrouter", "openpaths", "anthropic", "custom"):
+    for wanted in ("openai", "groq", "xai", "mistral", "deepseek-openai", "deepseek-anthropic",
+                   "together", "fireworks", "nvidia", "ollama", "moonshot", "minimax", "dashscope",
+                   "openrouter", "openpaths", "anthropic", "custom", "custom-anthropic"):
         assert wanted in ids, f"catalog missing {wanted}"
     orca = providers[0]
     assert orca["base_url"] == "https://api.orcarouter.ai/v1"
     assert orca["protocol"] == "openai"
     assert orca["default_model"] == "orcarouter/auto"
+
+
+def test_protocol_dual_presets(client: TestClient) -> None:
+    """DeepSeek and Custom ship one preset per protocol, each with its own URL."""
+    providers = {p["id"]: p for p in client.get("/api/settings/providers").json()}
+
+    ds_openai = providers["deepseek-openai"]
+    assert ds_openai["base_url"] == "https://api.deepseek.com/v1"
+    assert ds_openai["protocol"] == "openai"
+
+    ds_anthropic = providers["deepseek-anthropic"]
+    assert ds_anthropic["base_url"] == "https://api.deepseek.com/anthropic"
+    assert ds_anthropic["protocol"] == "anthropic"
+
+    assert providers["custom"]["protocol"] == "openai"
+    custom_anthropic = providers["custom-anthropic"]
+    assert custom_anthropic["protocol"] == "anthropic"
+    assert custom_anthropic["base_url"] == ""
+
+
+def test_legacy_deepseek_id_still_resolves() -> None:
+    """A saved `deepseek` setting keeps working until the DB migration rewrites it."""
+    from app.providers import get_provider
+
+    legacy = get_provider("deepseek")
+    assert legacy is not None
+    assert legacy["id"] == "deepseek-openai"
+    assert legacy["protocol"] == "openai"
 
 
 def test_probe_uses_catalog_default_base(client: TestClient, monkeypatch) -> None:

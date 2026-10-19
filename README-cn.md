@@ -60,7 +60,7 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **结果 / 复盘** | 得分 / 分板块 / 用时统计、`All · Correct · Wrong` 过滤、三栏 master–detail、补键重判（regrade） |
 | **工作区** | 手写解析（直存本地）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出入口 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、生词 **`.xlsx`** |
-| **设置** | 16 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试 |
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试 |
 
 > **规划中（已留入口，细节待定）：** 应用内**查词**（选中单词查词典）、专门的**错题分析导出**。
 > 见 [`docs/IDEAS.md`](docs/IDEAS.md) 与 [`ROADMAP.md`](ROADMAP.md)。
@@ -149,22 +149,22 @@ npm run dev
 
 ### 1. 导入题库
 
-打开 <http://localhost:5173>，首页是 **Select an exam**（选卷开考列表，只列已导入的卷子）。
-管理功能（导入 / 内置题库 / 设置）收在右下角不起眼的 **Manage** 链接里（→ `/manage`）。
+打开 <http://localhost:5173>，左侧栏固定五个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 删除）、
+**Mistakes**（错题分析集合，占位）、**Vocabulary**（单词整理集合，占位）、**Settings**（LLM 设置）。
 
-1. 点右下角 **Manage** 进入管理页。
+1. 点侧栏 **Library** 进入题库页。
 2. **上传文件**：把文件拖到 *Drag a file here* 区域，或点 **choose a file**。
    支持 `PDF · DOCX · .md · .markdown · .ifmd.md`（≤ 60 MB；题目需带编号 `1.` `2.` …，每题四个选项）。
 3. **等待流水线跑完**：`detect → convert → review` 三阶段，附**逐页报告**（该页是文本/OCR/低置信/无引擎）。
    - 转换结果干净 → 自动提交入库；
    - 有疑点 → 停在复核阶段，由你点 **Commit** 落库或 **Cancel** 取消（全程 0 token）。
-4. **（可选）用内置题库**：管理页的题库卡展开后按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
+4. **（可选）用内置题库**：Library 页的题库卡展开后按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
 5. **回首页开考**：返回 **Select an exam**，新导入的卷子直接点 **Start** 开考。
 
 <details>
 <summary>没有题库文件？自己写 IFMD</summary>
 
-管理页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [`docs/IFMD.md`](docs/IFMD.md) 的格式手写即可。
+Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [`docs/IFMD.md`](docs/IFMD.md) 的格式手写即可。
 </details>
 
 ### 2. 录入答案
@@ -213,13 +213,15 @@ npm run dev
 
 ### 6. 设置 LLM（可选）
 
-**除 AI 讲解外都不需要配置。** 在管理页点右上角 **⚙ Settings**（`/settings`）：
+**除 AI 讲解外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
-1. **Provider** 下拉（内置 16 家目录，含 Base URL 与默认模型）；
+1. **Provider** 下拉（内置 19 家目录，**默认 OrcaRouter**，含 Base URL 与默认模型）；
 2. **Base URL** 可覆盖；
 3. **API Key** 只写不回显（掩码显示）；
 4. **Model** 填模型名；
 5. **Save settings** / **Test connection**。
+
+Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 
 ## 可选功能
 
@@ -270,12 +272,12 @@ InteFlow/
 │   │   ├── export/            PDF (WeasyPrint) · docx · math_render(+mathjax 桥)
 │   │   ├── repos/ · llm/      持久化 · LLM 传输层
 │   │   ├── sections.py        自由板块标签
-│   │   ├── providers.py       16 家服务商目录
+│   │   ├── providers.py       19 家服务商目录
 │   │   └── builtin/           内置题库（44 单元随仓库分发）
 │   ├── tests/                 pytest（187）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Import(Manage) · AnswerKey · Practice · Result · Settings
+│   └── src/pages/             ExamHome · Library(Import) · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
 ├── scripts/dev.sh             一键起前后端
 ├── data/                      运行期数据（gitignore）
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/

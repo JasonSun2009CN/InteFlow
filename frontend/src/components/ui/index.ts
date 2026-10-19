@@ -7,3 +7,4 @@ export { Banner } from "./Banner";
 export { ToastProvider, useToast } from "./Toast";
 export { Icon } from "./Icon";
 export { AppShell } from "./AppShell";
+export { AppSidebar } from "./AppSidebar";

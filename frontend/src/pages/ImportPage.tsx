@@ -168,26 +168,17 @@ export default function ImportPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <Link to="/" className="text-sm text-slate-500 underline hover:text-slate-700">
-            ← Back to exams
-          </Link>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">Manage</h1>
-          <p className="mt-1 text-slate-600">
-            Import a question bank (PDF, Word <code className="rounded bg-slate-200 px-1">.docx</code>, or{" "}
-            <code className="rounded bg-slate-200 px-1">.ifmd.md</code>),
-            fill in the answers, then practice in a exam-style UI.
-          </p>
-        </div>
-        <Link
-          to="/settings"
-          className="shrink-0 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-          title="LLM API settings"
-        >
-          ⚙ Settings
-        </Link>
+    <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
+      <header className="mb-8 max-w-3xl">
+        <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
+          Question bank
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Library</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Import a question bank (PDF, Word <code className="rounded bg-slate-200 px-1">.docx</code>, or{" "}
+          <code className="rounded bg-slate-200 px-1">.ifmd.md</code>), fill in the answers,
+          then practice in an exam-style UI.
+        </p>
       </header>
 
       {error && (
@@ -305,7 +296,7 @@ export default function ImportPage() {
       )}
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Library</h2>
+        <h2 className="text-lg font-semibold">Your exams</h2>
         {docs === null && <p className="mt-3 text-sm text-slate-500">Loading…</p>}
         {docs?.length === 0 && (
           <p className="mt-3 text-sm text-slate-500">Nothing imported yet.</p>

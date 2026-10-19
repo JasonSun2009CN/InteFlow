@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   api,
   ApiError,
@@ -13,7 +12,7 @@ function errText(err: unknown): string {
 }
 
 export default function SettingsPage() {
-  const [provider, setProvider] = useState("openai");
+  const [provider, setProvider] = useState("orcarouter");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("");
@@ -117,14 +116,13 @@ export default function SettingsPage() {
   const label = "block text-sm font-medium text-slate-700 mb-1";
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <Link to="/manage" className="text-sm text-blue-700 underline">
-        ← Manage
-      </Link>
-
-      <header className="mb-6 mt-4">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-1 text-slate-600">
+    <div className="mx-auto w-full max-w-2xl px-6 py-10 sm:py-14">
+      <header className="mb-6">
+        <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
+          Workspace
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Settings</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
           Configure the LLM API used for on-demand explanations and import fallback.
           Everything is stored locally; the key never leaves this machine except to call
           the provider you name below.

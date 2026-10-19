@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式点击时调用（导入主链路 0 token）。
 >
-> 基线：pytest **187 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 43 passed。
+> 基线：pytest **187 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 49 passed。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -13,7 +13,7 @@
 ```mermaid
 flowchart LR
   subgraph Browser["浏览器 (React SPA · Vite + TS + Tailwind)"]
-    UI["页面: ExamHome / Import(Manage) / AnswerKey / Practice / Result / Settings"]
+    UI["工作区侧栏: Exams / Library / Mistakes / Vocabulary / Settings<br/>考试流: AnswerKey / Practice / Result"]
     RT["RichText: react-markdown + remark-math + rehype-katex"]
   end
 
@@ -25,7 +25,7 @@ flowchart LR
     PARSE["ifmd.parser (deterministic state machine)"]
     REPOS["repos: documents · imports · sessions · words · settings"]
     SEC["sections.py (free-form section labels)"]
-    LLM["llm.base -> providers.py (16 providers, 2 protocols)"]
+    LLM["llm.base -> providers.py (19 providers, 2 protocols)"]
     API --> CONV
     API --> PARSE
     API --> REPOS
@@ -153,23 +153,33 @@ erDiagram
 
 ```
 App.tsx (BrowserRouter)
-├── "/"                     ExamHomePage      —— 选卷开考列表（+ Manage 链接）
-├── "/manage"               ImportPage        —— 拖放导入 + 流水线 + 模板 + LibraryList + 内置题库卡
-├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格 + 批量粘贴 + 预览
-├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时）
-├── "/session/:sid/result"  ResultPage        —— 载入会话 → 三栏 Review Workspace
-└── "/settings"             SettingsPage      —— LLM 服务商配置
+└── AppShell  —— 非考试页包在纸墨工作区（左侧栏 + 移动抽屉）；仅练习页全屏无壳
+    ├── "/"                     ExamHomePage      —— Exams：选卷开考（统计 + 编号行）
+    ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 内置题库卡 + 试卷列表
+    ├── "/mistakes"             MistakesPage      —— 错题分析集合（占位）
+    ├── "/vocabulary"           VocabularyPage    —— 单词整理集合（占位）
+    ├── "/settings"             SettingsPage      —— LLM 服务商配置
+    ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格 + 批量粘贴 + 预览（含侧栏）
+    ├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时，无侧栏、保持 slate/blue）
+    ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 三栏 Review Workspace（含侧栏）
+    └── "/manage"               → 重定向到 /library（兼容旧链接）
 
-components/  RichText (markdown+KaTeX+图片) · workspace/（Workspace 三区+顶栏+移动抽屉 · QuestionNav 题号导航 ·
-             Inspector Tab(解析/AI/导出/规范化) · VocabularySheet 底部词汇表 · VocabGrid v2 电子表格 · Splitter 分隔条 ·
-             usePersistentLayout · useMediaQuery · icons）· ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard ·
-             ReviewSidebar（旧版手风琴，保留回滚）· ui/（设计系统原语）
+components/  AppSidebar（五个 tab：Exams/Library/Mistakes/Vocabulary/Settings）· RichText (markdown+KaTeX+图片) ·
+             workspace/（Workspace 三区+顶栏+移动抽屉 · QuestionNav 题号导航 · Inspector Tab(解析/AI/导出/规范化) ·
+             VocabularySheet 底部词汇表 · VocabGrid v2 电子表格 · Splitter 分隔条 · usePersistentLayout · useMediaQuery ·
+             icons）· ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · ReviewSidebar（旧版手风琴，保留回滚）·
+             ui/（设计系统原语）
 lib/         sections.ts（板块标签，与后端 sections.py 对齐）
 api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 ```
 
 结果页布局持久化在 `localStorage` 键 `inteflow.workspace.<docId>`（左右栏宽、底部高、折叠态、当前 Tab）；
 可拖拽分隔条为 `role="separator"` 且支持方向键。
+
+**主题作用域**：`.paper-app`（`index.css`）在非考试页重映射 Tailwind 的颜色变量
+（`slate/blue/red/emerald/amber/…` → 纸墨/印章/鼠尾草/赭石），并让 `h1/h2` 用衬线 `font-display`，
+所以现存页面无需逐个改 class 即同步纸墨风。练习页渲染在 `.paper-app` 之外，保持原 slate/blue。
+移动端左侧栏收成顶部条 + 抽屉（`AppSidebar`）。
 
 ---
 
@@ -181,7 +191,7 @@ app/
 ├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR，ifmd_path()）
 ├── imports.py              导入流水线服务：detect → convert → commit（确定性，0 token；PDF/DOCX/InteFlow-MD 单一代码路径）
 ├── sections.py             板块标签（KNOWN_LABELS / DEFAULT_SECTION / label()）
-├── providers.py            Provider 目录（16 家）+ protocol(openai|anthropic) 解析
+├── providers.py            Provider 目录（19 家）+ protocol(openai|anthropic) 解析
 ├── normalize_jobs.py       整卷规范化后台任务（内存 registry + 单飞）
 ├── api/
 │   ├── documents.py        导入（调用 imports 服务）/列表/详情/题目/历史/答案/解析/词汇/导出/删除/资源

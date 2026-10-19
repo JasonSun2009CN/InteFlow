@@ -44,6 +44,22 @@ def test_migrate_adds_word_grid_v2_columns() -> None:
     conn.close()
 
 
+def test_migrate_renames_legacy_deepseek_provider() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.executescript(SCHEMA)
+    conn.execute("INSERT INTO settings (key, value) VALUES ('provider', 'deepseek')")
+    conn.execute("INSERT INTO settings (key, value) VALUES ('model', 'deepseek-chat')")
+
+    _migrate(conn)
+    _migrate(conn)                                    # idempotent
+
+    rows = {r["key"]: r["value"] for r in conn.execute("SELECT key, value FROM settings")}
+    assert rows["provider"] == "deepseek-openai"
+    assert rows["model"] == "deepseek-chat"           # other settings untouched
+    conn.close()
+
+
 def test_migrate_is_idempotent() -> None:
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row

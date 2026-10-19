@@ -217,6 +217,17 @@ def _migrate(conn: sqlite3.Connection) -> None:
             if name not in grid_cols:
                 conn.execute(f"ALTER TABLE word_grids ADD COLUMN {name} {ddl}")
 
+    # settings (2026-10-19): DeepSeek became two protocol presets, so the old
+    # `deepseek` provider id is rewritten to `deepseek-openai`
+    # (see providers.LEGACY_PROVIDER_IDS for the in-memory fallback).
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'settings'"
+    ).fetchone():
+        conn.execute(
+            "UPDATE settings SET value = 'deepseek-openai'"
+            " WHERE key = 'provider' AND value = 'deepseek'"
+        )
+
 
 def init_db() -> None:
     with db() as conn:

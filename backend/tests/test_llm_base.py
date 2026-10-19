@@ -84,7 +84,7 @@ def test_officially_documented_default_base_url(
     stored, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # An empty stored base URL falls back to the provider's official default.
-    stored(provider="deepseek", base_url="", api_key="k", model="deepseek-chat")
+    stored(provider="deepseek-openai", base_url="", api_key="k", model="deepseek-flash")
     seen = _capture(monkeypatch, httpx.Response(200, json=OPENAI_OK))
 
     llm.complete("s", [{"role": "user", "content": "x"}])
@@ -92,6 +92,61 @@ def test_officially_documented_default_base_url(
     req = seen[0]
     assert req["url"] == "https://api.deepseek.com/v1/chat/completions"
     assert req["headers"]["Authorization"] == "Bearer k"
+
+
+def test_fresh_install_defaults_to_orcarouter(monkeypatch: pytest.MonkeyPatch) -> None:
+    # No stored provider at all → the catalog default service, not OpenAI.
+    monkeypatch.setattr(
+        settings_repo, "get_all", lambda: {"api_key": "k", "model": "orcarouter/auto"}
+    )
+    seen = _capture(monkeypatch, httpx.Response(200, json=OPENAI_OK))
+
+    llm.complete("s", [{"role": "user", "content": "x"}])
+
+    assert seen[0]["url"] == "https://api.orcarouter.ai/v1/chat/completions"
+
+
+def test_deepseek_anthropic_preset_speaks_messages(
+    stored, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The Anthropic-compatible DeepSeek preset stores DeepSeek's documented
+    # base; the transport adds /v1/messages to it.
+    stored(provider="deepseek-anthropic", base_url="", api_key="k", model="deepseek-flash")
+    seen = _capture(monkeypatch, httpx.Response(200, json=ANTHROPIC_OK))
+
+    out = llm.complete("SYS", [{"role": "user", "content": "x"}])
+
+    assert out == "anthropic-says-hi"
+    req = seen[0]
+    assert req["url"] == "https://api.deepseek.com/anthropic/v1/messages"
+    assert req["headers"]["x-api-key"] == "k"
+    assert req["json"]["system"] == "SYS"
+
+
+def test_anthropic_base_without_version_gains_v1(
+    stored, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Anthropic-style docs publish the base *without* /v1 (the SDK adds it),
+    # so a verbatim paste must still reach /v1/messages.
+    stored(provider="custom-anthropic", base_url="https://gateway.internal/anthropic",
+           api_key="k", model="deepseek-flash")
+    seen = _capture(monkeypatch, httpx.Response(200, json=ANTHROPIC_OK))
+
+    llm.complete("s", [{"role": "user", "content": "x"}])
+
+    assert seen[0]["url"] == "https://gateway.internal/anthropic/v1/messages"
+
+
+def test_anthropic_base_with_version_is_not_doubled(
+    stored, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    stored(provider="custom-anthropic", base_url="https://gateway.internal/anthropic/v1/",
+           api_key="k", model="deepseek-flash")
+    seen = _capture(monkeypatch, httpx.Response(200, json=ANTHROPIC_OK))
+
+    llm.complete("s", [{"role": "user", "content": "x"}])
+
+    assert seen[0]["url"] == "https://gateway.internal/anthropic/v1/messages"
 
 
 def test_protocol_override_beats_provider(

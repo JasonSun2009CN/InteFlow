@@ -151,22 +151,23 @@ npm run dev
 
 ### 1. Import a question bank
 
-Open <http://localhost:5173>. The home page is **Select an exam** (only imported exams are listed).
-Management (import / built-in bank / settings) lives behind the unobtrusive **Manage** link at the bottom right (`/manage`).
+Open <http://localhost:5173>. The left sidebar has five tabs: **Exams** (pick one to take),
+**Library** (import a file, add the built-in bank, manage your exam list), **Mistakes**,
+**Vocabulary** and **Settings**. **Mistakes** and **Vocabulary** are placeholders for now.
 
-1. Click **Manage**.
+1. Open **Library** in the sidebar.
 2. **Upload a file**: drop it on *Drag a file here*, or click **choose a file**.
    Supported: `PDF · DOCX · .md · .markdown · .ifmd.md` (≤ 60 MB; questions must be numbered `1.` `2.` …, each with four options).
 3. **Wait for the pipeline**: `detect → convert → review`, with a **per-page report** (text / OCR / low-confidence / no-engine).
    - Clean conversion → committed automatically;
    - Suspicious pages → it pauses at review so you can **Commit** or **Cancel** (0 token throughout).
-4. **(Optional) built-in bank**: expand the bank card on the Manage page, grouped by date, and click **Add** per unit or **Add all**.
+4. **(Optional) built-in bank**: expand the bank card on the Library page, grouped by date, and click **Add** per unit or **Add all**.
 5. **Back home to practice**: return to **Select an exam** and click **Start**.
 
 <details>
 <summary>No bank file? Write your own IFMD by hand</summary>
 
-The Manage page's template card provides a valid `.ifmd.md` template you can copy or download. See
+The Library page's template card provides a valid `.ifmd.md` template you can copy or download. See
 [`docs/IFMD.md`](docs/IFMD.md) for the format.
 </details>
 
@@ -216,13 +217,15 @@ After submitting you land on `/session/:sid/result`:
 
 ### 6. Configure the LLM (optional)
 
-**Not required for anything except AI explain.** Open **⚙ Settings** (`/settings`) from the Manage page:
+**Not required for anything except AI explain.** Open **Settings** (`/settings`) from the sidebar:
 
-1. **Provider** dropdown (16-provider catalog with Base URL + default model);
+1. **Provider** dropdown (19-provider catalog, defaults to **OrcaRouter**, with Base URL + default model);
 2. **Base URL** override;
 3. **API Key** (write-only, masked);
 4. **Model**;
 5. **Save settings** / **Test connection**.
+
+Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 
 ## Optional features
 
@@ -273,12 +276,12 @@ InteFlow/
 │   │   ├── export/            PDF (WeasyPrint) · docx · math_render (+ mathjax bridge)
 │   │   ├── repos/ · llm/      persistence · LLM transport
 │   │   ├── sections.py        free-form section labels
-│   │   ├── providers.py       16-provider catalog
+│   │   ├── providers.py       19-provider catalog
 │   │   └── builtin/           built-in bank (44 units shipped with the repo)
 │   ├── tests/                 pytest (187)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Import(Manage) · AnswerKey · Practice · Result · Settings
+│   └── src/pages/             ExamHome · Library(Import) · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
 ├── scripts/dev.sh             one-command dev environment
 ├── data/                      runtime data (git-ignored)
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/

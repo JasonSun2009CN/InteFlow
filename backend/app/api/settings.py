@@ -17,10 +17,12 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.providers import (
+    DEFAULT_PROVIDER,
     PROVIDERS,
     PROTOCOLS,
     default_base_url,
     default_protocol,
+    endpoint_url,
     get_provider,
 )
 from app.repos import settings as settings_repo
@@ -47,7 +49,7 @@ def _mask(key: str) -> str:
 
 def _load() -> dict[str, str]:
     stored = settings_repo.get_all()
-    provider = stored.get("provider", "openai")
+    provider = stored.get("provider") or DEFAULT_PROVIDER
     return {
         "provider": provider,
         "protocol": stored.get("protocol") or default_protocol(provider),
@@ -140,7 +142,9 @@ def test_connection(payload: TestPayload) -> dict:
         return {"ok": False, "detail": "no API key yet — paste a key first"}
 
     base = base_url.rstrip("/")
-    url = base if base.endswith("/models") else base + "/models"
+    # A pasted full endpoint is left alone; otherwise build base + /models with
+    # the same version-segment rule the LLM transport uses.
+    url = base if base.endswith("/models") else endpoint_url(base, protocol, "/models")
     if protocol == "anthropic":
         headers = {"x-api-key": api_key, "anthropic-version": "2023-06-01"}
     else:

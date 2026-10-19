@@ -11,7 +11,13 @@ from __future__ import annotations
 
 import httpx
 
-from app.providers import default_base_url, default_protocol, get_provider
+from app.providers import (
+    DEFAULT_PROVIDER,
+    default_base_url,
+    default_protocol,
+    endpoint_url,
+    get_provider,
+)
 from app.repos import settings as settings_repo
 
 TIMEOUT = 60.0
@@ -25,7 +31,7 @@ class LLMError(Exception):
 
 def _config() -> dict[str, str]:
     stored = settings_repo.get_all()
-    provider = stored.get("provider", "openai")
+    provider = stored.get("provider") or DEFAULT_PROVIDER
     if get_provider(provider) is None:
         raise LLMError(f"unknown provider {provider!r} — fix it in Settings")
     key = stored.get("api_key", "")
@@ -90,7 +96,7 @@ def _raise_for_status(response: httpx.Response, url: str) -> None:
 
 def _anthropic(cfg: dict[str, str], system: str,
                messages: list[dict[str, str]]) -> str:
-    url = cfg["base"] + "/messages"
+    url = endpoint_url(cfg["base"], "anthropic", "/messages")
     headers = {"x-api-key": cfg["key"], "anthropic-version": ANTHROPIC_VERSION}
     payload = {
         "model": cfg["model"],
@@ -111,7 +117,7 @@ def _anthropic(cfg: dict[str, str], system: str,
 
 def _openai(cfg: dict[str, str], system: str,
             messages: list[dict[str, str]]) -> str:
-    url = cfg["base"] + "/chat/completions"
+    url = endpoint_url(cfg["base"], "openai", "/chat/completions")
     headers = {"Authorization": f"Bearer {cfg['key']}"}
     payload = {
         "model": cfg["model"],

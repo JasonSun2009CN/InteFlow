@@ -1,101 +1,249 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { api, ApiError, type DocumentSummary } from "../api/client";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
 }
 
+/** SQLite stores `datetime('now')` as "YYYY-MM-DD HH:MM:SS" in UTC. */
+function formatAdded(value: string): string | null {
+  const iso = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
+    ? `${value.replace(" ", "T")}Z`
+    : value;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function Stat({
+  label,
+  value,
+  tone = "ink",
+}: {
+  label: string;
+  value: string;
+  tone?: "ink" | "seal";
+}) {
+  return (
+    <div>
+      <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink-400">
+        {label}
+      </dt>
+      <dd
+        className={`mt-1 font-display text-3xl leading-none tabular-nums ${
+          tone === "seal" ? "text-seal-600" : "text-ink-900"
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
+
 /**
- * Home screen: pick an exam and start it — nothing else.
+ * Exams tab: pick an exam and start it — nothing else.
  *
- * Import / Library / Settings are management tools, not part of taking a
- * test; they live behind the small "Manage" link in the corner (batch 17).
+ * Import / Library / Settings are management tools and live in the sidebar.
+ * The visual language is paper-and-ink: serif display type, hairline rules and
+ * numbered rows instead of cards.
  */
 export default function ExamHomePage() {
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setDocs(null);
+    setError(null);
     api
       .listDocuments()
       .then(setDocs)
       .catch((err) => setError(errText(err)));
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const examCount = docs?.length ?? 0;
+  const questionCount = docs?.reduce((sum, doc) => sum + doc.question_count, 0) ?? 0;
+  const needsKeys =
+    docs?.filter((doc) => doc.needs_answers && doc.answered_count < doc.question_count)
+      .length ?? 0;
+
   return (
-    <div className="relative mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4 py-12">
-      <h1 className="text-center text-3xl font-bold tracking-tight">Select an exam</h1>
-      <p className="mt-2 text-center text-sm text-slate-600">
-        Answers are graded when you submit. The timer starts when you begin.
-      </p>
+    <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
+      <section className="pb-10 sm:pb-14">
+        <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-ink-400">
+              Local practice workspace
+            </p>
+            <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
+              Select an exam
+            </h1>
+            <p className="mt-4 max-w-md text-sm leading-6 text-ink-500">
+              Answers are graded when you submit. The timer starts when you begin
+              — and everything stays on this machine.
+            </p>
+          </div>
 
-      {error && (
-        <div className="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
-          {error}
+          <dl className="flex gap-8 border-t border-paper-200 pt-6 md:border-t-0 md:pt-0 md:text-right">
+            <Stat label="Exams" value={docs ? String(examCount).padStart(2, "0") : "—"} />
+            <Stat
+              label="Questions"
+              value={docs ? questionCount.toLocaleString("en-US") : "—"}
+            />
+            <Stat
+              label="Needs keys"
+              value={docs ? String(needsKeys).padStart(2, "0") : "—"}
+              tone={needsKeys > 0 ? "seal" : "ink"}
+            />
+          </dl>
         </div>
-      )}
+      </section>
 
-      {docs === null && !error && (
-        <p className="mt-8 text-center text-sm text-slate-500">Loading…</p>
-      )}
-
-      {docs?.length === 0 && (
-        <div className="mt-8 rounded-xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm text-slate-600">No exams yet.</p>
-          <Link
-            to="/manage"
-            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      <section aria-labelledby="exam-list-heading" aria-busy={docs === null}>
+        <div className="flex items-baseline justify-between gap-4 border-b border-ink-900/80 pb-2">
+          <h2
+            id="exam-list-heading"
+            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-500"
           >
-            Import an exam
-          </Link>
+            Exams
+          </h2>
+          <p className="text-[11px] text-ink-400">Answers are graded when you submit</p>
         </div>
-      )}
 
-      {docs && docs.length > 0 && (
-        <ul className="mt-8 space-y-3">
-          {docs.map((doc) => (
-            <li
-              key={doc.id}
-              className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4"
+        {error && (
+          <div role="alert" className="my-8 border-l-2 border-seal-500 bg-seal-50 px-5 py-4">
+            <p className="font-medium text-seal-700">Couldn&apos;t load your exams.</p>
+            <p className="mt-1 text-sm leading-6 text-ink-500">{error}</p>
+            <button
+              type="button"
+              onClick={load}
+              className="mt-3 border-b border-ink-300 pb-0.5 text-xs font-medium text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900"
             >
-              <div className="min-w-0">
-                <div className="truncate font-semibold text-slate-900">{doc.title}</div>
-                <div className="mt-0.5 text-xs text-slate-500">
-                  {doc.question_count} questions
-                  {doc.needs_answers && doc.answered_count < doc.question_count
-                    ? ` · answers ${doc.answered_count}/${doc.question_count}`
-                    : ""}
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
-                {doc.needs_answers && doc.answered_count < doc.question_count && (
-                  <Link
-                    to={`/doc/${doc.id}/answers`}
-                    className="text-sm text-blue-700 underline hover:text-blue-800"
-                  >
-                    Enter answers
-                  </Link>
-                )}
-                <Link
-                  to={`/doc/${doc.id}/practice`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  Start
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+              Try again
+            </button>
+          </div>
+        )}
 
-      {/* Unobtrusive way into the management screens (import/library/settings). */}
-      <Link
-        to="/manage"
-        className="absolute bottom-4 right-4 text-xs text-slate-400 underline hover:text-slate-600"
-      >
-        Manage
-      </Link>
+        {docs === null && !error && (
+          <>
+            <ul className="divide-y divide-paper-200" aria-hidden="true">
+              {[0, 1, 2].map((i) => (
+                <li
+                  key={i}
+                  className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-4 gap-y-3 py-6 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
+                >
+                  <span className="mt-1 h-3 w-5 animate-pulse rounded-sm bg-paper-300/70" />
+                  <div className="min-w-0">
+                    <div className="h-5 w-2/3 animate-pulse rounded-sm bg-paper-300/70" />
+                    <div className="mt-2 h-3 w-1/3 animate-pulse rounded-sm bg-paper-200" />
+                  </div>
+                  <div className="col-span-2 h-8 w-24 animate-pulse rounded-sm bg-paper-200 sm:col-span-1" />
+                </li>
+              ))}
+            </ul>
+            <p role="status" className="sr-only">
+              Loading exams…
+            </p>
+          </>
+        )}
+
+        {docs?.length === 0 && (
+          <div className="border-b border-paper-200 py-14 text-center">
+            <p className="font-display text-3xl tracking-tight text-ink-900">No exams yet.</p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink-500">
+              Import a PDF, DOCX or InteFlow-MD file, or add a ready-made set from the
+              built-in library.
+            </p>
+            <Link
+              to="/library"
+              className="mt-6 inline-flex items-center gap-2 border border-ink-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-900 transition-colors hover:bg-ink-900 hover:text-paper-50"
+            >
+              Open library
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </div>
+        )}
+
+        {docs && docs.length > 0 && (
+          <ol className="divide-y divide-paper-200">
+            {docs.map((doc, index) => {
+              const needsKey =
+                doc.needs_answers && doc.answered_count < doc.question_count;
+              const added = formatAdded(doc.created_at);
+
+              return (
+                <li
+                  key={doc.id}
+                  className="group grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-4 gap-y-3 py-6 transition-colors hover:bg-paper-100/60 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
+                >
+                  <span className="pt-1 font-mono text-[11px] tabular-nums text-ink-300 sm:pt-0">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+
+                  <div className="min-w-0">
+                    <h3 className="truncate">
+                      <Link
+                        to={`/doc/${doc.id}/practice`}
+                        className="font-display text-xl leading-snug tracking-tight text-ink-900 decoration-paper-300 underline-offset-4 hover:underline sm:text-2xl"
+                      >
+                        {doc.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
+                      <span className="tabular-nums">
+                        {doc.question_count.toLocaleString("en-US")} questions
+                      </span>
+                      {added && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>Added {added}</span>
+                        </>
+                      )}
+                      {needsKey && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="font-medium tabular-nums text-seal-600">
+                            Answer key {doc.answered_count}/{doc.question_count}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="col-span-2 flex items-center justify-between gap-4 sm:col-span-1 sm:justify-end">
+                    {needsKey ? (
+                      <Link
+                        to={`/doc/${doc.id}/answers`}
+                        className="text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 transition-colors hover:text-ink-900"
+                      >
+                        Enter answers
+                      </Link>
+                    ) : (
+                      <span />
+                    )}
+                    <Link
+                      to={`/doc/${doc.id}/practice`}
+                      className="inline-flex items-center gap-2 border border-ink-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-900 transition-colors hover:bg-ink-900 hover:text-paper-50"
+                    >
+                      Start
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </section>
     </div>
   );
 }

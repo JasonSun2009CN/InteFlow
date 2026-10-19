@@ -28,9 +28,9 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **187 passed, 1 skipped** |
+| 后端测试 | `pytest` **206 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **43 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **49 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
 | API 面 | 27 条（见 `docs/ARCHITECTURE.md`） |
 
@@ -68,7 +68,12 @@
 | 题目模型 | 把 `sec` **泛化为自由板块标签**（去掉 `CHECK (sec IN ('rw','math'))`），SAT 卷仍填 `rw`/`math` |
 | 内置题库 | **保留**（开箱即用的示例题库） |
 | 计时 | 正计时 + 倒计时两种；倒计时**开始屏手输 + 记住上次**（存本地） |
+| 主界面信息架构 | **左侧栏 5 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Mistakes（错题集合，占位）/ Vocabulary（单词集合，占位）/ Settings。**只有练习页全屏无侧栏**；答案录入、复盘都在侧栏布局内。窄屏侧栏变抽屉 |
+| 视觉风格 | **纸墨风**（`.paper-app` 作用域重映射 Tailwind 颜色变量 + 衬线 `font-display`），除练习页外全部同步；练习页保持原 slate/blue |
+| 错题集合（待做） | 汇总所有 session 的错题，**按题目去重**（保留最近一次作答），可按试卷/板块过滤 |
+| 单词集合（待做） | **一套试题对应一份词表**；重刷同一试卷再加词是**在原词表上修改**，不新建 |
 | 查词 / 错题分析导出 | **先做占位**，细节后续再定 |
+| LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
 
 ## 6. 待办 / 已知缺口
@@ -79,7 +84,10 @@
    倒计时到 0 时的行为（自动交卷 / 只提示）**还没定，做之前先问用户**。
 2. **查词（占位）**：应用内词典查询。数据源（本地词典 / AI 释义 / 两者）未定。
 3. **错题分析导出（占位）**：目前只有整卷 PDF/DOCX 导出与生词 xlsx；"只导错题 + 解析"的文件格式未定。
-4. **UI/UX 打磨**（用户逐页审查）：做题界面、结算界面、Library 导航是最需要改的三处。
+4. **UI/UX 打磨**（用户逐页审查）：已完成——左侧栏 5 tab 工作区（窄屏抽屉）+ 纸墨风同步到除练习页外的所有页面
+   （2026-10-19）。继续审查中：练习界面、结算/复盘工作台的细节可能还要微调。
+5. **Mistakes / Vocabulary 两个 tab 目前是占位页**（`Coming soon`）。实现要点：错题按题去重（保留最近作答）；
+   词汇 = 每套试题一份词表，重刷时在原表上增改。做之前先与用户确认接口形态。
 
 ### 泛化的尾项
 - `guess_sec()` 的启发式仍是 SAT 调参（`rw`/`math` 信号）；无标题时回退到
@@ -100,7 +108,7 @@ cd backend && ../.venv/bin/python -m pytest -q     # 基线 187 passed, 1 skippe
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 43 passed, 5 skipped
+cd frontend && npm test         # 49 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -121,7 +129,9 @@ cd frontend && npm test         # 43 passed, 5 skipped
 | `backend/app/repos/` | documents · imports · sessions · words · settings |
 | `backend/app/export/` | PDF / DOCX / 数学公式桥接 |
 | `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
-| `frontend/src/pages/` | ExamHome · Import(Manage) · AnswerKey · **Practice** · Result · Settings |
+| `frontend/src/pages/` | ExamHome · **Library(Import)** · **Mistakes** · **Vocabulary** · AnswerKey · **Practice** · Result · Settings |
+| `frontend/src/components/ui/AppSidebar.tsx` | 工作区左侧栏（5 tab，移动端抽屉） |
+| `frontend/src/index.css` | 设计令牌 + `@theme`；`.paper-app` 纸墨主题作用域（颜色变量重映射） |
 | `frontend/src/components/workspace/` | 复盘三栏工作台（Workspace / Inspector / QuestionNav / VocabularySheet / VocabGrid / Splitter） |
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |

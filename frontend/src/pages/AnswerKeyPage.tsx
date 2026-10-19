@@ -110,30 +110,29 @@ export default function AnswerKeyPage() {
 
   if (error && !questions) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto w-full max-w-3xl px-6 py-10">
         <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
           {error}
         </div>
-        <Link to="/" className="mt-4 inline-block text-blue-700 underline">
-          Back to exams
-        </Link>
       </div>
     );
   }
 
   if (!doc || !questions) {
-    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">Loading…</div>;
+    return (
+      <div className="mx-auto w-full max-w-3xl px-6 py-10 text-slate-500">Loading…</div>
+    );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto w-full max-w-4xl px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link to="/" className="text-sm text-blue-700 underline">
-            ← Back to exams
-          </Link>
-          <h1 className="mt-1 text-2xl font-bold">Answer key · {doc.title}</h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
+            Answer key
+          </p>
+          <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{doc.title}</h1>
+          <p className="mt-1 text-sm text-slate-600">
             {total} questions · {filled}/{total} filled
             {doc.answers_status !== "none" && ` · source had: ${doc.answers_status} answers`}
           </p>
