@@ -3,14 +3,33 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 
 import pymupdf
 
 MIN_SIZE = 25.0            # pt; smaller things are icons/spacers
 MAX_FILL = 0.55            # max text coverage inside a vector cluster bbox
-CLUSTER_GAP = 6.0          # pt; drawings closer than this belong to one figure
+CLUSTER_GAP = 8.0          # pt; drawings closer than this belong to one figure
+LINE_THICKNESS = 1.0       # pt; nominal thickness given to zero-area line rects
 ZOOM = 3.0                 # rendering scale for clipped screenshots
+
+# A text grid (bordered table) is figure content even when dense enough to
+# exceed MAX_FILL. Plain bordered text boxes have no such grid and stay text.
+TABLE_MIN_ROWS = 3
+TABLE_MIN_COLS = 2
+BAND_X = 20.0              # pt; x tolerance when grouping text into table columns
+BAND_Y = 8.0               # pt; y tolerance when grouping text into table rows
+
+# Charts and tables are drawn as vector strokes: axes/edges are zero-area line
+# rects that never intersect, so the raw geometry fragments into unusable
+# slivers. Giving lines a nominal thickness lets the whole figure cluster.
+MIN_FIG_W = 40.0
+MIN_FIG_H = 25.0
+
+FRAGMENT_GAP = 55.0        # pt; plot + legend fragments belong to one figure
+TITLE_GAP = 14.0           # pt; a chart/table title sits just above the figure
+AXIS_MARGIN = 32.0         # pt; y-axis tick labels sit just left of the figure
 
 
 @dataclass
@@ -18,6 +37,10 @@ class ExtractedImage:
     rect: tuple[float, float, float, float]
     name: str
     png: bytes
+    vector: bool = False       # True for vector screenshots (charts, tables)
+    caption: str = ""          # figure title/header, used as the Markdown alt text
+    """Vector figures occlude the text inside their box — callers may drop that
+    text so it is not emitted twice (once as a picture, once as body text)."""
 
 
 def _to_png(data: bytes) -> bytes | None:
@@ -33,6 +56,23 @@ def _to_png(data: bytes) -> bytes | None:
 def _clip_png(page: pymupdf.Page, rect: pymupdf.Rect) -> bytes:
     pix = page.get_pixmap(clip=rect, matrix=pymupdf.Matrix(ZOOM, ZOOM), alpha=False)
     return pix.tobytes("png")
+
+
+def _normalized(rect: pymupdf.Rect) -> pymupdf.Rect:
+    """Give zero-area line rects a small thickness so they can cluster.
+
+    Axes, grid lines and table rules come out of ``get_drawings`` as rects with
+    a zero width or height; ``Rect.intersects`` refuses to join those, which is
+    why vector charts/tables used to fragment into missable slivers.
+    """
+    r = pymupdf.Rect(rect)
+    if r.x1 - r.x0 < LINE_THICKNESS:
+        c = (r.x0 + r.x1) / 2
+        r.x0, r.x1 = c - LINE_THICKNESS / 2, c + LINE_THICKNESS / 2
+    if r.y1 - r.y0 < LINE_THICKNESS:
+        c = (r.y0 + r.y1) / 2
+        r.y0, r.y1 = c - LINE_THICKNESS / 2, c + LINE_THICKNESS / 2
+    return r
 
 
 def _cluster(rects: list[pymupdf.Rect]) -> list[pymupdf.Rect]:
@@ -76,6 +116,154 @@ def _text_coverage(box: pymupdf.Rect, lines: list[dict]) -> float:
     return covered / area
 
 
+def _bands(values: list[float], tol: float) -> list[list[float]]:
+    """Group near-equal coordinates (rows/columns) into bands."""
+    out: list[list[float]] = []
+    for value in sorted(values):
+        if not out or value - out[-1][-1] > tol:
+            out.append([value])
+        else:
+            out[-1].append(value)
+    return out
+
+
+def _looks_like_table(box: pymupdf.Rect, lines: list[dict]) -> bool:
+    """True for a bordered text grid (a table), not a quote/option box.
+
+    A table arranges text into several rows *and* several columns; a box around
+    a paragraph or a pill around one option line has a single text column.
+    """
+    centers: list[tuple[float, float]] = []
+    for line in lines:
+        r = pymupdf.Rect(line["bbox"])
+        cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+        if box.x0 <= cx <= box.x1 and box.y0 <= cy <= box.y1:
+            centers.append((cx, cy))
+    if len(centers) < TABLE_MIN_ROWS * TABLE_MIN_COLS:
+        return False
+    cols = _bands([c[0] for c in centers], BAND_X)
+    rows = _bands([c[1] for c in centers], BAND_Y)
+    return len(rows) >= TABLE_MIN_ROWS and len(cols) >= TABLE_MIN_COLS
+
+
+def _ui_text_boxes(page_dict: dict) -> list[pymupdf.Rect]:
+    """Text lines set in a circled font — the question-app's option/badge UI."""
+    out: list[pymupdf.Rect] = []
+    for block in page_dict["blocks"]:
+        if block.get("type") != 0:
+            continue
+        for line in block.get("lines", []):
+            if any("circled" in s.get("font", "").lower() for s in line.get("spans", [])):
+                out.append(pymupdf.Rect(line["bbox"]))
+    return out
+
+
+def covers_text(rect: pymupdf.Rect, x0: float, y0: float, x1: float, y1: float,
+                tol: float = 3.0) -> bool:
+    """True when a figure rect swallows a text line (so it can be dropped).
+
+    The line must be horizontally contained inside the figure: a passage line
+    that merely overlaps the figure on one side is body text, not part of the
+    picture. Called on captured vector figures to avoid emitting their text
+    twice (once inside the rendered PNG, once as ifmd body text).
+    """
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    return (
+        x0 >= rect.x0 - tol
+        and x1 <= rect.x1 + tol
+        and rect.x0 - tol <= cx <= rect.x1 + tol
+        and rect.y0 - tol <= cy <= rect.y1 + tol
+    )
+
+
+def _line_text(line: dict) -> str:
+    spans = "".join(s.get("text", "") for s in line.get("spans", []))
+    return " ".join(spans.split())
+
+
+def _caption_text(title_lines: list[dict]) -> str:
+    """A readable caption from absorbed title lines, safe for Markdown alt text."""
+    text = " ".join(_line_text(ln) for ln in sorted(title_lines, key=lambda l: l["bbox"][1]))
+    text = re.sub(r"[\[\]()|]", " ", text)
+    text = " ".join(text.split())
+    return text[:150]
+
+
+def _header_text(box: pymupdf.Rect, lines: list[dict]) -> str:
+    """Join the topmost row of text inside a table as its caption."""
+    inside: list[tuple[float, float, dict]] = []
+    for line in lines:
+        r = pymupdf.Rect(line["bbox"])
+        cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+        if box.x0 <= cx <= box.x1 and box.y0 <= cy <= box.y1:
+            inside.append((cy, r.x0, line))
+    if not inside:
+        return ""
+    top = min(cy for cy, _, _ in inside)
+    header = sorted((x, ln) for cy, x, ln in inside if cy - top <= BAND_Y)
+    return _caption_text([ln for _, ln in header])
+
+
+def _absorb(box: pymupdf.Rect, lines: list[dict]) -> tuple[pymupdf.Rect, list[dict]]:
+    """Grow a figure box to take in its own title and y-axis labels.
+
+    Charts and tables in the scanned collection label themselves with ordinary
+    text just outside the drawn strokes: a centered title above and tick values
+    to the left of the y-axis. Those labels must be *cropped into* the picture
+    (so the figure stays self-contained) rather than left behind as body text.
+    Returns the grown box plus the title lines, for use as a caption.
+    """
+    title_lines: list[dict] = []
+    absorbed = True
+    while absorbed:                        # title block directly above
+        absorbed = False
+        for line in lines:
+            r = pymupdf.Rect(line["bbox"])
+            if r.x0 < box.x0 - 3 or r.x1 > box.x1 + 3:
+                continue
+            if box.y0 - TITLE_GAP <= r.y1 <= box.y0 + 2 and r.y0 < box.y0:
+                box.y0 = r.y0
+                title_lines.append(line)
+                absorbed = True
+    for line in lines:                      # y-axis tick labels to the left
+        r = pymupdf.Rect(line["bbox"])
+        if not (box.y0 - 3 <= (r.y0 + r.y1) / 2 <= box.y1 + 3):
+            continue
+        if box.x0 - AXIS_MARGIN <= r.x1 <= box.x0 + 2 and r.x0 < box.x0:
+            box.x0 = r.x0
+    return box, title_lines
+
+
+def figure_regions(figs: list[ExtractedImage]) -> list[pymupdf.Rect]:
+    """Suppression regions for one page: figures merged with their fragments.
+
+    A chart is drawn as several separate vector fragments — the plot, its axes,
+    the legend — with tick labels between them. Each fragment has already been
+    grown to include its title and y-axis labels (``_absorb``); here fragments
+    that belong to one figure are unioned so that text sitting *between* them
+    (an x-axis tick row) is covered too, matching the merged crop the two-column
+    profile renders.
+    """
+    boxes = [pymupdf.Rect(f.rect) for f in figs if f.vector]
+    merged = True
+    while merged and len(boxes) > 1:
+        merged = False
+        for i in range(len(boxes)):
+            for j in range(i + 1, len(boxes)):
+                grown = pymupdf.Rect(
+                    boxes[i].x0 - FRAGMENT_GAP, boxes[i].y0 - FRAGMENT_GAP,
+                    boxes[i].x1 + FRAGMENT_GAP, boxes[i].y1 + FRAGMENT_GAP,
+                )
+                if grown.intersects(boxes[j]):
+                    boxes[i] = boxes[i] | boxes[j]
+                    boxes.pop(j)
+                    merged = True
+                    break
+            if merged:
+                break
+    return boxes
+
+
 def _on_edge(page: pymupdf.Page, rect: pymupdf.Rect) -> bool:
     """True when the rect hugs two page edges — tiled backgrounds, not figures."""
     w, h = page.rect.width, page.rect.height
@@ -103,6 +291,7 @@ def collect_images(
     out: list[ExtractedImage] = []
     taken: list[pymupdf.Rect] = []
     lines = [ln for b in page_dict["blocks"] if b["type"] == 0 for ln in b.get("lines", [])]
+    ui_boxes = _ui_text_boxes(page_dict)
 
     def name_for(h: str) -> str:
         return f"p{page_no:02d}-{h[:8]}.png"
@@ -127,18 +316,26 @@ def collect_images(
         taken.append(rect)
         out.append(ExtractedImage(tuple(rect), name_for(h), png))
 
-    # 2. vector figures (number lines, geometry sketches, charts)
-    rects = [pymupdf.Rect(d["rect"]) for d in page.get_drawings() if d.get("rect")]
+    # 2. vector figures (number lines, geometry sketches, charts, tables)
+    rects = [_normalized(d["rect"]) for d in page.get_drawings() if d.get("rect")]
     for box in _cluster(rects):
         w, h = box.x1 - box.x0, box.y1 - box.y0
-        if w < 40 or h < 25:
+        if w < MIN_FIG_W or h < MIN_FIG_H:
             continue
         if box.x0 < 0 or box.y0 < 0 or box.x1 > page.rect.width + 1 or box.y1 > page.rect.height + 1:
             continue
         if _on_edge(page, box):
             continue                    # full-page background strokes
-        if _text_coverage(box, lines) > MAX_FILL:
-            continue                      # that's a table/bordered text, not a figure
+        # circled-font option pills / number badges are question-app chrome
+        if any(box.x0 <= (r.x0 + r.x1) / 2 <= box.x1 and box.y0 <= (r.y0 + r.y1) / 2 <= box.y1
+               for r in ui_boxes):
+            continue
+        if _text_coverage(box, lines) > MAX_FILL and not _looks_like_table(box, lines):
+            continue                      # a bordered text box, not a figure/table
+        box, title_lines = _absorb(pymupdf.Rect(box), lines)
+        caption = _caption_text(title_lines)
+        if not caption and _looks_like_table(box, lines):
+            caption = _header_text(box, lines)
         if any((pymupdf.Rect(t) & box).get_area() > pymupdf.Rect(t).get_area() * 0.5 for t in taken):
             continue                      # already captured as a bitmap
         padded = pymupdf.Rect(box.x0 - 3, box.y0 - 3, box.x1 + 3, box.y1 + 3) & page.rect
@@ -149,7 +346,8 @@ def collect_images(
         seen_hashes.add(h2)
         out.append(
             ExtractedImage(
-                (padded.x0, padded.y0, padded.x1, padded.y1), name_for(h2), png
+                (padded.x0, padded.y0, padded.x1, padded.y1), name_for(h2), png,
+                vector=True, caption=caption,
             )
         )
 

@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月北美 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:42Z
+imported_at: 2026-10-19T12:21:25Z
 answers: external
 ---
 
@@ -180,17 +180,7 @@ Which quotation from "May-Day" most effectively illustrates the claim?
 
 :::q {#Q012 sec=rw no=12}
 @material
-Numbers of the 23 Non-native Tree Species Reported and the Insect and
-
-Fungus Threats to Them
-
-Country Trees Fungi Insects
-
-Poland 10 25 105
-
-Denmark 12 22 33
-
-Great Britain 18 290 120
+![Numbers of the 23 Non-native Tree Fungus Threats to Them](assets/p06-b523d97a.png)
 
 Elisabeth Pötzelsberger and colleagues gathered data on 23 non-native tree species grown in Europe. They analyzed reports from Poland, Great Britain, and Denmark about the number of these species grown in those countries as well as the numbers of insect and fungus species that damage those trees. The researchers concluded that only one of the three countries had a greater number of damaging fungus species than damaging insect species.
 

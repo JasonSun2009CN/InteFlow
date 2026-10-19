@@ -98,7 +98,8 @@ def test_without_api_key_error_points_to_settings(tmp_path: Path, monkeypatch) -
 
 def test_bad_structure_is_retried_then_accepted(tmp_path: Path, monkeypatch) -> None:
     path = build_numberless_pdf(tmp_path / "no-numbers.pdf")
-    broken = {"segments": GOOD["segments"][:-1]}          # missing option D
+    # Options A, B, D — a gap where C should be, so the structure is invalid.
+    broken = {"segments": [s for s in GOOD["segments"] if s.get("letter") != "C"]}
     calls = _patch(monkeypatch, [json.dumps(broken), json.dumps(GOOD)])
 
     result = convert_pdf(path)
@@ -106,7 +107,7 @@ def test_bad_structure_is_retried_then_accepted(tmp_path: Path, monkeypatch) -> 
     assert result.question_count == 1
     assert len(calls) == 2
     retry = calls[1]
-    assert any("missing options D" in m["content"] for m in retry)
+    assert any("order from A" in m["content"] for m in retry)
 
 
 def test_fabricated_text_is_rejected_and_corrected(
@@ -130,7 +131,9 @@ def test_fabricated_text_is_rejected_and_corrected(
 
 def test_gives_up_after_one_retry(tmp_path: Path, monkeypatch) -> None:
     path = build_numberless_pdf(tmp_path / "no-numbers.pdf")
-    broken = json.dumps({"segments": GOOD["segments"][:-1]})
+    broken = json.dumps(
+        {"segments": [s for s in GOOD["segments"] if s.get("letter") != "C"]}
+    )
     calls = _patch(monkeypatch, [broken, broken])
 
     with pytest.raises(ConvertError, match="valid structure"):

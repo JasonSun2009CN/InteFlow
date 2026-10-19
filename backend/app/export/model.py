@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from app import repos
 from app.db import assets_dir
+from app.ifmd.parser import OPTION_LETTERS
 from app.repos import documents as documents_repo
 from app.repos import words as words_repo
 from app.sections import label as section_label
@@ -17,8 +18,10 @@ def option_map(options: list[str]) -> dict[str, str]:
     out: dict[str, str] = {}
     for i, opt in enumerate(options or []):
         text = (opt or "").strip()
-        match = re.match(r"^([A-D])[.)]\s*([\s\S]*)$", text)
-        letter = match.group(1) if match else ("ABCD"[i] if i < 4 else "?")
+        match = re.match(r"^([A-Z])[.)]\s*([\s\S]*)$", text)
+        letter = match.group(1) if match else (
+            OPTION_LETTERS[i] if i < len(OPTION_LETTERS) else "?"
+        )
         out[letter] = (match.group(2) if match else text).strip()
     return out
 

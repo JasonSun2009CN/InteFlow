@@ -130,19 +130,30 @@ def test_invalid_difficulty() -> None:
         parse(VALID.replace("difficulty=m", "difficulty=zz"))
 
 
-def test_three_options_rejected() -> None:
-    with pytest.raises(IfmdError, match="exactly 4 options, found 3"):
-        parse(VALID.replace("- D. hostile\n", ""))
+def test_three_options_accepted() -> None:
+    # A choice list need not be exactly four (AMC prints five).
+    doc = parse(VALID.replace("- D. hostile\n", ""))
+    assert doc.questions[0].kind == "choice"
+    assert list(doc.questions[0].letter_options) == ["A", "B", "C"]
 
 
-def test_five_options_rejected() -> None:
-    with pytest.raises(IfmdError, match="more than 4 options"):
-        parse(VALID.replace("- D. hostile", "- D. hostile\n- A. extra"))
+def test_single_option_rejected() -> None:
+    with pytest.raises(IfmdError, match="at least 2 options"):
+        parse(
+            VALID.replace(
+                "- B. cautiously optimistic\n- C. indifferent\n- D. hostile\n", ""
+            )
+        )
 
 
-def test_unknown_option_letter_rejected() -> None:
-    with pytest.raises(IfmdError, match="unexpected option letter 'E'"):
-        parse(VALID.replace("- D. hostile", "- D. hostile\n- E. extra"))
+def test_five_options_accepted() -> None:
+    doc = parse(VALID.replace("- D. hostile", "- D. hostile\n- E. extra"))
+    assert list(doc.questions[0].letter_options) == ["A", "B", "C", "D", "E"]
+
+
+def test_option_letter_gap_rejected() -> None:
+    with pytest.raises(IfmdError, match="expected option E."):
+        parse(VALID.replace("- D. hostile", "- D. hostile\n- F. extra"))
 
 
 def test_out_of_order_options_rejected() -> None:
@@ -156,7 +167,7 @@ def test_out_of_order_options_rejected() -> None:
 
 
 def test_invalid_answer_rejected() -> None:
-    with pytest.raises(IfmdError, match="invalid answer"):
+    with pytest.raises(IfmdError, match="has no matching option"):
         parse(VALID.replace("! answer: B", "! answer: E"))
 
 
@@ -205,7 +216,7 @@ def test_set_answer_unknown_id() -> None:
 
 def test_set_answer_invalid_letter() -> None:
     with pytest.raises(ValueError):
-        set_answer(VALID, "Q001", "E")
+        set_answer(VALID, "Q001", "1")
 
 
 def test_round_trip_is_idempotent() -> None:

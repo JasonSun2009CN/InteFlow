@@ -4,7 +4,55 @@ from __future__ import annotations
 
 import sqlite3
 
+import pytest
+
 from app.db import SCHEMA, _migrate
+
+
+def test_migrate_widens_option_letter_check() -> None:
+    """Legacy rows were capped at A–D; a fifth option (E) must be storable."""
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript(
+        """
+        CREATE TABLE documents (id INTEGER PRIMARY KEY, title TEXT);
+        CREATE TABLE questions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+          ext_id TEXT NOT NULL,
+          answer TEXT CHECK (answer IS NULL OR answer IN ('A','B','C','D')),
+          order_idx INTEGER NOT NULL,
+          UNIQUE (document_id, ext_id)
+        );
+        CREATE TABLE session_items (
+          session_id INTEGER NOT NULL,
+          question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+          chosen TEXT,
+          PRIMARY KEY (session_id, question_id)
+        );
+        """
+    )
+    conn.execute("INSERT INTO documents (id, title) VALUES (1, 'legacy')")
+    conn.execute(
+        "INSERT INTO questions (document_id, ext_id, answer, order_idx)"
+        " VALUES (1, 'Q001', 'D', 0)"
+    )
+    conn.execute("INSERT INTO session_items (session_id, question_id) VALUES (1, 1)")
+
+    _migrate(conn)
+    _migrate(conn)                                    # idempotent
+
+    row = conn.execute("SELECT * FROM questions WHERE ext_id = 'Q001'").fetchone()
+    assert row["answer"] == "D"                       # data preserved
+    assert conn.execute("SELECT COUNT(*) FROM session_items").fetchone()[0] == 1
+
+    conn.execute("UPDATE questions SET answer = 'E' WHERE ext_id = 'Q001'")
+    assert conn.execute("SELECT answer FROM questions").fetchone()["answer"] == "E"
+
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute("UPDATE questions SET answer = 'AB' WHERE ext_id = 'Q001'")
+    conn.close()
 
 
 def test_migrate_adds_missing_document_columns() -> None:

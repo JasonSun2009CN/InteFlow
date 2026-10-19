@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月北美 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:47Z
+imported_at: 2026-10-19T12:20:30Z
 answers: external
 ---
 
@@ -146,6 +146,8 @@ Which quotation from a translation of Uncle Vanya most effectively illustrates t
 
 :::q {#Q010 sec=rw no=10}
 @material
+![Highest-Grossing Films in a Language Other than English at US Box Office](assets/p06-abd66704.png)
+
 Few of the most commercially successful films in US movie theaters are in a language other than English. One journalist claims that to overcome what director Bong Joon-ho calls "the one-inch-tall barrier of subtitles," it is essential for a film to receive an Oscar nomination: non–English language films that are not given this public indication of high quality will struggle to find an audience compared with those that do receive Oscar nominations.
 
 @stem

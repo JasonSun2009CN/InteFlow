@@ -7,7 +7,7 @@ circular imports.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -29,6 +29,9 @@ class BuiltQuestion:
     sec: str
     answer: str | None
     source: str
+    kind: str = "choice"                      # choice | blank
+    multi: bool = False                       # several correct letters
+    answers: list[str] = field(default_factory=list)   # blank: accepted strings
 
 
 @dataclass

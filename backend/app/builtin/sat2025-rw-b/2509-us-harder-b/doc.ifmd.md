@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月北美 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:06Z
+imported_at: 2026-10-19T12:20:49Z
 answers: external
 ---
 
@@ -149,7 +149,7 @@ Which statement about Uman's art is most strongly supported by the text?
 
 :::q {#Q009 sec=rw no=9}
 @material
-Argentina regular camera trapping 4,329 6.50
+![Studies of Cougar Population Density](assets/p05-509c809c.png)
 
 Studies of the population density of cougars (Puma concolor) have yielded a range of results, which may in part reflect differences in the effectiveness of the methods that researchers have used in their studies. For example, the difference between the maximum population density reported by Sean M. Murphy et al. and that reported by Lindsey N. Rich et al. might be artificially large if the use of ______
 

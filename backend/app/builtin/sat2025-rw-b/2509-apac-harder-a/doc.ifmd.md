@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月亚太 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:11Z
+imported_at: 2026-10-19T12:20:55Z
 answers: external
 ---
 
@@ -163,11 +163,7 @@ What does the text most strongly suggest about paintings by Smith?
 
 :::q {#Q011 sec=rw no=11}
 @material
-Tax Penalties Assessed on Private Foundations That Filed Form 4720,
-
-by Reason, 2003–2005
-
-Percentage of total penalty
+![Tax Penalties Assessed on Private by Reason, 2003–2005](assets/p06-b2520571.png)
 
 excess business holdings
 

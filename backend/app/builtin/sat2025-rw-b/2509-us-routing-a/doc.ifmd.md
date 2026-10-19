@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月北美 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:00Z
+imported_at: 2026-10-19T12:20:42Z
 answers: external
 ---
 
@@ -178,7 +178,7 @@ Assuming participants had similar baseline fitness levels, which finding from th
 
 :::q {#Q012 sec=rw no=12}
 @material
-Hungary 1 18 13
+![Country Trees Fungi Insects](assets/p07-c566cea9.png)
 
 Elisabeth Pötzelsberger and colleagues gathered data on 23 non-native tree species grown in Europe. They analyzed reports from Austria, Poland, and Hungary about the number of these species grown in those countries as well as the numbers of insect and fungus species that damage those trees. The researchers concluded that Austria had a greater number of damaging fungus species than either of the other countries did.
 
@@ -210,7 +210,7 @@ Which quotation from Life Among the Paiutes most effectively illustrates the cla
 
 :::q {#Q014 sec=rw no=14}
 @material
-2 dark 3.46 2.74 1.85 2.45
+![Average Ratings of Perceived Personality Traits of Dogs and Human Willingness to Keep or Interact with Them](assets/p08-f1f303d9.png)
 
 Studies have found that when looking at other people's eyes, humans tend to perceive dilated pupils positively and constricted pupils negatively. Noting that a dark iris—the colored portion surrounding the pupil—is hard to distinguish from the black of the pupil (and thereby affects the pupil's apparent size) and that many domestic dogs have dark irises, Akitsugu Konno et al. showed close-up images of dogs' faces to human participants and asked them to rate the dogs'traits and their own attitudes toward the dogs. Their findings suggest that ______
 

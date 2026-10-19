@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月亚太 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:09Z
+imported_at: 2026-10-19T12:20:53Z
 answers: external
 ---
 
@@ -162,11 +162,7 @@ The text most strongly suggests that particular aspects of Hamilton's political 
 
 :::q {#Q010 sec=rw no=10}
 @material
-Prices of Nuts Sold by Growers
-
-in the United States, 2016/17 to 2019/20 Seasons
-
-Price per pound (dollars)
+![Prices of Nuts Sold by Growers 2016/17 to 2019/20 Seasons](assets/p05-2b4e1a8e.png)
 
 Season
 
@@ -187,35 +183,9 @@ Which choice most effectively uses data from the graph to complete the statement
 
 :::q {#Q011 sec=rw no=11}
 @material
-Fish Population in a Taiwanese
-
-Tide Pool, January 2001 to
-
-October 2001
-
 Number of individual
 
-fish observed
-
-0 5 10 15 20 25 30 35 40 45 50 55 60 65
-
-![figure](assets/p06-67751ad2.png)
-
-July 2001
-
-April 2001
-
-October 2001
-
-January 2001
-
-Month
-
-combotooth blenny
-
-yellowtail sergeant
-
-rippled rockskipper
+![Fish Population in a Taiwanese October 2001; October 2001 Month](assets/p06-90f121e4.png)
 
 Lin-Tai Ho and colleagues counted fish in a tide pool in Taiwan at several times during the year and found that some species had a significantly higher maximum population count than others. For example, the highest count for the combtooth blenny was 62 individuals in January of 2001, whereas the highest count for the yellowtail sergeant was ______
 

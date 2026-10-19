@@ -9,7 +9,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 3
     },
     {
       "id": "2508-us-routing-b",
@@ -25,7 +25,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2508-us-harder-b",
@@ -41,7 +41,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 2
+      "assets": 4
     },
     {
       "id": "2508-apac-routing-b",
@@ -49,7 +49,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2508-apac-harder-a",
@@ -57,7 +57,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2508-apac-harder-b",
@@ -65,7 +65,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 1
+      "assets": 3
     },
     {
       "id": "2509-us-routing-a",
@@ -73,7 +73,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2509-us-routing-b",
@@ -81,7 +81,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2509-us-harder-a",
@@ -97,7 +97,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2509-apac-routing-a",
@@ -105,7 +105,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2509-apac-routing-b",
@@ -113,7 +113,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 1
+      "assets": 2
     },
     {
       "id": "2509-apac-harder-a",
@@ -121,7 +121,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2509-apac-harder-b",
@@ -129,7 +129,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2510-us-routing-a",
@@ -137,7 +137,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2510-us-routing-b",
@@ -145,7 +145,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2510-us-routing-c",
@@ -161,7 +161,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 1
+      "assets": 2
     },
     {
       "id": "2510-us-harder-b",
@@ -169,7 +169,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2510-us-harder-c",
@@ -185,7 +185,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 2
+      "assets": 3
     },
     {
       "id": "2510-apac-routing-b",
@@ -193,7 +193,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2510-apac-routing-c",
@@ -209,7 +209,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 1
+      "assets": 4
     },
     {
       "id": "2510-apac-harder-b",
@@ -217,7 +217,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 3
     },
     {
       "id": "2510-apac-harder-c",
@@ -225,7 +225,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 1
+      "assets": 3
     },
     {
       "id": "2511-us-routing-a",
@@ -233,7 +233,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2511-us-routing-b",
@@ -241,7 +241,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2511-us-routing-c",
@@ -249,7 +249,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2511-us-harder-a",
@@ -257,7 +257,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2511-us-harder-b",
@@ -265,7 +265,7 @@
       "module": 2,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 1
     },
     {
       "id": "2511-us-harder-c",
@@ -281,7 +281,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 2
+      "assets": 3
     },
     {
       "id": "2511-apac-routing-b",
@@ -289,7 +289,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 3
     },
     {
       "id": "2511-apac-harder-a",
@@ -313,7 +313,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2512-us-routing-b",
@@ -321,7 +321,7 @@
       "module": 1,
       "questions": 27,
       "answers": 27,
-      "assets": 0
+      "assets": 2
     },
     {
       "id": "2512-us-harder-a",
@@ -353,7 +353,7 @@
       "module": 2,
       "questions": 25,
       "answers": 25,
-      "assets": 0
+      "assets": 1
     }
   ]
 }

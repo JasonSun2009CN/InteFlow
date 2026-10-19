@@ -26,9 +26,9 @@ _QNUM_RE = re.compile(r"^\s*\(?\s*(\d{1,3})\s*[.、)．]\s*(?=\S)")
 # "Question 12:" / "Q12."
 _QWORD_RE = re.compile(r"^\s*(?:question|Q)\s*#?\s*(\d{1,3})\s*[.):：]?\s*", re.IGNORECASE)
 # A marker letter such as "A." "(A)" "B)" "C:" — must be followed by space/end.
-_OPT_MARKER_RE = re.compile(r"([A-D])[.、:：)]")
+_OPT_MARKER_RE = re.compile(r"([A-Z])[.、:：)]")
 # Answer-key style entries: "12. B" / "12) (B)" / "12 - B"
-_ANSWER_ENTRY_RE = re.compile(r"(\d{1,3})\s*[.、)．\-–—:]?\s*[\(]?\s*([A-D])\s*[\)]?")
+_ANSWER_ENTRY_RE = re.compile(r"(\d{1,3})\s*[.、)．\-–—:]?\s*[\(]?\s*([A-Z])\s*[\)]?")
 _ANSWER_KEY_HEADING_RE = re.compile(
     r"(?i)^\s{0,20}(?:answer\s*key|answers?\b|key\s+to\s+(?:the\s+)?(?:test|questions)?"
     r"|scoring\s+guide|答案|参考答案|标准答案)\s*$"

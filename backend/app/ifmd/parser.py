@@ -6,15 +6,20 @@ import re
 from dataclasses import dataclass, field
 
 FORMAT_VERSION = 1
-ANSWERS = ("A", "B", "C", "D")
+# Option letters, in order. A choice question may have any number of options
+# (AMC has 5, some contests 6), always starting at A and contiguous; a question
+# with no options is a blank. Letters beyond "D" are equally valid answers.
+OPTION_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+MAX_OPTIONS = len(OPTION_LETTERS)
+ANSWERS = tuple(OPTION_LETTERS)
 DIFFICULTIES = ("e", "m", "h")
 
 _FRONT_MATTER_RE = re.compile(r"^---\s*$")
 _ATTR_RE = re.compile(r"""(?:#(?P<id>[\w.-]+))|(?P<key>\w+)=(?P<val>"[^"]*"|'[^']*'|\S+)""")
 # Bullet is optional; three spellings accepted: "- A. x", "A. x", "(A) x".
 _OPTION_RE = re.compile(
-    r"^\s*(?:[-*]\s*)?\(?([A-D])\)(?:\s*[.)]\s*|\s+)(?P<in_paren>.*)"
-    r"|^\s*(?:[-*]\s*)?([A-D])[.)]\s*(?P<bare>.*)"
+    r"^\s*(?:[-*]\s*)?\(?([A-Z])\)(?:\s*[.)]\s*|\s+)(?P<in_paren>.*)"
+    r"|^\s*(?:[-*]\s*)?([A-Z])[.)]\s*(?P<bare>.*)"
 )
 _META_RE = re.compile(r"^\s*!\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$")
 # Any A-Z line-start that the option regex refuses (e.g. "E. ...") is a hard error,
@@ -22,6 +27,9 @@ _META_RE = re.compile(r"^\s*!\s*([A-Za-z_][\w-]*)\s*:\s*(.*)$")
 _ANY_LETTER_OPT_RE = re.compile(r"^\s*(?:[-*]\s*)?\(?([A-Z])[.)]\s*")
 _IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 _QUESTION_START_RE = re.compile(r"^:::q\s*\{(.*)\}\s*$")
+# Blank answers are separated by "|" (text may contain spaces/commas).
+_BLANK_ANSWER_SPLIT_RE = re.compile(r"\s*\|\s*")
+_CHOICE_ANSWER_SPLIT_RE = re.compile(r"[\s,;/]+")
 
 
 class IfmdError(ValueError):
@@ -38,12 +46,15 @@ class Question:
     ext_id: str
     sec: str
     stem: str
-    options: list[str]                       # exactly 4, "A. text"
+    options: list[str]                       # "A. text" list for a choice, [] for a blank
     no: int | None = None
     type: str | None = None
     difficulty: str | None = None
     material: str | None = None
-    answer: str | None = None
+    answer: str | None = None                # legacy single letter (choice only)
+    answers: list[str] = field(default_factory=list)   # letters (choice) or text (blank)
+    kind: str = "choice"                     # choice | blank
+    multi: bool = False                      # several correct letters
     explain: str | None = None
     source_ref: str | None = None
     images: list[str] = field(default_factory=list)
@@ -55,7 +66,7 @@ class Question:
         """{'A': 'text', ...} with the leading "A. " stripped."""
         out: dict[str, str] = {}
         for opt in self.options:
-            m = re.match(r"^([A-D])[.)]\s*(.*)$", opt)
+            m = re.match(r"^([A-Z])[.)]\s*(.*)$", opt)
             if m:
                 out[m.group(1)] = m.group(2)
         return out
@@ -193,22 +204,29 @@ def parse(text: str) -> ParsedDoc:
             om = _OPTION_RE.match(bline)
             if om:
                 letter = om.group(1) or om.group(3)
+                expected = OPTION_LETTERS[len(options)]
+                if letter != expected and not options:
+                    # Lettered prose before any option (e.g. "L. Leann Kanda")
+                    # is body text, not an option.
+                    om = None
+            if om:
                 content = (om.group("in_paren") if om.group(1) else om.group("bare")) or ""
-                if len(options) == 4:
-                    raise IfmdError("question has more than 4 options", bline_no)
-                expected = "ABCD"[len(options)]
+                if len(options) >= MAX_OPTIONS:
+                    raise IfmdError("question has more than 26 options", bline_no)
                 if letter != expected:
                     raise IfmdError(
                         f"expected option {expected}., got {letter}.", bline_no
                     )
                 options.append(f"{letter}. {content.strip()}")
                 continue
-            # Only once options have started: prose/material may legitimately begin
-            # lines with "T. S. Eliot" or "Q. What ..." and must not be flagged.
+            # Once options have started, any other line-start letter marker is a
+            # hard error so unknown letters never silently leak into the stem.
+            # (Before the first option, prose may legitimately begin a line with
+            # "T. S. Eliot" or "Q. What ...".)
             bm = _ANY_LETTER_OPT_RE.match(bline) if options else None
             if bm:
                 raise IfmdError(
-                    f"unexpected option letter {bm.group(1)!r} (only A-D are allowed)", bline_no
+                    f"unexpected option letter {bm.group(1)!r} after options", bline_no
                 )
             km = _META_RE.match(bline)
             if km:
@@ -220,16 +238,56 @@ def parse(text: str) -> ParsedDoc:
                 continue
             body_wo_opts.append(bline)
 
-        if len(options) != 4:
-            raise IfmdError(
-                f"question must have exactly 4 options, found {len(options)}", block_start
-            )
+        # A question with no options is a blank (fill-in); two or more options make
+        # it a choice. A single option is ambiguous and rejected — partial option
+        # lists are never guessed into either kind.
+        kind_attr = (attrs.get("kind") or "").strip().lower()
+        if kind_attr not in ("", "choice", "blank"):
+            raise IfmdError(f"invalid kind={kind_attr!r} (expected choice|blank)", block_start)
+        if len(options) == 1:
+            raise IfmdError("a choice question needs at least 2 options", block_start)
+        kind = kind_attr or ("choice" if options else "blank")
+        if kind == "choice" and not options:
+            raise IfmdError("a choice question needs options", block_start)
+        if kind == "blank" and options:
+            raise IfmdError("a blank question must not have options", block_start)
 
-        answer = meta_kv.get("answer")
-        if answer is not None:
-            answer = answer.strip().upper()
-            if answer not in ANSWERS:
-                raise IfmdError(f"invalid answer {answer!r} (expected A-D)", block_start)
+        multi_raw = (attrs.get("multi") or "").strip().lower()
+        if multi_raw not in ("", "0", "1", "true", "false", "yes", "no"):
+            raise IfmdError(f"invalid multi={multi_raw!r} (expected 0|1)", block_start)
+        multi = multi_raw in ("1", "true", "yes")
+
+        raw_answer = meta_kv.get("answer")
+        answers: list[str] = []
+        if raw_answer is not None:
+            if kind == "blank":
+                answers = [part.strip() for part in _BLANK_ANSWER_SPLIT_RE.split(raw_answer) if part.strip()]
+                if not answers:
+                    raise IfmdError("blank answer must not be empty", block_start)
+            else:
+                answers = [
+                    part.strip().upper()
+                    for part in _CHOICE_ANSWER_SPLIT_RE.split(raw_answer)
+                    if part.strip()
+                ]
+                bad = [a for a in answers if a not in ANSWERS]
+                if bad:
+                    raise IfmdError(
+                        f"invalid answer {bad[0]!r} (expected A-Z)", block_start
+                    )
+                allowed = set(OPTION_LETTERS[: len(options)])
+                unknown = [a for a in answers if a not in allowed]
+                if unknown:
+                    raise IfmdError(
+                        f"answer {unknown[0]!r} has no matching option", block_start
+                    )
+                answers = sorted(dict.fromkeys(answers))
+                if len(answers) > 1 and not multi:
+                    raise IfmdError(
+                        "multiple answers need multi=1 on the question block", block_start
+                    )
+                if not multi and len(answers) > 1:  # pragma: no cover - guarded above
+                    answers = answers[:1]
 
         material, stem = _split_body(body_wo_opts, block_start + 1)
         if not stem:
@@ -262,7 +320,10 @@ def parse(text: str) -> ParsedDoc:
                 type=attrs.get("type"),
                 difficulty=difficulty,
                 material=(material.strip() or None) if material else None,
-                answer=answer,
+                answer=answers[0] if kind == "choice" and len(answers) == 1 else None,
+                answers=answers,
+                kind=kind,
+                multi=multi,
                 explain=meta_kv.get("explain"),
                 source_ref=meta_kv.get("source"),
                 images=images,
@@ -282,16 +343,37 @@ def parse(text: str) -> ParsedDoc:
     return ParsedDoc(meta=meta, questions=questions, preamble="\n".join(preamble_lines).strip())
 
 
-def set_answer(text: str, ext_id: str, answer: str) -> str:
-    """Insert or replace `! answer:` for one question, preserving the rest of the file."""
-    answer = answer.strip().upper()
-    if answer not in ANSWERS:
-        raise ValueError(f"invalid answer {answer!r}")
+def format_answer_line(kind: str, answers: list[str]) -> str:
+    """Render the ``! answer:`` value for a question kind."""
+    if kind == "blank":
+        return " | ".join(answers)
+    return ", ".join(answers)
+
+
+def set_answers(text: str, ext_id: str, kind: str, answers: list[str]) -> str:
+    """Insert or replace `! answer:` for one question, preserving the rest of the file.
+
+    ``answers`` is a list of letters (choice) or accepted strings (blank); an
+    empty list removes the line.
+    """
+    cleaned: list[str] = []
+    if kind == "blank":
+        cleaned = [a.strip() for a in answers if a.strip()]
+    else:
+        for a in answers:
+            letter = a.strip().upper()
+            if letter not in ANSWERS:
+                raise ValueError(f"invalid answer {letter!r}")
+            if letter not in cleaned:
+                cleaned.append(letter)
+        cleaned.sort()
+
+    value = format_answer_line(kind, cleaned)
     lines = text.splitlines()
-    pending = f"! answer: {answer}"
+    pending = f"! answer: {value}" if cleaned else None
     out: list[str] = []
     block_start: int | None = None     # index in `out` of the target ":::q" line
-    inserted = False
+    touched = False
 
     for line in lines:
         m = _QUESTION_START_RE.match(line)
@@ -301,7 +383,6 @@ def set_answer(text: str, ext_id: str, answer: str) -> str:
             out.append(line)
             continue
         if block_start is not None and line.strip() == ":::":
-            # Replace an existing `! answer:` inside this block, otherwise append one.
             existing = next(
                 (
                     j
@@ -310,16 +391,24 @@ def set_answer(text: str, ext_id: str, answer: str) -> str:
                 ),
                 None,
             )
-            if existing is not None:
+            if pending is None:
+                if existing is not None:
+                    out.pop(existing)
+            elif existing is not None:
                 out[existing] = pending
             else:
                 out.insert(len(out), pending)
-            inserted = True
+            touched = True
             block_start = None
             out.append(line)
             continue
         out.append(line)
 
-    if not inserted:
+    if not touched:
         raise KeyError(f"question #{ext_id} not found")
     return "\n".join(out) + "\n"
+
+
+def set_answer(text: str, ext_id: str, answer: str) -> str:
+    """Single-letter answer (choice questions) — kept for existing callers."""
+    return set_answers(text, ext_id, "choice", [answer])

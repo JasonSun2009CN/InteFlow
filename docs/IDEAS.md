@@ -37,14 +37,43 @@
     会消耗tokens
 - 方案2：和单词表中对应
 
-### 不同themes
-- 在settingss中设置
-- CB风格作为默认选项
-- 古风纸墨风作为可选项
-- 其他themes待定
+### ✅ 不同themes
+- 在 Settings → Appearance 中设置（存 `localStorage`，键 `inteflow.theme`）
+- **已实现（2026-10-19）**，5 套主题全部落地：
+  Clear Blue（默认，即原 "CB Classic" 改名）/ Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial。
+  实现见 `frontend/src/theme.ts` + `frontend/src/index.css` 的主题层（`.app-theme[data-theme=…]`）。
+- **全屏练习页不跟随主题**（保留原 slate/blue），复盘页跟随。
+- 设计预览（纯 HTML/CSS/JS，无依赖）保留在 [`theme-examples/`](theme-examples/README.md)：
+  每页渲染同一个主页，只换视觉；打开 `theme-examples/index.html` 可看实时对比。
+- 预览里首页统计数字的**递增动画**（0 → 目标值，ease-out 600ms）已照搬到真机首页：
+  `frontend/src/lib/useCountUp.ts`；每次页面加载只播一次，`prefers-reduced-motion` 下跳过，
+  并有超时兜底确保最终一定落在真实数字上。
 
-### 填空题
+### ✅ 填空题
 - 添加填空题功能
+- 已完成（2026-10-19）：导入时未识别到选项即按填空题处理；答案录入页可用加号添加多个可接受答案。
 
-### 多答案
+### ✅ 多答案
 - 多答案功能
+- 已完成（2026-10-19）：选择题头部 `multi=1` 支持多选，答案存 `A,C`；练习页与批量录入均支持。
+
+### ✅ 复盘（分析模式）重构
+- 进入复盘隐藏左侧栏、全屏；题号导航缩到左上角点击展开；左侧题面 + 右侧 Pages 式分析编辑器；分析可保存续写并导出 md/docx/pdf。
+
+### ✅ 复盘解析的加载与预览（2026-10-19）
+- 修复：重新打开某次作答时，分析页在 notebook 异步加载完成后仍是空白（已保存内容不显示）。
+- Preview 用 `remark-breaks` 保留单换行；离开/切题时补存最后不到 0.9 秒的输入。
+- 复盘页顶部新增 **Notebook**：整套解析全屏预览（试卷标题 → 已写解析题目的题干/图表/解析），并可直接导出 md/docx/pdf（只含已写解析的题）。
+
+### ✅ 作答历史
+- 左侧栏在 Exams 与 Library 之间加了 Sessions 页：按做题时间倒序，可搜索、可删除。
+
+### ✅ 设置
+- 新增"用户名"（导出封面用）与"题目识别 API 兜底"开关。
+˛
+### 添加“需复习题目”的功能
+- 把mistake界面分开，一半放错题，一般放用户标记的题目
+
+### 学科题目分类
+- 支持用户给套题进行学科分类：EG SAT Math
+- 在题目栏中进行categorize

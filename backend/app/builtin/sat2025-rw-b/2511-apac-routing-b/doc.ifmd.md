@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月亚太 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:54Z
+imported_at: 2026-10-19T12:21:37Z
 answers: external
 ---
 
@@ -107,18 +107,6 @@ The following text is adapted from Matthew Arnold's 1869 nonfiction book Culture
 
 The Times [a British newspaper], replying to some foreign strictures on the dress, looks, and behaviour of the English abroad, urges that the English ideal is that every one should be free to do and to look just as he likes. But culture indefatigably tries, not to make what each raw person may like, the rule by which he fashions himself; but to draw ever nearer to a sense of what is indeed beautiful, graceful, and becoming, and to get the raw person to like that.
 
-Home Console and Computer Games of the 1980s
-
-Title Approximate number of
-
-units sold worldwide Genre Developer
-
-Tetris 43,000,000 puzzle Nintendo R&D1
-
-Excitebike 4,160,000 racing Nintendo R&D1
-
-Super Mario Brothers 3 17,280,000 platformer Nintendo EAD
-
 @stem
 Which choice best states the main idea of the text?
 
@@ -132,7 +120,7 @@ Which choice best states the main idea of the text?
 
 :::q {#Q008 sec=rw no=8}
 @material
-The Last Ninja 4,000,000 adventure System 3
+![Home Console and Computer Games of the 1980s](assets/p04-d457294c.png)
 
 A student is writing a paper on the global rise of the home video game industry during the 1980s. The student is researching the relative popularity of various genres of console and computer games. Looking at the information in the table, the student finds that the games in the genres of ______
 
@@ -149,7 +137,7 @@ Which choice most effectively uses data from the table to complete the statement
 
 :::q {#Q009 sec=rw no=9}
 @material
-Biochar and NPK fertilizer 1032.1 6.78 13.96
+![Effect of Various Soil Treatments on Mean Pineapple Fruit Weight and Size](assets/p05-5b9fe61e.png)
 
 Working in Ghana, Emmanuel Hanyabui and colleagues compared the impact on pineapple growth of different combinations of soil additives, including NPK fertilizer (an inorganic fertilizer containing nitrogen, phosphorus, and potassium), organic compost, and biochar (a carbon-rich material produced from organic waste matter). Based on data in the table, pineapple farmers with no access to inorganic soil additives would likely increase the weight and size of their fruits by the greatest amount by using ______
 
@@ -181,7 +169,7 @@ Which quotation from The Man in the Brown Suit most effectively illustrates the 
 
 :::q {#Q011 sec=rw no=11}
 @material
-Daisies (5–6 years) 207 191 190 195
+![Members of the Girl Scouts of America, by Age Category, 1992–1995 in thousands](assets/p06-574f2e83.png)
 
 The Girl Scouts of America is an organization famous for its annual sales of several varieties of cookies, including Tagalongs. A student is writing an essay on the history of the organization. The student claims that from 1992 to 1995 the organization's popularity regularly peaked among participants in a certain age range before declining among older participants as Girl Scout activities began to compete with other interests.
 

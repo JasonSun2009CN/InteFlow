@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月北美 · Harder C"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:26Z
+imported_at: 2026-10-19T12:21:09Z
 answers: external
 ---
 
@@ -137,23 +137,7 @@ Which additional finding from Chen and colleagues'study, if true, would best sup
 
 :::q {#Q009 sec=rw no=9}
 @material
-Number of Modular Construction Projects
-
-by Building Category
-
-Number of projects
-
-![figure](assets/p05-7a2b5f70.png)
-
-relocatable permanent
-
-Structure type
-
-multifamily
-
-education
-
-dormitory
+![by Building Category; Structure type](assets/p05-0df71dd8.png)
 
 Modular construction, or a process in which a building is manufactured off-site in sections and assembled onsite, is gaining traction in the architectural industry, given modular construction's multifarious advantages, which range from greater worker safety to the fact that a building can be constructed in a relatively short amount of time. An architecture company wishes to pursue modular construction projects but wants to avoid those in building categories that may already be oversaturated with projects. An executive from the company compiles data about both permanent and relocatable modular constructions of various types and concludes that ______
 

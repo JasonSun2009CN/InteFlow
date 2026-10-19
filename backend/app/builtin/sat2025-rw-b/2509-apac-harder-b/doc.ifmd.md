@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月亚太 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:14Z
+imported_at: 2026-10-19T12:20:57Z
 answers: external
 ---
 
@@ -131,7 +131,7 @@ Which choice best states the main idea of the text?
 
 :::q {#Q009 sec=rw no=9}
 @material
-Zenaida meloda West Peruvian dove Columbiformes No
+![Broken-Wing Display in Various Bird Species](assets/p05-ec72bdcf.png)
 
 While observing birds for a biology class, a group of students noticed a greater painted-snipe (Rostratula benghalensis), a bird of the order Charadriiformes (shorebirds), slowly move away, make loud noises, and feign an injured wing as the group approached the bird's ground nest. Researching this behavior, the students learned that this phenomenon is commonly referred to as "broken-wing display" and is meant to lure predators away from the nesting site and toward a seemingly vulnerable adult bird. Upon learning of other birds that also exhibit the behavior they had observed, the students hypothesized that the phenomenon is exclusive to shorebirds.
 
@@ -148,7 +148,7 @@ Which choice best describes data from the table that weaken the students' claim?
 
 :::q {#Q010 sec=rw no=10}
 @material
-Dichloromethane and methanol (4) present absent present
+![Organic Compounds Detected in Sequential Extracts from A0106](assets/p06-0c1f562d.png)
 
 After sample A0106 was retrieved from the asteroid Ryugu, a portion of it was subjected to an extraction protocol in which small amounts of pulverized material were rinsed, sequentially, with hexane, dichloromethane, methanol, and finally a mixture of dichloromethane and methanol. Each rinse created a separate extract suitable for spectral analysis. Based on the table, both alkane and dimethyl sulfide compounds must have been present in the pulverized sample before the methanol-only extraction, because ______
 

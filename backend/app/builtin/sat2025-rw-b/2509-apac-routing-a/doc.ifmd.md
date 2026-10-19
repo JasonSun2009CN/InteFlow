@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月亚太 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:07Z
+imported_at: 2026-10-19T12:20:51Z
 answers: external
 ---
 
@@ -139,18 +139,6 @@ The following text is from María Amparo Ruiz de Burton's 1885 novel The Squatte
 
 Don Mariano Alamar was silently walking up and down the front piazza of his house at the rancho; his hands listlessly clasped behind and his head slightly bent forward in deep thought. He had pushed away to one side the many arm-chairs and wicker rockers with which the piazza was furnished. He wanted a long space to walk. That his meditations were far from agreeable, could easily be seen by the compressed lips, slight frown, and sad gaze of his mild and beautiful blue eyes.
 
-Average Hours Worked per Person per Year in 1950 and 2017
-
-Country 1950 2017 Change in hours Percent change in hours
-
-United Kingdom 2,184 1,670 –514 –24%
-
-Australia 2,178 1,731 –447 –21%
-
-Germany 2,427 1,354 –1,074 –44%
-
-Mexico 2,432 2,255 –177 –7%
-
 @stem
 Based on the text, why does Don Mariano push aside the furniture on the piazza?
 
@@ -164,6 +152,8 @@ Based on the text, why does Don Mariano push aside the furniture on the piazza?
 
 :::q {#Q010 sec=rw no=10}
 @material
+![Average Hours Worked per Person per Year in 1950 and 2017](assets/p05-7ebceeba.png)
+
 Calculations may be inexact due to rounding.
 
 A student in an economics course is examining the decline since 1950 in average hours worked per person per year in various nations due to both increased productivity and the adoption of policies that limit working hours. The first task in this investigation is to determine how the decline in the United Kingdom compares to that in other countries. The student finds that ______
@@ -181,7 +171,7 @@ Which choice most effectively uses data from the table to complete the statement
 
 :::q {#Q011 sec=rw no=11}
 @material
-Construction $6,797,300,000 77,247 $87,994
+![Impact of Three Key Industries on Oklahoma Economy in 2017](assets/p06-9c93d608.png)
 
 The nearly forty tribes located in Oklahoma, including the Choctaw Nation and the Comanche Nation, operate numerous businesses, employ tens of thousands of people, and generate billions of dollars in revenue. A student in an economics class is researching the tribes' collective activity as a single industry. The student wants to compare that industry's role in Oklahoma in 2017 with the roles of other industries in the state. Looking at a table with information about three industries, the student finds that compared with the other two industries, tribal economic activity ______
 

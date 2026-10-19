@@ -7,7 +7,7 @@ import pymupdf
 from app.convert import twocolumn
 from app.convert.pdf import convert_pdf
 from app.ifmd.parser import parse
-from tests.fixtures import build_twocolumn_pdf
+from tests.fixtures import build_twocolumn_pdf, build_twocolumn_table_pdf
 
 
 def _convert(path: Path):
@@ -83,6 +83,17 @@ def test_stray_digit_is_skipped_not_promoted(tmp_path: Path) -> None:
     result = _convert(path)
     assert result.question_count == 4
     assert any("skipped question #42" in w for w in result.warnings), result.warnings
+
+
+def test_table_bands_to_nearest_badge(tmp_path: Path) -> None:
+    """A left-column table goes to the badge it sits closest to, not by band."""
+    path = build_twocolumn_table_pdf(tmp_path / "twocolumn-table.pdf")
+    doc = parse(_convert(path).ifmd)
+
+    q1, q2 = doc.questions[0], doc.questions[1]
+    assert not q1.images, "the table is nearer badge #2"
+    assert q2.images, "table should be captured for question #2"
+    assert "assets/" in (q2.material or "")
 
 
 def test_left_column_bitmap_attached_to_row(tmp_path: Path) -> None:

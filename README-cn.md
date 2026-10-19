@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-187%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-218%20passed-2E7D32)
 
 ---
 
@@ -55,14 +55,14 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
 | **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等 |
 | **资料库** | 文档列表（题数、已作答数、答案状态）、练习历史、删除（级联） |
-| **答案录入** | 逐题 A–D 网格 + **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA`）+ 校验 + 预览，同步回写源文件 |
-| **练习** | 考试风格全屏、**正计时 / 倒计时两种计时**、单题视图、题号导航、标记、键盘 `A–D` / `← →`、交卷确认 |
-| **结果 / 复盘** | 得分 / 分板块 / 用时统计、`All · Correct · Wrong` 过滤、三栏 master–detail、补键重判（regrade） |
-| **工作区** | 手写解析（直存本地）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出入口 |
-| **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、生词 **`.xlsx`** |
-| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试 |
+| **答案录入** | 选择题 A–Z 网格（题面有几个选项就显示几个，如 AMC 的 A–E；**多选**题可勾多个）+ **填空题多答案**（加号添加可接受答案）+ **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA` / 多选 `3-AC` / `1-E`）+ 校验 + 预览，同步回写源文件 |
+| **练习** | 考试风格全屏、**正计时 / 倒计时两种计时**、单题视图、题号导航、标记、键盘 `选项字母` / `← →`、多选与填空作答、交卷确认 |
+| **结果 / 复盘** | 得分 / 分板块 / 用时统计、**全屏复盘**（无侧栏）、`All · Correct · Wrong` 过滤、左上角可折叠题号导航、左题面 + 右 Pages 式分析编辑器（自动保存 / 续写）、补键重判（regrade） |
+| **工作区** | 每题分析页（Markdown，支持公式/图片）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出抽屉 |
+| **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底开关** |
 
-> **规划中（已留入口，细节待定）：** 应用内**查词**（选中单词查词典）、专门的**错题分析导出**。
+> **规划中（已留入口，细节待定）：** 应用内**查词**（选中单词查词典）。
 > 见 [`docs/IDEAS.md`](docs/IDEAS.md) 与 [`ROADMAP.md`](ROADMAP.md)。
 
 ## 两条铁律
@@ -98,36 +98,43 @@ sudo apt install libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 
 
 ## 快速开始
 
-### macOS / Linux
+### 一键启动（推荐）
 
 ```bash
 git clone <你的仓库地址> InteFlow
 cd InteFlow
 
-# 首次运行：一键建环境 + 装依赖（可重复运行，幂等）
-./scripts/setup.sh
-
-# 启动开发环境（后端 :8000 + 前端 :5173）
-./scripts/dev.sh
+# macOS / Linux
+./start.sh
 ```
-
-### Windows (PowerShell)
 
 ```powershell
-git clone <你的仓库地址> InteFlow
-cd InteFlow
-
-.\scripts\setup.ps1
-.\scripts\dev.ps1
+# Windows (PowerShell)
+.\start.ps1
 ```
+
+`start.sh` / `start.ps1` **幂等**：首次运行自动建 `.venv`、装前后端依赖（缺才装），之后再运行直接启动。
+它会同时拉起**后端 :8000** 与**前端 :5173**，等后端健康后**自动打开浏览器**，按 `Ctrl-C` 同时停止两端。
+
+- **macOS 双击启动**：在 Finder 里双击 **`InteFlow.command`**。
+- **Windows 双击启动**：双击 **`start.bat`**。
+- 换端口：`INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
+  （Windows：`$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`）。
+- 端口被占用、缺 Python/Node、依赖异常时会给出明确提示并退出。
 
 - 后端 API：<http://localhost:8000>（健康检查 <http://localhost:8000/api/health>）
 - 前端页面：<http://localhost:5173> ← **浏览器打开这个**
 
-按 `Ctrl-C` 同时停止两端。
-
 <details>
-<summary><b>不用 dev.sh / dev.ps1 的手动启动方式</b></summary>
+<summary><b>分步启动（先 setup 再 dev）与纯手动启动</b></summary>
+
+```bash
+# 步骤 1：只建环境 + 装依赖（幂等）
+./scripts/setup.sh          # Windows: .\scripts\setup.ps1
+
+# 步骤 2：启动开发环境
+./scripts/dev.sh            # Windows: .\scripts\dev.ps1
+```
 
 ```bash
 # 1) 后端（终端 A）
@@ -149,12 +156,12 @@ npm run dev
 
 ### 1. 导入题库
 
-打开 <http://localhost:5173>，左侧栏固定五个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 删除）、
-**Mistakes**（错题分析集合，占位）、**Vocabulary**（单词整理集合，占位）、**Settings**（LLM 设置）。
+打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 删除）、
+**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（单词整理集合，占位）、**Settings**（LLM / 用户名 / 兜底开关）。
 
 1. 点侧栏 **Library** 进入题库页。
 2. **上传文件**：把文件拖到 *Drag a file here* 区域，或点 **choose a file**。
-   支持 `PDF · DOCX · .md · .markdown · .ifmd.md`（≤ 60 MB；题目需带编号 `1.` `2.` …，每题四个选项）。
+   支持 `PDF · DOCX · .md · .markdown · .ifmd.md`（≤ 60 MB；题目需带编号 `1.` `2.` …；选择题四个选项，**无选项按填空处理**）。
 3. **等待流水线跑完**：`detect → convert → review` 三阶段，附**逐页报告**（该页是文本/OCR/低置信/无引擎）。
    - 转换结果干净 → 自动提交入库；
    - 有疑点 → 停在复核阶段，由你点 **Commit** 落库或 **Cancel** 取消（全程 0 token）。
@@ -171,9 +178,10 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 
 文档解析出题目但**答案键缺失/不全**时（列表里会提示），点 **Answers** 进入 `/doc/:id/answers`：
 
-- **逐题网格**：每题点 A/B/C/D；
-- **Bulk entry 批量粘贴**：输入框支持 `1-A 2-C 3-D`、`1. A`、`12B`、裸字母串 `ACBDA`，点 **Apply to grid** 一次性填充；
-- 保存时自动校验（只接受 A–D），并同步回写 `doc.ifmd.md`；**Preview** 区可先检查再保存。
+- **选择题网格**：每题点 A/B/C/D；**多选**题（题干标 `multi`）可勾多个；
+- **填空题**：输入框直接写答案，点 **⊕ Add acceptable answer** 可添加多个可接受答案（判分时任一匹配即算对）；
+- **Bulk entry 批量粘贴**：输入框支持 `1-A 2-C 3-D`、`1. A`、`12B`、裸字母串 `ACBDA`、多选 `3-AC`，点 **Apply to grid** 一次性填充；
+- 保存时自动校验并同步回写 `doc.ifmd.md`；**Preview** 区可先检查再保存。
 
 > 也可以先不录答案直接练习：交卷后会引导你来这页补录，保存后自动重判。
 
@@ -185,41 +193,39 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
    - **正计时（Count-up）**：只累计用时；
    - **倒计时（Countdown）**：手输 `mm:ss`，应用会记住你上次的数值。
 2. 点 **Begin — enter fullscreen** 进入全屏，**计时从此刻开始**（也可先点 *Enter answers first* 去补录答案）；
-3. 作答方式：鼠标点选项，或按键盘 **`A` `B` `C` `D`**；**`←` `→`** 切换上/下一题；底部题号面板可任意跳题；
-   **Mark for review** 标记当前题；
+3. 作答方式：鼠标点选项，或按键盘 **`A` `B` `C` `D`**（选择题）；**多选**题可勾多个，**填空题**直接输入文本；
+   **`←` `→`** 切换上/下一题；底部题号面板可任意跳题；**Mark for review** 标记当前题；
 4. 做完点 **Submit** → 弹确认框 → 再点 **Submit** 交卷判分。
 
 ### 4. 结果与复盘
 
-交卷后进入 `/session/:sid/result`：
+交卷后进入 `/session/:sid/result`（**全屏复盘，无左侧栏**）：
 
-- **统计面板**：Score、按本卷实际出现的**板块**各一张卡片、Time，以及 **Wrong answers** 错题 chips（点击跳题）；
-- **过滤 Tab**：`All` / `Correct` / `Wrong`；
-- **三栏布局**：左侧题号索引（状态色）→ 中间单题区（`←` `→` 键盘切题、`n / total`）→ 右侧常驻工作区。
-
-**工作区（右侧）**：
-
-| 分区 | 用法 |
-|---|---|
-| **Explanation** | 给当前题手写解析，点保存直接入库（0 token） |
-| **Vocabulary** | 生词表，列 `Word \| Meaning \| Notes`，可增删行/列、编辑后保存；**Export .xlsx** 导出 |
-| **AI Answer** | 显式点击才调用 LLM（题干 + 正确选项作为上下文） |
-| **Export** | **Export .pdf** / **Export .docx**，导出题目、答案与解析（不经过 AI） |
+- **左上角题目导航**：默认缩成一个小 pill，点击后箭头旋转、**悬浮展开**全部题号（状态色），可选 `All` / `Wrong` / `Correct`；点某题即选中并自动收起（`Esc` 或点空白处关闭）。
+- **左右分屏**：左侧显示当前题的题干、正确选项、你的选择；右侧是 **Pages 式分析编辑器**（一题一页）。
+- **分析编辑器**：支持 Markdown（公式 `$x^2$`、图片 `![](assets/…)`）；`Write` / `Preview` 切换；输入后**自动保存**（约 0.9 秒防抖，也可 `⌘S` / 点 Save）。下次进入自动续写。
+- **Notebook（整套解析预览）**：复盘页顶部 **Notebook** 按钮打开全屏预览——从试卷标题开始，依次显示所有已写解析的题目（题干、图表、解析），并可直接导出。
+- **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §5）。
+- 若答卷时没答案键，保存后会自动重判（regrade）。
 
 ### 5. 导出
 
-- **整份文档**：工作区 **Export** 分区 → `Export .pdf` 或 `Export .docx`。
+- **复盘笔记本**：复盘页顶部 **Notebook** 先预览整套解析，再导出 **Markdown / DOCX / PDF**（工具栏 **Export** 同样可导出）。一份试卷一套分析（封面含用户名与成绩），**只包含已写解析的题目**；浏览器下载的同时会在 `data/exports/` 留一份，界面会显示保存路径。
+- **整份文档**：Library 里对文档导出 **PDF** / **DOCX**（题目、答案与解析）。
 - **生词本**：**Export .xlsx**。
 
-### 6. 设置 LLM（可选）
+### 6. 设置（用户名 / LLM / 兜底开关）
 
 **除 AI 讲解外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
-1. **Provider** 下拉（内置 19 家目录，**默认 OrcaRouter**，含 Base URL 与默认模型）；
-2. **Base URL** 可覆盖；
-3. **API Key** 只写不回显（掩码显示）；
-4. **Model** 填模型名；
-5. **Save settings** / **Test connection**。
+1. **Your name**：填名字，用于复盘笔记本导出封面；
+2. **AI recognition fallback**：导入识别失败时的 LLM 兜底开关（默认开）；关闭后导入失败会提示你启用，
+   并在你打开开关、配好 API Key 后再试；
+3. **Provider** 下拉（内置 19 家目录，**默认 OrcaRouter**，含 Base URL 与默认模型）；
+4. **Base URL** 可覆盖；
+5. **API Key** 只写不回显（掩码显示）；
+6. **Model** 填模型名；
+7. **Save settings** / **Test connection**。
 
 Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 
@@ -246,7 +252,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 187 passed, 1 skipped；用临时数据目录，不动你的数据）
+# 后端测试（基线 218 passed, 1 skipped；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -255,7 +261,10 @@ cd frontend && npm run build
 # 前端组件测试
 cd frontend && npm test
 
-# 本地开发（后端 :8000 + 前端 :5173）
+# 一键启动（缺环境先 setup + 起前后端 + 开浏览器）
+./start.sh
+
+# 或者：环境已就绪时直接起（不做前置检查）
 ./scripts/dev.sh
 ```
 
@@ -265,20 +274,23 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI 装配（/api/health、6 个 router）
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai
+│   │   ├── main.py            FastAPI 装配（/api/health、7 个 router）
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
-│   │   ├── ifmd/              InteFlow-MD 解析 + 回写（确定性状态机）
-│   │   ├── export/            PDF (WeasyPrint) · docx · math_render(+mathjax 桥)
+│   │   ├── ifmd/              InteFlow-MD 解析 + 回写（确定性状态机；多选/填空）
+│   │   ├── export/            PDF (WeasyPrint) · docx · notebook(复盘) · math_render(+mathjax 桥)
 │   │   ├── repos/ · llm/      持久化 · LLM 传输层
 │   │   ├── sections.py        自由板块标签
 │   │   ├── providers.py       19 家服务商目录
 │   │   └── builtin/           内置题库（44 单元随仓库分发）
-│   ├── tests/                 pytest（187）
+│   ├── tests/                 pytest（218）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Library(Import) · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
-├── scripts/dev.sh             一键起前后端
+│   └── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）
+├── InteFlow.command           macOS 双击启动
+├── start.bat                  Windows 双击启动
+├── scripts/dev.sh             一键起前后端（不做前置检查）
 ├── data/                      运行期数据（gitignore）
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/
 ```
@@ -287,7 +299,7 @@ InteFlow/
 
 | 现象 | 解决 |
 |---|---|
-| `dev.sh` 报端口被占用 | `lsof -i :8000` / `:5173` 找到进程并结束，或换端口启动 |
+| `dev.sh` 报端口被占用 | `lsof -i :8000` / `:5173` 找到进程并结束，或换端口启动（`start.sh` 会先检测并提示） |
 | 页面一直 Loading / 提示连不上后端 | 确认后端活着：<http://localhost:8000/api/health>；前端指向其他后端时设置 `INTEFLOW_API` 后重启 vite |
 | 导入扫描 PDF 提示需要 OCR | 安装 `tesseract`，或 macOS 上 `pip install pyobjc-framework-Vision`，重启后端后重新导入 |
 | DOCX 导入被拒绝 | 上传前做了 zip 安全校验（条目数/解压总量/压缩比/宏），异常或加密文档会被拒；请用正常导出的 `.docx` |

@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月亚太 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:53Z
+imported_at: 2026-10-19T12:20:36Z
 answers: external
 ---
 
@@ -163,7 +163,7 @@ Which statement, if true, would most directly support the underlined claim?
 
 :::q {#Q011 sec=rw no=11}
 @material
-combtooth blenny 291 113 148
+![Cumulative Counts of Fish in Three Taiwanese Tide Pools, 1999–2018](assets/p06-1b70c83f.png)
 
 Lin-Tai Ho and colleagues tracked fish populations in three tide pool–monitoring stations in Taiwan from 1999 to 2018. Although a total of only 16 barred flagtails were observed at station 3, that was not the lowest count at any station: ______
 
@@ -180,7 +180,7 @@ Which choice most effectively uses data from the table to complete the assertion
 
 :::q {#Q012 sec=rw no=12}
 @material
-Great Britain 18 290 120
+![Country Trees Fungi Insects](assets/p07-65f42d8e.png)
 
 Elisabeth Pötzelsberger and colleagues gathered data on 23 non-native tree species grown in Europe. They analyzed reports from Great Britain, Bulgaria, and Belgium about the number of these species grown in those countries as well as the numbers of insect and fungus species that damage those trees. The researchers concluded that Great Britain had a greater number of damaging fungus species than either of the other countries did.
 

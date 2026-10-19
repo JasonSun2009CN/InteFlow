@@ -95,9 +95,8 @@ def _html(doc: ExportDoc, svgs: dict) -> str:
         out.append(f"<div class='stem'>{_rich(q.stem, svgs)}</div>")
         if q.options:
             out.append("<div class='options'>")
-            for letter in "ABCD":
-                if letter in q.options:
-                    out.append(f"<div>{letter}. {_rich(q.options[letter], svgs)}</div>")
+            for letter, text in q.options.items():
+                out.append(f"<div>{letter}. {_rich(text, svgs)}</div>")
             out.append("</div>")
         for image in q.images:
             out.append(f"<img class='q-image' src='{_data_uri(image)}'/>")

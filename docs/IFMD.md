@@ -44,7 +44,7 @@ answers: none                 # inline | external | none（见 §5）
 ……材料正文……
 @stem                      ← 可选但强烈建议：题干起点
 ……题干正文……
-- A. 选项一                 ← 固定 4 个选项，A–D，大写字母 + 点
+- A. 选项一                 ← 选择题：从 A 起连续的大写字母 + 点，至少 2 个（AMC 5 个，部分卷 6 个）
 - B. 选项二
 - C. 选项三
 - D. 选项四
@@ -56,7 +56,9 @@ answers: none                 # inline | external | none（见 §5）
 - **无任何标记**：块内全部内容都是题干。
 - **只有 `@stem`**：`@stem` 之前的内容自动作为材料（`@material` 的简写形式）。
 - **`@material` 与 `@stem` 同时出现**：分别界定材料与题干；只有 `@material` 而没有 `@stem` 是错误。
-- 选项行必须恰好 4 个，顺序 `A B C D`；解析器遇到数量不对 → **报错，不猜测**。
+- **题型有两种**：
+  - 选择题：选项行从 `A` 起**连续**排列（`A B C …`），至少 2 个、最多 26 个；跳号或不足 2 个 → **报错，不猜测**。
+  - 填空题（`kind=blank`）：**没有选项行**。导入时若识别不到选项即按填空题处理（见 §3.2）。
 - 块内禁止出现裸 `:::` 行（除非作为块结束）。
 
 ### 3.2 头部属性
@@ -68,12 +70,14 @@ answers: none                 # inline | external | none（见 §5）
 | `no` | ⬜ | 整数 | 原卷题号，与 id 分开存 |
 | `type` | ⬜ | 自由串 | 如 `vocab` `craft` `algebra` |
 | `difficulty` | ⬜ | `e` \| `m` \| `h` | easy / medium / hard |
+| `kind` | ⬜ | `choice` \| `blank` | 题型，缺省 `choice`；`blank` 表示填空题（无选项） |
+| `multi` | ⬜ | `0` \| `1` | 选择题是否多选，缺省 `0`（单选） |
 
 ### 3.3 元数据行 `! key: value`
 
 | key | 说明 |
 |---|---|
-| `answer` | `A`–`D`。导入时没有就**不写这一行**，由后续答案录入页补 |
+| `answer` | 答案。选择题：`A`–`D`，多选用**逗号**分隔（`A,C`）；填空题：每个可接受答案用 **`\|`** 分隔（`the \| a`）。导入时没有就**不写这一行**，由后续答案录入页补 |
 | `explain` | 解析/正确理由。可缺省，按需用 LLM 或手写补 |
 | `source` | 溯源，如 `p.12` |
 
@@ -93,7 +97,7 @@ answers: none                 # inline | external | none（见 §5）
 | `external` | 源文档末尾有独立答案表（如 `Answer Key` / `答案`） | 转换器按题号回填 |
 | `none` | 源文档无答案 | 导入后进入**答案录入页**：显示题数，逐题或批量粘贴录入 |
 
-`none` → 录入完成 → 落库时写入 questions 表，`.ifmd.md` 文件同步回写 `! answer:` 并把 `answers` 改为 `external`。
+`none` → 录入完成 → 落库时写入 questions 表，`.ifmd.md` 文件同步回写 `! answer:`（多选用 `A,C`，填空用 `|` 分隔）并把 `answers` 改为 `external`。
 
 ## 6. 示例
 
@@ -135,16 +139,40 @@ If $3x + 5 = 20$, what is the value of $x$?
 
 > 注：`sec` 是自由标签，`rw`/`math` 只是 SAT 卷的常见取值；其他学科可直接 `sec=physics`、`sec=history`。
 
+### 6.3 填空题（无选项，多个可接受答案）
+
+```markdown
+:::q {#Q010 sec=rw no=10 kind=blank}
+! answer: photosynthesis | photosynthesis in plants
+What process do plants use to convert light into chemical energy?
+:::
+```
+
+### 6.4 多选选择题（`multi=1`）
+
+```markdown
+:::q {#Q011 sec=rw no=11 multi=1}
+! answer: A,C
+Which TWO of the following are renewable energy sources?
+
+- A. Solar
+- B. Coal
+- C. Wind
+- D. Natural gas
+:::
+```
+
 ## 7. 设计决议（已确认）
 
 1. 材料内标题不做独立字段，由转换器写成材料首行（如 `**Title — Source**`）。
 2. 材料与题干的图片共用 `assets/`，用 `alt` 文本区分归属，不单独建字段。
 3. **保序**：题目按块出现顺序存储（`order_idx`），`no` 只记录原卷题号。
-4. 选项硬编码为 **恰好 4 个 A–D**，超出或不足一律报错。
+4. **选择题字母从 A 起连续**（A、B、C、…），至少 2 个、最多 26 个；跳号或不足 2 个一律报错，答案字母必须落在题目已有的选项内。**填空题（`kind=blank`）刻意没有选项**——转换器识别不到选项时按填空处理，不再报"选项不足"。
 5. **`sec` 自由标签**：解析器只要求非空，不校验取值（SAT 卷仍用 `rw`/`math`，其他学科自定）。转换器在无板块标题时回退到 `INTEFLOW_DEFAULT_SECTION`（默认 `rw`）。
+6. **多答案**：选择题多选由头部 `multi=1` 声明，答案写成 `A,C`；填空题的多个可接受答案写成 `a | b`。
 
 ## 8. 解析器实现约定
 
 - 单一入口：`parse(text) -> {meta, questions[]}`，纯函数，**不调用 LLM、不做模糊推断**。
 - 任何结构错误抛出带行号的 `IfmdError`，导入界面直接展示错误位置。
-- 单元测试覆盖：正常块 / 缺选项 / 选项数不对 / 版本不符 / 公式与图片 / `@material` 组合 / 未知 `!` key。
+- 单元测试覆盖：正常块 / **无选项（填空题）** / 选项数不对（1–3 或 >4） / 版本不符 / 公式与图片 / `@material` 组合 / 未知 `!` key / **`multi=1` 与多答案 `A,C`** / **填空多答案 `a | b`**。

@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月北美 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:48Z
+imported_at: 2026-10-19T12:21:31Z
 answers: external
 ---
 
@@ -182,9 +182,7 @@ Which finding, if true, would most directly weaken the researcher's claim?
 
 :::q {#Q012 sec=rw no=12}
 @material
-prevention of soil erosion 13 11 23
-
-creation of new forms of recreation 8 2 1
+![Social or ecological service Project leaders Stakeholders General public](assets/p07-ff5e09ce.png)
 
 Esther Sanyé-Mengual, Kathrin Specht, and their team surveyed three groups of people in Bologna, Italy— leaders of urban agriculture projects, stakeholders in urban agriculture (e.g., food researchers and urban farming associations), and the general public—to compare their views about the extent to which urban agriculture contributes to 25 social or ecological services that the team identified. The researchers used these ratings to rank the services for each group, with a ranking of 1 indicating that a group perceives that urban agriculture benefits that service the most. Using only the rankings shown in the table, a city planner in Bologna who is promoting a new urban agriculture project concludes that advertisements aimed at project leaders should emphasize the project's benefit to the provision of food.
 

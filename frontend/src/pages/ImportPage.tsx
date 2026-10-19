@@ -192,7 +192,7 @@ export default function ImportPage() {
         <p className="mt-1 text-sm text-slate-600">
           PDFs and Word <code className="rounded bg-slate-200 px-1">.docx</code> files are converted
           locally to InteFlow-MD — no tokens, no cloud. Questions must be numbered
-          ({"1."}, {"2."}, …) with four options each.
+          ({"1."}, {"2."}, …) with two or more labelled options each.
         </p>
         {ocr !== null &&
           (ocr.length > 0 ? (
@@ -278,7 +278,7 @@ export default function ImportPage() {
               )}
               <Link
                 to={`/doc/${imported.id}/practice`}
-                className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
               >
                 Start practice
               </Link>

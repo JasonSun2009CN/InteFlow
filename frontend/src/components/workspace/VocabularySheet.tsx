@@ -7,11 +7,11 @@ import { ChevronDownIcon, MaximizeIcon } from "./icons";
 interface Props {
   docId: number;
   open: boolean;
-  height: number;
-  onToggle: () => void;
-  onResize: (deltaPx: number) => void;
-  onMaximize: () => void;
-  onResetHeight: () => void;
+  height?: number;
+  onToggle?: () => void;
+  onResize?: (deltaPx: number) => void;
+  onMaximize?: () => void;
+  onResetHeight?: () => void;
 }
 
 function errText(err: unknown): string {
@@ -28,7 +28,7 @@ function errText(err: unknown): string {
 export default function VocabularySheet({
   docId,
   open,
-  height,
+  height = 220,
   onToggle,
   onResize,
   onMaximize,
@@ -93,7 +93,7 @@ export default function VocabularySheet({
       className="flex shrink-0 flex-col border-t bg-white"
       style={{ height: open ? height : 44 }}
     >
-      {open && (
+      {open && onResize && (
         <Splitter orientation="horizontal" label="Resize vocabulary sheet" onResize={onResize} onReset={onResetHeight} />
       )}
       <header className="flex h-11 shrink-0 items-center gap-2 px-3">
@@ -135,7 +135,7 @@ export default function VocabularySheet({
               </button>
             </>
           )}
-          {open && (
+          {open && onMaximize && (
             <button
               type="button"
               onClick={onMaximize}

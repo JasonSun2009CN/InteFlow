@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月亚太 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:51Z
+imported_at: 2026-10-19T12:20:34Z
 answers: external
 ---
 
@@ -103,14 +103,6 @@ Which choice best states the main purpose of the text?
 @material
 Habitat navigation is a skill that helps animals reach food or safety. To test how navigation works in fish, Shachar Givon and colleagues taught goldfish to drive a vehicle—a motorized fish tank with wheels—on land. The vehicle was programmed to move in the same direction that the fish swam in within the tank. In the experiment, the fish were tasked with driving their tank to a pink board. They received a treat when they succeeded, and they often did. Because the fish could move their tank to the board, Givon concludes that their navigational skills aren't specific to an aquatic environment.
 
-Examples of Hoards found in Ireland and Northern Ireland
-
-Hoard name Date of contents Year of discovery Description
-
-Coggalbeg Hoard 24th–19th century BCE 1945 gold pieces
-
-Dooyork Hoard 3rd century BCE–2nd century 2001 gold, bronze, and beads
-
 @stem
 Which choice best states the main idea of the text?
 
@@ -124,7 +116,7 @@ Which choice best states the main idea of the text?
 
 :::q {#Q008 sec=rw no=8}
 @material
-Coleraine Hoard 5th century CE 1854 silver pieces
+![Examples of Hoards found in Ireland and Northern Ireland](assets/p04-1a44780f.png)
 
 Deposits of valuable objects, or hoards, have been unearthed in many different parts of Ireland and Northern Ireland. Some of these hoards were discovered before 2000; for example, ______
 
@@ -143,23 +135,13 @@ Which choice most effectively uses data from the table to complete the statement
 @material
 Banded Sand Catsharks Found in Three Sponges
 
-Number of sharks
-
-0 2 4 6 8 10 12 14 16 18
+![figure](assets/p05-6c25d552.png)
 
 male
 
 undetermined
 
 female
-
-sponge 1
-
-sponge 2
-
-![figure](assets/p05-24743624.png)
-
-sponge 3
 
 Researcher Helen O'Neill and her team were studying sponges in the family Irciniidae when they discovered that three of the sponges were functioning as microhabitats for banded sand catsharks (Atelomycterus fasciatus). Additionally, the team found that male and female A. fasciatus share the same sponge (the same microhabitat), a behavior not found among Port Jackson sharks (Heterodontus portusjacksoni), another seabed-dwelling species.
 
@@ -176,6 +158,8 @@ Which choice best describes data from the graph that support the underlined clai
 
 :::q {#Q010 sec=rw no=10}
 @material
+![figure](assets/p05-24743624.png)
+
 Olms are salamanders that live in underwater caves. Scientists once thought that olms stay in their caves all their lives. However, Raoul Manenti and team claim that olms regularly come to the surface to perform important activities such as finding food.
 
 @stem
@@ -191,23 +175,7 @@ Which finding, if true, would most strongly support the underlined claim?
 
 :::q {#Q011 sec=rw no=11}
 @material
-Maximum Charge Measured
-
-for Various Pollinators
-
-Picocoulombs (pC)
-
-![figure](assets/p06-6144b028.png)
-
-0 100 200 300 400 500 600 700 800
-
-Charge
-
-houseflies
-
-red mason bees
-
-wintering honeybees
+![Maximum Charge Measured for Various Pollinators](assets/p06-a8992f5c.png)
 
 Studies have shown that plants usually have a negative electrical charge, while bees and other pollinators tend to have a positive charge. Because negatively and positively charged objects attract, a team of researchers examined whether this mechanism plays a role in the transmission of pollen between plants and pollinators. The researchers'experiments showed that positive charges above 300 picocoulombs (pC) could draw pollen grains to a pollinator, so they concluded that both red mason bees and wintering honeybees can attract pollen.
 

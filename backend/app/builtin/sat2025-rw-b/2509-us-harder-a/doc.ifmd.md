@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月北美 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:04Z
+imported_at: 2026-10-19T12:20:46Z
 answers: external
 ---
 
@@ -118,19 +118,11 @@ What does the text most strongly imply about the relationship between probabilis
 @material
 Average Overlap between Immature Orangutans' Diets (ID) and Their Mothers'
 
-Diets (MD)
-
-% of diet
+![Average Overlap between Immature Diets MD](assets/p05-4903d7bf.png)
 
 ID not shared with MD
 
 MD shared with ID
-
-![figure](assets/p05-3cc2c7eb.png)
-
-individual 17 (male)
-
-individual 5 (female)
 
 Male orangutans typically disperse from the territory in which they were born when they reach maturity, whereas females typically do not. Beatrice Ehmann and her colleagues hypothesized that this difference in life trajectory should be reflected in the diets of immature orangutans: males should share fewer of their mothers' dietary preferences than females do since those preferences tend to be particular to the food resources available in the local area and may be of relatively low utility beyond it. The researchers calculated the percent of mother orangutans' diets shared with their offspring's diets and the percent of immature orangutans' diets not shared with their mothers' diets.
 
@@ -147,33 +139,7 @@ Which choice best describes data from the graph that support Ehmann and colleagu
 
 :::q {#Q009 sec=rw no=9}
 @material
-Proportion of the Three Most Commonly Exhibited
-
-Mobility Patterns, in the US
-
-and Cote d' Ivoir
-
-0.8
-
-Proportion
-
-0.6
-
-0.4
-
-0.2
-
-US 2 US 3 US 4 CI 2 CI 3 CI 4
-
-Mobility pattern by country
-
-measured
-
-model: emphasis density
-
-![figure](assets/p06-a10cf60f.png)
-
-model: emphasis preferences
+![Mobility Patterns, in the US and Cote d’ Ivoir; US 2 Mobility pattern by country](assets/p06-7076a629.png)
 
 Researchers used anonymous location data from the US and Côte d' Ivoire to document people's daily patterns of mobility, using these results to test the efficacy of the researchers' predictive computer model. In each country, unidirectional cycles among two, three, or four locations were empirically the most common pattern types; the graph shows each of these pattern types as a proportion of all pattern instances found for that country (e.g., the measured value for CI 3 in the graph, 0.12, indicates that the three-location pattern constituted 12% of all pattern instances in the Côte d' Ivoire data). The researchers ran their model twice under different assumptions, concluding that emphasizing the salience of local population density over personal preferences generally yielded the best results.
 

@@ -2,9 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { api, ApiError, type DocumentSummary } from "../api/client";
+import { buttonClasses } from "../components/ui";
+import { useCountUp } from "../lib/useCountUp";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
+}
+
+/** Stats read as a two-digit ledger: 01, 02, … */
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
 }
 
 /** SQLite stores `datetime('now')` as "YYYY-MM-DD HH:MM:SS" in UTC. */
@@ -24,12 +31,16 @@ function formatAdded(value: string): string | null {
 function Stat({
   label,
   value,
+  format = (n) => String(n),
   tone = "ink",
 }: {
   label: string;
-  value: string;
+  value: number | null;
+  format?: (n: number) => string;
   tone?: "ink" | "seal";
 }) {
+  const shown = useCountUp(value);
+
   return (
     <div>
       <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink-400">
@@ -40,7 +51,7 @@ function Stat({
           tone === "seal" ? "text-seal-600" : "text-ink-900"
         }`}
       >
-        {value}
+        {shown === null ? "—" : format(shown)}
       </dd>
     </div>
   );
@@ -94,14 +105,20 @@ export default function ExamHomePage() {
           </div>
 
           <dl className="flex gap-8 border-t border-paper-200 pt-6 md:border-t-0 md:pt-0 md:text-right">
-            <Stat label="Exams" value={docs ? String(examCount).padStart(2, "0") : "—"} />
+            <Stat
+              label="Exams"
+              value={docs ? examCount : null}
+              format={pad}
+            />
             <Stat
               label="Questions"
-              value={docs ? questionCount.toLocaleString("en-US") : "—"}
+              value={docs ? questionCount : null}
+              format={(n) => n.toLocaleString("en-US")}
             />
             <Stat
               label="Needs keys"
-              value={docs ? String(needsKeys).padStart(2, "0") : "—"}
+              value={docs ? needsKeys : null}
+              format={pad}
               tone={needsKeys > 0 ? "seal" : "ink"}
             />
           </dl>
@@ -165,10 +182,10 @@ export default function ExamHomePage() {
             </p>
             <Link
               to="/library"
-              className="mt-6 inline-flex items-center gap-2 border border-ink-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-900 transition-colors hover:bg-ink-900 hover:text-paper-50"
+              className={buttonClasses({ className: "mt-6 whitespace-nowrap" })}
             >
               Open library
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
         )}
@@ -232,10 +249,10 @@ export default function ExamHomePage() {
                     )}
                     <Link
                       to={`/doc/${doc.id}/practice`}
-                      className="inline-flex items-center gap-2 border border-ink-900 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-900 transition-colors hover:bg-ink-900 hover:text-paper-50"
+                      className={buttonClasses({ className: "whitespace-nowrap" })}
                     >
                       Start
-                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </div>
                 </li>

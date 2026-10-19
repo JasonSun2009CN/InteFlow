@@ -67,28 +67,19 @@ function write<T>(key: string, value: T): void {
 
 /** Persistent layout for the review workspace, scoped to one document. */
 export interface WorkspaceLayout {
-  navOpen: boolean;
-  inspectorOpen: boolean;
-  navWidth: number;
-  inspectorWidth: number;
-  sheetOpen: boolean;
-  sheetHeight: number;
-  inspectorTab: "explain" | "ai" | "export" | "normalize";
+  /** Width of the question pane, as a percentage of the split area. */
+  questionWidth: number;
+  drawerTab: "ai" | "vocabulary" | "export";
 }
 
 export const DEFAULT_LAYOUT: WorkspaceLayout = {
-  navOpen: true,
-  inspectorOpen: true,
-  navWidth: 176,
-  inspectorWidth: 340,
-  sheetOpen: true,
-  sheetHeight: 220,
-  inspectorTab: "explain",
+  questionWidth: 42,
+  drawerTab: "ai",
 };
 
 export function useWorkspaceLayout(docId: number) {
   return usePersistentState<WorkspaceLayout>(
-    `inteflow.workspace.${docId}`,
+    `inteflow.workspace.v2.${docId}`,
     DEFAULT_LAYOUT,
   );
 }

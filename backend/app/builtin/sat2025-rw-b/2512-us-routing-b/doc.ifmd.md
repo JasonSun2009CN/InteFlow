@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年12月北美 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:04:01Z
+imported_at: 2026-10-19T12:21:44Z
 answers: external
 ---
 
@@ -195,6 +195,8 @@ Which quotation from Memoirs of Elleanor Eldridge most effectively illustrates t
 
 :::q {#Q013 sec=rw no=13}
 @material
+![Average Ratings of Perceived Personality Traits of Dogs and Human Willingness to Keep or Interact with Them](assets/p08-59e91fe7.png)
+
 Dogs and modern gray wolves share a recent wolf ancestor from which dogs were domesticated. Noting that dogs tend to have darker irises than gray wolves do, Akitsugu Konno et al. presented facial images of dogs with a range of iris colors to human participants, who rated the dogs' personality traits and their own attitudes toward the dogs. On the basis of their findings, Konno et al. concluded that the dog-wolf iris pattern may be an effect of human selection for a positively perceived trait during domestication.
 
 @stem
@@ -210,7 +212,7 @@ Which choice best describes data from the table that support Konno et al.'s conc
 
 :::q {#Q014 sec=rw no=14}
 @material
-SL small H. virginiana 73.9%
+![Site Fragment size Tree Water % mass](assets/p09-50f16dbb.png)
 
 In 2018, Bagchi et al. investigated the effects of forest fragmentation on the nutritional value of tree leaves for folivores (leaf eaters). They measured the water content in the leaves of Acer rubrum (red oak) and Hamamelis virginiana (witch hazel) in Connecticut forest fragments—small fragments that were less than 50 hectares and large ones that were greater than 200 hectares—and used water content as a proxy for nutrient content (because water content levels are positively correlated with those of growth-promoting components such as nitrogen).
 

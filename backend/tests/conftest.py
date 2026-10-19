@@ -7,7 +7,12 @@ from pathlib import Path  # noqa: E402
 
 import pytest  # noqa: E402
 
-from tests.fixtures import build_sat_docx, build_sat_pdf, build_scanned_pdf  # noqa: E402
+from tests.fixtures import (  # noqa: E402
+    build_five_option_pdf,
+    build_sat_docx,
+    build_sat_pdf,
+    build_scanned_pdf,
+)
 
 MINI_IFMD = """---
 ifmd: 1
@@ -54,6 +59,11 @@ def sat_docx(tmp_path_factory: pytest.TempPathFactory) -> Path:
 @pytest.fixture(scope="session")
 def sat_scanned(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return build_scanned_pdf(tmp_path_factory.mktemp("scan") / "sat-scanned.pdf")
+
+
+@pytest.fixture(scope="session")
+def five_option_pdf(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    return build_five_option_pdf(tmp_path_factory.mktemp("amc") / "amc-sample.pdf")
 
 
 @pytest.fixture(scope="session")

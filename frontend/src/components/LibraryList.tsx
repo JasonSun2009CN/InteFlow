@@ -44,7 +44,7 @@ export default function LibraryList({ docs, importedId, onDelete }: Props) {
           <div className="flex shrink-0 flex-wrap gap-2 text-sm">
             <Link
               to={`/doc/${doc.id}/practice`}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+              className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 font-medium text-white hover:bg-blue-700"
             >
               Practice
             </Link>

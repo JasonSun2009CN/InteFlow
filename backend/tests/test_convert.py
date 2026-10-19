@@ -1,10 +1,11 @@
+import re
 from pathlib import Path
 
 import pytest
 
 from app.convert.pdf import ConvertError, convert_pdf
 from app.ifmd.parser import parse
-from tests.fixtures import build_numberless_pdf, build_sat_pdf
+from tests.fixtures import build_blank_pdf, build_numberless_pdf, build_sat_pdf, build_table_pdf
 
 
 def test_converts_sample_pdf(sat_pdf: Path) -> None:
@@ -70,6 +71,23 @@ def test_section_heading_sets_sec(sat_pdf: Path) -> None:
     assert [q.sec for q in questions[3:]] == ["math", "math"]
 
 
+def test_five_option_question_converts(five_option_pdf: Path) -> None:
+    """AMC-style: options are not capped at four; A–E all survive and an E key
+    backfills like any other letter."""
+    result = convert_pdf(five_option_pdf)
+    doc = parse(result.ifmd)
+
+    assert result.question_count == 2 == len(doc.questions)
+    assert not [w for w in result.warnings if w.startswith("skipped question")], result.warnings
+
+    q1, q2 = doc.questions
+    assert list(q1.letter_options) == ["A", "B", "C", "D", "E"]
+    assert q1.letter_options["E"] == "7"
+    assert q1.answer == "C"
+    assert list(q2.letter_options) == ["A", "B", "C", "D", "E"]
+    assert q2.answer == "E"
+
+
 def test_options_on_one_line_and_two_per_line(sat_pdf: Path) -> None:
     questions = parse(convert_pdf(sat_pdf).ifmd).questions
     assert questions[3].letter_options == {"A": "3", "B": "5", "C": "8", "D": "15"}
@@ -80,6 +98,69 @@ def test_options_on_one_line_and_two_per_line(sat_pdf: Path) -> None:
 def test_answer_key_applies_to_every_question(sat_pdf: Path) -> None:
     answers = [q.answer for q in parse(convert_pdf(sat_pdf).ifmd).questions]
     assert answers == ["A", "C", "B", "D", "A"]
+
+
+def test_table_figure_is_extracted_with_its_title(tmp_path: Path) -> None:
+    result = convert_pdf(build_table_pdf(tmp_path / "table.pdf"))
+    q1 = parse(result.ifmd).questions[0]
+
+    assert q1.images, "a bordered table should become a figure"
+    assert "assets/" in q1.stem, q1.stem
+    name = q1.images[0].removeprefix("assets/")
+    assert name in result.assets
+    assert result.assets[name][:8] == b"\x89PNG\r\n\x1a\n"
+
+    # cell text is part of the picture, not emitted again as body text
+    blob = (q1.material or "") + q1.stem + "".join(q1.letter_options.values())
+    for leak in ("43,000,000", "Excitebike"):
+        assert leak not in blob, leak
+    # the title moves *into the image* and becomes the image's alt text
+    assert "![Console and Computer Games](assets/" in blob
+    body_only = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", blob)
+    assert "Console and Computer Games" not in body_only
+
+
+def test_figure_crop_absorbs_title_and_axis_labels(tmp_path: Path) -> None:
+    """A table/chart is cropped together with its title and y-axis labels."""
+    import pymupdf
+
+    from app.convert import images as _images
+
+    path = build_table_pdf(tmp_path / "table.pdf")
+    doc = pymupdf.open(path)
+    try:
+        page = doc.load_page(0)
+        pdict = page.get_text("dict")
+        figs = [f for f in _images.collect_images(page, pdict, 1, set()) if f.vector]
+        title = next(
+            ln["bbox"]
+            for b in pdict["blocks"] if b["type"] == 0
+            for ln in b.get("lines", [])
+            if "Console and Computer Games" in "".join(s["text"] for s in ln["spans"])
+        )
+    finally:
+        doc.close()
+
+    assert any(
+        f.rect[0] <= title[0] + 1 and f.rect[1] <= title[1] + 1 and f.rect[2] >= title[2] - 1
+        for f in figs
+    ), "the title line must be inside the captured figure crop"
+
+
+def test_questions_without_options_become_blanks(tmp_path: Path) -> None:
+    """No options in the source -> fill-in-the-blank, never a skipped question."""
+    path = build_blank_pdf(tmp_path / "blank.pdf")
+    result = convert_pdf(path)
+    doc = parse(result.ifmd)
+
+    assert [q.kind for q in doc.questions] == ["choice", "blank", "blank"]
+    blank = doc.questions[1]
+    assert blank.options == []
+    assert blank.stem == "The committee reached a decision that was entirely ___."
+    assert not [w for w in result.warnings if w.startswith("skipped question")]
+
+    # the rendered block survives a round trip through the parser
+    assert "kind=blank" in result.ifmd
 
 
 def test_numberless_pdf_is_rejected(tmp_path: Path) -> None:

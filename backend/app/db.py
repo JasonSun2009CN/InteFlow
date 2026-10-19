@@ -75,8 +75,11 @@ CREATE TABLE IF NOT EXISTS questions (
   difficulty   TEXT,
   material     TEXT,
   stem         TEXT NOT NULL,
-  options_json TEXT NOT NULL,        -- ["A. ...", ...] exactly 4
-  answer       TEXT CHECK (answer IS NULL OR answer IN ('A','B','C','D')),
+  options_json TEXT NOT NULL DEFAULT '[]',  -- ["A. ...", ...] one per option, or [] for a blank
+  kind         TEXT NOT NULL DEFAULT 'choice',  -- choice|blank
+  multi        INTEGER NOT NULL DEFAULT 0,      -- 1 = several correct letters
+  answers_json TEXT NOT NULL DEFAULT '[]',      -- ["B"] / ["A","C"] / ["2","two"]
+  answer       TEXT CHECK (answer IS NULL OR answer GLOB '[A-Z]'),
   explain      TEXT,
   source_ref   TEXT,
   images_json  TEXT NOT NULL DEFAULT '[]',
@@ -97,9 +100,21 @@ CREATE TABLE IF NOT EXISTS session_items (
   question_id  INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
   no           INTEGER NOT NULL,
   chosen       TEXT,
+  chosen_json  TEXT NOT NULL DEFAULT '[]',
   is_correct   INTEGER,
   answered_at  TEXT,
   PRIMARY KEY (session_id, question_id)
+);
+
+CREATE TABLE IF NOT EXISTS analysis_pages (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id  INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  question_id  INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  position     INTEGER NOT NULL DEFAULT 0,
+  content      TEXT NOT NULL DEFAULT '',
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (document_id, question_id, position)
 );
 
 CREATE TABLE IF NOT EXISTS analyses (
@@ -189,6 +204,38 @@ def _migrate(conn: sqlite3.Connection) -> None:
     run repeatedly. Kept as a standalone function so it can be unit-tested
     against an in-memory connection.
     """
+    # questions (2026-10-19): option letters are no longer capped at A–D (AMC
+    # prints five), so the legacy CHECK must widen to any single A–Z. SQLite
+    # cannot drop a CHECK, so rebuild the table via the documented copy/rename.
+    # Run first, before any DML opens a transaction, so the FK toggle applies.
+    q_row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'questions'"
+    ).fetchone()
+    if q_row and "answer IN ('A','B','C','D')" in (q_row["sql"] or ""):
+        new_sql = (q_row["sql"] or "").replace(
+            "CHECK (answer IS NULL OR answer IN ('A','B','C','D'))",
+            "CHECK (answer IS NULL OR answer GLOB '[A-Z]')",
+        )
+        new_sql = new_sql.replace(
+            "CREATE TABLE IF NOT EXISTS questions", "CREATE TABLE questions_new", 1
+        )
+        if "questions_new" not in new_sql:
+            new_sql = new_sql.replace("CREATE TABLE questions", "CREATE TABLE questions_new", 1)
+        # A transaction must not be open when the FK toggle is set, or it is a
+        # no-op and DROP TABLE cascades away the child rows.
+        conn.commit()
+        conn.execute("PRAGMA foreign_keys = OFF")
+        conn.execute("PRAGMA legacy_alter_table = ON")
+        conn.execute("DROP TABLE IF EXISTS questions_new")
+        conn.execute(new_sql)
+        names = ", ".join(r["name"] for r in conn.execute("PRAGMA table_info(questions)"))
+        conn.execute(f"INSERT INTO questions_new ({names}) SELECT {names} FROM questions")
+        conn.execute("DROP TABLE questions")
+        conn.execute("ALTER TABLE questions_new RENAME TO questions")
+        conn.commit()                       # end the txn so the PRAGMAs below apply
+        conn.execute("PRAGMA legacy_alter_table = OFF")
+        conn.execute("PRAGMA foreign_keys = ON")
+
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
     additions = (
         ("builtin_key", "TEXT"),
@@ -216,6 +263,38 @@ def _migrate(conn: sqlite3.Connection) -> None:
         ):
             if name not in grid_cols:
                 conn.execute(f"ALTER TABLE word_grids ADD COLUMN {name} {ddl}")
+
+    # questions / session_items (2026-10-19): blank questions + multiple answers.
+    # `answer` stays the single-letter column (old data + export paths), the new
+    # `answers_json` is the source of truth for grading.
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'questions'"
+    ).fetchone():
+        q_cols = {row["name"] for row in conn.execute("PRAGMA table_info(questions)")}
+        for name, ddl in (
+            ("kind", "TEXT NOT NULL DEFAULT 'choice'"),
+            ("multi", "INTEGER NOT NULL DEFAULT 0"),
+            ("answers_json", "TEXT NOT NULL DEFAULT '[]'"),
+        ):
+            if name not in q_cols:
+                conn.execute(f"ALTER TABLE questions ADD COLUMN {name} {ddl}")
+        # backfill: legacy rows had exactly four options and one letter answer
+        conn.execute(
+            "UPDATE questions SET answers_json = json_array(answer)"
+            " WHERE (answers_json IS NULL OR answers_json = '[]') AND answer IS NOT NULL"
+        )
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'session_items'"
+    ).fetchone():
+        si_cols = {row["name"] for row in conn.execute("PRAGMA table_info(session_items)")}
+        if "chosen_json" not in si_cols:
+            conn.execute(
+                "ALTER TABLE session_items ADD COLUMN chosen_json TEXT NOT NULL DEFAULT '[]'"
+            )
+        conn.execute(
+            "UPDATE session_items SET chosen_json = json_array(chosen)"
+            " WHERE (chosen_json IS NULL OR chosen_json = '[]') AND chosen IS NOT NULL"
+        )
 
     # settings (2026-10-19): DeepSeek became two protocol presets, so the old
     # `deepseek` provider id is rewritten to `deepseek-openai`

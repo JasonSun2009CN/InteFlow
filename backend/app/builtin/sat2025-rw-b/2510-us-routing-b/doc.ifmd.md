@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月北美 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:17Z
+imported_at: 2026-10-19T12:21:00Z
 answers: external
 ---
 
@@ -161,6 +161,8 @@ Based on the text, what is one likely effect of the change in baleen whale popul
 
 :::q {#Q011 sec=rw no=11}
 @material
+![Average Hours Worked per Person per Year in 1950 and 2017](assets/p06-1043bf88.png)
+
 Calculations may be inexact due to rounding.
 
 A student in an economics course is examining the decline since 1950 in average hours worked per person per year in various nations due to both increased productivity and the adoption of policies that limit working hours. The first task in this investigation is to determine how the decline in the United Kingdom compares to that in other countries. The student finds that ______

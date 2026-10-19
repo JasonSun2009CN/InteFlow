@@ -2,7 +2,7 @@
 
 > 本地优先的学习工作流：**导入题库（PDF/DOCX/Markdown）→ 刷题 → 逐题复盘错题 → 写解析 / 查词 / 问 AI → 导出错题分析与生词文件。**
 >
-> 状态快照：**2026-10-19** ｜ pytest **187 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 49 passed, 5 skipped。
+> 状态快照：**2026-10-19** ｜ pytest **218 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 88 passed, 5 skipped。
 > 相关文档：[`README.md`](README.md) · [`README-cn.md`](README-cn.md) · [`AGENT.md`](AGENT.md) ·
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/IFMD.md`](docs/IFMD.md) · [`docs/IDEAS.md`](docs/IDEAS.md)
 
@@ -24,14 +24,24 @@
 - ✅ **全量改名**（`SATeacher→InteFlow`、`satmd→ifmd`、`.sat.md→.ifmd.md`、`bluebook→twocolumn` 等，见 [`AGENT.md`](AGENT.md) §4）。
 - ✅ **板块泛化**：`sec` 去掉 `CHECK` 约束，成为自由标签；后端 `app/sections.py` + 前端 `lib/sections.ts` 统一显示标签；结算页按"实际出现的板块"动态出卡片。
 - ✅ 文档：英文 `README.md` + 中文 `README-cn.md` + `AGENT.md` + `docs/IDEAS.md` + `docs/IFMD.md` + 本文件。
-- ✅ **工作区导航重构（2026-10-19）**：左侧栏 5 个 tab（Exams / Library / Mistakes / Vocabulary / Settings，窄屏抽屉）；
-  纸墨风主题作用于除练习页外的全部页面（`.paper-app` 重映射颜色变量）。`Mistakes` / `Vocabulary` 暂为占位页。
+- ✅ **工作区导航重构（2026-10-19）**：左侧栏 6 个 tab（Exams / Library / **Sessions** / Mistakes / Vocabulary / Settings，窄屏抽屉）；
+  `Mistakes` / `Vocabulary` 暂为占位页。
+- ✅ **主题系统（2026-10-19）**：5 套主题（Clear Blue 默认 / Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial）
+  在 Settings → Appearance 切换、存 `localStorage`；`.app-theme[data-theme=…]` 重映射颜色变量 + 特征样式，全站同步，
+  **全屏练习页保持原 slate/blue 不跟随**。
+- ✅ **复盘（分析模式）重构（2026-10-19）**：进入复盘隐藏侧栏、全屏；题号导航缩到左上角点击悬浮展开（All/Wrong/Correct）；
+  左侧题面 + 右侧 Pages 式分析编辑器（Write/Preview、防抖自动保存、⌘S）；一套试卷一套笔记本（`analysis_pages` 一题一页），
+  可导出 md/docx/pdf 并在 `data/exports/` 留副本；AI / 单词表 / 导出收进工具栏抽屉。
+- ✅ **题型扩展（2026-10-19）**：多答案选择题（`multi=1`，答案 `A,C`）+ 填空题（`kind=blank`，多个可接受答案 `a | b`）；
+  导入时未识别到选项按填空处理；设置里加"题目识别 API 兜底"开关与"用户名"。
+- ✅ **作答历史 + 删除**：Sessions 页按时间倒序列出每次作答，可搜索、可删除（`GET/DELETE /api/sessions`）。**只有提交过（submit）的作答才记录**；打开考试不产生记录。
+- ✅ **移除 Normalize**：前端入口与后端接口/任务/测试全部删除（`convert/normalize.py` 文本清洗工具保留）。
 
 ### 沿用前身（已实现，直接可用）
 导入（PDF/DOCX/Markdown/OCR/流水线/内置题库）· 答案录入（网格 + 批量粘贴）·
-练习（全屏、计时、题号导航、标记、键盘）· 结果复盘（三栏工作台 + 过滤 + regrade）·
+练习（全屏、计时、题号导航、标记、键盘、多选/填空）· 结果复盘（全屏工作台 + 折叠导航 + 分析编辑器 + 过滤 + regrade）·
 工作区（手写解析 / 词汇表 v2 / AI 讲解 / 导出入口）· 导出（PDF / DOCX / 生词 xlsx）·
-设置（16 家 LLM 服务商目录）· 测试（pytest 187 / vitest 49）。
+设置（19 家 LLM 服务商目录 + 用户名 + AI 兜底开关）· 整套解析 Notebook 预览与导出 · 测试（pytest 218 / vitest 87）。
 
 ---
 
@@ -40,11 +50,11 @@
 | 优先级 | 事项 | 说明 | 状态 |
 |---|---|---|---|
 | P0 | **计时方案：正计时 / 倒计时** | `PracticePage` 现仅正计时；需加倒计时模式（开始屏选择 + 手输 `mm:ss` + 记住上次）。倒计时归零行为待定 | 🔜 |
-| P0 | **UI/UX 打磨** | 用户逐页审查：① 练习界面 ② 复盘/结算工作台；侧栏 5 tab + 纸墨风已落地（2026-10-19） | 🔜 |
+| P0 | **UI/UX 打磨** | 用户逐页审查：① 练习界面 ② 复盘工作台（导航/编辑器/抽屉）；侧栏 6 tab + 纸墨风 + 复盘全屏重构已落地（2026-10-19） | 🔜 |
 | P1 | **Mistakes tab：错题分析集合** | 汇总所有 session 错题，按题去重（保留最近作答），按试卷/板块过滤；现为占位页 | 💡 占位 |
 | P1 | **Vocabulary tab：单词整理集合** | 一套试题一份词表，重刷同卷时在原表增改；现为占位页 | 💡 占位 |
 | P1 | **查词** | 应用内词典查询（本地词典 / AI 释义 / 两者，待定） | 💡 占位 |
-| P1 | **错题分析导出** | 只导错题 + 解析的文件（格式待定：PDF / DOCX / MD） | 💡 占位 |
+| P1 | ~~**错题分析导出**~~ | 一套试卷一套分析笔记本，导出 md/docx/pdf 并存 `data/exports/` | ✅ 已完成 |
 | P2 | 非 SAT 会话的 section 统计与文案进一步中性化 | 启发式 `guess_sec` 仍偏 SAT | 💡 |
 | P2 | 导出封面 / 水印 / 目录（>20 题 question index） | 前身遗留增量 | 💡 |
 | P2 | AI 解析结果"来源 + 时间"标注 | 前身遗留 M7 | 💡 |
@@ -64,8 +74,8 @@
 ## 4. 验收与命令
 
 ```bash
-cd backend && ../.venv/bin/python -m pytest -q   # 187 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q   # 218 passed, 1 skipped
 cd frontend && npm run build                     # 0 错误
-cd frontend && npm test                          # 49 passed, 5 skipped
+cd frontend && npm test                          # 88 passed, 5 skipped
 ./scripts/dev.sh                                 # 后端 :8000 + 前端 :5173
 ```

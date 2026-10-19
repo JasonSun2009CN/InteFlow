@@ -204,7 +204,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       <button
                         onClick={() => void saveExplain()}
                         disabled={!dirty || saving}
-                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+                        className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
                       >
                         {saving ? "Saving…" : "Save"}
                       </button>

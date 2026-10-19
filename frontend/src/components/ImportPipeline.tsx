@@ -221,7 +221,7 @@ export default function ImportPipeline({
           <button
             onClick={onCommit}
             disabled={busy}
-            className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {job.needs_review ? "Looks good — import" : "Import"}
           </button>

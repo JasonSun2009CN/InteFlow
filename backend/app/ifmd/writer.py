@@ -2,7 +2,7 @@
 
 Round-trip holds at the parse level: ``parse(render(doc))`` reproduces every
 field the parser keeps — front-matter keys (order included), preamble, and each
-question's attributes, material/stem, four options, meta lines and unknown
+question's attributes, material/stem, options, meta lines and unknown
 ``!`` keys. Byte-identical output is *not* guaranteed (quotes are stripped from
 front-matter values), but nothing is lost.
 
@@ -14,7 +14,7 @@ targets ``BuiltQuestion``: dict options, ``q.source``) corrupts parser output
 
 from __future__ import annotations
 
-from app.ifmd.parser import ParsedDoc, Question
+from app.ifmd.parser import ParsedDoc, Question, format_answer_line
 
 FORMAT_KEY = "ifmd"
 
@@ -28,6 +28,10 @@ def render_question(q: Question) -> list[str]:
         attrs.append(f"type={q.type}")
     if q.difficulty is not None:
         attrs.append(f"difficulty={q.difficulty}")
+    if q.kind == "blank":
+        attrs.append("kind=blank")
+    if q.multi:
+        attrs.append("multi=1")
 
     out = [f":::q {{{' '.join(attrs)}}}"]
     if q.material:
@@ -36,8 +40,8 @@ def render_question(q: Question) -> list[str]:
     out.append("")
     for opt in q.options:                       # already "A. text"
         out.append(f"- {opt}")
-    if q.answer:
-        out.append(f"! answer: {q.answer}")
+    if q.answers:
+        out.append(f"! answer: {format_answer_line(q.kind, q.answers)}")
     if q.explain:
         out.append(f"! explain: {q.explain}")
     if q.source_ref:

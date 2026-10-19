@@ -6,6 +6,26 @@ from app.convert.ocr import tesseract
 from app.db import ifmd_path
 from tests.conftest import MINI_IFMD, upload
 
+FIVE_OPTION_IFMD = """---
+ifmd: 1
+title: "AMC Mini"
+source: "amc.md"
+lang: en
+answers: none
+---
+
+:::q {#Q001 sec=math no=1}
+@stem
+What is the value of 2 + 3?
+
+- A. 3
+- B. 4
+- C. 5
+- D. 6
+- E. 7
+:::
+"""
+
 
 def test_health(client) -> None:
     resp = client.get("/api/health")
@@ -77,7 +97,7 @@ def test_reject_empty_file(client) -> None:
 
 
 def test_reject_broken_ifmd_reports_line(client) -> None:
-    broken = MINI_IFMD.replace("- D. four", "- D. four\n- E. five")
+    broken = MINI_IFMD.replace("- D. four", "- D. four\n- F. six")
     resp = upload(client, "broken.md", broken)
     assert resp.status_code == 422
     assert "line" in resp.json()["detail"]
@@ -120,6 +140,30 @@ def test_answer_key_entry_flow(client) -> None:
     text = ifmd_path(doc_id).read_text()
     assert "! answer: B" in text and "! answer: D" in text
     assert "answers: external" in text
+
+
+def test_five_option_question_answers_and_grades(client) -> None:
+    """A fifth option (E) is a first-class choice: it can be keyed and graded."""
+    resp = upload(client, "amc.ifmd.md", FIVE_OPTION_IFMD)
+    assert resp.status_code == 200, resp.text
+    doc_id = resp.json()["id"]
+
+    q = client.get(f"/api/documents/{doc_id}/questions").json()[0]
+    assert q["options"] == ["A. 3", "B. 4", "C. 5", "D. 6", "E. 7"]
+
+    ok = client.put(f"/api/documents/{doc_id}/answers", json={"answers": {"Q001": "E"}})
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["answered_count"] == 1
+
+    start = client.post("/api/sessions", json={"document_id": doc_id}).json()
+    submit = client.post(
+        f"/api/sessions/{start['session_id']}/submit",
+        json={"answers": {str(start["questions"][0]["id"]): "E"}},
+    )
+    assert submit.status_code == 200, submit.text
+    item = submit.json()["items"][0]
+    assert item["answer"] == "E"
+    assert item["is_correct"] is True
 
 
 def test_unknown_document_is_404(client) -> None:

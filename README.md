@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-187%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-218%20passed-2E7D32)
 
 ---
 
@@ -56,15 +56,15 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
 | **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent |
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
-| **Answer entry** | Per-question A–D grid + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA`) + validation + preview, written back to the source file |
-| **Practice** | Exam-style fullscreen, **count-up or countdown timer**, single-question view, question palette, flagging, keyboard `A–D` / `← →`, submit confirmation |
-| **Results / review** | Score / per-section / time stats, `All · Correct · Wrong` filter, three-pane master–detail, re-grade after back-filling the key |
-| **Workspace** | Hand-written analysis (stored locally), vocabulary sheet `Word \| Meaning \| Notes` (add/edit/delete + export `.xlsx`), **AI explain** (explicit click), export entry points |
-| **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), vocabulary **`.xlsx`** |
-| **Settings** | 16 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test |
+| **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
+| **Practice** | Exam-style fullscreen, **count-up or countdown timer**, single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
+| **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
+| **Workspace** | One analysis page per question (Markdown, formulas/images), vocabulary sheet `Word \| Meaning \| Notes` (add/edit/delete + export `.xlsx`), **AI explain** (explicit click), export drawer |
+| **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback** toggle |
 
-> **Planned (placeholders in place, details TBD):** in-app **dictionary lookup** for selected words, and a
-> dedicated **wrong-answer analysis export**. See [`docs/IDEAS.md`](docs/IDEAS.md) and [`ROADMAP.md`](ROADMAP.md).
+> **Planned (placeholders in place, details TBD):** in-app **dictionary lookup** for selected words.
+> See [`docs/IDEAS.md`](docs/IDEAS.md) and [`ROADMAP.md`](ROADMAP.md).
 
 ## Two iron rules
 
@@ -100,36 +100,45 @@ Without them **only PDF export fails**; everything else keeps working.
 
 ## Quick start
 
-### macOS / Linux
+### One command (recommended)
 
 ```bash
 git clone <your-repo-url> InteFlow
 cd InteFlow
 
-# First run: create the env + install deps (idempotent)
-./scripts/setup.sh
-
-# Start the dev environment (backend :8000 + frontend :5173)
-./scripts/dev.sh
+# macOS / Linux
+./start.sh
 ```
-
-### Windows (PowerShell)
 
 ```powershell
-git clone <your-repo-url> InteFlow
-cd InteFlow
-
-.\scripts\setup.ps1
-.\scripts\dev.ps1
+# Windows (PowerShell)
+.\start.ps1
 ```
+
+`start.sh` / `start.ps1` are **idempotent**: the first run creates `.venv` and installs backend +
+frontend deps (only what's missing); later runs just start. It brings up **backend :8000** and
+**frontend :5173**, waits for the backend health check, and **opens your browser**. Press `Ctrl-C`
+to stop both.
+
+- **macOS double-click**: open **`InteFlow.command`** in Finder.
+- **Windows double-click**: double-click **`start.bat`**.
+- Change ports: `INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
+  (Windows: `$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`).
+- Missing Python/Node or an occupied port fails fast with a clear message.
 
 - Backend API: <http://localhost:8000> (health check <http://localhost:8000/api/health>)
 - Frontend page: <http://localhost:5173> ← **open this in your browser**
 
-Press `Ctrl-C` to stop both.
-
 <details>
-<summary><b>Starting manually (without dev.sh / dev.ps1)</b></summary>
+<summary><b>Step by step (setup + dev) and manual start</b></summary>
+
+```bash
+# Step 1: create the env + install deps only (idempotent)
+./scripts/setup.sh          # Windows: .\scripts\setup.ps1
+
+# Step 2: start the dev environment
+./scripts/dev.sh            # Windows: .\scripts\dev.ps1
+```
 
 ```bash
 # 1) backend (terminal A)
@@ -151,13 +160,16 @@ npm run dev
 
 ### 1. Import a question bank
 
-Open <http://localhost:5173>. The left sidebar has five tabs: **Exams** (pick one to take),
-**Library** (import a file, add the built-in bank, manage your exam list), **Mistakes**,
-**Vocabulary** and **Settings**. **Mistakes** and **Vocabulary** are placeholders for now.
+Open <http://localhost:5173>. The left sidebar has six tabs: **Exams** (pick one to take),
+**Library** (import a file, add the built-in bank, manage your exam list), **Sessions** (every **submitted**
+attempt, searchable/deletable), **Mistakes**, **Vocabulary** and **Settings**. **Mistakes** and **Vocabulary** are
+placeholders for now.
 
 1. Open **Library** in the sidebar.
 2. **Upload a file**: drop it on *Drag a file here*, or click **choose a file**.
-   Supported: `PDF · DOCX · .md · .markdown · .ifmd.md` (≤ 60 MB; questions must be numbered `1.` `2.` …, each with four options).
+   Supported: `PDF · DOCX · .md · .markdown · .ifmd.md` (≤ 60 MB; questions must be numbered `1.` `2.` …;
+   choice questions have two or more labelled options (A, B, C, …, up to 26 — AMC
+   prints five) — **no options means it is imported as a fill-in-the-blank**).
 3. **Wait for the pipeline**: `detect → convert → review`, with a **per-page report** (text / OCR / low-confidence / no-engine).
    - Clean conversion → committed automatically;
    - Suspicious pages → it pauses at review so you can **Commit** or **Cancel** (0 token throughout).
@@ -175,9 +187,10 @@ The Library page's template card provides a valid `.ifmd.md` template you can co
 
 When a document parses into questions but the **answer key is missing/partial**, click **Answers** (`/doc/:id/answers`):
 
-- **Per-question grid**: click A/B/C/D for each question;
-- **Bulk entry**: paste `1-A 2-C 3-D`, `1. A`, `12B`, or a bare letter string `ACBDA`, then **Apply to grid**;
-- Saving validates (A–D only) and writes back to `doc.ifmd.md`; use **Preview** to check first.
+- **Choice grid**: click A/B/C/D for each question; **multi**-select questions (marked `multi`) accept several;
+- **Fill in the blank**: type the answer; click **⊕ Add acceptable answer** to list several accepted spellings (any match grades correct);
+- **Bulk entry**: paste `1-A 2-C 3-D`, `1. A`, `12B`, a bare letter string `ACBDA`, or multi `3-AC`, then **Apply to grid**;
+- Saving validates and writes back to `doc.ifmd.md`; use **Preview** to check first.
 
 > You can also practice first: after submitting, the app guides you here to back-fill the key, then re-grades automatically.
 
@@ -189,41 +202,49 @@ From **Select an exam**, click **Start** to reach the start screen:
    - **Count-up** — just track elapsed time;
    - **Countdown** — enter `mm:ss`; the app remembers your last value.
 2. Click **Begin — enter fullscreen**; **the timer starts now**. (You can also *Enter answers first*.)
-3. Answer with the mouse or the keyboard **`A` `B` `C` `D`**; use **`←` `→`** to move; the bottom palette jumps anywhere;
-   **Mark for review** flags the current question.
+3. Answer with the mouse or the keyboard **`A` `B` `C` `D`** (choice questions); **multi** questions toggle several
+   options and **fill-in-the-blank** questions take typed text; use **`←` `→`** to move; the bottom palette jumps
+   anywhere; **Mark for review** flags the current question.
 4. Click **Submit** → confirm → submit for grading.
 
 ### 4. Results & review
 
-After submitting you land on `/session/:sid/result`:
+After submitting you land on `/session/:sid/result` (**fullscreen review, no sidebar**):
 
-- **Stats**: Score, one card per section actually present in the paper, and Time; plus **Wrong answers** chips (click to jump).
-- **Filter tabs**: `All` / `Correct` / `Wrong`.
-- **Three panes**: question index (status colors) → single question (`←` `→`, `n / total`) → the persistent workspace.
-
-**Workspace (right side):**
-
-| Section | Use |
-|---|---|
-| **Explanation** | Write your own analysis for the current question; saved straight to the DB (0 token) |
-| **Vocabulary** | `Word \| Meaning \| Notes` sheet, add/remove rows/columns, edit and save; **Export .xlsx** |
-| **AI Answer** | Calls the LLM only on an explicit click (stem + correct option as context) |
-| **Export** | **Export .pdf** / **Export .docx** of the questions, answers and analysis (no AI involved) |
+- **Top-left question navigator**: collapsed to a small pill by default; clicking it rotates the chevron and
+  **floats open** the whole question list (status colors) with `All` / `Wrong` / `Correct` tabs. Picking a
+  question selects it and closes the overlay (`Esc` or a click outside also closes).
+- **Split view**: the current question, the correct answer and your pick on the left; a **Pages-style analysis
+  editor** (one page per question) on the right.
+- **Analysis editor**: Markdown (formulas `$x^2$`, images `![](assets/…)`), `Write` / `Preview`, and
+  **autosave** (~0.9 s debounce; `⌘S` or **Save** for immediate). It resumes next time you open the attempt.
+- **Notebook**: the top-bar button opens a full-exam preview — the exam title, then every question that already
+  has analysis (stem, figures and notes), with export buttons.
+- **Toolbar drawer**: `AI` (explicit LLM explain), `Vocabulary` (this paper's word sheet, `.xlsx` export),
+  `Export` (review notebook — see §5).
+- If the key was missing while you practiced, saving re-grades automatically (regrade).
 
 ### 5. Export
 
-- **Whole document**: the workspace **Export** section → `Export .pdf` or `Export .docx`.
+- **Review notebook**: preview it with **Notebook** in the review top bar, then export **Markdown / DOCX / PDF**
+  (also available in the **Export** drawer). One notebook per exam (cover with your name and score), containing
+  only questions that have analysis; it downloads in the browser and a copy is kept in `data/exports/`, with the
+  saved path shown in the UI.
+- **Whole document**: export **PDF** / **DOCX** (questions, answers and analysis) from the Library.
 - **Vocabulary**: **Export .xlsx**.
 
-### 6. Configure the LLM (optional)
+### 6. Settings (name / LLM / fallback)
 
 **Not required for anything except AI explain.** Open **Settings** (`/settings`) from the sidebar:
 
-1. **Provider** dropdown (19-provider catalog, defaults to **OrcaRouter**, with Base URL + default model);
-2. **Base URL** override;
-3. **API Key** (write-only, masked);
-4. **Model**;
-5. **Save settings** / **Test connection**.
+1. **Your name** — used on the review notebook cover;
+2. **AI recognition fallback** — LLM fallback when import recognition fails (on by default); with it off, a
+   failed import tells you to enable it, then retry once the toggle is on and an API key is set;
+3. **Provider** dropdown (19-provider catalog, defaults to **OrcaRouter**, with Base URL + default model);
+4. **Base URL** override;
+5. **API Key** (write-only, masked);
+6. **Model**;
+7. **Save settings** / **Test connection**.
 
 Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 
@@ -250,7 +271,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 187 passed, 1 skipped; uses a temp data dir)
+# backend tests (baseline 218 passed, 1 skipped; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -259,7 +280,10 @@ cd frontend && npm run build
 # frontend component tests
 cd frontend && npm test
 
-# local dev (backend :8000 + frontend :5173)
+# one command: setup if needed + start both (backend :8000 + frontend :5173) + open browser
+./start.sh
+
+# or start with the env already in place (no preflight checks)
 ./scripts/dev.sh
 ```
 
@@ -269,20 +293,23 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI wiring (/api/health, 6 routers)
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai
+│   │   ├── main.py            FastAPI wiring (/api/health, 7 routers)
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
-│   │   ├── ifmd/              InteFlow-MD parser + writer (deterministic state machine)
-│   │   ├── export/            PDF (WeasyPrint) · docx · math_render (+ mathjax bridge)
+│   │   ├── ifmd/              InteFlow-MD parser + writer (deterministic state machine; multi / blank)
+│   │   ├── export/            PDF (WeasyPrint) · docx · notebook (review) · math_render (+ mathjax bridge)
 │   │   ├── repos/ · llm/      persistence · LLM transport
 │   │   ├── sections.py        free-form section labels
 │   │   ├── providers.py       19-provider catalog
 │   │   └── builtin/           built-in bank (44 units shipped with the repo)
-│   ├── tests/                 pytest (187)
+│   ├── tests/                 pytest (218)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Library(Import) · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
-├── scripts/dev.sh             one-command dev environment
+│   └── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)
+├── InteFlow.command           macOS double-click start
+├── start.bat                  Windows double-click start
+├── scripts/dev.sh             one-command dev environment (no preflight checks)
 ├── data/                      runtime data (git-ignored)
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/
 ```
@@ -291,7 +318,7 @@ InteFlow/
 
 | Symptom | Fix |
 |---|---|
-| `dev.sh` says a port is in use | `lsof -i :8000` / `:5173`, kill the process, or start on another port |
+| `start.sh` / `dev.sh` says a port is in use | `lsof -i :8000` / `:5173`, kill the process, or start on another port (`start.sh` checks first and tells you) |
 | Page stuck on Loading / can't reach the backend | Confirm the backend is alive at <http://localhost:8000/api/health>; if the backend is elsewhere set `INTEFLOW_API` and restart Vite |
 | Scanned PDF needs OCR | Install `tesseract`, or on macOS `pip install pyobjc-framework-Vision`, restart the backend, re-import |
 | DOCX rejected | Uploads get a zip safety check (entry count / total uncompressed size / compression ratio / macros); unusual or encrypted files are rejected |

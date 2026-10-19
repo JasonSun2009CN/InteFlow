@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月亚太 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:28Z
+imported_at: 2026-10-19T12:21:10Z
 answers: external
 ---
 
@@ -169,17 +169,7 @@ Number of the 23 Non-native Tree Species Grown in
 
 Three Countries
 
-Number of species
-
-![figure](assets/p06-6990cd45.png)
-
-Country 0
-
-Austria
-
-Switzerland
-
-Poland
+![Country](assets/p06-920023a2.png)
 
 Elisabeth Pötzelsberger and colleagues gathered data on 23 non-native tree species grown in Europe. They analyzed reports from Austria, Switzerland, and Poland about the number of these species grown by the timber industries in those countries. The researchers concluded that none of these countries'timber industries grow all 23 species.
 
@@ -215,19 +205,7 @@ Maximum Charge Measured
 
 for Various Pollinators
 
-Picocoulombs (pC)
-
-![figure](assets/p08-6c7e05a9.png)
-
-0 100 200 300 400 500 600 700 800 900 1,000
-
-Charge
-
-bumblebees
-
-houseflies
-
-queen honeybees
+![1,000](assets/p08-5f91d0b0.png)
 
 Terrestrial plants typically carry a negative electrical charge, while bees and other pollinators tend to accumulate a positive charge. A team of researchers therefore hypothesized that electrostatic attraction (mutual attraction between objects with opposite charges) might enhance pollen transmission between plants and their pollinator species. The team's experiments showed that the maximum positive charge of queen honeybees is sufficiently high to facilitate electrostatic pollen transfer, a finding that suggests that ______
 
@@ -244,6 +222,8 @@ Which choice most effectively uses data from the graph to complete the text?
 
 :::q {#Q014 sec=rw no=14}
 @material
+![Charge](assets/p08-6badeff7.png)
+
 Great Britain has classified the killer shrimp as an invasive species that could harm some of the country's native species. But researchers Alejandro Camacho and Jason McLachlan have pointed out that "invasive"and "native" are labels that describe temporary circumstances. Changes in Earth's climate may force animals from their current ranges. Climate changes may also create good habitats in areas where a species couldn't live previously. These observations suggest that ______
 
 @stem

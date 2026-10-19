@@ -7,10 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from app.db import assets_dir, db, ifmd_path
-from app.ifmd.parser import Question
+from app.ifmd.parser import OPTION_LETTERS, Question
 
 
 def _question_dict(row: Any, include_answer: bool = True) -> dict:
+    answers = json.loads(row["answers_json"]) if "answers_json" in row.keys() else []
     data = {
         "id": row["id"],
         "ext_id": row["ext_id"],
@@ -21,10 +22,13 @@ def _question_dict(row: Any, include_answer: bool = True) -> dict:
         "material": row["material"],
         "stem": row["stem"],
         "options": json.loads(row["options_json"]),
+        "kind": row["kind"] if "kind" in row.keys() else "choice",
+        "multi": bool(row["multi"]) if "multi" in row.keys() else False,
         "images": json.loads(row["images_json"]),
         "source": row["source_ref"],
         "explain": row["explain"],
         "answer": row["answer"] if include_answer else None,
+        "answers": answers if include_answer else [],
     }
     return data
 
@@ -92,8 +96,9 @@ def insert_questions(doc_id: int, questions: list[Question]) -> None:
         for idx, q in enumerate(questions):
             conn.execute(
                 "INSERT INTO questions (document_id, ext_id, no, sec, type, difficulty,"
-                " material, stem, options_json, answer, explain, source_ref, images_json, order_idx)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                " material, stem, options_json, kind, multi, answers_json, answer, explain,"
+                " source_ref, images_json, order_idx)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     doc_id,
                     q.ext_id,
@@ -104,6 +109,9 @@ def insert_questions(doc_id: int, questions: list[Question]) -> None:
                     q.material,
                     q.stem,
                     json.dumps(q.options, ensure_ascii=False),
+                    q.kind,
+                    1 if q.multi else 0,
+                    json.dumps(q.answers, ensure_ascii=False),
                     q.answer,
                     q.explain,
                     q.source_ref,
@@ -116,7 +124,7 @@ def insert_questions(doc_id: int, questions: list[Question]) -> None:
 def update_questions(doc_id: int, questions: list[Question]) -> int:
     """Persist rewritten text (material/stem/options) for the given questions.
 
-    Matched by ``ext_id``; only the text columns move — ``answer``,
+    Matched by ``ext_id``; only the text columns move — ``answers``,
     ``source_ref`` and ``explain`` are untouched by design, so a normalization
     can never alter answers or citations in the DB.
     """
@@ -124,12 +132,15 @@ def update_questions(doc_id: int, questions: list[Question]) -> int:
         changed = 0
         for q in questions:
             cur = conn.execute(
-                "UPDATE questions SET material = ?, stem = ?, options_json = ?"
+                "UPDATE questions SET material = ?, stem = ?, options_json = ?,"
+                " kind = ?, multi = ?"
                 " WHERE document_id = ? AND ext_id = ?",
                 (
                     q.material,
                     q.stem,
                     json.dumps(q.options, ensure_ascii=False),
+                    q.kind,
+                    1 if q.multi else 0,
                     doc_id,
                     q.ext_id,
                 ),
@@ -145,7 +156,9 @@ def get_document(doc_id: int) -> dict | None:
     if row is None:
         return None
     counts = one(
-        "SELECT COUNT(*) AS total, SUM(answer IS NOT NULL) AS answered"
+        "SELECT COUNT(*) AS total,"
+        " SUM(CASE WHEN (answers_json IS NOT NULL AND answers_json NOT IN ('', '[]'))"
+        "           OR answer IS NOT NULL THEN 1 ELSE 0 END) AS answered"
         " FROM questions WHERE document_id = ?",
         (doc_id,),
     )
@@ -189,14 +202,39 @@ def list_questions(doc_id: int, include_answers: bool = True) -> list[dict]:
     return [_question_dict(r, include_answer=include_answers) for r in rows]
 
 
-def set_answers(doc_id: int, answers: dict[str, str]) -> int:
-    """Write user-entered answers by ext_id; returns how many rows changed."""
+def set_answers(doc_id: int, answers: dict[str, list[str]]) -> int:
+    """Write user-entered answers by ext_id; returns how many rows changed.
+
+    Each value is a list: letters for a choice question (one or more when the
+    question is ``multi``), accepted strings for a blank. An empty list clears
+    the key.
+    """
     with db() as conn:
         changed = 0
-        for ext_id, letter in answers.items():
+        for ext_id, values in answers.items():
+            row = conn.execute(
+                "SELECT kind, multi FROM questions WHERE document_id = ? AND ext_id = ?",
+                (doc_id, ext_id),
+            ).fetchone()
+            if row is None:
+                continue
+            kind = row["kind"] or "choice"
+            cleaned: list[str] = []
+            if kind == "blank":
+                cleaned = [str(v).strip() for v in values if str(v).strip()]
+            else:
+                for value in values:
+                    letter = str(value).strip().upper()
+                    if letter in OPTION_LETTERS and letter not in cleaned:
+                        cleaned.append(letter)
+                cleaned.sort()
+                if not row["multi"]:
+                    cleaned = cleaned[:1]
+            legacy = cleaned[0] if kind == "choice" and len(cleaned) == 1 else None
             cur = conn.execute(
-                "UPDATE questions SET answer = ? WHERE document_id = ? AND ext_id = ?",
-                (letter.upper(), doc_id, ext_id),
+                "UPDATE questions SET answers_json = ?, answer = ?"
+                " WHERE document_id = ? AND ext_id = ?",
+                (json.dumps(cleaned, ensure_ascii=False), legacy, doc_id, ext_id),
             )
             changed += cur.rowcount
     return changed

@@ -1,0 +1,145 @@
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { api, type DocumentSummary, type QuizQuestion, type StartResponse } from "../api/client";
+import PracticePage from "./PracticePage";
+
+vi.mock("../api/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/client")>();
+  return {
+    ...actual,
+    api: {
+      ...actual.api,
+      startSession: vi.fn(),
+      submit: vi.fn(),
+      deleteSession: vi.fn(),
+    },
+  };
+});
+
+const startSession = vi.mocked(api.startSession);
+const submit = vi.mocked(api.submit);
+const deleteSession = vi.mocked(api.deleteSession);
+
+const doc: DocumentSummary = {
+  id: 7,
+  title: "October Review",
+  source_filename: "october.pdf",
+  answers_status: "external",
+  question_count: 2,
+  answered_count: 2,
+  needs_answers: false,
+  created_at: "2026-10-19 09:15:00",
+};
+
+function quiz(id: number): QuizQuestion {
+  return {
+    id,
+    ext_id: `Q${id}`,
+    no: id,
+    sec: "rw",
+    type: null,
+    difficulty: null,
+    material: null,
+    stem: `Stem ${id}`,
+    options: ["A) one", "B) two", "C) three", "D) four"],
+    kind: "choice",
+    multi: false,
+    images: [],
+    source: null,
+    explain: null,
+  };
+}
+
+const session: StartResponse = {
+  session_id: 42,
+  document: doc,
+  questions: [quiz(1), quiz(2)],
+};
+
+function renderPage() {
+  return render(
+    <MemoryRouter initialEntries={["/doc/7/practice"]}>
+      <Routes>
+        <Route path="/doc/:id/practice" element={<PracticePage />} />
+        <Route path="/session/:sid/result" element={<div>Results</div>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
+describe("PracticePage sessions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    startSession.mockResolvedValue(session);
+    deleteSession.mockResolvedValue(undefined as never);
+  });
+
+  it("discards the provisional session when you leave without submitting", async () => {
+    const { unmount } = renderPage();
+    expect(await screen.findByText("Ready to begin")).toBeInTheDocument();
+
+    unmount();
+
+    await waitFor(() => expect(deleteSession).toHaveBeenCalledWith(42));
+  });
+
+  it("keeps the session once the attempt is submitted", async () => {
+    submit.mockResolvedValue({
+      session_id: 42,
+      total: 2,
+      graded: 2,
+      correct: 1,
+      items: [],
+    });
+    renderPage();
+    await screen.findByText("Ready to begin");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Begin — enter fullscreen/ }));
+    });
+    await screen.findByText("Exit");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+    });
+    const confirm = screen.getAllByRole("button", { name: "Submit" });
+    await act(async () => {
+      fireEvent.click(confirm[confirm.length - 1]);
+    });
+
+    expect(await screen.findByText("Results")).toBeInTheDocument();
+    expect(submit).toHaveBeenCalled();
+    expect(deleteSession).not.toHaveBeenCalled();
+  });
+});
+
+describe("PracticePage five options", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    deleteSession.mockResolvedValue(undefined as never);
+    startSession.mockResolvedValue({
+      session_id: 7,
+      document: doc,
+      questions: [{ ...quiz(1), options: ["A) 3", "B) 4", "C) 5", "D) 6", "E) 7"] }],
+    });
+  });
+
+  it("renders and keyboard-selects a fifth option", async () => {
+    renderPage();
+    await screen.findByText("Ready to begin");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Begin — enter fullscreen/ }));
+    });
+    await screen.findByText("Exit");
+
+    const eOption = screen.getByRole("button", { name: /7/ });
+    expect(eOption).toHaveAttribute("aria-pressed", "false");
+
+    await act(async () => {
+      fireEvent.keyDown(window, { key: "e" });
+    });
+    expect(screen.getByRole("button", { name: /7/ })).toHaveAttribute("aria-pressed", "true");
+  });
+});

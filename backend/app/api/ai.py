@@ -16,7 +16,7 @@ from app.sections import label as section_label
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
-_OPT_RE = re.compile(r"^([A-D])[.)]\s*([\s\S]*)$")
+_OPT_RE = re.compile(r"^([A-Z])[.)]\s*([\s\S]*)$")
 
 SYSTEM = (
     "You are a patient tutor. The user gives you one question and its correct "
@@ -61,8 +61,8 @@ def ai_answer(payload: AnswerPayload) -> dict:
         student_answer = repos.sessions.get_student_answer(payload.session_id, payload.question_id)
 
     # Expanded context: material + stem + all options + correct answer + student's choice + section
-    opts_list = q["options"]  # list of 4 strings like ["A. one", "B. two", "C. three", "D. four"]
-    opts = {opt[0]: opt[3:].strip() for opt in opts_list if opt and opt[1] in ".．"}  # {"A": "one", "B": "two", ...}
+    opts_list = q["options"]  # e.g. ["A. one", "B. two", ...], any number of options
+    opts = {opt[0]: opt[3:].strip() for opt in opts_list if opt and opt[1] in ".．"}  # {"A": "one", ...}
     correct_letter = q["answer"]
     correct_text = _correct_option(opts_list, correct_letter)
     student_letter = student_answer
@@ -73,10 +73,9 @@ def ai_answer(payload: AnswerPayload) -> dict:
         user_parts.append(f"Material:\n{q['material']}")
     user_parts.append(f"Question:\n{q['stem']}")
     user_parts.append("Options:")
-    for letter in "ABCD":
-        if letter in opts:
-            prefix = "✓" if letter == correct_letter else ("→" if letter == student_letter else " ")
-            user_parts.append(f"  {prefix} {letter}. {opts[letter]}")
+    for letter, text in opts.items():
+        prefix = "✓" if letter == correct_letter else ("→" if letter == student_letter else " ")
+        user_parts.append(f"  {prefix} {letter}. {text}")
     user_parts.append(f"\nCorrect answer: {correct_letter}. {correct_text}")
     if student_letter and student_text:
         user_parts.append(f"Your answer: {student_letter}. {student_text}")

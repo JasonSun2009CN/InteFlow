@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { api } from "../api/client";
@@ -7,13 +8,15 @@ interface Props {
   text: string;
   /** Document id, used to resolve `assets/...` image paths. */
   docId?: number;
+  /** Render single newlines as hard breaks (hand-written prose, not source text). */
+  breaks?: boolean;
 }
 
 /** Markdown + `$math$` renderer shared by every question surface. */
-export default function RichText({ text, docId }: Props) {
+export default function RichText({ text, docId, breaks = false }: Props) {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkMath]}
+      remarkPlugins={breaks ? [remarkMath, remarkBreaks] : [remarkMath]}
       rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: false }]]}
       components={{
         img: ({ src, alt }) => (

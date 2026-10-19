@@ -23,6 +23,7 @@ from app.convert.docx import convert_docx
 from app.convert.pdf import ConvertError, ProgressFn, convert_pdf
 from app.db import UPLOAD_TMP, jobs_dir
 from app.repos import imports as jobs_repo
+from app.repos import settings as settings_repo
 from app.ifmd.parser import IfmdError, parse
 
 ANSWER_STATUSES = {"inline", "external", "none"}
@@ -402,6 +403,10 @@ def run_ai_fallback(job_id: str) -> ImportResult:
     result = load_result(job_id)
     if result is None:
         raise ImportProblem("staged result not found", 404)
+    if not settings_repo.llm_fallback_enabled():
+        raise ImportProblem(
+            "AI recognition fallback is turned off — enable it in Settings", 409
+        )
 
     job_dir = jobs_dir(job_id)
     pdf_path = job_dir / "original.pdf"

@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InteFlow — theme examples</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --text: #1b1f27;
+        --muted: #5b6472;
+        --faint: #8a94a3;
+        --border: #e4e8ee;
+        --accent: #2f6fd0;
+        --radius: 10px;
+        --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+          Arial, sans-serif;
+        --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino,
+          serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .wrap {
+        max-width: 76rem;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+      }
+
+      header.page {
+        max-width: 44rem;
+        margin-bottom: 3rem;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: var(--accent);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0.6rem 0 0;
+        font-family: var(--serif);
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+      }
+
+      .lede {
+        margin: 1rem 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .hint {
+        margin: 1.25rem 0 0;
+        padding: 0.8rem 1rem;
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        background: #eef3fb;
+        color: #2a4368;
+        font-size: 0.85rem;
+      }
+
+      code {
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        background: #eef1f5;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.82em;
+      }
+
+      h2 {
+        margin: 3.5rem 0 1.25rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.75rem;
+      }
+
+      .card {
+        display: flex;
+        width: 20rem;
+        max-width: 100%;
+        flex: 1 1 20rem;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: 0 1px 2px rgb(27 31 39 / 0.04);
+        transition: box-shadow 140ms ease, transform 140ms ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px -16px rgb(27 31 39 / 0.35);
+      }
+
+      .frame {
+        position: relative;
+        aspect-ratio: 1320 / 860;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+        background: #fff;
+      }
+
+      .frame iframe {
+        width: 1320px;
+        height: 860px;
+        border: 0;
+        transform-origin: top left;
+        pointer-events: none;
+      }
+
+      .frame a {
+        position: absolute;
+        inset: 0;
+        text-indent: -9999px;
+        overflow: hidden;
+      }
+
+      .card-body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 1rem 1.1rem 1.15rem;
+      }
+
+      .card-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .card-name {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        letter-spacing: -0.01em;
+      }
+
+      .card-open {
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .card-open:hover {
+        text-decoration: underline;
+      }
+
+      .card-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .swatches {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: auto;
+        padding-top: 0.35rem;
+      }
+
+      .swatch {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 1px solid rgb(0 0 0 / 0.12);
+        border-radius: 5px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+      }
+
+      caption {
+        margin-bottom: 0.75rem;
+        color: var(--faint);
+        font-size: 0.78rem;
+        text-align: left;
+      }
+
+      th,
+      td {
+        padding: 0.7rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--faint);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      td:first-child {
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 0.7rem;
+        height: 0.7rem;
+        margin-right: 0.4rem;
+        border: 1px solid rgb(0 0 0 / 0.12);
+        border-radius: 50%;
+        vertical-align: -0.05rem;
+      }
+
+      footer.page {
+        margin-top: 4rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        color: var(--faint);
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="page">
+        <p class="eyebrow">InteFlow · themes</p>
+        <h1>五个主题备选方案</h1>
+        <p class="lede">
+          五份独立的 HTML 预览页，均渲染同一个主页（侧栏 5 个 tab、统计、试卷列表、按钮与提示条），
+          只有视觉语言不同，方便直接对比。纯 HTML / CSS / JavaScript，无依赖、无构建。
+        </p>
+        <p class="hint">
+          交互都可以点：侧栏切 tab、搜索框过滤试卷、Start 弹出提示、右上角 × 关闭提示条、
+          按 <code>/</code> 聚焦搜索、窄屏变成抽屉菜单。每页左下角的 Theme 下拉可直接换主题。
+        </p>
+      </header>
+
+      <h2>预览</h2>
+      <div class="grid" id="grid"></div>
+
+      <h2>对比要点</h2>
+      <table>
+        <caption>同一套结构 token，只换颜色 / 字体 / 圆角 / 按钮样式。</caption>
+        <thead>
+          <tr>
+            <th>主题</th>
+            <th>底色</th>
+            <th>强调色</th>
+            <th>标题字</th>
+            <th>按钮</th>
+            <th>适合</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CB Classic</td>
+            <td><span class="dot" style="background:#f2f5f9"></span>#f2f5f9</td>
+            <td><span class="dot" style="background:#0057b8"></span>#0057b8</td>
+            <td>无衬线（系统）</td>
+            <td>实心蓝</td>
+            <td>作为默认：学生最熟悉、最"官方"</td>
+          </tr>
+          <tr>
+            <td>Paper &amp; Ink</td>
+            <td><span class="dot" style="background:#faf8f3"></span>#faf8f3</td>
+            <td><span class="dot" style="background:#9a402c"></span>#9a402c</td>
+            <td>衬线（Iowan / Palatino）</td>
+            <td>描边黑</td>
+            <td>当前实现：安静、耐看、纸质书感</td>
+          </tr>
+          <tr>
+            <td>Minimal Light</td>
+            <td><span class="dot" style="background:#ffffff"></span>#ffffff</td>
+            <td><span class="dot" style="background:#1f1f1f"></span>#1f1f1f</td>
+            <td>无衬线（系统）</td>
+            <td>实心近黑</td>
+            <td>信息密度最高，长时间刷题最不累眼</td>
+          </tr>
+          <tr>
+            <td>Midnight Navy</td>
+            <td><span class="dot" style="background:#0a1120"></span>#0a1120</td>
+            <td><span class="dot" style="background:#7aa2f7"></span>#7aa2f7</td>
+            <td>衬线（Charter / Georgia）</td>
+            <td>实心浅蓝</td>
+            <td>夜间 / 暗色偏好，或需要跟着系统深色模式</td>
+          </tr>
+          <tr>
+            <td>Warm Editorial</td>
+            <td><span class="dot" style="background:#f7efe2"></span>#f7efe2</td>
+            <td><span class="dot" style="background:#b4552b"></span>#b4552b</td>
+            <td>衬线（Georgia）</td>
+            <td>实心陶土</td>
+            <td>偏杂志/阅读感，暖色比纸墨更活泼一点</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <footer class="page">
+        结构样式在 <code>assets/base.css</code>，主题 token 在
+        <code>assets/themes/*.css</code>（每个主题只有一个 <code>:root</code> 变量块 +
+        少量局部覆盖），组件与交互在 <code>assets/mock.js</code>。
+        落地到 React 版本时，把对应 <code>:root</code> 变量映射到 Tailwind
+        的 <code>@theme</code> / <code>.paper-app</code> 作用域即可。
+      </footer>
+    </div>
+
+    <script src="assets/mock.js"></script>
+    <script>
+      (function () {
+        var SWATCHES = {
+          "cb-classic": ["#f2f5f9", "#ffffff", "#0057b8", "#101c30"],
+          "paper-ink": ["#faf8f3", "#fffdf8", "#9a402c", "#1c1916"],
+          "minimal-light": ["#ffffff", "#fbfbfa", "#1f1f1f", "#191919"],
+          "midnight-navy": ["#0a1120", "#111a2c", "#7aa2f7", "#e8edf7"],
+          "warm-editorial": ["#f7efe2", "#fffbf3", "#b4552b", "#241c15"]
+        };
+
+        var grid = document.getElementById("grid");
+
+        grid.innerHTML = InteFlowMock.themes
+          .map(function (theme) {
+            var swatches = (SWATCHES[theme.id] || [])
+              .map(function (color) {
+                return '<span class="swatch" style="background:' + color + '"></span>';
+              })
+              .join("");
+
+            return (
+              '<article class="card">' +
+              '<div class="frame">' +
+              '<iframe src="' +
+              theme.file +
+              '" title="' +
+              theme.name +
+              ' preview" loading="lazy" scrolling="no" tabindex="-1"></iframe>' +
+              '<a href="' +
+              theme.file +
+              '">Open the ' +
+              theme.name +
+              " example</a>" +
+              "</div>" +
+              '<div class="card-body">' +
+              '<div class="card-head">' +
+              '<h3 class="card-name">' +
+              theme.name +
+              "</h3>" +
+              '<a class="card-open" href="' +
+              theme.file +
+              '">打开整页 →</a>' +
+              "</div>" +
+              '<p class="card-note">' +
+              theme.note +
+              "</p>" +
+              '<div class="swatches">' +
+              swatches +
+              "</div>" +
+              "</div>" +
+              "</article>"
+            );
+          })
+          .join("");
+
+        /* Scale each preview iframe so it fills its card exactly. */
+        function fit() {
+          var frames = document.querySelectorAll(".frame");
+          Array.prototype.forEach.call(frames, function (frame) {
+            var iframe = frame.querySelector("iframe");
+            if (!iframe) return;
+            var scale = frame.clientWidth / 1320;
+            iframe.style.transform = "scale(" + scale + ")";
+          });
+        }
+
+        fit();
+        window.addEventListener("resize", fit);
+        window.addEventListener("load", fit);
+      })();
+    </script>
+  </body>
+</html>

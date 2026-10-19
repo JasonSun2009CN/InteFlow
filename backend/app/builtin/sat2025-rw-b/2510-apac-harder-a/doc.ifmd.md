@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月亚太 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:34Z
+imported_at: 2026-10-19T12:21:17Z
 answers: external
 ---
 
@@ -101,6 +101,8 @@ Which choice best describes the function of the reference to "anvil and strife" 
 
 :::q {#Q007 sec=rw no=7}
 @material
+![Studies of Cougar Population Density](assets/p04-966c84f5.png)
+
 Studies of the population density of cougars (Puma concolor) have yielded a range of results, which may in part reflect differences in the effectiveness of the methods that researchers have used in their studies. If, for example, the use of helicopter surveying tends to lead to overestimates of cougar population density, that may explain why the study by ______
 
 @stem
@@ -135,19 +137,7 @@ Projected Percent Change in Agricultural Production
 
 and Market Price under Tariff-Elimination Scenario
 
-Percent change in market prices
-
-Country Percent change in
-
-total production
-
-Brazil +6.28 +3.19
-
-Canada +3.74 +0.84
-
-India –1.34 –1.98
-
-Japan –7.18 –3.00
+![Percent change in Percent change Country](assets/p06-9612f0c6.png)
 
 A tariff is a tax on imported goods intended to protect domestic producers of similar goods from international competition. Eliminating tariffs can lead to an influx of cheaper imported goods, lowering prices; in a place where domestic production is relatively expensive, this influx can suppress domestic production, as the country's consumers favor more cheaply produced imported goods over domestically produced ones. A student consults a table showing projected changes in production and average market prices of agricultural commodities in four countries in a tariff-elimination scenario. Based on the data, the student claims that compared with India and Japan, agricultural production in Brazil and Canada is likely relatively inexpensive.
 
@@ -164,29 +154,7 @@ Which choice most effectively uses information from the text and data from the t
 
 :::q {#Q010 sec=rw no=10}
 @material
-Fracture Toughness Values for CrMnFeCoNi and CrCoNi
-
-at Various Temperatures
-
-square root of crack length)
-
-(megapascals times the
-
-Fracture toughness
-
-![figure](assets/p07-6d494ad2.png)
-
-20 77 198 293 0 50 100 150 200 250 300 350 400 450 500 550
-
-Temperature (kelvins)
-
-CrCoNi initiation toughness
-
-CrCoNi propagation toughness
-
-CrMnFeCoNi initiation toughness
-
-CrMnFeCoNi propagation toughness
+![Fracture Toughness Values at Various Temperatures 550 500 450 400 350 300 250 200 150 100 50 20 Temperature kelvins; Fracture Toughness Values at Various Temperatures](assets/p07-dab4265c.png)
 
 High entropy alloys (HEAs) typically combine five or more elements in roughly equal proportions, and medium entropy alloys (MEAs) typically combine three or four elements in similar proportions. HEAs and MEAs are known for withstanding cracking at extremely low (cryogenic) temperatures relatively well, though their fracture toughness generally falls as temperature does. Dong Liu et al. investigated the fracture toughness (both the initiation and propagation toughness) of the HEA CrMnFeCoNi and its MEA derivative CrCoNi and concluded that the alloys' toughness performance differs from that of most HEAs and MEAs.
 
@@ -218,7 +186,7 @@ Which choice most effectively uses a quotation from a translation of The Clouds 
 
 :::q {#Q012 sec=rw no=12}
 @material
-Mexico City Monterrey 729 3,474,971 3,202,091 domestic
+![Highly Traveled Commercial Airline Routes in 2017–18](assets/p09-b3ffe6d0.png)
 
 A study of commercial airline routes that carried the greatest number of passengers in 2017 and 2018 shows that, in general, domestic routes (routes within a single country) carried many more passengers than international routes. However, a few international routes were so popular that they carried more travelers than some of the most highly traveled domestic routes, as can be seen when comparing the ______
 

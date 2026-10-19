@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月亚太 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:58Z
+imported_at: 2026-10-19T12:20:40Z
 answers: external
 ---
 
@@ -167,7 +167,7 @@ Which choice best states the main idea of the text?
 
 :::q {#Q011 sec=rw no=11}
 @material
-Carrick-on-Suir Hoard 17th century CE 2013 gold coins
+![Examples of Hoards found in Ireland and Northern Ireland](assets/p07-aa23126e.png)
 
 Deposits of valuable objects, called hoards, have been unearthed in many different parts of Ireland and Northern Ireland. Technological advancements in the twenty-first century have made it easier to locate hoards, but plenty of hoards were found earlier. For example,
 
@@ -190,10 +190,6 @@ Post-treatment Performance of Low
 
 and High-Knowledge Participants
 
-Average percent of quiz
-
-questions correct
-
 advertisement (Gore)
 
 control (Bush)
@@ -202,13 +198,7 @@ control (Gore)
 
 advertisement (Bush)
 
-Treatment condition
-
-low knowledge
-
-![figure](assets/p08-191e8540.png)
-
-high knowledge
+![Treatment condition](assets/p08-d03128c1.png)
 
 Political scientists have asserted that by providing succinct and clear information about candidates and issues, campaign advertisements should reduce the differences in political knowledge observed between groups of voters. Cognitive scientists have noted, however, that existing domain knowledge facilitates the acquisition of new information in that domain. Valentino et al. shed light on this issue by presenting control ads or ads for George W. Bush or Al Gore (candidates in the 2000 US presidential election) to participants with low or high existing political knowledge, then quizzing participants on their understanding of both candidates' positions.
 
@@ -225,7 +215,7 @@ Taken together, information in the text and graph best support which conclusion 
 
 :::q {#Q013 sec=rw no=13}
 @material
-Mouflon 150 15
+![Diameter of outer coat Diameter of inner coat Type of sheep](assets/p09-cbd4d60e.png)
 
 Domestic sheep's wild ancestor, the mouflon, has a coarse outer coat and an inner coat of wool fiber that is finer in diameter and therefore much softer. In some domestic breeds, such as the Spanish Merino, the outer fiber is only marginally coarser than the inner, and the wool is soft overall. Thus, Merino wool is ideal for delicate garments worn against the skin. Meanwhile, the Navajo-Churro has been selected to retain the marked distinction between outer and inner fiber that the Merino has lost. Being coarser than Merino wool overall, Navajo-Churro wool yields a more durable yarn, which Diné (Navajo) weavers use in their celebrated rugs. Yet a comparison of the fiber characteristics of all three sheep reveals that ______
 

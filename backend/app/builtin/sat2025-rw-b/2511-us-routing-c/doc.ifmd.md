@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月北美 · Routing C"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:44Z
+imported_at: 2026-10-19T12:21:27Z
 answers: external
 ---
 
@@ -159,9 +159,7 @@ Which quotation from "The Open Boat" most effectively illustrates the claim?
 
 :::q {#Q011 sec=rw no=11}
 @material
-Malaysia 0.4 84 1.0 82
-
-Taiwan 0.0 1 0.5 17
+![Estimated Electricity Requirements for Green Hydrogen Production in 2020 and 2050](assets/p06-cfa9c1c0.png)
 
 Estimated electricity for green hydrogen production data are rounded to the first decimal place. In 2020, most hydrogen was produced through steam methane reforming, which emits carbon gases. Using electricity from renewable sources to produce green hydrogen sourced from water would enable countries to reduce industrial carbon emissions, but doing so depends on countries' capacity for direct-use electricity (electricity produced and used at the same facility). Researchers estimated the amount of electricity needed in 2020 if green hydrogen had been adopted and the amount needed to meet projected green hydrogen demand in 2050. Comparison between these estimates and estimates of capacity suggests that in most countries, green hydrogen production would require a larger share of electricity produced on-site. One exception is ______
 

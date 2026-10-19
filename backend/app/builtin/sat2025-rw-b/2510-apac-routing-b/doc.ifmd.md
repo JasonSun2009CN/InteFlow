@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月亚太 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:30Z
+imported_at: 2026-10-19T12:21:12Z
 answers: external
 ---
 
@@ -178,17 +178,7 @@ Which quotation from Memoirs of Elleanor Eldridge most effectively illustrates t
 
 :::q {#Q012 sec=rw no=12}
 @material
-Mean Body Mass of Birds Known to Perform
-
-Broken-Wing Display
-
-Bird Mean body mass (grams)
-
-common snipe 126
-
-swamp palm bulbul 61
-
-horned grebe 385
+![Mean Body Mass of Birds Known to Perform Broken-Wing Display](assets/p06-2c9ed0e5.png)
 
 One antipredator defense that the piping plover uses to protect its nest and young chicks is called "brokenwing display"; this form of deceptive defense involves an adult bird pretending to be injured and unable to fly in order to distract an approaching predator. Broken-wing display has been documented in 285 bird species from 13 different avian orders. A student predicts that bird species with mean body masses greater than 150 grams do not use deceptive defenses because larger birds tend to be more effective than smaller birds at using aggressive defenses to protect nests from predators, making deceptive defenses unnecessary.
 

@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年12月亚太 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:04:07Z
+imported_at: 2026-10-19T12:21:50Z
 answers: external
 ---
 

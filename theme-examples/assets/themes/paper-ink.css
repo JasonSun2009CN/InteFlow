@@ -1,0 +1,143 @@
+/* ==========================================================================
+ * Theme 2 — Paper & Ink (the theme currently implemented)
+ * --------------------------------------------------------------------------
+ * Warm paper ground, ink text, a single seal-red accent, serif headings and
+ * hairline rules. Buttons are outlined rather than filled, and numbering is
+ * monospaced — a printed test booklet rather than a dashboard.
+ * ========================================================================== */
+
+:root,
+[data-theme="paper-ink"] {
+  --bg: #faf8f3;
+  --surface: #fffdf8;
+  --surface-2: #f5f1e8;
+  --sidebar-bg: #f6f2e9;
+  --row-hover: #f4efe4;
+
+  --text: #1c1916;
+  --text-muted: #504a41;
+  --text-faint: #8d8678;
+
+  --border: #ece5d8;
+  --border-strong: #c9c0ad;
+
+  --accent: #9a402c;
+  --accent-hover: #7e3424;
+  --accent-text: #fdf9f4;
+  --accent-soft: #f3e3dd;
+
+  --warn: #8c6730;
+  --warn-soft: #f7efdd;
+  --warn-text: #6f5128;
+
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --shadow-md: 0 10px 24px -14px rgb(28 25 22 / 0.45);
+
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Book Antiqua", Georgia, "Times New Roman", serif;
+  --tracking-label: 0.2em;
+  --btn-transform: uppercase;
+  --title-weight: 400;
+}
+
+.hero-text {
+  padding-bottom: 0.25rem;
+}
+
+.title {
+  letter-spacing: -0.015em;
+}
+
+/* A soft pool of light on the paper, like a desk lamp above the page. */
+.app {
+  background-image: radial-gradient(
+    1100px 460px at 55% -180px,
+    #f1e9d9 0%,
+    rgba(250, 248, 243, 0) 72%
+  );
+}
+
+.brand-mark {
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+.nav-item.is-active {
+  position: relative;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 1rem;
+  transform: translateY(-50%);
+  background: var(--accent);
+}
+
+.nav-item.is-active {
+  padding-left: 0.7rem;
+}
+
+.stat-value {
+  font-weight: 400;
+}
+
+.stat-value.is-warn {
+  font-weight: 400;
+}
+
+.section-head {
+  border-bottom: 1.5px solid var(--text);
+}
+
+.section-title {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.exam-title {
+  font-size: 1.25rem;
+}
+
+.exam-title a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* Outlined button — printing rather than UI chrome. */
+.btn-primary {
+  background: transparent;
+  border-color: var(--text);
+  color: var(--text);
+  letter-spacing: 0.18em;
+}
+
+.btn-primary:hover {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+.exam-index {
+  letter-spacing: 0.06em;
+}
+
+.banner {
+  border-left-width: 2px;
+}
+
+.toast {
+  background: var(--text);
+  color: #faf8f3;
+}

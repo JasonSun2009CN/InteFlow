@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年9月北美 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:01Z
+imported_at: 2026-10-19T12:20:44Z
 answers: external
 ---
 
@@ -163,14 +163,6 @@ Based on the text, the author would most likely agree with which statement about
 @material
 Benjamin Prud'homme and colleagues have explored how convergent evolution—a phenomenon that occurs when the same trait evolves independently in two reproductively separate lineages—can result from a genetic mechanism shared by both lineages. Meanwhile, Patricia J. Wittkopp and colleagues have investigated how convergence occurs through different genetic mechanisms, but the relative prevalence of convergence through shared and different genetic processes is still poorly understood. This motivated biologists Delbert A. Green II and Cassandra G. Extavour to evaluate both types of convergence in a single study for their 2012 paper.
 
-Examples of Hoards found in Ireland and Northern Ireland
-
-Hoard name Date of contents Year of discovery Description
-
-Carrick-on-Suir Hoard 17th century CE 2013 gold coins
-
-Ardagh Hoard 10th century CE 1868 silver and bronze pieces
-
 @stem
 According to the text, what did Prud'homme and colleagues focus on in their study?
 
@@ -184,7 +176,7 @@ According to the text, what did Prud'homme and colleagues focus on in their stud
 
 :::q {#Q012 sec=rw no=12}
 @material
-Coggalbeg Hoard 24th–19th century BCE 1945 gold pieces
+![Examples of Hoards found in Ireland and Northern Ireland](assets/p06-041ffd88.png)
 
 Deposits of valuable objects, or hoards, have been unearthed in many different parts of Ireland and Northern Ireland. Some of these hoards were discovered before 2000; for example, ______
 

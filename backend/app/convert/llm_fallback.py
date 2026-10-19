@@ -10,8 +10,9 @@ the source text below).
 
 Harness engineering: fixed-size page chunks, JSON-only responses, a
 whitespace/quote-tolerant substring check against the source, structural
-validation (four options per question, real numbers), and exactly one
-corrective retry per chunk that feeds the validation errors back.
+validation (a contiguous A, B, C, … option run of at least two options per
+question, real numbers), and exactly one corrective retry per chunk that feeds
+the validation errors back.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ from app.convert.pdf import (  # pdf does not import this module at load time
     _detect_lang,
     _strip_question_number,
 )
+from app.ifmd.parser import OPTION_LETTERS
 
 CHUNK_CHARS = 6000
 MAX_ATTEMPTS = 2
@@ -51,8 +53,8 @@ Segment types, in reading order:
   before the first question that uses it, or again when a new passage begins.
 - "question": one question stem. "no" = its printed number (if the questions
   are unnumbered, number them sequentially from 1). "text" = the stem only.
-- "option": one choice of the currently open question: "no", "letter" (A-D)
-  and "text".
+- "option": one choice of the currently open question: "no", "letter" (its
+  printed letter: A, B, C, …) and "text".
 - "answer": an answer-key entry with the correct "letter" for question "no".
   It carries no "text".
 - "ignore": page headers, page numbers, directions, instructions,
@@ -61,7 +63,10 @@ Segment types, in reading order:
 Rules:
 1. Copy text VERBATIM from the input: same words, same order. Never
    paraphrase, translate, shorten, or fix anything. Whitespace may differ.
-2. Every question must receive exactly four non-empty options A, B, C, D.
+2. A choice question must receive at least two non-empty options labelled A, B,
+   C, … in order from A — exactly as many as the source prints (often four,
+   AMC prints five). Only when the source prints no choices at all (a
+   fill-in-the-blank question) emit the question with no option segments.
 3. Emit segments in reading order; never merge or split questions.
 4. Output a single JSON object with a "segments" array — nothing else.
 """
@@ -212,6 +217,12 @@ def _check_fidelity(segments: list[dict], source: str) -> list[str]:
 # --------------------------------------------------------------------------
 
 
+def _contiguous_options(letters) -> bool:
+    """True when ``letters`` is a run A, B, C, … of at least two options."""
+    got = sorted(letters)
+    return len(got) >= 2 and got == list(OPTION_LETTERS[: len(got)])
+
+
 def _interpret(
     segments: list[dict], page_hint: int
 ) -> tuple[list[BuiltQuestion], dict[int, str], list[str]]:
@@ -229,9 +240,29 @@ def _interpret(
             return
         if not cur["stem"]:
             errors.append(f"question {cur['no']} has an empty stem")
-        elif set(cur["options"]) != set("ABCD"):
-            missing = sorted(set("ABCD") - set(cur["options"]))
-            errors.append(f"question {cur['no']} is missing options {', '.join(missing)}")
+        elif not cur["options"]:
+            # No choices printed -> fill-in-the-blank question.
+            stem = _strip_question_number(cur["stem"], cur["no"])
+            if not stem:
+                errors.append(f"question {cur['no']} has an empty stem")
+            else:
+                questions.append(
+                    BuiltQuestion(
+                        material="\n\n".join(cur["material"]) or None,
+                        stem=stem,
+                        options={},
+                        no=cur["no"],
+                        sec=guess_sec(stem + " " + " ".join(cur["material"])),
+                        answer=None,
+                        source=f"p.{page_hint}",
+                        kind="blank",
+                    )
+                )
+        elif not _contiguous_options(cur["options"]):
+            errors.append(
+                f"question {cur['no']} options must be labelled A, B, C, … in "
+                f"order from A (got {'/'.join(sorted(cur['options']))})"
+            )
         else:
             stem = _strip_question_number(cur["stem"], cur["no"])
             if not stem:
@@ -259,8 +290,9 @@ def _interpret(
             continue
 
         if seg_type == "answer":
-            if isinstance(no, int) and seg.get("letter") in "ABCD" and seg.get("letter"):
-                answer_map[no] = seg["letter"]
+            letter = seg.get("letter")
+            if isinstance(no, int) and isinstance(letter, str) and letter in OPTION_LETTERS:
+                answer_map[no] = letter
             else:
                 errors.append(f"malformed answer segment: {seg!r}")
             continue
@@ -289,7 +321,7 @@ def _interpret(
 
         # option
         letter = seg.get("letter")
-        if letter not in "ABCD" or not letter:
+        if not isinstance(letter, str) or letter not in OPTION_LETTERS:
             errors.append(f"option has no valid letter: {seg!r}")
             continue
         if cur is None or cur["no"] != no:

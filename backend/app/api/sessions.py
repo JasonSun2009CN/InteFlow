@@ -16,7 +16,8 @@ class StartPayload(BaseModel):
 
 
 class SubmitPayload(BaseModel):
-    answers: dict[str, str | None] = {}
+    # One letter/string for a single answer, a list for multi-select or blanks.
+    answers: dict[str, str | list[str] | None] = {}
 
 
 def _fail(message: str, status: int) -> None:
@@ -39,6 +40,12 @@ def start_session(payload: StartPayload) -> dict:
         "document": doc,
         "questions": questions,
     }
+
+
+@router.get("")
+def list_sessions() -> list[dict]:
+    """Every attempt, newest first (the Sessions page)."""
+    return session_repo.list_sessions()
 
 
 @router.get("/{session_id}")
@@ -76,3 +83,12 @@ def regrade_session(session_id: int) -> dict:
     except ValueError as exc:
         _fail(str(exc), 409)
         raise                                          # pragma: no cover
+
+
+@router.delete("/{session_id}")
+def delete_session(session_id: int) -> dict:
+    """Remove one attempt (its review data goes with it)."""
+    if not session_repo.delete_session(session_id):
+        _fail("session not found", 404)
+        raise                                          # pragma: no cover
+    return {"deleted": session_id}

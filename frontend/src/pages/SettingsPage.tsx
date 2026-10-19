@@ -6,6 +6,7 @@ import {
   type ProbeResult,
   type ProviderInfo,
 } from "../api/client";
+import { Button, ThemePicker } from "../components/ui";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -16,6 +17,8 @@ export default function SettingsPage() {
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("");
+  const [userName, setUserName] = useState("");
+  const [llmFallback, setLlmFallback] = useState(true);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
@@ -30,6 +33,8 @@ export default function SettingsPage() {
         setProvider(s.provider);
         setBaseUrl(s.base_url);
         setModel(s.model);
+        setUserName(s.user_name);
+        setLlmFallback(s.llm_fallback);
         setProviders(list);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
@@ -64,6 +69,8 @@ export default function SettingsPage() {
         provider,
         base_url: baseUrl.trim(),
         model: model.trim(),
+        user_name: userName.trim(),
+        llm_fallback: llmFallback,
         ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
       });
       setStored(saved);
@@ -141,7 +148,27 @@ export default function SettingsPage() {
         </div>
       )}
 
+      <div className="mb-5">
+        <ThemePicker />
+      </div>
+
       <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div>
+          <label className={label} htmlFor="user-name">
+            Your name
+          </label>
+          <input
+            id="user-name"
+            className={input}
+            value={userName}
+            placeholder="Printed on page 1 of every exported notebook"
+            onChange={(e) => setUserName(e.target.value)}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Used as the cover-page name when you export an analysis notebook.
+          </p>
+        </div>
+
         <div>
           <label className={label} htmlFor="provider">
             Provider
@@ -212,7 +239,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => void onRemoveKey()}
                 disabled={busy !== null}
-                className="shrink-0 rounded-md border border-red-300 px-3 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+                className="btn shrink-0 rounded-md border border-red-300 px-3 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
               >
                 Remove
               </button>
@@ -242,23 +269,42 @@ export default function SettingsPage() {
           </datalist>
         </div>
 
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <label className="flex items-start gap-3" htmlFor="llm-fallback">
+            <input
+              id="llm-fallback"
+              type="checkbox"
+              checked={llmFallback}
+              onChange={(e) => setLlmFallback(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <span className="block text-sm font-medium text-slate-800">
+                AI recognition fallback
+              </span>
+              <span className="mt-1 block text-xs leading-5 text-slate-600">
+                When a PDF or DOCX cannot be parsed by the built-in layout rules, let the
+                configured model label the questions instead. It only reads text that was
+                already extracted, never rewrites it, and costs tokens — turn it off to keep
+                imports fully offline. When the source prints no choices, the question is
+                imported as a fill-in-the-blank instead.
+              </span>
+            </span>
+          </label>
+        </div>
+
         <div className="flex gap-3 pt-1">
-          <button
-            type="button"
-            onClick={() => void onSave()}
-            disabled={busy !== null}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
+          <Button type="button" onClick={() => void onSave()} disabled={busy !== null}>
             {busy === "save" ? "Saving…" : "Save settings"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => void onTest()}
             disabled={busy !== null}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
             {busy === "test" ? "Testing…" : "Test connection"}
-          </button>
+          </Button>
         </div>
 
         {probe && (

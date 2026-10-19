@@ -51,6 +51,8 @@ export interface ImportJob {
   needs_review: boolean;
 }
 
+export type QuestionKind = "choice" | "blank";
+
 export interface Question {
   id: number;
   ext_id: string;
@@ -61,14 +63,17 @@ export interface Question {
   material: string | null;
   stem: string;
   options: string[];
+  kind: QuestionKind;
+  multi: boolean;
   images: string[];
   source: string | null;
   explain: string | null;
   answer: string | null;
+  answers: string[];
 }
 
-/** What the quiz UI receives — the correct answer never leaves the server. */
-export type QuizQuestion = Omit<Question, "answer">;
+/** What the quiz UI receives — the correct answers never leave the server. */
+export type QuizQuestion = Omit<Question, "answer" | "answers">;
 
 export interface StartResponse {
   session_id: number;
@@ -91,13 +96,17 @@ export interface ResultItem {
   no: number;
   source_no: number | null;
   sec: Section;
+  kind: QuestionKind;
+  multi: boolean;
   material: string | null;
   stem: string;
   options: string[];
   images: string[];
   source: string | null;
   chosen: string | null;
+  chosen_answers: string[];
   answer: string | null;
+  answers: string[];
   is_correct: boolean | null;
   explain: string | null;
 }
@@ -139,17 +148,46 @@ export interface WordGrid {
   view: WordView;
 }
 
-/** Progress/summary of a whole-document normalization run. */
-export interface NormalizeJob {
-  doc_id: number;
-  status: "running" | "done" | "failed";
-  total: number;
-  done: number;
-  applied: number;
-  unchanged: number;
-  kept: number;
-  errors: string[];
-  error: string | null;
+/** One question's analysis page — the notebook is one page per question. */
+export interface AnalysisPage {
+  id: number | null;
+  document_id: number;
+  question_id: number;
+  position: number;
+  content: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface AnalysisNotebook {
+  document_id: number;
+  title: string;
+  pages: AnalysisPage[];
+}
+
+export interface AnalysisMeta {
+  document_id: number;
+  title: string;
+  user_name: string;
+  sessions: {
+    session_id: number;
+    started_at: string;
+    finished_at: string | null;
+    correct: number;
+    graded: number;
+  }[];
+}
+
+/** One saved attempt, as listed on the Sessions page. */
+export interface SessionSummary {
+  session_id: number;
+  document_id: number;
+  document_title: string;
+  started_at: string;
+  finished_at: string | null;
+  correct: number;
+  graded: number;
+  answered: number;
 }
 
 /** One module of a built-in bank, as listed on the import page. */
@@ -179,6 +217,8 @@ export interface AppSettings {
   model: string;
   api_key_masked: string;
   api_key_set: boolean;
+  user_name: string;
+  llm_fallback: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -197,6 +237,8 @@ export interface SettingsInput {
   api_key?: string;
   model?: string;
   clear_key?: boolean;
+  user_name?: string;
+  llm_fallback?: boolean;
 }
 
 export class ApiError extends Error {
@@ -284,7 +326,7 @@ export const api = {
 
   getQuestions: (id: number) => request<Question[]>(`/api/documents/${id}/questions`),
 
-  putAnswers: (id: number, answers: Record<string, string>) =>
+  putAnswers: (id: number, answers: Record<string, string[]>) =>
     request<DocumentSummary>(`/api/documents/${id}/answers`, {
       method: "PUT",
       ...json({ answers }),
@@ -299,13 +341,19 @@ export const api = {
       ...json({ document_id: documentId }),
     }),
 
-  submit: (sessionId: number, answers: Record<string, string | null>) =>
+  submit: (sessionId: number, answers: Record<string, string | string[] | null>) =>
     request<SubmitResult>(`/api/sessions/${sessionId}/submit`, {
       method: "POST",
       ...json({ answers }),
     }),
 
   getSession: (sessionId: number) => request<SessionDetail>(`/api/sessions/${sessionId}`),
+
+  /** Every saved attempt, newest first (the Sessions page). */
+  listSessions: () => request<SessionSummary[]>("/api/sessions"),
+
+  deleteSession: (sessionId: number) =>
+    request<{ deleted: number }>(`/api/sessions/${sessionId}`, { method: "DELETE" }),
 
   /** Re-grade a submitted attempt (after the answer key was filled in). */
   regradeSession: (sessionId: number) =>
@@ -339,14 +387,70 @@ export const api = {
       ...json({ document_id: docId, question_id: questionId, session_id: sessionId }),
     }),
 
-  /** Whole-document CB-style normalization: starts a background run (one LLM
-   *  call per question, applied directly — no per-question review). */
-  normalizeDocument: (docId: number) =>
-    request<NormalizeJob>(`/api/documents/${docId}/normalize`, { method: "POST" }),
+  /** One exam's analysis notebook (one page per question, in question order). */
+  getAnalysis: (docId: number) => request<AnalysisNotebook>(`/api/documents/${docId}/analysis`),
 
-  /** Progress/summary of the latest whole-document normalization run. */
-  getNormalizeJob: (docId: number) =>
-    request<NormalizeJob>(`/api/documents/${docId}/normalize`),
+  /** Create or update one question's analysis page. */
+  saveAnalysisPage: (docId: number, questionId: number, content: string) =>
+    request<AnalysisPage>(`/api/documents/${docId}/analysis/${questionId}`, {
+      method: "PUT",
+      ...json({ content }),
+    }),
+
+  deleteAnalysisPage: (docId: number, questionId: number) =>
+    request<{ deleted: number }>(`/api/documents/${docId}/analysis/${questionId}`, {
+      method: "DELETE",
+    }),
+
+  /** Cover-page metadata: the display name plus this exam's attempts. */
+  getAnalysisMeta: (docId: number) =>
+    request<AnalysisMeta>(`/api/documents/${docId}/analysis-meta`),
+
+  /** Notebook export URL (md | docx | pdf); a copy is also kept under data/exports. */
+  analysisExportUrl: (
+    docId: number,
+    fmt: "md" | "docx" | "pdf",
+    sessionId?: number,
+    onlyAnalyzed = false,
+  ) => {
+    const params = new URLSearchParams();
+    if (sessionId) params.set("session_id", String(sessionId));
+    if (onlyAnalyzed) params.set("only_analyzed", "true");
+    const query = params.toString();
+    return `/api/documents/${docId}/analysis/export/${fmt}${query ? `?${query}` : ""}`;
+  },
+
+  /** Download the notebook and report the path of the server-side copy. */
+  exportAnalysis: async (
+    docId: number,
+    fmt: "md" | "docx" | "pdf",
+    sessionId?: number,
+    onlyAnalyzed = false,
+  ): Promise<{ path: string | null; filename: string }> => {
+    const url = api.analysisExportUrl(docId, fmt, sessionId, onlyAnalyzed);
+    const res = await fetch(url);
+    if (!res.ok) {
+      let detail = res.statusText || `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        if (typeof body?.detail === "string") detail = body.detail;
+      } catch {
+        /* non-JSON error body */
+      }
+      throw new ApiError(detail, res.status);
+    }
+    const disposition = res.headers.get("Content-Disposition") ?? "";
+    const match = /filename="?([^";]+)"?/.exec(disposition);
+    const filename = match ? match[1] : `analysis.${fmt}`;
+    const blob = await res.blob();
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(href);
+    return { path: res.headers.get("X-Export-Path"), filename };
+  },
 
   history: (docId: number) =>
     request<

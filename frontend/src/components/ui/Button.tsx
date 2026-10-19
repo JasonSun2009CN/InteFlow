@@ -8,6 +8,43 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconPosition?: "left" | "right";
 }
 
+type Variant = NonNullable<Props["variant"]>;
+type Size = NonNullable<Props["size"]>;
+
+const BASE =
+  "btn inline-flex items-center justify-center font-medium rounded-lg border border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2";
+
+const VARIANT_CLASSES: Record<Variant, string> = {
+  primary: "btn-primary bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
+  secondary:
+    "btn-secondary bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-slate-200",
+  ghost: "btn-ghost text-slate-700 hover:bg-slate-100 active:bg-slate-200",
+  danger: "btn-danger bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800",
+};
+
+const SIZE_CLASSES: Record<Size, string> = {
+  sm: "px-3 py-1.5 text-sm gap-1.5",
+  md: "px-4 py-2 text-sm gap-2",
+  lg: "px-6 py-3 text-base gap-2",
+};
+
+/**
+ * Button classes without the button element — for actions that have to be a
+ * link (`<Link className={buttonClasses(...)}>`), so themes that restyle
+ * `.btn-primary` reach the home screen's calls to action too.
+ */
+export function buttonClasses({
+  variant = "primary",
+  size = "md",
+  className = "",
+}: {
+  variant?: Variant;
+  size?: Size;
+  className?: string;
+} = {}): string {
+  return `${BASE} ${VARIANT_CLASSES[variant]} ${SIZE_CLASSES[size]} ${className}`;
+}
+
 export const Button = forwardRef<HTMLButtonElement, Props>(
   (
     {
@@ -23,26 +60,11 @@ export const Button = forwardRef<HTMLButtonElement, Props>(
     },
     ref,
   ) => {
-    const base = "inline-flex items-center justify-center font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2";
-
-    const variants = {
-      primary: "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
-      secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-slate-200",
-      ghost: "text-slate-700 hover:bg-slate-100 active:bg-slate-200",
-      danger: "bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800",
-    };
-
-    const sizes = {
-      sm: "px-3 py-1.5 text-sm gap-1.5",
-      md: "px-4 py-2 text-sm gap-2",
-      lg: "px-6 py-3 text-base gap-2",
-    };
-
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+        className={buttonClasses({ variant, size, className })}
         {...props}
       >
         {loading && (

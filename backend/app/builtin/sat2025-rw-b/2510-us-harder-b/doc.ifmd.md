@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月北美 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:23Z
+imported_at: 2026-10-19T12:21:06Z
 answers: external
 ---
 
@@ -103,11 +103,7 @@ Based on the texts, the author of Text 2 would most likely agree with which stat
 
 :::q {#Q007 sec=rw no=7}
 @material
-Tax Penalties Assessed on Private Foundations That Filed Form 4720,
-
-by Reason, 2003–2005
-
-Percentage of total penalty
+![Tax Penalties Assessed on Private by Reason, 2003–2005](assets/p04-92871ff4.png)
 
 excess business holdings
 
@@ -136,23 +132,7 @@ Which choice most effectively uses data from the graph to complete the assertion
 
 :::q {#Q008 sec=rw no=8}
 @material
-Projected Percent Change in Agricultural Production
-
-and Market Price under Tariff-Elimination Scenario
-
-Percent change in market prices
-
-Country Percent change in
-
-total production
-
-Argentina +0.90 +1.02
-
-China –0.03 –0.11
-
-Russia –3.48 –0.99
-
-United States +1.76 +0.44
+![Projected Percent Change in Agricultural Production and Market Price under Tariff-Elimination Scenario](assets/p05-3d21f841.png)
 
 A tariff is a tax on imported goods intended to protect domestic producers of similar goods from international competition. Eliminating tariffs can lead to an influx of cheaper imported goods, lowering prices; in a place where domestic production is relatively expensive, this influx can suppress domestic production, as the country's consumers favor more cheaply produced imported goods over domestically produced ones. A student consults a table showing projected changes in production and average market prices of agricultural commodities in four countries in a tariff-elimination scenario. Based on the data, the student claims that compared with China and Russia, agricultural production in Argentina and the United States is likely relatively inexpensive.
 

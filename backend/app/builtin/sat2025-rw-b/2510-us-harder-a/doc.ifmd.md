@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月北美 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:21Z
+imported_at: 2026-10-19T12:21:04Z
 answers: external
 ---
 
@@ -135,23 +135,7 @@ Which additional finding from Chen and colleagues'study, if true, would best sup
 
 :::q {#Q009 sec=rw no=9}
 @material
-Number of Modular Construction Projects
-
-by Building Category
-
-Number of projects
-
-![figure](assets/p06-7a2b5f70.png)
-
-relocatable permanent
-
-Structure type
-
-multifamily
-
-education
-
-dormitory
+![by Building Category; Structure type](assets/p06-0df71dd8.png)
 
 Modular construction, or a process in which a building is manufactured off-site in sections and assembled onsite, is gaining traction in the architectural industry, given modular construction's multifarious advantages, which range from greater worker safety to the fact that a building can be constructed in a relatively short amount of time. An architecture company wishes to pursue modular construction projects but wants to avoid those in building categories that may already be oversaturated with projects. An executive from the company compiles data about both permanent and relocatable modular constructions of various types and concludes that ______
 
@@ -168,7 +152,7 @@ Which choice most effectively uses data from the graph to complete the statement
 
 :::q {#Q010 sec=rw no=10}
 @material
-Norway Indiana run-of-river 4 19,751 Tippecanoe River
+![US Hydroelectric Power Plants, 2019](assets/p07-f11a7bec.png)
 
 A run-of-river hydroelectric power plant, as the name suggests, uses the natural flow of a water source to generate electricity but is unable to start or stop that flow through its generators. In contrast, a peaking hydroelectric power plant (used when demand for electricity peaks) controls the flow of water through its generators: starting flow when demand is high enough, stopping it when demand is too low, and otherwise regulating it to keep pace with changing electricity needs. Although peaking plants do not typically operate continuously as run-of-river plants do, some run-of-river plants can generate fewer megawatt-hours of power per year (MWh/yr) than some peaking plants. For example, the ______
 

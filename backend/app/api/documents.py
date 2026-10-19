@@ -12,13 +12,11 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
 from app import imports as imports_service
-from app import llm
-from app import normalize_jobs
 from app import repos
 from app.db import assets_dir
 from app.export import build_export, render_docx_bytes, render_pdf_bytes
 from app.repos import words as words_repo
-from app.ifmd.parser import set_answer
+from app.ifmd.parser import OPTION_LETTERS, set_answers
 from app.repos import sessions as session_repo
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
@@ -34,7 +32,9 @@ MEDIA_TYPES = {
 
 
 class AnswersPayload(BaseModel):
-    answers: dict[str, str]
+    # ext_id -> letters (choice) or accepted strings (blank). A bare string is
+    # accepted too so older clients keep working.
+    answers: dict[str, list[str] | str]
 
 
 class ExplainPayload(BaseModel):
@@ -50,15 +50,6 @@ class WordsPayload(BaseModel):
     rows: Any = None
     view: Any = None
     headers: Any = None
-
-
-class NormalizePayload(BaseModel):
-    """Normalized question payload returned by /normalize and accepted by /normalize/accept."""
-    material: str | None = None
-    stem: str
-    options: dict[str, str]
-    answer: str
-    source_ref: str
 
 
 def _fail(message: str, status: int = 422) -> None:
@@ -115,12 +106,45 @@ def put_answers(doc_id: int, payload: AnswersPayload) -> dict:
         _fail("document not found", 404)
         raise                                          # pragma: no cover
 
-    cleaned: dict[str, str] = {}
-    for ext_id, letter in payload.answers.items():
-        letter = (letter or "").strip().upper()
-        if letter not in {"A", "B", "C", "D"}:
-            _fail(f"invalid answer {letter!r} for {ext_id} (expected A-D)", 400)
-        cleaned[ext_id] = letter
+    rows = {
+        q["ext_id"]: q
+        for q in repos.documents.list_questions(doc_id, include_answers=False)
+    }
+    cleaned: dict[str, list[str]] = {}
+    for ext_id, raw in payload.answers.items():
+        question = rows.get(ext_id)
+        if question is None:
+            continue
+        values = [raw] if isinstance(raw, str) else list(raw)
+        kind = question.get("kind") or "choice"
+        if kind == "blank":
+            accepted = [str(v).strip() for v in values if str(v).strip()]
+            if not accepted:
+                _fail(f"blank answer for {ext_id} must not be empty", 400)
+            cleaned[ext_id] = accepted
+            continue
+        letters: list[str] = []
+        allowed = {
+            opt[0].upper()
+            for opt in (question.get("options") or [])
+            if opt and opt[0].isalpha()
+        }
+        for value in values:
+            letter = str(value).strip().upper()
+            if letter not in OPTION_LETTERS:
+                _fail(f"invalid answer {letter!r} for {ext_id} (expected a letter A-Z)", 400)
+            if allowed and letter not in allowed:
+                _fail(f"answer {letter!r} has no matching option for {ext_id}", 400)
+            if letter not in letters:
+                letters.append(letter)
+        if not letters:
+            _fail(f"no answer supplied for {ext_id}", 400)
+        if len(letters) > 1 and not question.get("multi"):
+            _fail(
+                f"{ext_id} accepts a single answer — mark it multi=1 to allow several",
+                400,
+            )
+        cleaned[ext_id] = sorted(letters)
     if not cleaned:
         _fail("no answers supplied", 400)
 
@@ -131,8 +155,9 @@ def put_answers(doc_id: int, payload: AnswersPayload) -> dict:
     # keep the on-disk InteFlow-MD in sync (source of truth for export/debug)
     try:
         text = repos.documents.read_ifmd(doc_id)
-        for ext_id, letter in cleaned.items():
-            text = set_answer(text, ext_id, letter)
+        for ext_id, values in cleaned.items():
+            kind = rows[ext_id].get("kind") or "choice"
+            text = set_answers(text, ext_id, kind, values)
         text = re.sub(r"(?m)^answers:\s*\S+\s*$", "answers: external", text, count=1)
         repos.documents.write_ifmd(doc_id, text)
     except (KeyError, OSError):
@@ -152,124 +177,6 @@ def put_explain(doc_id: int, question_id: int, payload: ExplainPayload) -> dict:
         _fail("question not found", 404)
         raise                                          # pragma: no cover
     return {"question_id": question_id, "explain": content}
-
-
-# --------------------------------------------------------------------------
-# CB-style normalization (batch 12; whole-document run added for the M6 UX)
-# --------------------------------------------------------------------------
-
-
-@router.post("/{doc_id}/normalize", status_code=202)
-def start_document_normalization(doc_id: int) -> dict:
-    """Normalize **every** question of the document in the background.
-
-    One LLM call per question, applied directly — there is no per-question
-    review step (the UI only shows progress). Poll the GET form of this path
-    until ``status`` leaves ``running``.
-    """
-    if repos.documents.get_document(doc_id) is None:
-        _fail("document not found", 404)
-        raise                                          # pragma: no cover
-    if not llm.configured():
-        _fail("no LLM configured — set API key and model in Settings", 409)
-        raise                                          # pragma: no cover
-    return normalize_jobs.start(doc_id)
-
-
-@router.get("/{doc_id}/normalize")
-def document_normalization_status(doc_id: int) -> dict:
-    """Progress/summary of the latest whole-document normalization run."""
-    if repos.documents.get_document(doc_id) is None:
-        _fail("document not found", 404)
-        raise                                          # pragma: no cover
-    job = normalize_jobs.get(doc_id)
-    if job is None:
-        _fail("no normalization has been run for this document", 404)
-        raise                                          # pragma: no cover
-    return job
-
-
-@router.post("/{doc_id}/questions/{question_id}/normalize")
-def normalize_question(doc_id: int, question_id: int) -> dict:
-    """Generate a CB-style normalization for a question (LLM call; explicit user action)."""
-    if not llm.configured():
-        _fail("no LLM configured — set API key and model in Settings", 409)
-        raise                                          # pragma: no cover
-
-    doc = repos.documents.get_document(doc_id)
-    if doc is None:
-        _fail("document not found", 404)
-        raise                                          # pragma: no cover
-
-    questions = repos.documents.list_questions(doc_id)
-    q = next((qq for qq in questions if qq["id"] == question_id), None)
-    if q is None:
-        _fail("question not found", 404)
-        raise                                          # pragma: no cover
-
-    # Need material, stem, options, answer, source_ref.
-    # list_questions returns options as ["A. text", ...] — the LLM speaks dicts.
-    material = q.get("material")
-    stem = q.get("stem", "")
-    from app.llm import normalize as normalize_mod
-
-    options = normalize_mod.to_lettered(q.get("options") or [])
-    answer = q.get("answer") or ""
-    source_ref = q.get("source") or ""
-
-    if not stem or len(options) != 4 or answer not in {"A", "B", "C", "D"}:
-        _fail("question missing required fields for normalization", 400)
-        raise                                          # pragma: no cover
-
-    try:
-        result = normalize_mod.normalize_question(
-            material=material,
-            stem=stem,
-            options=options,
-            answer=answer,
-            source_ref=source_ref,
-        )
-    except normalize_mod.NormalizeError as exc:
-        _fail(str(exc), 422)
-        raise                                          # pragma: no cover
-    except llm.LLMError as exc:
-        _fail(f"LLM request failed: {exc}", 502)
-        raise                                          # pragma: no cover
-
-    return {
-        "original": result.original,
-        "normalized": result.normalized,
-        "changed": result.changed,
-        "answer_preserved": result.answer_preserved,
-        "requires_review": result.requires_review,
-    }
-
-
-@router.post("/{doc_id}/questions/{question_id}/normalize/accept")
-def accept_normalization(doc_id: int, question_id: int, payload: NormalizePayload) -> dict:
-    """Persist an accepted normalization (validates invariants again)."""
-    if repos.documents.get_document(doc_id) is None:
-        _fail("document not found", 404)
-        raise                                          # pragma: no cover
-
-    # The route carries the numeric row id; the ifmd block is keyed by #ext_id.
-    row = next(
-        (q for q in repos.documents.list_questions(doc_id) if q["id"] == question_id),
-        None,
-    )
-    if row is None:
-        _fail("question not found", 404)
-        raise                                          # pragma: no cover
-
-    try:
-        from app.llm import normalize as normalize_mod
-
-        result = normalize_mod.apply_normalization(doc_id, row["ext_id"], payload.model_dump())
-    except normalize_mod.NormalizeError as exc:
-        _fail(str(exc), 422)
-        raise                                          # pragma: no cover
-
-    return {"updated": question_id, "ifmd": result["ifmd"]}
 
 
 @router.get("/{doc_id}/words")

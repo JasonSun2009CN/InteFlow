@@ -32,10 +32,15 @@ from app.convert.normalize import (
     parse_answer_entries,
     split_option_segments,
 )
-from app.ifmd.parser import IfmdError, parse as parse_ifmd
+from app.ifmd.parser import (
+    OPTION_LETTERS,
+    IfmdError,
+    format_answer_line,
+    parse as parse_ifmd,
+)
 
-IMG_TOKEN_RE = re.compile(r"^\[\[IMG:([^\]]+)\]\]$")
-INLINE_ANSWER_RE = re.compile(r"(?i)^\s*(?:answer|正确答案|答案)\s*[:：]?\s*\(?([A-D])\)?\s*$")
+IMG_TOKEN_RE = re.compile(r"^\[\[IMG:([^\]|]+)(?:\|([^\]]*))?\]\]$")
+INLINE_ANSWER_RE = re.compile(r"(?i)^\s*(?:answer|正确答案|答案)\s*[:：]?\s*\(?([A-Z])\)?\s*$")
 
 GAP_MERGE = 0.55         # line gap <= this * size -> same paragraph
 GAP_BLANK = 1.6          # line gap >  this * size -> certainly a new paragraph
@@ -140,6 +145,9 @@ def _scan_page(
     mid = width / 2
     figs = _images.collect_images(page, page_dict, page_no, seen)
     assets = {Path(f.name).stem: f.png for f in figs}
+    # text drawn inside a captured vector figure (table cell, axis label, chart
+    # title) is part of the picture; keep it out of the text stream
+    vector_rects = [pymupdf.Rect(f.rect) for f in figs if f.vector]
     lines: list[Line] = []
     anchored: set[tuple[float, float]] = set()
 
@@ -157,7 +165,7 @@ def _scan_page(
                 continue
             stem = Path(fig.name).stem
             anchored.add((round(rect.x0, 1), round(rect.y0, 1)))
-            lines.append(Line(f"[[IMG:{stem}]]", page_no,
+            lines.append(Line(f"[[IMG:{stem}|{fig.caption}]]", page_no,
                               rect.x0, rect.y0, rect.x1, rect.y1, rect.y1 - rect.y0))
             continue
 
@@ -176,6 +184,9 @@ def _scan_page(
             continue
         if is_chrome(buf, first_y, last_y, height):
             continue
+        if any(_images.covers_text(r, block["bbox"][0], first_y, block["bbox"][2], last_y)
+               for r in vector_rects):
+            continue
         lines.append(Line(buf, page_no, block["bbox"][0], first_y, block["bbox"][2], last_y, size))
 
     for fig in figs:                       # vector figures: anchor to nearest line
@@ -183,7 +194,7 @@ def _scan_page(
         if key in anchored:
             continue
         stem = Path(fig.name).stem
-        lines.append(Line(f"[[IMG:{stem}]]", page_no,
+        lines.append(Line(f"[[IMG:{stem}|{fig.caption}]]", page_no,
                           fig.rect[0], fig.rect[1], fig.rect[2], fig.rect[3],
                           max(fig.rect[3] - fig.rect[1], 8.0)))
 
@@ -402,6 +413,29 @@ def _build_group(items: list[Item], no: int | None, start: int) -> Group:
 # --------------------------------------------------------------------------
 
 
+def _count_options(group: Group) -> int:
+    """Length of the contiguous A, B, C, ... option run in the group.
+
+    Options always start at A and stay contiguous (AMC prints five, some
+    contests six), so the length of the run opened by the first "A." marker is
+    the option count; 0 means the group has no printed choices at all (a
+    fill-in-the-blank question).
+    """
+    started = False
+    count = 0
+    for chunk in group.chunks:
+        for text in chunk:
+            _, segs = split_option_segments(text)
+            for letter, _ in segs:
+                if not started:
+                    if letter == OPTION_LETTERS[0]:
+                        started = True
+                        count = 1
+                elif letter == OPTION_LETTERS[count]:
+                    count += 1
+    return count
+
+
 def _build_question(
     group: Group, section_hint: str | None, warnings: list[str]
 ) -> BuiltQuestion | None:
@@ -412,6 +446,7 @@ def _build_question(
     answer: str | None = None
     state = "pre"
     pending: list[str] = []
+    count = _count_options(group)
 
     def flush_pre() -> None:
         nonlocal pending
@@ -439,11 +474,11 @@ def _build_question(
                 continue
 
             if state == "opt":
-                if _add_option_line(options, order, text, trailing) and len(order) == 4:
+                if _add_option_line(options, order, text, trailing, count) and len(order) == count:
                     state = "post"
                 continue
 
-            # post: everything after the fourth option
+            # post: everything after the last option
             if IMG_TOKEN_RE.match(text):
                 _append_to_last(options, order, text)
             else:
@@ -452,8 +487,32 @@ def _build_question(
             flush_pre()
 
     flush_pre()
-    if len(options) != 4:
-        warnings.append(f"skipped question {_label(group)}: found {len(options)} of 4 options")
+
+    # No options at all -> a fill-in-the-blank question: the whole body is the
+    # stem (no material/stem guess, there is no option block to anchor on).
+    if not options:
+        stem = _emit([text for chunk in pre for text in chunk])
+        if group.no is not None:
+            stem = _strip_question_number(stem, group.no)
+        if not stem:
+            warnings.append(f"skipped question {_label(group)}: empty stem")
+            return None
+        sec = section_hint or guess_sec(stem)
+        return BuiltQuestion(
+            material=None,
+            stem=stem,
+            options={},
+            no=group.no,
+            sec=sec,
+            answer=None,
+            source=f"p.{group.page}",
+            kind="blank",
+        )
+
+    if len(options) < 2:
+        warnings.append(
+            f"skipped question {_label(group)}: only {len(options)} option(s) found"
+        )
         return None
 
     material, stem = _split_material_stem(pre)
@@ -509,7 +568,7 @@ def _add_option(
         if content:
             options[letter] = join_lines(options[letter], content)
         return
-    expected = "ABCD"[len(order)]
+    expected = OPTION_LETTERS[len(order)]
     if letter != expected:
         trailing.append(f"{letter}. {content}")
         return
@@ -518,7 +577,11 @@ def _add_option(
 
 
 def _add_option_line(
-    options: dict[str, str], order: list[str], text: str, trailing: list[str]
+    options: dict[str, str],
+    order: list[str],
+    text: str,
+    trailing: list[str],
+    count: int,
 ) -> bool:
     """Handle one line after the options started; True when a marker was seen."""
     if IMG_TOKEN_RE.match(text):
@@ -527,13 +590,13 @@ def _add_option_line(
     lead, segs = split_option_segments(text)
     if not segs:
         if lead:
-            if len(order) == 4:
+            if len(order) >= count:
                 trailing.append(lead)
             else:
                 _append_to_last(options, order, lead)
         return False
     if lead:
-        if len(order) < 4:
+        if len(order) < count:
             _append_to_last(options, order, lead)
         else:
             trailing.append(lead)
@@ -574,7 +637,8 @@ def _emit(lines: list[str]) -> str:
             if buf:
                 paragraphs.append(buf)
                 buf = ""
-            paragraphs.append(f"![figure](assets/{m.group(1)}.png)")
+            alt = (m.group(2) or "").strip() or "figure"
+            paragraphs.append(f"![{alt}](assets/{m.group(1)}.png)")
         else:
             buf = join_lines(buf, text) if buf else text
     if buf:
@@ -591,13 +655,20 @@ def _render_question(idx: int, q: BuiltQuestion) -> str:
     attrs = [f"#Q{idx:03d}", f"sec={q.sec}"]
     if q.no is not None:
         attrs.append(f"no={q.no}")
+    if q.kind == "blank":
+        attrs.append("kind=blank")
+    if q.multi:
+        attrs.append("multi=1")
     out = [f":::q {{{' '.join(attrs)}}}"]
     if q.material:
         out += ["@material", q.material, ""]
     out += ["@stem", q.stem, ""]
-    for letter in "ABCD":
-        out.append(f"- {letter}. {q.options[letter]}")
-    if q.answer:
+    if q.kind != "blank":
+        for letter, content in q.options.items():
+            out.append(f"- {letter}. {content}")
+    if q.answers:
+        out.append(f"! answer: {format_answer_line(q.kind, q.answers)}")
+    elif q.answer:
         out.append(f"! answer: {q.answer}")
     out.append(f"! source: {q.source}")
     out.append(":::")
@@ -645,6 +716,15 @@ def _validate_block(block: str, title: str) -> str | None:
 # --------------------------------------------------------------------------
 
 
+def _img_md(m: re.Match) -> str:
+    """`[[IMG:name|caption]]` token -> a Markdown image with a real alt text."""
+    alt = (m.group(2) or "").strip() or "figure"
+    return f"![{alt}](assets/{m.group(1)}.png)"
+
+
+_IMG_TOKEN_RE = re.compile(r"\[\[IMG:([^\]|]+)(?:\|([^\]]*))?\]\]")
+
+
 def _assemble(
     title: str,
     source: str,
@@ -665,8 +745,8 @@ def _assemble(
 
     blocks: list[str] = []
     for q in questions:
-        block = re.sub(
-            r"\[\[IMG:([^\]]+)\]\]", r"![figure](assets/\1.png)",
+        block = _IMG_TOKEN_RE.sub(
+            _img_md,
             _render_question(len(blocks) + 1, q),
         )
         err = _validate_block(block, title)
@@ -740,6 +820,13 @@ def convert_pdf(
     except ConvertError as err:
         if not err.fallback:
             raise
+        from app.repos import settings as settings_repo
+
+        if not settings_repo.llm_fallback_enabled():
+            raise ConvertError(
+                f"{err} — the AI recognition fallback is turned off; enable "
+                "'AI recognition fallback' in Settings to retry with a model"
+            ) from err
         if not llm.configured():
             raise ConvertError(
                 f"{err} — no LLM API configured; add an API key and a model in "

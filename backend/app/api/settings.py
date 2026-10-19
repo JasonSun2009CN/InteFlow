@@ -39,6 +39,8 @@ class SettingsPayload(BaseModel):
     api_key: str | None = None       # write-only; blank means "keep stored key"
     model: str | None = None
     clear_key: bool = False          # explicit wipe; blank alone keeps the key
+    user_name: str | None = None     # printed on page 1 of every analysis notebook
+    llm_fallback: bool | None = None  # allow AI question recognition when parsing fails
 
 
 def _mask(key: str) -> str:
@@ -56,6 +58,8 @@ def _load() -> dict[str, str]:
         "base_url": stored.get("base_url", ""),
         "api_key": stored.get("api_key", ""),
         "model": stored.get("model", ""),
+        "user_name": stored.get("user_name", ""),
+        "llm_fallback": stored.get("llm_fallback", "1"),
     }
 
 
@@ -67,6 +71,8 @@ def _view(s: dict[str, str]) -> dict:
         "model": s["model"],
         "api_key_masked": _mask(s["api_key"]) if s["api_key"] else "",
         "api_key_set": bool(s["api_key"]),
+        "user_name": s["user_name"],
+        "llm_fallback": s["llm_fallback"] != "0",
     }
 
 
@@ -105,6 +111,10 @@ def put_settings(payload: SettingsPayload) -> dict:
         updates["api_key"] = ""
     elif payload.api_key and payload.api_key.strip():
         updates["api_key"] = payload.api_key.strip()
+    if payload.user_name is not None:
+        updates["user_name"] = payload.user_name.strip()
+    if payload.llm_fallback is not None:
+        updates["llm_fallback"] = "1" if payload.llm_fallback else "0"
     settings_repo.set_values(updates)
     return _view(_load())
 

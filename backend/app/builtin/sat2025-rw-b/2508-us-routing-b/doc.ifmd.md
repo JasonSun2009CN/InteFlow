@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月北美 · Routing B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:45Z
+imported_at: 2026-10-19T12:20:28Z
 answers: external
 ---
 
@@ -146,21 +146,7 @@ What does the text most strongly suggest about the study conducted by Rosas-Guer
 
 :::q {#Q010 sec=rw no=10}
 @material
-Prices of Nuts Sold by Growers
-
-in the United States, 2016/17 to 2019/20 Seasons
-
-Price per pound (dollars)
-
-Season
-
-macadamias
-
-walnuts
-
-![figure](assets/p06-01375620.png)
-
-hazelnuts
+![Prices of Nuts Sold by Growers 2016/17 to 2019/20 Seasons; 2017/18 Season](assets/p06-d4b1b84f.png)
 
 The US Department of Agriculture's Fruit and Tree Nuts Outlook is a document that covers a variety of subjects, from the increasing availability of fresh fruit to the effect of stinkbug damage on pear crops. A student studying agricultural economics is consulting a graph in the document that shows the prices for which several types of nuts have been sold by growers in the United States over four growing seasons from 2016 to 2020. The student wishes to determine in which season walnuts reached their lowest price. Consulting the graph, the student finds that this season was the ______
 
@@ -200,25 +186,7 @@ October 2001
 
 Number of individual
 
-fish observed
-
-July 2001
-
-October 2001
-
-April 2001
-
-January 2001
-
-![figure](assets/p08-deb15c3b.png)
-
-Month
-
-Indo-Pacific sergeant
-
-streaky rockskipper
-
-barred flagtail
+![25; October 2001 Month](assets/p08-ba74ed15.png)
 
 Lin-Tai Ho and colleagues counted fish in a tide pool in Taiwan at several times during the year and found that some species had a significantly higher maximum population count than others. For example, the highest count for the Indo-Pacific sergeant was 28 individuals in October of 2001, whereas the highest count for the streaky rockskipper was ______
 

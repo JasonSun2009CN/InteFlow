@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月亚太 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:55Z
+imported_at: 2026-10-19T12:20:38Z
 answers: external
 ---
 
@@ -166,7 +166,7 @@ Which choice best describes what happens in the text?
 
 :::q {#Q010 sec=rw no=10}
 @material
-Atari 2600 Atari console 18,450,000
+![Home Video Game Systems of the 1970s and 1980s](assets/p06-9794c31a.png)
 
 A student is writing a research paper on the global rise or the home video game industry during the 1970s and 1980s. The student is surprised by differences in the number of units sold by some systems compared to those sold by others. Most remarkably, the ______
 
@@ -198,6 +198,8 @@ Which finding, if true, would most directly weaken Schober's hypothesis?
 
 :::q {#Q012 sec=rw no=12}
 @material
+![Trait Day 5 Day 10 Day 15 Day 20](assets/p08-8cc6503b.png)
+
 The mating environment hypothesis predicts that populations of flowering plants compensate for reduced mating opportunities due to dichogamy (a plant's expression of male and female functions at separate times to prevent self-pollination) by adjusting the bias of floral sex allocation during the flowering period, increasing the probability of successful crossplant pollination. Researchers tested the hypothesis by examining a population of broadleaf arrowhead, a plant for which bloom onset generally takes longer for male flowers than for female flowers, during the flowering season. They concluded that the mating environment hypothesis is not well supported by their observational data.
 
 @stem

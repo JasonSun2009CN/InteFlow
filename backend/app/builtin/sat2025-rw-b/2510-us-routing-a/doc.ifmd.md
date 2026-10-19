@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月北美 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:15Z
+imported_at: 2026-10-19T12:20:59Z
 answers: external
 ---
 
@@ -178,17 +178,7 @@ What does the text most strongly suggest about paintings by Gibson?
 
 :::q {#Q012 sec=rw no=12}
 @material
-Mean Body Mass of Birds Known to Perform
-
-Broken-Wing Display
-
-Bird Mean body mass (grams)
-
-pied-billed grebe 409
-
-common ringed plover 60
-
-common snipe 126
+![Mean Body Mass of Birds Known to Perform Broken-Wing Display](assets/p06-83fb2abb.png)
 
 One antipredator defense that the grey-headed lapwing uses to protect its nest and young chicks is called "broken-wing display"; this form of deceptive defense involves an adult bird pretending to be injured and unable to fly in order to distract an approaching predator. Broken-wing display has been documented in 285 bird species from 13 different avian orders. A student predicts that bird species with mean body masses greater than 150 grams do not use deceptive defenses because larger birds tend to be more effective than smaller birds at using aggressive defenses to protect nests from predators, making deceptive defenses unnecessary.
 

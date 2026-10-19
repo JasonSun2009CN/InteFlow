@@ -34,10 +34,11 @@ import pymupdf
 from app.convert import images as _images
 from app.convert.model import BuiltQuestion, Item
 from app.convert.normalize import clean_text, guess_sec, is_chrome, join_lines
+from app.ifmd.parser import MAX_OPTIONS, OPTION_LETTERS
 
 BADGE_RE = re.compile(r"^\d{1,3}$")
-OPT_START_RE = re.compile(r"^([a-d])[.)]?\s+\S")
-OPT_SPLIT_RE = re.compile(r"^([a-d])[.)]?\s+(\S.*)$", re.S)
+OPT_START_RE = re.compile(r"^([a-z])[.)]?\s+\S")
+OPT_SPLIT_RE = re.compile(r"^([a-z])[.)]?\s+(\S.*)$", re.S)
 
 BADGE_Y0_MIN = 0.05          # below the page header
 BADGE_Y0_MAX = 0.80          # above the footer zone
@@ -238,22 +239,24 @@ def detect(doc: pymupdf.Document) -> bool:
 
 
 def _assemble_field(
-    blocks: list[Block], figs: list[tuple[float, str]]
+    blocks: list[Block], figs: list[tuple[float, str, str]]
 ) -> str:
     """Text blocks and figure tokens poured out in visual order."""
     entries = [(b.y0, b.x0, b.text) for b in blocks]
-    entries += [(y, 0.0, f"[[IMG:{name}]]") for y, name in figs]
+    entries += [(y, 0.0, f"[[IMG:{name}|{caption}]]") for y, name, caption in figs]
     entries.sort()
     return "\n\n".join(text for _, _, text in entries)
 
 
-def _fig_is_chrome(fig: _images.ExtractedImage, blocks: list[Block], mid: float) -> bool:
+def _fig_is_chrome(fig: _images.ExtractedImage, blocks: list[Block]) -> bool:
     """True for screenshots of the question UI itself (badge/option boxes).
 
     Two-column pages draw a rounded box around every option and behind the
-    number badge; when those cluster into a low-text-coverage rectangle the
-    generic extractor mistakes them for a figure. A figure covering a badge,
-    a circled option, or any right-column text is UI chrome, not content.
+    number badge; when those cluster into a rectangle the generic extractor
+    mistakes them for a figure. A figure covering a badge or a circled option
+    is UI chrome, not content. A *wide* content figure (a full-width table or
+    chart) legitimately overlaps the right column, so width alone is not proof
+    of chrome.
     """
     rect = pymupdf.Rect(fig.rect)
     for b in blocks:
@@ -261,8 +264,6 @@ def _fig_is_chrome(fig: _images.ExtractedImage, blocks: list[Block], mid: float)
         if not (rect.x0 - 2 <= cx <= rect.x1 + 2 and rect.y0 - 2 <= cy <= rect.y1 + 2):
             continue
         if b.circled or BADGE_RE.match(b.text):
-            return True
-        if cx >= mid:
             return True
     return False
 
@@ -288,8 +289,12 @@ def _merge_band_figs(page: pymupdf.Page, figs: list[_images.ExtractedImage]) -> 
                 union = a | b
                 png = _images._clip_png(page, union & page.rect)
                 name = f"p{page.number + 1:02d}-{hashlib.sha1(png).hexdigest()[:8]}.png"
+                caption = "; ".join(dict.fromkeys(
+                    c for c in (out[i].caption, out[j].caption) if c
+                ))
                 out[i] = _images.ExtractedImage(
-                    (union.x0, union.y0, union.x1, union.y1), name, png
+                    (union.x0, union.y0, union.x1, union.y1), name, png,
+                    vector=out[i].vector or out[j].vector, caption=caption,
                 )
                 out.pop(j)
                 merged = True
@@ -320,7 +325,15 @@ def convert(doc: pymupdf.Document, warnings: list[str]) -> TwoColumnResult:
         blocks, sec_page = _scan(page, page_no)
 
         # drop screenshots of the question UI itself (option/badge boxes)
-        figs = [f for f in figs if not _fig_is_chrome(f, blocks, mid)]
+        figs = [f for f in figs if not _fig_is_chrome(f, blocks)]
+        # text that lives inside a captured vector figure is rendered in the
+        # picture; keep it out of the text stream so it is not emitted twice
+        covered = _images.figure_regions(figs)
+
+        def inside_figure(b: Block) -> bool:
+            return any(_images.covers_text(r, b.x0, b.y0, b.x1, b.y1) for r in covered)
+
+        blocks = [b for b in blocks if not inside_figure(b)]
         assets.update({Path(f.name).stem: f.png for f in figs})
         rows = _rows(blocks, mid, h)
 
@@ -330,16 +343,36 @@ def convert(doc: pymupdf.Document, warnings: list[str]) -> TwoColumnResult:
         def fig_center(f: _images.ExtractedImage) -> float:
             return (f.rect[1] + f.rect[3]) / 2
 
+        # A figure belongs to the material when it starts in the left column or
+        # spans the gutter (full-width tables/charts); only figures confined to
+        # the right column sit with the stem/options.
         figs_left = [
             f for f in figs
-            if (f.rect[0] + f.rect[2]) / 2 < mid and fig_center(f) < CONTENT_BOTTOM * h
+            if f.rect[0] < mid and fig_center(f) < CONTENT_BOTTOM * h
         ]
         figs_right = [
             f for f in figs
-            if (f.rect[0] + f.rect[2]) / 2 >= mid and fig_center(f) < CONTENT_BOTTOM * h
+            if f.rect[0] >= mid and fig_center(f) < CONTENT_BOTTOM * h
         ]
 
         page_questions: list[BuiltQuestion] = []
+        badge_ys = [badge.y0 for badge, _, _ in rows]
+
+        def nearest_row(f: _images.ExtractedImage) -> int:
+            """Index of the badge row this figure sits closest to."""
+            c = fig_center(f)
+            return min(range(len(rows)), key=lambda i: abs(badge_ys[i] - c))
+
+        # Figures are owned by the *nearest* badge row rather than a fixed band:
+        # a table can sit above its badge (top of page), a chart below it.
+        owned_left: dict[int, list[_images.ExtractedImage]] = {}
+        owned_right: dict[int, list[_images.ExtractedImage]] = {}
+        if rows:
+            for f in figs_left:
+                owned_left.setdefault(nearest_row(f), []).append(f)
+            for f in figs_right:
+                owned_right.setdefault(nearest_row(f), []).append(f)
+
         for row_i, (badge, right, left) in enumerate(rows):
             for b in [badge, *right, *left]:
                 claimed.add(id(b))
@@ -362,35 +395,25 @@ def convert(doc: pymupdf.Document, warnings: list[str]) -> TwoColumnResult:
                 continue
             if len(starts) < MIN_OPTIONS:
                 warnings.append(
-                    f"skipped question {label}: found {len(starts)} of 4 options"
+                    f"skipped question {label}: found {len(starts)} options"
                 )
                 continue
-            if len(starts) > 4 or [s[1] for s in starts[:4]] != list("ABCD"):
+            if len(starts) > MAX_OPTIONS or [s[1] for s in starts] != list(
+                OPTION_LETTERS[: len(starts)]
+            ):
                 warnings.append(
                     f"skipped question {label}: option letters "
-                    f"{'/'.join(s[1] for s in starts)} are not A/B/C/D in order"
+                    f"{'/'.join(s[1] for s in starts)} are not A/B/C/… in order"
                 )
                 continue
 
-            # figures: left-column ones go to the material, right-column to the stem
-            next_top = (
-                rows[row_i + 1][0].y0 - ROW_OFFSET
-                if row_i + 1 < len(rows)
-                else CONTENT_BOTTOM * h
-            )
-            mat_cands = [
-                f for f in figs_left
-                if badge.y0 - ROW_OFFSET <= fig_center(f) < next_top
-            ]
-            stem_cands = [
-                f for f in figs_right
-                if badge.y0 < fig_center(f) < badge.y0 + OPTION_WINDOW * h
-            ]
-            mat_cands = _merge_band_figs(page, mat_cands)
-            stem_cands = _merge_band_figs(page, stem_cands)
+            # figures: left-column (or full-width) ones go to the material,
+            # right-column ones to the stem
+            mat_cands = _merge_band_figs(page, owned_left.get(row_i, []))
+            stem_cands = _merge_band_figs(page, owned_right.get(row_i, []))
             assets.update({Path(f.name).stem: f.png for f in [*mat_cands, *stem_cands]})
-            mat_figs = [(fig_center(f), Path(f.name).stem) for f in mat_cands]
-            stem_figs = [(fig_center(f), Path(f.name).stem) for f in stem_cands]
+            mat_figs = [(fig_center(f), Path(f.name).stem, f.caption) for f in mat_cands]
+            stem_figs = [(fig_center(f), Path(f.name).stem, f.caption) for f in stem_cands]
 
             stem_blocks = right[: starts[0][0]]
             if not any(b.text for b in stem_blocks):

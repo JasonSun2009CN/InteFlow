@@ -4,11 +4,14 @@ import { api, ApiError, type QuizQuestion, type StartResponse } from "../api/cli
 import RichText from "../components/RichText";
 import { sectionLabel } from "../lib/sections";
 
-const LETTERS = ["A", "B", "C", "D"];
-
 function optionParts(option: string): { letter: string; text: string } {
-  const m = /^([A-D])[.)]\s*([\s\S]*)$/.exec(option.trim());
+  const m = /^([A-Z])[.)]\s*([\s\S]*)$/.exec(option.trim());
   return m ? { letter: m[1], text: m[2] } : { letter: "?", text: option };
+}
+
+/** The letters this question actually offers (AMC prints five, some six). */
+function optionLetters(q: QuizQuestion): Set<string> {
+  return new Set(q.options.map((opt) => optionParts(opt).letter));
 }
 
 function clock(total: number): string {
@@ -29,7 +32,7 @@ export default function PracticePage() {
   const [error, setError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
   const [idx, setIdx] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [marked, setMarked] = useState<Set<number>>(new Set());
   const [seconds, setSeconds] = useState(0);
   const [confirming, setConfirming] = useState(false);
@@ -44,6 +47,9 @@ export default function PracticePage() {
   // the single in-flight request.
   const startedFor = useRef<number | null>(null);
   const aliveRef = useRef(true);
+  /** The provisional session row; dropped on leave unless the attempt is submitted. */
+  const sessionIdRef = useRef<number | null>(null);
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     aliveRef.current = true;
@@ -56,17 +62,31 @@ export default function PracticePage() {
     setError(null);
     if (startedFor.current === docId) return undefined; // strict-mode re-run
 
+    submittedRef.current = false;
     startedFor.current = docId;
     api
       .startSession(docId)
       .then((s) => {
-        if (aliveRef.current && startedFor.current === docId) setSession(s);
+        if (!aliveRef.current || startedFor.current !== docId) {
+          // The screen went away before the session loaded — drop the row.
+          void api.deleteSession(s.session_id).catch(() => {});
+          return;
+        }
+        sessionIdRef.current = s.session_id;
+        setSession(s);
       })
       .catch((err) => {
         if (aliveRef.current && startedFor.current === docId) setError(errText(err));
       });
     return () => {
       aliveRef.current = false;
+      // Opening an exam must not leave an attempt behind: unless it was
+      // submitted, the provisional session is discarded.
+      const sid = sessionIdRef.current;
+      sessionIdRef.current = null;
+      if (sid !== null && !submittedRef.current) {
+        void api.deleteSession(sid).catch(() => {});
+      }
     };
   }, [docId]);
 
@@ -89,8 +109,23 @@ export default function PracticePage() {
   const answered = Object.keys(answers).length;
   const last = idx === questions.length - 1;
 
-  function choose(qid: number, letter: string) {
-    setAnswers((prev) => ({ ...prev, [qid]: letter }));
+  /** Choice: single-select replaces, multi-select toggles. */
+  function choose(q: QuizQuestion, letter: string) {
+    setAnswers((prev) => {
+      const existing = prev[q.id] ?? [];
+      if (!q.multi) {
+        // single-select: clicking the same letter again clears it
+        return { ...prev, [q.id]: existing.includes(letter) ? [] : [letter] };
+      }
+      const next = existing.includes(letter)
+        ? existing.filter((l) => l !== letter)
+        : [...existing, letter].sort();
+      return { ...prev, [q.id]: next };
+    });
+  }
+
+  function setBlank(qid: number, value: string) {
+    setAnswers((prev) => ({ ...prev, [qid]: value.trim() ? [value] : [] }));
   }
 
   function toggleMark(qid: number) {
@@ -109,8 +144,11 @@ export default function PracticePage() {
     try {
       const res = await api.submit(
         session.session_id,
-        Object.fromEntries(Object.entries(answers).map(([k, v]) => [k, v])),
+        Object.fromEntries(
+          Object.entries(answers).filter(([, v]) => v.length > 0),
+        ),
       );
+      submittedRef.current = true;
       setConfirming(false);
       if (res.graded > 0) {
         // the key exists — straight to the graded results
@@ -126,7 +164,7 @@ export default function PracticePage() {
     }
   }
 
-  /** Leave mid-exam: the session stays in the document's history unfinished. */
+  /** Leave mid-exam: the session is abandoned and never listed as an attempt. */
   function leaveExam() {
     setLeaving(false);
     navigate("/");
@@ -143,7 +181,7 @@ export default function PracticePage() {
     setEntered(true);
   }
 
-  // exam-style shortcuts: A-D selects, arrows move.
+  // exam-style shortcuts: the option letters select, arrows move.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!session || !entered || confirming || leaving) return;
@@ -152,8 +190,8 @@ export default function PracticePage() {
       const q = questions[idx];
       if (!q) return;
       const key = e.key.toUpperCase();
-      if (LETTERS.includes(key)) {
-        choose(q.id, key);
+      if (q.kind !== "blank" && optionLetters(q).has(key)) {
+        choose(q, key);
       } else if (e.key === "ArrowRight") {
         setIdx((i) => Math.min(i + 1, questions.length - 1));
       } else if (e.key === "ArrowLeft") {
@@ -295,35 +333,56 @@ export default function PracticePage() {
             </div>
 
             <div className="mt-5 space-y-2.5">
-              {current.options.map((option) => {
-                const { letter, text } = optionParts(option);
-                const selected = answers[current.id] === letter;
-                return (
-                  <button
-                    key={letter}
-                    onClick={() => choose(current.id, letter)}
-                    aria-pressed={selected}
-                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
-                      selected
-                        ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                        : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50"
-                    }`}
-                  >
-                    <span
-                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border text-sm font-semibold ${
+              {current.kind === "blank" ? (
+                <label className="block">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Your answer
+                  </span>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={answers[current.id]?.[0] ?? ""}
+                    onChange={(event) => setBlank(current.id, event.target.value)}
+                    aria-label="Your answer"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-[15px] focus:border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                  />
+                </label>
+              ) : (
+                current.options.map((option) => {
+                  const { letter, text } = optionParts(option);
+                  const selected = (answers[current.id] ?? []).includes(letter);
+                  return (
+                    <button
+                      key={letter}
+                      onClick={() => choose(current, letter)}
+                      aria-pressed={selected}
+                      className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
                         selected
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-400 text-slate-700"
+                          ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
+                          : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50"
                       }`}
                     >
-                      {letter}
-                    </span>
-                    <span className="min-w-0 flex-1 pt-0.5 text-[15px]">
-                      <RichText text={text} docId={docId} />
-                    </span>
-                  </button>
-                );
-              })}
+                      <span
+                        className={`grid h-7 w-7 shrink-0 place-items-center text-sm font-semibold ${
+                          current.multi ? "rounded-md border" : "rounded-full border"
+                        } ${
+                          selected
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-slate-400 text-slate-700"
+                        }`}
+                      >
+                        {letter}
+                      </span>
+                      <span className="min-w-0 flex-1 pt-0.5 text-[15px]">
+                        <RichText text={text} docId={docId} />
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+              {current.multi && (
+                <p className="text-xs text-slate-500">Select every correct answer.</p>
+              )}
             </div>
           </section>
         </div>
@@ -341,7 +400,7 @@ export default function PracticePage() {
 
           <nav className="flex flex-1 flex-wrap justify-center gap-1.5" aria-label="Question palette">
             {questions.map((q, i) => {
-              const isAnswered = answers[q.id] !== undefined;
+              const isAnswered = (answers[q.id] ?? []).length > 0;
               const isMarked = marked.has(q.id);
               const isCurrent = i === idx;
               const tone = isMarked

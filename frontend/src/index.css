@@ -84,7 +84,7 @@
   /* Typography */
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  /* Serif display face for the home screen's headings — printed-book feel. */
+  /* Serif display face — printed-book headings. Themes re-point this. */
   --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, "Times New Roman", serif;
 
   --text-xs: 0.75rem;     /* 12px */
@@ -158,127 +158,707 @@ body {
   clip: rect(0, 0, 0, 0);
 }
 
-/* ------------------------------------------------------------------ *
- * Paper & ink theme scope.
+/* ==================================================================== *
+ * Themes
+ * --------------------------------------------------------------------
+ * Everything you see inside `.app-theme` is skinned by CSS variables:
  *
- * Every non-exam screen lives inside `.paper-app`. Remapping the Tailwind
- * colour variables there re-skins all existing `slate-* / blue-* / red-* …`
- * utilities to the warm paper palette without touching each page.
- * The practice screen renders outside this scope and keeps the original
- * cool slate + blue look.
- * ------------------------------------------------------------------ */
-.paper-app {
-  --color-white: #fffdf8;
+ *   1. each theme declares a small set of *semantic* tokens (`--t-…`)
+ *   2. one shared block maps every Tailwind colour family onto those tokens
+ *   3. a few unlayered rules below carry each theme's signature details
+ *      (display face, corner radius, button shape, nav marker, scrim, wash)
+ *
+ * Because the mapping is unlayered it wins over Tailwind's `utilities`
+ * layer, so a theme can restyle a component without touching its JSX.
+ *
+ * The full-screen practice screen renders outside `.app-theme` and keeps the
+ * original slate/blue palette on purpose (see `AppShell`).
+ * ==================================================================== */
 
-  /* neutrals: warm paper → ink */
-  --color-slate-50: #faf8f3;
-  --color-slate-100: #f5f1e8;
-  --color-slate-200: #ece5d8;
-  --color-slate-300: #dad1bf;
-  --color-slate-400: #b6afa1;
-  --color-slate-500: #8d8678;
-  --color-slate-600: #6d665a;
-  --color-slate-700: #504a41;
-  --color-slate-800: #3a352f;
-  --color-slate-900: #1c1916;
+/* -- page-level bits that can't live inside the wrapper ---------------- */
 
-  /* accent / actions: blue & primary → ink */
-  --color-blue-50: #f7f5f0;
-  --color-blue-200: #e2dbcd;
-  --color-blue-400: #8d8678;
-  --color-blue-500: #504a41;
-  --color-blue-600: #1c1916;
-  --color-blue-700: #000000;
-  --color-blue-800: #000000;
-  --color-blue-900: #000000;
-  --color-primary-50: #f7f5f0;
-  --color-primary-100: #ece5d8;
-  --color-primary-200: #dad1bf;
-  --color-primary-500: #6d665a;
-  --color-primary-600: #1c1916;
-  --color-primary-700: #000000;
-  --color-primary-800: #000000;
-
-  /* AI / secondary accents: muted denim & plum */
-  --color-indigo-50: #f0f1f2;
-  --color-indigo-600: #3f4a52;
-  --color-indigo-700: #333c43;
-  --color-violet-600: #4a4152;
-  --color-violet-700: #3d3545;
-
-  /* errors: seal red */
-  --color-red-50: #fbf1ee;
-  --color-red-100: #f5ded6;
-  --color-red-200: #ecc4b8;
-  --color-red-300: #dda291;
-  --color-red-400: #ca7a63;
-  --color-red-500: #b04d36;
-  --color-red-600: #9a402c;
-  --color-red-700: #7e3424;
-  --color-red-800: #65291c;
-  --color-danger-50: #fbf1ee;
-  --color-danger-100: #f5ded6;
-  --color-danger-200: #ecc4b8;
-  --color-danger-500: #b04d36;
-  --color-danger-600: #9a402c;
-  --color-danger-700: #7e3424;
-  --color-danger-800: #65291c;
-
-  /* success: sage */
-  --color-emerald-50: #f2f3ec;
-  --color-emerald-100: #e4e7d8;
-  --color-emerald-300: #b1ba95;
-  --color-emerald-500: #6f7d4f;
-  --color-emerald-600: #5b6840;
-  --color-emerald-700: #475232;
-  --color-emerald-800: #38412a;
-  --color-emerald-900: #2c3320;
-  --color-green-50: #f2f3ec;
-  --color-green-300: #b1ba95;
-  --color-green-800: #38412a;
-  --color-success-50: #f2f3ec;
-  --color-success-100: #e4e7d8;
-  --color-success-200: #cfd5bb;
-  --color-success-600: #5b6840;
-  --color-success-700: #475232;
-  --color-success-800: #38412a;
-
-  /* warning: ochre */
-  --color-amber-50: #faf5ea;
-  --color-amber-100: #f3e7cd;
-  --color-amber-300: #d5b97c;
-  --color-amber-400: #bf9b52;
-  --color-amber-500: #a67f3a;
-  --color-amber-600: #8c6730;
-  --color-amber-700: #6f5128;
-  --color-amber-800: #5a4322;
-  --color-amber-900: #4a3820;
-  --color-warning-50: #faf5ea;
-  --color-warning-100: #f3e7cd;
-  --color-warning-200: #e7d3a8;
-  --color-warning-600: #8c6730;
-  --color-warning-700: #6f5128;
-  --color-warning-800: #5a4322;
+html[data-theme="clear-blue"] {
+  color-scheme: light;
+  background-color: #f2f5f9;
 }
 
-/* Warm paper ground with one soft light pooling from the top. */
-.paper-wash {
-  background-color: var(--color-paper-50);
-  background-image: radial-gradient(
-    1100px 480px at 50% -160px,
-    #f0e9da 0%,
-    rgba(250, 248, 243, 0) 72%
+html[data-theme="paper-ink"] {
+  color-scheme: light;
+  background-color: #faf8f3;
+}
+
+html[data-theme="minimal-light"] {
+  color-scheme: light;
+  background-color: #ffffff;
+}
+
+html[data-theme="midnight-navy"] {
+  color-scheme: dark;
+  background-color: #0a1120;
+}
+
+html[data-theme="warm-editorial"] {
+  color-scheme: light;
+  background-color: #f7efe2;
+}
+
+/* The page canvas follows the theme as well, so the overscroll area beyond the
+   app's own ground matches instead of flashing the default slate. */
+html[data-theme] body {
+  background-color: inherit;
+}
+
+/* -- 1. semantic tokens, one block per theme --------------------------- */
+
+.app-theme[data-theme="clear-blue"] {
+  --t-bg: #f2f5f9;
+  --t-bg-2: #e9eef6;
+  --t-surface: #ffffff;
+  --t-surface-2: #f6f9fc;
+  --t-line: #e3e9f1;
+  --t-line-strong: #c8d3e2;
+  --t-fainter: #b8c4d4;
+  --t-faint: #8494ab;
+  --t-muted: #64748b;
+  --t-muted-2: #52627a;
+  --t-text-2: #2c3c56;
+  --t-text: #101c30;
+
+  --t-accent: #0057b8;
+  --t-accent-hover: #004592;
+  --t-accent-active: #003a7a;
+  --t-accent-mid: #4d8ecd;
+  --t-accent-line: #b6d1ec;
+  --t-accent-soft: #e9f1fb;
+  --t-accent-soft-2: #d7e8f9;
+  --t-accent-text: #0b4a94;
+
+  --t-secondary-soft: #eef1f8;
+  --t-secondary: #3c5a8a;
+  --t-secondary-dark: #2f4870;
+  --t-secondary-2: #5b5a92;
+  --t-secondary-2-dark: #4a4979;
+
+  --t-danger-soft: #fef2f2;
+  --t-danger-soft-2: #fee2e2;
+  --t-danger-line-2: #fecaca;
+  --t-danger-line: #fca5a5;
+  --t-danger-mid: #f87171;
+  --t-danger: #ef4444;
+  --t-danger-strong: #dc2626;
+  --t-danger-stronger: #b91c1c;
+  --t-danger-dark: #991b1b;
+  --t-danger-darker: #7f1d1d;
+
+  --t-success-soft: #ecfdf5;
+  --t-success-soft-2: #d1fae5;
+  --t-success-line-2: #a7f3d0;
+  --t-success-line: #6ee7b7;
+  --t-success-mid: #34d399;
+  --t-success: #10b981;
+  --t-success-strong: #059669;
+  --t-success-stronger: #047857;
+  --t-success-dark: #065f46;
+  --t-success-darker: #064e3b;
+
+  --t-warning-soft: #fffbeb;
+  --t-warning-soft-2: #fef3c7;
+  --t-warning-line-2: #fde68a;
+  --t-warning-line: #fcd34d;
+  --t-warning-mid: #fbbf24;
+  --t-warning: #f59e0b;
+  --t-warning-strong: #d97706;
+  --t-warning-stronger: #b45309;
+  --t-warning-dark: #92400e;
+  --t-warning-darker: #78350f;
+
+  --t-scrim: rgb(16 28 48 / 0.4);
+  --t-wash: radial-gradient(
+    1100px 420px at 55% -160px,
+    #e8eefa 0%,
+    rgb(242 245 249 / 0) 70%
   );
+  --t-btn-transform: none;
+  --t-btn-tracking: 0.01em;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(16 28 48 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(16 28 48 / 0.09), 0 2px 4px -2px rgb(16 28 48 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(16 28 48 / 0.1), 0 4px 6px -4px rgb(16 28 48 / 0.08);
+  --shadow-xl: 0 20px 25px -5px rgb(16 28 48 / 0.12), 0 8px 10px -6px rgb(16 28 48 / 0.08);
+
+  --font-display: var(--font-sans);
 }
 
-/* Keyboard focus inside the workspace should read as ink, not the app's blue. */
-.paper-app :focus-visible {
-  @apply ring-ink-900 ring-offset-paper-50;
+.app-theme[data-theme="paper-ink"] {
+  --t-bg: #faf8f3;
+  --t-bg-2: #f5f1e8;
+  --t-surface: #fffdf8;
+  --t-surface-2: #f6f2e9;
+  --t-line: #ece5d8;
+  --t-line-strong: #cdc4b1;
+  --t-fainter: #b6afa1;
+  --t-faint: #8d8678;
+  --t-muted: #6d665a;
+  --t-muted-2: #504a41;
+  --t-text-2: #3a352f;
+  --t-text: #1c1916;
+
+  --t-accent: #9a402c;
+  --t-accent-hover: #7e3424;
+  --t-accent-active: #65291c;
+  --t-accent-mid: #c07a63;
+  --t-accent-line: #e6c3b6;
+  --t-accent-soft: #fbf1ee;
+  --t-accent-soft-2: #f5ded6;
+  --t-accent-text: #8c3a27;
+
+  --t-secondary-soft: #f0f1f2;
+  --t-secondary: #3f4a52;
+  --t-secondary-dark: #333c43;
+  --t-secondary-2: #4a4152;
+  --t-secondary-2-dark: #3d3545;
+
+  --t-danger-soft: #fbf1ee;
+  --t-danger-soft-2: #f5ded6;
+  --t-danger-line-2: #ecc4b8;
+  --t-danger-line: #dda291;
+  --t-danger-mid: #ca7a63;
+  --t-danger: #b04d36;
+  --t-danger-strong: #9a402c;
+  --t-danger-stronger: #7e3424;
+  --t-danger-dark: #65291c;
+  --t-danger-darker: #4d2016;
+
+  --t-success-soft: #f2f3ec;
+  --t-success-soft-2: #e4e7d8;
+  --t-success-line-2: #cfd5bb;
+  --t-success-line: #b1ba95;
+  --t-success-mid: #8b9a6a;
+  --t-success: #6f7d4f;
+  --t-success-strong: #5b6840;
+  --t-success-stronger: #475232;
+  --t-success-dark: #38412a;
+  --t-success-darker: #2c3320;
+
+  --t-warning-soft: #faf5ea;
+  --t-warning-soft-2: #f3e7cd;
+  --t-warning-line-2: #e7d3a8;
+  --t-warning-line: #d5b97c;
+  --t-warning-mid: #bf9b52;
+  --t-warning: #a67f3a;
+  --t-warning-strong: #8c6730;
+  --t-warning-stronger: #6f5128;
+  --t-warning-dark: #5a4322;
+  --t-warning-darker: #4a3820;
+
+  --t-scrim: rgb(28 25 22 / 0.42);
+  --t-wash: radial-gradient(
+    1100px 460px at 55% -180px,
+    #f1e9d9 0%,
+    rgb(250 248 243 / 0) 72%
+  );
+  --t-btn-transform: uppercase;
+  --t-btn-tracking: 0.14em;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.1875rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.5rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(28 25 22 / 0.05);
+  --shadow-md: 0 4px 8px -2px rgb(28 25 22 / 0.1), 0 2px 4px -2px rgb(28 25 22 / 0.08);
+  --shadow-lg: 0 10px 20px -6px rgb(28 25 22 / 0.14);
+  --shadow-xl: 0 20px 30px -10px rgb(28 25 22 / 0.18);
+
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Book Antiqua", Georgia, "Times New Roman", serif;
 }
 
-/* Headings inside the workspace use the serif display face. */
-.paper-app h1,
-.paper-app h2 {
+.app-theme[data-theme="minimal-light"] {
+  --t-bg: #ffffff;
+  --t-bg-2: #f7f7f5;
+  --t-surface: #ffffff;
+  --t-surface-2: #fafafa;
+  --t-line: #ececec;
+  --t-line-strong: #d9d9d9;
+  --t-fainter: #c9c9c9;
+  --t-faint: #9b9b9b;
+  --t-muted: #6f6f6f;
+  --t-muted-2: #5f5f5f;
+  --t-text-2: #333333;
+  --t-text: #191919;
+
+  --t-accent: #1f1f1f;
+  --t-accent-hover: #000000;
+  --t-accent-active: #000000;
+  --t-accent-mid: #6b6b6b;
+  --t-accent-line: #dcdcdc;
+  --t-accent-soft: #f1f1f1;
+  --t-accent-soft-2: #e8e8e8;
+  --t-accent-text: #191919;
+
+  --t-secondary-soft: #f4f4f4;
+  --t-secondary: #4a4a4a;
+  --t-secondary-dark: #2f2f2f;
+  --t-secondary-2: #55534e;
+  --t-secondary-2-dark: #3d3b37;
+
+  --t-danger-soft: #fdf2f2;
+  --t-danger-soft-2: #fbe4e4;
+  --t-danger-line-2: #f6cfcf;
+  --t-danger-line: #eeb1b1;
+  --t-danger-mid: #e08a8a;
+  --t-danger: #cf4444;
+  --t-danger-strong: #b93a3a;
+  --t-danger-stronger: #9c3030;
+  --t-danger-dark: #7f2727;
+  --t-danger-darker: #661f1f;
+
+  --t-success-soft: #f2f8f3;
+  --t-success-soft-2: #e0efe3;
+  --t-success-line-2: #c6e0ca;
+  --t-success-line: #a3cbaa;
+  --t-success-mid: #7cb085;
+  --t-success: #4f8f5c;
+  --t-success-strong: #3f7749;
+  --t-success-stronger: #34613c;
+  --t-success-dark: #2a4d31;
+  --t-success-darker: #213d27;
+
+  --t-warning-soft: #fbf6ee;
+  --t-warning-soft-2: #f5ead6;
+  --t-warning-line-2: #ecdcb8;
+  --t-warning-line: #ddc48d;
+  --t-warning-mid: #c9a760;
+  --t-warning: #ab8838;
+  --t-warning-strong: #8d6e2b;
+  --t-warning-stronger: #6f5622;
+  --t-warning-dark: #57431b;
+  --t-warning-darker: #453515;
+
+  --t-scrim: rgb(0 0 0 / 0.4);
+  --t-wash: none;
+  --t-btn-transform: none;
+  --t-btn-tracking: 0;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 10px -4px rgb(0 0 0 / 0.12);
+  --shadow-lg: 0 10px 24px -12px rgb(0 0 0 / 0.18);
+  --shadow-xl: 0 20px 40px -18px rgb(0 0 0 / 0.22);
+
+  --font-display: var(--font-sans);
+}
+
+.app-theme[data-theme="midnight-navy"] {
+  --t-bg: #0a1120;
+  --t-bg-2: #131d33;
+  --t-surface: #111a2c;
+  --t-surface-2: #16203a;
+  --t-line: #1d2a44;
+  --t-line-strong: #31415f;
+  --t-fainter: #4a5a78;
+  --t-faint: #6f809c;
+  --t-muted: #93a2bd;
+  --t-muted-2: #a3b1cb;
+  --t-text-2: #d5deee;
+  --t-text: #e8edf7;
+
+  --t-accent: #7aa2f7;
+  --t-accent-hover: #9dbaff;
+  --t-accent-active: #b7ccff;
+  --t-accent-mid: #5b86dd;
+  --t-accent-line: #26365a;
+  --t-accent-soft: #16233d;
+  --t-accent-soft-2: #1b2b4a;
+  --t-accent-text: #bcd2fb;
+
+  --t-secondary-soft: #191e35;
+  --t-secondary: #8ea2dd;
+  --t-secondary-dark: #a3b6f0;
+  --t-secondary-2: #b49be0;
+  --t-secondary-2-dark: #c6b0f0;
+
+  --t-danger-soft: #2a1618;
+  --t-danger-soft-2: #3a1d20;
+  --t-danger-line-2: #5a2b2f;
+  --t-danger-line: #7d3b40;
+  --t-danger-mid: #c4696f;
+  --t-danger: #ef7c7c;
+  --t-danger-strong: #f28f8f;
+  --t-danger-stronger: #f5a3a3;
+  --t-danger-dark: #f8c0c0;
+  --t-danger-darker: #fbd8d8;
+
+  --t-success-soft: #12241b;
+  --t-success-soft-2: #17301f;
+  --t-success-line-2: #26512f;
+  --t-success-line: #33693c;
+  --t-success-mid: #64b47a;
+  --t-success: #7ee0a8;
+  --t-success-strong: #96e7b8;
+  --t-success-stronger: #b0eecd;
+  --t-success-dark: #cbf5dd;
+  --t-success-darker: #e0faea;
+
+  --t-warning-soft: #2a2114;
+  --t-warning-soft-2: #3a2d18;
+  --t-warning-line-2: #5c4726;
+  --t-warning-line: #7d5f2f;
+  --t-warning-mid: #c99a55;
+  --t-warning: #e6b463;
+  --t-warning-strong: #f0c98d;
+  --t-warning-stronger: #f5d7a5;
+  --t-warning-dark: #f9e4c2;
+  --t-warning-darker: #fcefda;
+
+  --t-scrim: rgb(0 0 0 / 0.62);
+  --t-wash: radial-gradient(
+    900px 420px at 60% -160px,
+    #16233f 0%,
+    rgb(10 17 32 / 0) 70%
+  );
+  --t-btn-transform: none;
+  --t-btn-tracking: 0.01em;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-md: 0 6px 16px -8px rgb(0 0 0 / 0.7);
+  --shadow-lg: 0 14px 32px -14px rgb(0 0 0 / 0.75);
+  --shadow-xl: 0 24px 48px -20px rgb(0 0 0 / 0.8);
+
+  --font-display: "Charter", "Iowan Old Style", Georgia, "Times New Roman", serif;
+}
+
+.app-theme[data-theme="warm-editorial"] {
+  --t-bg: #f7efe2;
+  --t-bg-2: #f2e7d5;
+  --t-surface: #fffbf3;
+  --t-surface-2: #faf3e6;
+  --t-line: #e9dcc7;
+  --t-line-strong: #cbb79b;
+  --t-fainter: #c3b39c;
+  --t-faint: #9a8b76;
+  --t-muted: #6d6252;
+  --t-muted-2: #5d5347;
+  --t-text-2: #3a2f25;
+  --t-text: #241c15;
+
+  --t-accent: #b4552b;
+  --t-accent-hover: #973f1c;
+  --t-accent-active: #7d3417;
+  --t-accent-mid: #cf8a63;
+  --t-accent-line: #e6c6b2;
+  --t-accent-soft: #f9e7dc;
+  --t-accent-soft-2: #f6d9c9;
+  --t-accent-text: #9c431f;
+
+  --t-secondary-soft: #e8f0ec;
+  --t-secondary: #3f6b5d;
+  --t-secondary-dark: #345a4e;
+  --t-secondary-2: #6b5a76;
+  --t-secondary-2-dark: #584a62;
+
+  --t-danger-soft: #fbeeea;
+  --t-danger-soft-2: #f7dcd3;
+  --t-danger-line-2: #eec3b4;
+  --t-danger-line: #dd9f8a;
+  --t-danger-mid: #c87a5f;
+  --t-danger: #b23a2a;
+  --t-danger-strong: #962c1f;
+  --t-danger-stronger: #7a2318;
+  --t-danger-dark: #5f1c13;
+  --t-danger-darker: #4a160f;
+
+  --t-success-soft: #eef3ea;
+  --t-success-soft-2: #dfe9d8;
+  --t-success-line-2: #c6d7bb;
+  --t-success-line: #a2bf90;
+  --t-success-mid: #7ba368;
+  --t-success: #5c8a4a;
+  --t-success-strong: #48703a;
+  --t-success-stronger: #39592e;
+  --t-success-dark: #2c4524;
+  --t-success-darker: #22361c;
+
+  --t-warning-soft: #faf2e2;
+  --t-warning-soft-2: #f4e3c3;
+  --t-warning-line-2: #e9cf9c;
+  --t-warning-line: #d9b46c;
+  --t-warning-mid: #c3963f;
+  --t-warning: #a67c28;
+  --t-warning-strong: #8a641f;
+  --t-warning-stronger: #6e4f19;
+  --t-warning-dark: #573e14;
+  --t-warning-darker: #453110;
+
+  --t-scrim: rgb(36 28 21 / 0.45);
+  --t-wash: linear-gradient(
+    180deg,
+    #f9f2e6 0%,
+    rgb(247 239 226 / 0) 340px
+  );
+  --t-btn-transform: uppercase;
+  --t-btn-tracking: 0.1em;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.75rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(36 28 21 / 0.05);
+  --shadow-md: 0 4px 8px -2px rgb(36 28 21 / 0.1);
+  --shadow-lg: 0 12px 24px -10px rgb(36 28 21 / 0.16);
+  --shadow-xl: 0 22px 36px -16px rgb(36 28 21 / 0.2);
+
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Times New Roman", serif;
+}
+
+/* -- 2. Tailwind colour families → semantic tokens (shared) ------------ */
+
+.app-theme {
+  /* neutrals */
+  --color-white: var(--t-surface);
+  --color-slate-50: var(--t-bg);
+  --color-slate-100: var(--t-bg-2);
+  --color-slate-200: var(--t-line);
+  --color-slate-300: var(--t-line-strong);
+  --color-slate-400: var(--t-faint);
+  --color-slate-500: var(--t-muted);
+  --color-slate-600: var(--t-muted-2);
+  --color-slate-700: var(--t-text-2);
+  --color-slate-800: var(--t-text-2);
+  --color-slate-900: var(--t-text);
+
+  /* actions */
+  --color-blue-50: var(--t-accent-soft);
+  --color-blue-100: var(--t-accent-soft-2);
+  --color-blue-200: var(--t-accent-line);
+  --color-blue-300: var(--t-accent-mid);
+  --color-blue-400: var(--t-accent-mid);
+  --color-blue-500: var(--t-accent-mid);
+  --color-blue-600: var(--t-accent);
+  --color-blue-700: var(--t-accent-hover);
+  --color-blue-800: var(--t-accent-active);
+  --color-blue-900: var(--t-accent-active);
+  --color-primary-50: var(--t-accent-soft);
+  --color-primary-100: var(--t-accent-soft-2);
+  --color-primary-200: var(--t-accent-line);
+  --color-primary-300: var(--t-accent-mid);
+  --color-primary-400: var(--t-accent-mid);
+  --color-primary-500: var(--t-accent-mid);
+  --color-primary-600: var(--t-accent);
+  --color-primary-700: var(--t-accent-hover);
+  --color-primary-800: var(--t-accent-active);
+  --color-primary-900: var(--t-accent-active);
+
+  /* the editorial palette: paper / ink / seal */
+  --color-paper-50: var(--t-bg);
+  --color-paper-100: var(--t-bg-2);
+  --color-paper-200: var(--t-line);
+  --color-paper-300: var(--t-line-strong);
+  --color-ink-300: var(--t-fainter);
+  --color-ink-400: var(--t-faint);
+  --color-ink-500: var(--t-muted);
+  --color-ink-600: var(--t-muted-2);
+  --color-ink-700: var(--t-text-2);
+  --color-ink-800: var(--t-text-2);
+  --color-ink-900: var(--t-text);
+  --color-seal-50: var(--t-accent-soft);
+  --color-seal-100: var(--t-accent-soft-2);
+  --color-seal-500: var(--t-accent);
+  --color-seal-600: var(--t-accent-hover);
+  --color-seal-700: var(--t-accent-active);
+
+  /* AI / secondary accents */
+  --color-indigo-50: var(--t-secondary-soft);
+  --color-indigo-600: var(--t-secondary);
+  --color-indigo-700: var(--t-secondary-dark);
+  --color-violet-600: var(--t-secondary-2);
+  --color-violet-700: var(--t-secondary-2-dark);
+
+  /* errors */
+  --color-red-50: var(--t-danger-soft);
+  --color-red-100: var(--t-danger-soft-2);
+  --color-red-200: var(--t-danger-line-2);
+  --color-red-300: var(--t-danger-line);
+  --color-red-400: var(--t-danger-mid);
+  --color-red-500: var(--t-danger);
+  --color-red-600: var(--t-danger-strong);
+  --color-red-700: var(--t-danger-stronger);
+  --color-red-800: var(--t-danger-dark);
+  --color-red-900: var(--t-danger-darker);
+  --color-danger-50: var(--t-danger-soft);
+  --color-danger-100: var(--t-danger-soft-2);
+  --color-danger-200: var(--t-danger-line-2);
+  --color-danger-300: var(--t-danger-line);
+  --color-danger-400: var(--t-danger-mid);
+  --color-danger-500: var(--t-danger);
+  --color-danger-600: var(--t-danger-strong);
+  --color-danger-700: var(--t-danger-stronger);
+  --color-danger-800: var(--t-danger-dark);
+  --color-danger-900: var(--t-danger-darker);
+
+  /* success */
+  --color-emerald-50: var(--t-success-soft);
+  --color-emerald-100: var(--t-success-soft-2);
+  --color-emerald-200: var(--t-success-line-2);
+  --color-emerald-300: var(--t-success-line);
+  --color-emerald-400: var(--t-success-mid);
+  --color-emerald-500: var(--t-success);
+  --color-emerald-600: var(--t-success-strong);
+  --color-emerald-700: var(--t-success-stronger);
+  --color-emerald-800: var(--t-success-dark);
+  --color-emerald-900: var(--t-success-darker);
+  --color-green-50: var(--t-success-soft);
+  --color-green-100: var(--t-success-soft-2);
+  --color-green-200: var(--t-success-line-2);
+  --color-green-300: var(--t-success-line);
+  --color-green-400: var(--t-success-mid);
+  --color-green-500: var(--t-success);
+  --color-green-600: var(--t-success-strong);
+  --color-green-700: var(--t-success-stronger);
+  --color-green-800: var(--t-success-dark);
+  --color-green-900: var(--t-success-darker);
+  --color-success-50: var(--t-success-soft);
+  --color-success-100: var(--t-success-soft-2);
+  --color-success-200: var(--t-success-line-2);
+  --color-success-300: var(--t-success-line);
+  --color-success-400: var(--t-success-mid);
+  --color-success-500: var(--t-success);
+  --color-success-600: var(--t-success-strong);
+  --color-success-700: var(--t-success-stronger);
+  --color-success-800: var(--t-success-dark);
+  --color-success-900: var(--t-success-darker);
+
+  /* warnings */
+  --color-amber-50: var(--t-warning-soft);
+  --color-amber-100: var(--t-warning-soft-2);
+  --color-amber-200: var(--t-warning-line-2);
+  --color-amber-300: var(--t-warning-line);
+  --color-amber-400: var(--t-warning-mid);
+  --color-amber-500: var(--t-warning);
+  --color-amber-600: var(--t-warning-strong);
+  --color-amber-700: var(--t-warning-stronger);
+  --color-amber-800: var(--t-warning-dark);
+  --color-amber-900: var(--t-warning-darker);
+  --color-yellow-50: var(--t-warning-soft);
+  --color-yellow-100: var(--t-warning-soft-2);
+  --color-yellow-200: var(--t-warning-line-2);
+  --color-yellow-300: var(--t-warning-line);
+  --color-yellow-400: var(--t-warning-mid);
+  --color-yellow-500: var(--t-warning);
+  --color-yellow-600: var(--t-warning-strong);
+  --color-yellow-700: var(--t-warning-stronger);
+  --color-yellow-800: var(--t-warning-dark);
+  --color-yellow-900: var(--t-warning-darker);
+  --color-warning-50: var(--t-warning-soft);
+  --color-warning-100: var(--t-warning-soft-2);
+  --color-warning-200: var(--t-warning-line-2);
+  --color-warning-300: var(--t-warning-line);
+  --color-warning-400: var(--t-warning-mid);
+  --color-warning-500: var(--t-warning);
+  --color-warning-600: var(--t-warning-strong);
+  --color-warning-700: var(--t-warning-stronger);
+  --color-warning-800: var(--t-warning-dark);
+  --color-warning-900: var(--t-warning-darker);
+}
+
+/* -- 3. signature details --------------------------------------------- */
+
+/* Ground plus the theme's soft top light. */
+.app-theme-wash {
+  background-color: var(--t-bg);
+  background-image: var(--t-wash);
+}
+
+/* Headings use the theme's display face (system sans on the modern themes). */
+.app-theme h1,
+.app-theme h2 {
   font-family: var(--font-display);
   letter-spacing: -0.015em;
+}
+
+/* Buttons pick up the theme's letterforms. */
+.app-theme .btn {
+  text-transform: var(--t-btn-transform);
+  letter-spacing: var(--t-btn-tracking);
+}
+
+/* Paper & ink prints: the primary action is ruled, not filled. The shorthand
+   matters — some call sites are plain <button>s with no border utilities. */
+.app-theme[data-theme="paper-ink"] .btn-primary {
+  background-color: transparent;
+  border: 1px solid var(--t-text);
+  color: var(--t-text);
+}
+.app-theme[data-theme="paper-ink"] .btn-primary:hover {
+  background-color: var(--t-text);
+  border-color: var(--t-text);
+  color: var(--t-bg);
+}
+.app-theme[data-theme="paper-ink"] .btn-primary:active {
+  background-color: #000000;
+  border-color: #000000;
+  color: var(--t-bg);
+}
+
+/* Sidebar: the active tab is a rule on the printed themes, a chip on the
+   modern ones. */
+.app-theme[data-theme="paper-ink"] .nav-item.is-active,
+.app-theme[data-theme="minimal-light"] .nav-item.is-active,
+.app-theme[data-theme="warm-editorial"] .nav-item.is-active {
+  background-color: transparent;
+}
+.app-theme[data-theme="minimal-light"] .nav-marker {
+  display: none;
+}
+.app-theme[data-theme="minimal-light"] .nav-item.is-active {
+  background-color: var(--t-bg-2);
+}
+.app-theme[data-theme="warm-editorial"] .nav-item.is-active {
+  color: var(--t-accent);
+  font-weight: 600;
+}
+.app-theme[data-theme="warm-editorial"] .nav-marker {
+  background-color: var(--t-accent);
+  width: 2px;
+}
+
+/* Flat chips instead of pills where the theme reads as printed. */
+.app-theme[data-theme="paper-ink"] .badge,
+.app-theme[data-theme="warm-editorial"] .badge {
+  border-radius: var(--radius-sm);
+}
+
+/* Overlays stay dark even on themes that invert `slate-900`. */
+.scrim {
+  background-color: rgb(15 23 42 / 0.4);
+}
+.app-theme .scrim {
+  background-color: var(--t-scrim);
+}
+
+/* Slightly wider rules and quieter dividers on the editorial themes. */
+.app-theme[data-theme="warm-editorial"] .card {
+  border-color: var(--t-line-strong);
 }

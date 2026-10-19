@@ -54,7 +54,8 @@ export default function IfmdTemplate() {
       <p className="mt-3 text-sm text-slate-600">
         A plain-text format you can write or edit by hand — imported with zero tokens and no
         cloud. Questions use a <code className="rounded bg-slate-200 px-1">{":::q"}</code> block
-        with exactly four <code className="rounded bg-slate-200 px-1">A–D</code> options.
+        with <code className="rounded bg-slate-200 px-1">A–E</code> or more labelled options
+        (no options at all makes it a fill-in-the-blank).
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button

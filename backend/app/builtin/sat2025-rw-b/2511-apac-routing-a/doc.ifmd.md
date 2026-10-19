@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月亚太 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:52Z
+imported_at: 2026-10-19T12:21:35Z
 answers: external
 ---
 
@@ -148,23 +148,7 @@ Which quotation from Richard II most effectively illustrates the claim?
 
 :::q {#Q010 sec=rw no=10}
 @material
-Percentage of US Congress Members Who
-
-Self-Identified as Veterans, 1953–2023
-
-Percent
-
-20 30 40 50 60 70 80
-
-![figure](assets/p06-68095ac3.png)
-
-0 10
-
-Year
-
-House of Representatives
-
-Senate
+![Percentage of US Congress Members Who Self-Identified as Veterans, 1953–2023; 1973 Year](assets/p06-63ef4fdf.png)
 
 Since the nation's earliest days, both houses of the United States Congress have counted many military veterans among their elected officials, including Hiram L. Fong (who served in the US Army Air Force) and Ralph Harold Metcalfe Sr. (who served in the US Army). A research institute gathered historical data about congressional members who have reported past military experience and determined that ______
 
@@ -181,15 +165,7 @@ Which choice most effectively uses data from the graph to complete the sentence?
 
 :::q {#Q011 sec=rw no=11}
 @material
-Mean Adhesion Strength of Graphite and Acrylamide Gel,
-
-at Varying Voltages
-
-Adhesion strength (kPa)
-
-![figure](assets/p07-11aa7a37.png)
-
-0 5 10 15 20 25 30 35 40 45
+![Mean Adhesion Strength of at Varying Voltages](assets/p07-e7597b8e.png)
 
 0 1 2 3
 
@@ -212,6 +188,8 @@ Which choice most effectively uses data from the graph to complete the statement
 
 :::q {#Q012 sec=rw no=12}
 @material
+![Latino Population Share and Share of LOBs in Four US Metropolitan Areas](assets/p08-7abb877d.png)
+
 In their chapter of Advancing U.S. Latino Entrepreneurship (2020), Michael J. Pisani and his coauthor analyze data on the Latino population share and the share of Latino-owned businesses (LOBs) in US metropolitan areas with Latino populations that are among the largest in the country. The authors note for nearly all the metropolitan areas included in their analysis, the Latino population share is larger than the share of LOBs. The exception is ______
 
 @stem

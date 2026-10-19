@@ -114,7 +114,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
             <button
               onClick={() => void addAll()}
               disabled={busy}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {busyAll
                 ? "Adding…"
@@ -163,7 +163,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                             onClick={() => void addUnit(unit)}
                             disabled={busy}
                             data-add-unit={unit.id}
-                            className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                            className="btn btn-primary shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                           >
                             {busyUnit === unit.id ? "Adding…" : "Add"}
                           </button>

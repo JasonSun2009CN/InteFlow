@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月北美 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:46Z
+imported_at: 2026-10-19T12:21:29Z
 answers: external
 ---
 
@@ -148,9 +148,7 @@ Which statement about DOM2 horses is most strongly supported by the text?
 
 :::q {#Q010 sec=rw no=10}
 @material
-100% 12 0.9499
-
-100% 24 1.9641
+![RH level Duration hours/day Fungal growth rate generations/day](assets/p06-0bba349a.png)
 
 Just like household dust on Earth, dust on the International Space Station (ISS) harbors hundreds of common microorganisms—Aspergillus unguis and other fungi, along with bacteria, such as Lactobacillus helveticus. According to experiments conducted using samples of ISS dust of initially similar compositions, changes in both relative humidity (RH) and duration of humidity exposure elicited changes in growth for both fungal and bacterial species. However, when overall fungal growth increased, it was mainly due to an increase in growth of A. unguis, whereas bacterial growth was widely distributed across species in the samples.
 
@@ -167,6 +165,8 @@ Taken together, information in the text and table best support which statement a
 
 :::q {#Q011 sec=rw no=11}
 @material
+![Average Hours Worked per Person per Year in 1950 and 2017](assets/p07-cf6f42d4.png)
+
 Calculations may be inexact due to rounding.
 
 A student in an economics course is examining the decline since 1950 in average hours worked per person per year in various nations due to both increased productivity and the adoption of policies that limit working hours. The first task in this investigation is to determine how the decline in Colombia compares to that in other countries. The student finds that ______

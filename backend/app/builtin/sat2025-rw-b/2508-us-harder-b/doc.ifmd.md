@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月北美 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:50Z
+imported_at: 2026-10-19T12:20:32Z
 answers: external
 ---
 
@@ -152,19 +152,7 @@ Maximum Charge Measured
 
 for Various Pollinators
 
-Picocoulombs (pC)
-
-![figure](assets/p06-0be0f75d.png)
-
-0 100 200 300 400 500 600 700 800 900 1,000
-
-Charge
-
-bumblebees
-
-foraging honeybees
-
-houseflies
+![1,000](assets/p06-2b4038aa.png)
 
 Terrestrial plants typically carry a negative electrical charge, while bees and other pollinators tend to accumulate a positive charge. A team of researchers therefore hypothesized that electrostatic attraction (mutual attraction between objects with opposite charges) might enhance pollen transmission between plants and their pollinator species. The team's experiments showed that the maximum positive charge of foraging honeybees is sufficiently high to facilitate electrostatic pollen transfer, a finding that suggests that
 

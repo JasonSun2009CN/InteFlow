@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年11月北美 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:40Z
+imported_at: 2026-10-19T12:21:23Z
 answers: external
 ---
 
@@ -176,19 +176,7 @@ Which quotation from Lady Windermere's Fan most effectively illustrates the clai
 
 :::q {#Q012 sec=rw no=12}
 @material
-Average Frequencies of LP Allele
-
-in Four European Regions
-
-Region* Iron Age Modern-day
-
-Germany 7% 48%
-
-Great Britain 50% 73%
-
-Hungary 7% 48%
-
-Portugal 9% 40%
+![Average Frequencies of LP Allele in Four European Regions](assets/p07-77a30deb.png)
 
 *Referred to by the names of corresponding present-day nations
 
@@ -207,7 +195,7 @@ Which choice best describes data from the table that support the researchers' co
 
 :::q {#Q013 sec=rw no=13}
 @material
-The Pitch Falcon Structures 380 Texas, USA
+![Number of Days to Construct Modular Retail Facilities](assets/p08-5584de0d.png)
 
 The rapid completion of the Spencer Pavilion, a modular structure (a structure built in pieces elsewhere and assembled on site) located in Australia, led an employee at another company to collect data on other facilities built using modular construction methods. The employee concluded that modular construction is more efficient than other construction methods.
 

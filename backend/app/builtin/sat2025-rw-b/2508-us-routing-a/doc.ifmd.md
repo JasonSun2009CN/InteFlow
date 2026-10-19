@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年8月北美 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:02:43Z
+imported_at: 2026-10-19T12:20:26Z
 answers: external
 ---
 
@@ -133,7 +133,7 @@ Based on the text, what can most reasonably be inferred about Ramchand?
 
 :::q {#Q009 sec=rw no=9}
 @material
-dusky frillgoby 1,045 789 904
+![Three Taiwanese Tide Pools, 1999–2018](assets/p05-fc853889.png)
 
 Lin-Tai Ho and colleagues tracked fish populations in three tide pool—monitoring stations in Taiwan from 1999 to 2018. Although a total of only 31 blackspotted rockskippers were observed at station 3, that was not the lowest count at any station: ______
 
@@ -165,7 +165,7 @@ Which potential finding from the team's study, if true, would most directly supp
 
 :::q {#Q011 sec=rw no=11}
 @material
-100% RH 3 42,500,000,000
+![Treatment Sample ID Fungal concentration spores/mg dust](assets/p07-863435f6.png)
 
 The International Space Station (ISS) is configured to maintain 25%–75% relative humidity (RH), a range within which fungal growth in the environment is generally innocuous. However, pockets of elevated moisture can occur from crew activities such as toothbrushing, thereby locally creating favorable conditions for faster, potentially harmful fungal growth. To investigate how elevated RH conditions affect fungal spores found in dust aboard the ISS, researchers used a single sample's initial spore concentration (spore count per mg of dust) as a control and compared it to the counts after the sample's exposure to elevated RH of 85% and 100%, finding concerningly high amounts of growth at elevated humidity conditions.
 
@@ -197,7 +197,7 @@ Which finding, if true, would most directly support the second research team's h
 
 :::q {#Q013 sec=rw no=13}
 @material
-Trichopodus trichopterus white 0.41 0.39 4
+![Myoglobin Mb Levels in the Cardiac Tissue of Three Teleost Species](assets/p09-8a8e2d93.png)
 
 Myoglobin (Mb) is a protein that primarily aids in oxygen storage and diffusion across the mitochondrial membrane in cardiac muscle cells; these are necessary functions in aerobic organisms, including teleost fish. Carrying out these functions typically requires Mb to be expressed at high levels, evidenced by red heart tissue. The table shows the average Mb levels and their standard deviations (indicating how dispersed the Mb levels of individual fish are in relation to the average) of three teleost fish species, as calculated by Daniel J. Macqueen et al. Based on the data, the researchers concluded that for some teleost species, oxygen storage and diffusion may occur with negligible assistance from Mb.
 

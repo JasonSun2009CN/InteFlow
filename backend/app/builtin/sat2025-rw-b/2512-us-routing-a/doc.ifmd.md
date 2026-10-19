@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年12月北美 · Routing A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:59Z
+imported_at: 2026-10-19T12:21:42Z
 answers: external
 ---
 
@@ -189,7 +189,7 @@ Which statement, if true, would most directly support the underlined argument?
 
 :::q {#Q013 sec=rw no=13}
 @material
-Southcentral England 13.9 38.8 47.2
+![Region WHG percent EEF percent Yamnaya percent](assets/p07-846482d8.png)
 
 Research has shown that in 3000 BCE, people in what is now Great Britain derived an average of 80 percent of their genetic ancestry from early European farmers (EEF) and the remaining 20 percent from western European hunter-gatherers (WHG). When the genetic influence of another group, the Yamnaya, rose substantially in Britain around 2450 BCE, the average proportion of EEF ancestry in southern Britain (present-day England and Wales) decreased, dropping to only 31 percent by 2100 BCE. Studying genetic data from the pre-Roman Iron Age (750–43 BCE) across regions of Britain, a researcher claims that a wave of people with relatively high proportions of EEF ancestry likely migrated into southern Britain between 2100 BCE and the start of the pre-Roman Iron Age.
 
@@ -221,7 +221,7 @@ Which choice most logically completes the text?
 
 :::q {#Q015 sec=rw no=15}
 @material
-Wien Hbf Austria metropolitan multihub (urban)
+![Four European High-Speed Rail Hubs](assets/p08-f31ad663.png)
 
 Installing a new high-speed rail (HSR) hub in an area has the potential to boost residential development nearby, though the amount and type of development vary considerably by location. This potential is greatest when HSR hubs are established in areas far away from city centers, as these locations tend to have more available land for redevelopment into residential areas.
 

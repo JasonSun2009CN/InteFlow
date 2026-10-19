@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年12月亚太 · Harder A"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:04:10Z
+imported_at: 2026-10-19T12:21:52Z
 answers: external
 ---
 
@@ -144,7 +144,7 @@ Which choice best states the main idea of the text?
 
 :::q {#Q010 sec=rw no=10}
 @material
-Late Classic (450 CE–600 CE) 128 91.4% 31.3% 0.26%
+![Persistence of Settlements and Compound Average Annual Population Growth Rate in the Yautepec Valley](assets/p07-99cb8699.png)
 
 The percent of cities and towns in a given period that persist from a prior period (backward continuity) and the percent that persist into a later period (forward continuity) are known to correlate positively with economic and political stability in a region. Researchers studying demographic trends in the Indigenous societies of ancient Mexico determined both continuity measures for the Yautepec Valley, which lay within the macroregional hegemony of the city-state of Teotihuacan from roughly 100 BCE until roughly 450 CE, after which point Teotihuacan declined. The team concluded that ______
 

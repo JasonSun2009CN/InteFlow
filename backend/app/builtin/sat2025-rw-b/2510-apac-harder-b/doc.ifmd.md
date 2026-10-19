@@ -3,7 +3,7 @@ ifmd: 1
 title: "25年10月亚太 · Harder B"
 source: "SAT机考25年语文合集（下）1.4.pdf"
 lang: en
-imported_at: 2026-10-06T11:03:36Z
+imported_at: 2026-10-19T12:21:19Z
 answers: external
 ---
 
@@ -101,7 +101,7 @@ Which choice best describes the overall structure of the text?
 
 :::q {#Q007 sec=rw no=7}
 @material
-Transportation/warehousing $12,414,600,000 52,891 $234,720
+![Impact of Four Key Industries on Oklahoma Economy in 2017](assets/p04-d0e58c31.png)
 
 The nearly forty tribes located in Oklahoma, including the Osage Nation and the Quapaw Tribe, operate numerous businesses and generate billions of dollars in revenue. A student in an economics class is researching the tribes' collective activity as a single industry. The student wants to compare that industry's contribution to Oklahoma's overall economy in 2017 with the contributions made by three other industries in the state. Looking at the table, the student finds that tribal economic activity totaled over $7.3 billion, ranking it above ______
 
@@ -118,7 +118,7 @@ Which choice most effectively uses data from the table to complete the compariso
 
 :::q {#Q008 sec=rw no=8}
 @material
-3 dark 3.88 2.51 2.35 2.65
+![Average Ratings of Perceived Personality Traits of Dogs and Human Willingness to Keep or Interact with Them](assets/p05-cd425c90.png)
 
 Studies have found that when looking at other people's eyes, humans tend to perceive dilated pupils positively and constricted pupils negatively. Noting that a dark iris—the colored portion surrounding the pupil—is hard to distinguish from the black of the pupil (and thereby affects the pupil's apparent size) and that many domestic dogs have dark irises, Akitsugu Konno et al. showed close-up images of dogs' faces to human participants and asked them to rate the dogs'traits and their own attitudes toward the dogs. Their findings suggest that ______
 
@@ -135,7 +135,7 @@ Which choice most effectively uses data from the table to complete the statement
 
 :::q {#Q009 sec=rw no=9}
 @material
-ZX Spectrum Sinclair computer 2,300,000
+![Home Video Game Systems of the 1970s and 1980s](assets/p06-e15a9d90.png)
 
 A student is writing a research paper on the global rise of the home video game industry during the 1970s and 1980s. The student is surprised by differences in the number of units sold by some systems compared to those sold by others. Most remarkably, the ______
 

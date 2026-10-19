@@ -88,9 +88,8 @@ def render_docx(doc: ExportDoc) -> bytes:
         if q.material:
             _add_rich(document, q.material, svgs, style="Intense Quote")
         _add_rich(document, q.stem, svgs)
-        for letter in "ABCD":
-            if letter in q.options:
-                _add_rich(document, f"{letter}. {q.options[letter]}", svgs, style="List Bullet")
+        for letter, text in q.options.items():
+            _add_rich(document, f"{letter}. {text}", svgs, style="List Bullet")
         for image in q.images:
             try:
                 document.add_picture(str(image), width=Inches(5.5))
