@@ -354,6 +354,44 @@ export interface AnalysisMeta {
   }[];
 }
 
+/** One saved analysis attached to a review item (current page or legacy row). */
+export interface ReviewAnalysis {
+  source: "page" | "legacy" | "explain";
+  content: string;
+  updated_at: string | null;
+}
+
+/** A question in the Mistakes or Starred collection. */
+export interface ReviewItem {
+  question_id: number;
+  document_id: number;
+  document_title: string;
+  subject: SubjectRef | null;
+  no: number;
+  source_no: number | null;
+  sec: Section;
+  kind: QuestionKind;
+  multi: boolean;
+  material: string | null;
+  stem: string;
+  options: string[];
+  images: string[];
+  source: string | null;
+  chosen: string | null;
+  chosen_answers: string[];
+  answer: string | null;
+  answers: string[];
+  is_correct: boolean | null;
+  session_id: number | null;
+  answered_at: string | null;
+  finished_at: string | null;
+  starred: boolean;
+  starred_at: string | null;
+  explain: string | null;
+  analysis: string;
+  analyses: ReviewAnalysis[];
+}
+
 /** One saved attempt, as listed on the Sessions page. */
 export interface SessionSummary {
   session_id: number;
@@ -568,6 +606,28 @@ export const api = {
   /** Re-grade a submitted attempt (after the answer key was filled in). */
   regradeSession: (sessionId: number) =>
     request<SubmitResult>(`/api/sessions/${sessionId}/regrade`, { method: "POST" }),
+
+  /** Review collections: latest wrong answers and explicitly starred questions. */
+  listMistakes: () => request<ReviewItem[]>("/api/review/mistakes"),
+
+  listStarredQuestions: () => request<ReviewItem[]>("/api/review/starred"),
+
+  listStarredIds: (documentId: number) =>
+    request<{ question_ids: number[] }>(
+      `/api/review/starred/ids?document_id=${documentId}`,
+    ),
+
+  starQuestion: (questionId: number) =>
+    request<{ question_id: number; starred: boolean }>(
+      `/api/review/starred/${questionId}`,
+      { method: "POST" },
+    ),
+
+  unstarQuestion: (questionId: number) =>
+    request<{ question_id: number; starred: boolean }>(
+      `/api/review/starred/${questionId}`,
+      { method: "DELETE" },
+    ),
 
   /** Hand-written explanation — saved straight to the DB (0 token). */
   saveExplain: (docId: number, questionId: number, content: string) =>

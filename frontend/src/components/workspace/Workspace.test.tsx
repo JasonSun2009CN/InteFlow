@@ -8,12 +8,21 @@ vi.mock("../../api/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../api/client")>();
   return {
     ...actual,
-    api: { ...actual.api, getAnalysis: vi.fn(), getWords: vi.fn() },
+    api: {
+      ...actual.api,
+      getAnalysis: vi.fn(),
+      getWords: vi.fn(),
+      listStarredIds: vi.fn(),
+      starQuestion: vi.fn(),
+      unstarQuestion: vi.fn(),
+    },
   };
 });
 
 const getAnalysis = vi.mocked(api.getAnalysis);
 const getWords = vi.mocked(api.getWords);
+const listStarredIds = vi.mocked(api.listStarredIds);
+const starQuestion = vi.mocked(api.starQuestion);
 
 function media(matches: boolean) {
   vi.mocked(window.matchMedia).mockImplementation(
@@ -89,6 +98,8 @@ describe("Workspace", () => {
     media(false);
     getAnalysis.mockResolvedValue({ document_id: 7, title: "October Review", pages: [] });
     getWords.mockResolvedValue(emptyGrid);
+    listStarredIds.mockResolvedValue({ question_ids: [] });
+    starQuestion.mockResolvedValue({ question_id: 5, starred: true });
   });
 
   it("opens the full notebook preview from the top bar", async () => {
@@ -118,6 +129,19 @@ describe("Workspace", () => {
 
     expect(screen.getByRole("dialog", { name: "Analysis notebook" })).toBeInTheDocument();
     expect(await screen.findByText("My saved analysis.")).toBeInTheDocument();
+  });
+
+  it("stars the selected question from the review workspace", async () => {
+    render(
+      <MemoryRouter>
+        <Workspace detail={detail} result={result} t={0} sessionId={11} />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "☆ Star" }));
+
+    expect(await screen.findByRole("button", { name: "★ Starred" })).toBeInTheDocument();
+    expect(starQuestion).toHaveBeenCalledWith(5);
   });
 
   it("offers a Back link to the sessions list, not the exam picker", async () => {

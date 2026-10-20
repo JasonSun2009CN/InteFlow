@@ -82,10 +82,17 @@
 - 2026-10-20：Settings 增加 `vocab_ai_sense`（关闭后拖词不调用 LLM）与 `vocab_learner_definitions`（优先 `dictionary/learners/*.eudb` 的学习者释义，缺失自动回退标准词典）。当前 Collegiate 文件本身不含 learner 释义，需另装学习者词典。
 - 在这套词表/词性/释义数据上的“单词考试”（中译英、英译中）已实现，见下方 ✅ 条目。
 
-### 添加“需复习题目”的功能
+### ✅ 添加“需复习题目”的功能（2026-10-20）
 - 把mistake界面分开成两部分，一半放错题，一般放用户标记的题目
 - 设想：mistake界面换个名字，然后在mistake里面分categories，支持按时间顺序排，支持搜索套题和题干、选项的内容。
 - 要显示题目的分析（如果有的话），如果有多个分析的话都显示
+- **已实现（2026-10-20）**：侧栏 **Mistakes → Review**，页内 **Mistakes / Starred** 两 tab。
+  - Mistakes：所有已提交作答的错题，按题去重，保留**最近一次**作答；后来做对自动移出。
+  - Starred（精选题集）：`question_stars` 持久化；练习页、复盘工作台、错题列表都可点星/取消，立即保存。
+  - 搜索套题/题干/选项/答案；按 exam 过滤；Newest/Oldest 时间排序。
+  - 右侧复用复盘分析编辑器；`analysis_pages` + legacy `analyses` 若有多条，旧分析全部只读列出。
+  - 代码：`backend/app/repos/review.py` + `backend/app/api/review.py`；前端 `pages/MistakesPage.tsx`
+    + Practice/Workspace 星标；测试见 `test_review.py`、`MistakesPage.test.tsx`。
 
 ### ✅ 学科题目分类（2026-10-20）
 - 支持用户给套题进行学科分类：EG SAT Math

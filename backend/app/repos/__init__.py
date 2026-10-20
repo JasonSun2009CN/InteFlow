@@ -1,3 +1,3 @@
-from app.repos import documents, sessions, settings, subjects
+from app.repos import documents, review, sessions, settings, subjects
 
-__all__ = ["documents", "sessions", "settings", "subjects"]
+__all__ = ["documents", "review", "sessions", "settings", "subjects"]

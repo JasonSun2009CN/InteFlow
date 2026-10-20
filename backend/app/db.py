@@ -95,6 +95,13 @@ CREATE TABLE IF NOT EXISTS questions (
   UNIQUE (document_id, ext_id)
 );
 
+CREATE TABLE IF NOT EXISTS question_stars (
+  question_id  INTEGER PRIMARY KEY REFERENCES questions(id) ON DELETE CASCADE,
+  document_id  INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_question_stars_document ON question_stars(document_id);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
@@ -255,6 +262,22 @@ def _migrate(conn: sqlite3.Connection) -> None:
         " created_at TEXT NOT NULL DEFAULT (datetime('now'))"
         ")"
     )
+    # starred / selected questions (2026-10-20): one row per question, global.
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS question_stars ("
+        " question_id INTEGER PRIMARY KEY REFERENCES questions(id) ON DELETE CASCADE,"
+        " document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,"
+        " created_at TEXT NOT NULL DEFAULT (datetime('now'))"
+        ")"
+    )
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'questions'"
+    ).fetchone():
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_question_stars_document"
+            " ON question_stars(document_id)"
+        )
+
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
     additions = (
         ("builtin_key", "TEXT"),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  CircleX,
+  Bookmark,
   GraduationCap,
   History,
   Languages,
@@ -23,7 +23,7 @@ const NAV: NavItem[] = [
   { to: "/", label: "Exams", icon: GraduationCap, end: true },
   { to: "/sessions", label: "Sessions", icon: History },
   { to: "/library", label: "Library", icon: Library },
-  { to: "/mistakes", label: "Mistakes", icon: CircleX },
+  { to: "/mistakes", label: "Review", icon: Bookmark },
   { to: "/vocabulary", label: "Vocabulary", icon: Languages },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];

@@ -82,7 +82,9 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   const [notebookOpen, setNotebookOpen] = useState(false);
   const [mobileSide, setMobileSide] = useState<0 | 1>(0);
   const [pages, setPages] = useState<Record<number, string>>({});
+  const [starred, setStarred] = useState<Set<number>>(new Set());
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [starError, setStarError] = useState<string | null>(null);
 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
@@ -151,6 +153,44 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   }, [docId]);
 
   useEffect(() => {
+    let cancelled = false;
+    api
+      .listStarredIds(docId)
+      .then(({ question_ids }) => {
+        if (!cancelled) setStarred(new Set(question_ids));
+      })
+      .catch(() => {
+        /* stars are optional furniture in the workspace */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [docId]);
+
+  async function toggleStar(questionId: number) {
+    const wasStarred = starred.has(questionId);
+    setStarError(null);
+    setStarred((current) => {
+      const next = new Set(current);
+      if (wasStarred) next.delete(questionId);
+      else next.add(questionId);
+      return next;
+    });
+    try {
+      if (wasStarred) await api.unstarQuestion(questionId);
+      else await api.starQuestion(questionId);
+    } catch (err) {
+      setStarred((current) => {
+        const next = new Set(current);
+        if (wasStarred) next.add(questionId);
+        else next.delete(questionId);
+        return next;
+      });
+      setStarError(err instanceof ApiError ? err.message : String(err));
+    }
+  }
+
+  useEffect(() => {
     const ids = result.items.filter(matchesFilter).map((i) => i.question_id);
     setSelectedId((prev) => (prev !== null && ids.includes(prev) ? prev : (ids[0] ?? null)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,6 +254,18 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           {selected.source ? ` · ${selected.source}` : ""}
         </span>
         <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void toggleStar(selected.question_id)}
+            aria-pressed={starred.has(selected.question_id)}
+            className={`rounded-lg border px-2.5 py-1 text-xs font-medium ${
+              starred.has(selected.question_id)
+                ? "border-amber-300 bg-amber-100 text-amber-800"
+                : "border-slate-300 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            {starred.has(selected.question_id) ? "★ Starred" : "☆ Star"}
+          </button>
           <button
             onClick={() => prevQ && setSelectedId(prevQ.question_id)}
             disabled={!prevQ}
@@ -436,6 +488,11 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
       {loadError && (
         <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
           Could not load the analysis notebook: {loadError}
+        </p>
+      )}
+      {starError && (
+        <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
+          Could not update the star: {starError}
         </p>
       )}
 

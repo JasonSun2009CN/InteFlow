@@ -15,7 +15,7 @@ export default function App() {
     <BrowserRouter>
       <AppShell>
         <Routes>
-          {/* Workspace tabs (left sidebar): Exams / Sessions / Library / Mistakes / Vocabulary / Settings. */}
+          {/* Workspace tabs (left sidebar): Exams / Sessions / Library / Review / Vocabulary / Settings. */}
           <Route path="/" element={<ExamHomePage />} />
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/library" element={<ImportPage />} />

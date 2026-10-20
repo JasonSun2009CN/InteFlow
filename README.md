@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-288%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-296%20passed-2E7D32)
 
 ---
 
@@ -62,6 +62,7 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
 | **Workspace** | **2-of-4 pane split** (Question · Analysis · AI Tutor · Vocabulary) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, export drawer |
 | **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
+| **Review** | **Mistakes** (every wrong answer, one row per question using the latest attempt; corrected later = removed) and **Starred** (questions you star while practising or reviewing). Search papers/stems/options, filter by exam, sort newest/oldest, and read or edit the shared analysis; extra legacy analyses are shown read-only |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
 | **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **learner's definitions**, **AI grading for word tests** |
 
@@ -167,8 +168,8 @@ npm run dev
 
 Open <http://localhost:5173>. The left sidebar has six tabs: **Exams** (pick one to take),
 **Library** (import a file, add the built-in bank, manage your exam list, group papers by subject), **Sessions** (every **submitted**
-attempt, searchable/deletable), **Mistakes**, **Vocabulary** and **Settings**. **Mistakes** is a placeholder for now;
-**Vocabulary** holds the per-paper word lists and the word test.
+attempt, searchable/deletable), **Review**, **Vocabulary** and **Settings**. **Review** holds the mistake and starred
+sets; **Vocabulary** holds the per-paper word lists and the word test.
 
 1. Open **Library** in the sidebar.
 2. **Upload a file**: drop it on *Drag a file here*, or click **choose a file**.
@@ -233,7 +234,7 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 - **Notebook**: the top-bar button opens a full-exam preview — the exam title, then every question that already
   has analysis (stem, figures and notes), with export buttons.
 - **Toolbar drawer**: `AI` (explicit LLM explain), `Vocabulary` (this paper's word sheet, `.xlsx` export),
-  `Export` (review notebook — see §6).
+  `Export` (review notebook — see §7).
 - If the key was missing while you practiced, saving re-grades automatically (regrade).
 
 ### 5. Vocabulary & word tests
@@ -258,7 +259,26 @@ Open **Vocabulary** in the sidebar. The page has two tabs:
      both modes against the word-list meaning plus Merriam-Webster, with strict instructions to reject vague
      answers; if no key is configured or a call fails, the app falls back to local grading and says so.
 
-### 6. Export
+### 6. Review sets (mistakes + starred)
+
+Open **Review** in the sidebar. The page has two tabs:
+
+- **Mistakes** — every question you missed in a submitted attempt. Each question appears once, using your
+  **latest attempt** (a later correct attempt removes it). This is not a session log: repeated misses do not
+  duplicate the row.
+- **Starred** — your selected questions. Tap **☆ Star for review** while practising, **☆ Star** in the review
+  workspace, or the star button in the Mistakes list. Stars are saved immediately and survive unfinished attempts.
+
+Both tabs share the same toolbar and right-hand editor:
+
+1. Search across paper titles, stems, options and answers; narrow to one exam with the dropdown, and switch between
+   **Newest first** / **Oldest first**.
+2. Pick a row to open the question, its correct/your answer, and the **Analysis** editor. It is the same notebook as
+   the review workspace, so edits appear there too.
+3. If a question has older analyses (legacy rows or extra saved pages), they are listed read-only under the editor.
+4. **Open attempt** jumps to the full review workspace for that session; **Practice** reopens the paper.
+
+### 7. Export
 
 - **Review notebook**: preview it with **Notebook** in the review top bar, then export **Markdown / DOCX / PDF**
   (also available in the **Export** drawer). One notebook per exam (cover with your name and score), containing
@@ -267,7 +287,7 @@ Open **Vocabulary** in the sidebar. The page has two tabs:
 - **Whole document**: export **PDF** / **DOCX** (questions, answers and analysis) from the Library.
 - **Vocabulary**: **Export .xlsx**.
 
-### 7. Settings (name / LLM / fallback / vocabulary / word tests)
+### 8. Settings (name / LLM / fallback / vocabulary / word tests)
 
 **Not required for anything except AI explain / word-test AI grading.** Open **Settings** (`/settings`) from the sidebar:
 
@@ -312,7 +332,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 288 passed, 1 skipped; uses a temp data dir)
+# backend tests (baseline 296 passed, 1 skipped; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -334,8 +354,8 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI wiring (/api/health, 11 routers)
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects
+│   │   ├── main.py            FastAPI wiring (/api/health, 12 routers)
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects · review
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD parser + writer (deterministic state machine; multi / blank)
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook (review) · math_render (+ mathjax bridge)
@@ -345,11 +365,12 @@ InteFlow/
 │   │   ├── vocab_assist.py    drag-to-add sense selection (optional AI)
 │   │   ├── word_exam.py       word-test build / local grading / optional AI grading
 │   │   ├── repos/subjects.py  subject groups: CRUD + paper assignment
+│   │   ├── repos/review.py    mistakes + starred collections
 │   │   └── builtin/           built-in bank (44 units shipped with the repo)
-│   ├── tests/                 pytest (288)
+│   ├── tests/                 pytest (296)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Review (Mistakes) · Vocabulary · AnswerKey · Practice · Result · Settings
 │   ├── src/components/        workspace panes · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · import/library UI
 │   └── src/lib/               wordExamQr (compact JSON + multi-part QR) · subjects (palette) · theme · sections
 ├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)

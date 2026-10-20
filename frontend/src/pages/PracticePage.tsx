@@ -90,6 +90,22 @@ export default function PracticePage() {
     };
   }, [docId]);
 
+  // Load the paper's persisted stars so they survive reloads and unfinished tries.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .listStarredIds(docId)
+      .then(({ question_ids }) => {
+        if (!cancelled) setMarked(new Set(question_ids));
+      })
+      .catch(() => {
+        /* starring is optional; practice still works */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [docId]);
+
   // leave fullscreen when the exam ends or the page unmounts
   useEffect(
     () => () => {
@@ -128,13 +144,28 @@ export default function PracticePage() {
     setAnswers((prev) => ({ ...prev, [qid]: value.trim() ? [value] : [] }));
   }
 
-  function toggleMark(qid: number) {
+  async function toggleMark(qid: number) {
+    const wasStarred = marked.has(qid);
     setMarked((prev) => {
       const next = new Set(prev);
-      if (next.has(qid)) next.delete(qid);
+      if (wasStarred) next.delete(qid);
       else next.add(qid);
       return next;
     });
+    setError(null);
+    try {
+      if (wasStarred) await api.unstarQuestion(qid);
+      else await api.starQuestion(qid);
+    } catch (err) {
+      // roll the star back if the local write failed
+      setMarked((prev) => {
+        const next = new Set(prev);
+        if (wasStarred) next.add(qid);
+        else next.delete(qid);
+        return next;
+      });
+      setError(errText(err));
+    }
   }
 
   async function doSubmit() {
@@ -324,7 +355,7 @@ export default function PracticePage() {
                     : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                {marked.has(current.id) ? "⚑ Marked" : "Mark for review"}
+                {marked.has(current.id) ? "★ Starred" : "☆ Star for review"}
               </button>
             </div>
 
@@ -412,7 +443,7 @@ export default function PracticePage() {
                 <button
                   key={q.id}
                   onClick={() => setIdx(i)}
-                  title={`Question ${q.no ?? i + 1}${isMarked ? " (marked)" : ""}`}
+                  title={`Question ${q.no ?? i + 1}${isMarked ? " (starred)" : ""}`}
                   className={`grid h-8 w-8 place-items-center rounded-md border text-xs font-semibold transition ${tone} ${
                     isCurrent ? "ring-2 ring-slate-900 ring-offset-1" : ""
                   }`}

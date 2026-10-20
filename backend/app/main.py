@@ -14,6 +14,7 @@ from app.api import (
     dictionary,
     documents,
     imports,
+    review,
     sessions,
     settings,
     subjects,
@@ -50,6 +51,7 @@ app.include_router(dictionary.router)
 app.include_router(vocabulary.router)
 app.include_router(word_exam.router)
 app.include_router(subjects.router)
+app.include_router(review.router)
 
 
 @app.get("/api/health")

@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **288 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 125 passed, 5 skipped。
+> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 131 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -13,21 +13,22 @@
 ```mermaid
 flowchart LR
   subgraph Browser["浏览器 (React SPA · Vite + TS + Tailwind)"]
-    UI["工作区侧栏: Exams / Library / Sessions / Mistakes / Vocabulary / Settings<br/>考试流: AnswerKey / Practice / Result"]
+    UI["工作区侧栏: Exams / Library / Sessions / Review / Vocabulary / Settings<br/>考试流: AnswerKey / Practice / Result"]
     RT["RichText: react-markdown + remark-math + rehype-katex"]
   end
 
   UI -- "/api/* (Vite dev proxy :5173 -> :8000)" --> API
 
   subgraph Backend["FastAPI (app.main)"]
-    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / vocabulary / word_exam / subjects"]
+    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / vocabulary / word_exam / subjects / review"]
     CONV["convert: pdf · twocolumn · docx · images · normalize · ocr · llm_fallback"]
     PARSE["ifmd.parser (deterministic state machine)"]
-    REPOS["repos: documents · imports · sessions · analyses · words · settings"]
+    REPOS["repos: documents · imports · sessions · analyses · words · settings · subjects · review"]
     DICT["dictionary: Eudic .eudb parser + SQLite indexes (standard / learner, 0 token)"]
     ASSIST["vocab_assist: MW sense selection (explicit, optional AI)"]
     EXAM["word_exam: build / local grading / optional AI grading (explicit)"]
     SUBJ["subjects: user-defined labels for exam papers (0 token)"]
+    REVIEW["review: mistakes (latest wrong) + starred questions (0 token)"]
     SEC["sections.py (free-form section labels)"]
     LLM["llm.base -> providers.py (19 providers, 2 protocols)"]
     API --> CONV
@@ -37,6 +38,7 @@ flowchart LR
     API --> ASSIST
     API --> EXAM
     API --> SUBJ
+    API --> REVIEW
     ASSIST --> LLM
     EXAM --> LLM
     CONV --> PARSE
@@ -106,9 +108,16 @@ erDiagram
   sessions  ||--o{ session_items : "1:N"
   questions ||--o{ session_items : "appears in"
   questions ||--o{ analysis_pages : "one page"
+  questions ||--o| question_stars : "selected"
   documents ||--o{ vocab : "reserved"
   documents ||--o{ notes : "reserved"
   subjects  ||--o{ documents : "optional label"
+
+  question_stars {
+    int question_id PK
+    int document_id FK
+    text created_at
+  }
 
   subjects {
     int id PK
@@ -190,7 +199,7 @@ erDiagram
   }
 ```
 
-保留但**未使用**的表（历史占位）：`analyses`、`vocab`、`notes`、`llm_logs`。分析正文现用 `analysis_pages`（旧 `questions.explain` 首次读取时映射迁移，不落库）。
+保留但**不再写入**的表（历史占位）：`analyses`（旧版多分析记录；Review 只读展示）、`vocab`、`notes`、`llm_logs`。分析正文现用 `analysis_pages`（旧 `questions.explain` 首次读取时映射迁移，不落库）。
 
 ---
 
@@ -202,7 +211,7 @@ App.tsx (BrowserRouter)
     ├── "/"                     ExamHomePage      —— Exams：选卷开考（统计 + 学科筛选 + 编号行）
     ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 内置题库卡 + 试卷列表 + 学科管理
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
-    ├── "/mistakes"             MistakesPage      —— 错题分析集合（占位）
+    ├── "/mistakes"             MistakesPage      —— Review：Mistakes / Starred 两集合（搜索/过滤/排序/分析）
     ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
     ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 单词考试评分开关
     ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览 + 学科归类（含侧栏）
@@ -210,7 +219,7 @@ App.tsx (BrowserRouter)
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
     └── "/manage"               → 重定向到 /library（兼容旧链接）
 
-components/  AppSidebar（六个 tab：Exams/Library/Sessions/Mistakes/Vocabulary/Settings）· RichText (markdown+KaTeX+图片) ·
+components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/Settings）· RichText (markdown+KaTeX+图片) ·
              workspace/（Workspace 四选二分屏 · WorkspacePane 每侧工具切换器 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
              AnalysisEditor Pages 式分析页 (Write/Preview + 自动保存 + 单换行保留) · AiTutorPane AI 讲解 pane ·
              VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） · ExportDrawer 顶栏导出抽屉 ·
@@ -242,7 +251,7 @@ api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 
 ```
 app/
-├── main.py                 FastAPI 装配（lifespan=init_db；CORS；11 个 router）
+├── main.py                 FastAPI 装配（lifespan=init_db；CORS；12 个 router）
 ├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR，ifmd_path()）
 ├── imports.py              导入流水线服务：detect → convert → commit（确定性，0 token；PDF/DOCX/InteFlow-MD 单一代码路径）
 ├── sections.py             板块标签（KNOWN_LABELS / DEFAULT_SECTION / label()）
@@ -258,7 +267,8 @@ app/
 │   ├── dictionary.py       本地韦氏词典 status / lookup（0 token）
 │   ├── vocabulary.py       全部试卷的生词本概览（计数 + 预览）
 │   ├── word_exam.py        单词考试：开始（随机抽题、答案留后端）/ 提交判分
-│   └── subjects.py         学科 CRUD（名称/颜色）+ 试卷归属；文档 PATCH 在 documents.py
+│   ├── subjects.py         学科 CRUD（名称/颜色）+ 试卷归属；文档 PATCH 在 documents.py
+│   └── review.py           错题集 / 精选题集 / 星标接口（0 token）
 ├── dictionary/
 │   ├── eudb.py             Eudic .eudb 容器解析（header / zlib blocks / HTML→纯文本）
 │   └── store.py            派生 SQLite 索引构建 + 状态 + 精确/前缀/包含查询
@@ -286,6 +296,7 @@ app/
 │   ├── words.py            词汇表 grid v2（columns_json + rows_json + view_json；v1 读取自愈升级）
 │   │                         + 结构化条目：summaries / add_entry / update_entry / delete_entry（按列名映射、按词去重）
 │   ├── subjects.py         学科：list / create / update / delete / exists（名称大小写不敏感去重、调色板轮换）
+│   ├── review.py           错题（最近一次）与精选题查询、分析聚合、星标增删
 │   └── settings.py         settings 键值（user_name / llm_fallback / 生词本两个开关 / 单词考试 AI 评分）
 ├── export/                  PDF/DOCX 导出（0 token）
 │   ├── model.py            ExportDoc/ExportQuestion（聚合题目 + 词汇表；section_label 来自 sections.py）
@@ -431,9 +442,30 @@ PATCH  /api/documents/{id}           -> {subject_id: number|null}；null = 移�
   Exams 首页显示学科徽章与筛选 chips。
 - 删除学科只影响归类，不删试卷、题目、答案、分析或词表。
 
+### 6.7 错题集与精选题集（Review，0 token）
+
+```
+GET    /api/review/mistakes                 -> 所有已提交作答的错题
+GET    /api/review/starred                  -> 所有精选题（含最近一次作答、分析）
+GET    /api/review/starred/ids?document_id= -> 某套试卷的已星标 question_id（练习页恢复星标）
+POST   /api/review/starred/{question_id}    -> 加星（幂等）
+DELETE /api/review/starred/{question_id}    -> 取消星标
+```
+
+- **Mistakes**：SQL `ROW_NUMBER() PARTITION BY question_id ORDER BY session id DESC` 先取每题最近一次
+  `session_items`，再只保留 `is_correct = 0`。因此同一题重复错只显示一次（用户答案取最近一次）；
+  后来做对则自动移出；未评分（没有答案键）的最近作答不算错题。
+- **Starred**：`question_stars(question_id PK, document_id, created_at)`，每题一行、级联删除。
+  练习页 `☆ Star for review`、复盘工作台、Mistakes 列表都可即时加/取消星；`starred/ids` 让练习页恢复星标。
+- 两类条目返回统一形状：题干/选项/图片/material、正确答案与用户答案、题型/多选、套题与学科、
+  最近 attempt（session_id / finished_at）、星标状态、`analysis`（当前页）+ `analyses`（当前页 + legacy
+  `analyses` 全部内容）。前端右侧复用 `AnalysisEditor` 编辑当前分析，额外旧分析只读列出。
+- Review 页支持按套题/题干/选项/答案搜索、按 exam 过滤、Newest/Oldest 时间排序；Mistakes 与 Starred
+  两个 tab 各自懒加载。
+
 ---
 
-## 7. 当前 API 面（56 条）
+## 7. 当前 API 面（61 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -482,6 +514,10 @@ PATCH  /api/documents/{id}           -> {subject_id: number|null}；null = 移�
 | POST | `/api/sessions/{id}/submit` | 提交判分 |
 | POST | `/api/sessions/{id}/regrade` | 补键重判 |
 | DELETE | `/api/sessions/{id}` | 删除一次作答 |
+| GET | `/api/review/mistakes` | 错题集（每题最近一次作答；后来做对自动移出） |
+| GET | `/api/review/starred` | 精选题集（含最近作答与分析） |
+| GET | `/api/review/starred/ids` | 某套试卷的星标 question_id 列表 |
+| POST/DELETE | `/api/review/starred/{question_id}` | 加星 / 取消星标（幂等） |
 | GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions` / `vocab_exam_ai_grading`） |
 | GET | `/api/settings/providers` | Provider 目录 |
 | POST | `/api/settings/test` | 连通性测试 |

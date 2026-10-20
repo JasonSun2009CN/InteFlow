@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-288%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-296%20passed-2E7D32)
 
 ---
 
@@ -62,6 +62,7 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **工作区** | 每题分析页（Markdown，支持公式/图片）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出抽屉 |
 | **生词本** | 一套试卷一份词表（Word · POS · Meaning · Notes）、本地韦氏词典查词、拖词入表、按条添加、`.xlsx` 导出 |
 | **单词考试** | Vocabulary 页内 **Word list / Word test** 两 tab：随机抽题或全测，**English → Chinese**（手写释义，本地宽松判分）或 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）；结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码；可选 AI 严格判分 |
+| **错题集 / 精选题集** | 侧栏 **Review**：**Mistakes** 按题去重并保留最近一次作答（后来做对自动移出）；**Starred** 是练习/复盘/错题列表中点星收藏的题目。支持按套题/题干/选项搜索、exam 过滤、时间正倒序，并共用分析编辑器；旧分析只读列出 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
 | **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底**、**AI 选义**、**学习者词典**、**单词考试 AI 评分** |
 
@@ -158,7 +159,7 @@ npm run dev
 ### 1. 导入题库
 
 打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 学科管理 / 删除）、
-**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表 + 单词考试）、**Settings**（LLM / 用户名 / 兜底 / 生词本 / 单词考试评分开关）。
+**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Review**（错题集 + 精选题集）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表 + 单词考试）、**Settings**（LLM / 用户名 / 兜底 / 生词本 / 单词考试评分开关）。
 
 1. 点侧栏 **Library** 进入题库页。
 2. **上传文件**：把文件拖到 *Drag a file here* 区域，或点 **choose a file**。
@@ -211,7 +212,7 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 - **左右分屏**：左侧显示当前题的题干、正确选项、你的选择；右侧是 **Pages 式分析编辑器**（一题一页）。
 - **分析编辑器**：支持 Markdown（公式 `$x^2$`、图片 `![](assets/…)`）；`Write` / `Preview` 切换；输入后**自动保存**（约 0.9 秒防抖，也可 `⌘S` / 点 Save）。下次进入自动续写。
 - **Notebook（整套解析预览）**：复盘页顶部 **Notebook** 按钮打开全屏预览——从试卷标题开始，依次显示所有已写解析的题目（题干、图表、解析），并可直接导出。
-- **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §6）。
+- **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §7）。
 - 若答卷时没答案键，保存后会自动重判（regrade）。
 
 ### 5. 生词本与单词考试
@@ -230,13 +231,30 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
   5. AI 评分**默认关闭**。在 Settings 打开 **AI grading for word tests** 后，模型会参考词表释义 + 韦氏词典
      严格判分两种模式（提示词明确拒绝含糊/宽泛答案）；没有配置 key 或调用失败时自动回退本地判分并提示。
 
-### 6. 导出
+### 6. 错题集与精选题集（Review）
+
+侧栏点 **Review**，页面内有两个 tab：
+
+- **Mistakes（错题集）**：所有已提交作答里的错题，**每题只出现一次**，取你**最近一次**的作答；
+  如果后来同一题做对了，会自动移出。重复做错不会重复堆积。
+- **Starred（精选题集）**：你主动收藏的题。练习页点 **☆ Star for review**、复盘工作台点 **☆ Star**、
+  或错题列表右侧的星标按钮即可加入；星标立即保存，中途退出练习也不丢。
+
+两个 tab 共用同一套工具与右侧编辑器：
+
+1. 搜索套题标题、题干、选项和答案；用下拉只看某套试卷；点 **Newest first / Oldest first** 切换时间排序。
+2. 点左侧题目，右侧显示题目、正确答案/你的答案，以及 **Analysis** 编辑器。它和复盘工作台是同一份笔记本，
+   在这里改的分析会同步过去。
+3. 如果该题还有旧分析（legacy 记录或额外页面），会以只读卡片列在编辑器下方。
+4. **Open attempt** 打开该次的完整复盘；**Practice** 重新进入这套试卷。
+
+### 7. 导出
 
 - **复盘笔记本**：复盘页顶部 **Notebook** 先预览整套解析，再导出 **Markdown / DOCX / PDF**（工具栏 **Export** 同样可导出）。一份试卷一套分析（封面含用户名与成绩），**只包含已写解析的题目**；浏览器下载的同时会在 `data/exports/` 留一份，界面会显示保存路径。
 - **整份文档**：Library 里对文档导出 **PDF** / **DOCX**（题目、答案与解析）。
 - **生词本**：**Export .xlsx**。
 
-### 7. 设置（用户名 / LLM / 兜底 / 生词本 / 单词考试评分）
+### 8. 设置（用户名 / LLM / 兜底 / 生词本 / 单词考试评分）
 
 **除 AI 讲解 / 单词考试 AI 评分外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
@@ -281,7 +299,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 288 passed, 1 skipped；用临时数据目录，不动你的数据）
+# 后端测试（基线 296 passed, 1 skipped；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -303,8 +321,8 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI 装配（/api/health、11 个 router）
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects
+│   │   ├── main.py            FastAPI 装配（/api/health、12 个 router）
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects · review
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD 解析 + 回写（确定性状态机；多选/填空）
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook(复盘) · math_render(+mathjax 桥)
@@ -314,11 +332,12 @@ InteFlow/
 │   │   ├── vocab_assist.py    拖词选义（可选 AI）
 │   │   ├── word_exam.py       单词考试：抽题 / 本地判分 / 可选 AI 判分
 │   │   ├── repos/subjects.py  学科：CRUD + 试卷归属
+│   │   ├── repos/review.py    错题集 + 精选题集
 │   │   └── builtin/           内置题库（44 单元随仓库分发）
-│   ├── tests/                 pytest（288）
+│   ├── tests/                 pytest（296）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Review (Mistakes) · Vocabulary · AnswerKey · Practice · Result · Settings
 │   ├── src/components/        复盘分屏 · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · 导入/资料库 UI
 │   └── src/lib/               wordExamQr（紧凑 JSON + 多段 QR）· subjects（调色板）· theme · sections
 ├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）

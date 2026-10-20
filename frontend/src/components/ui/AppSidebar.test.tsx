@@ -16,7 +16,7 @@ describe("AppSidebar", () => {
     renderAt("/");
 
     expect(screen.getByRole("navigation", { name: "Main" })).toBeInTheDocument();
-    for (const label of ["Exams", "Sessions", "Library", "Mistakes", "Vocabulary", "Settings"]) {
+    for (const label of ["Exams", "Sessions", "Library", "Review", "Vocabulary", "Settings"]) {
       expect(screen.getByRole("link", { name: label })).toHaveAttribute("href");
     }
   });
@@ -29,7 +29,7 @@ describe("AppSidebar", () => {
       "page",
     );
     expect(screen.getByRole("link", { name: "Exams" })).not.toHaveAttribute("aria-current");
-    expect(screen.getByRole("link", { name: "Mistakes" })).not.toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Review" })).not.toHaveAttribute(
       "aria-current",
     );
   });

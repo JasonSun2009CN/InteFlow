@@ -159,6 +159,9 @@ def test_schema_creates_import_jobs() -> None:
         for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
     }
     assert "import_jobs" in tables
+    assert "question_stars" in tables
     cols = {row[1] for row in conn.execute("PRAGMA table_info(import_jobs)")}
     assert {"id", "status", "stage", "pages_json", "warnings_json", "document_id"} <= cols
+    star_cols = {row[1] for row in conn.execute("PRAGMA table_info(question_stars)")}
+    assert {"question_id", "document_id", "created_at"} <= star_cols
     conn.close()

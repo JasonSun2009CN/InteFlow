@@ -13,6 +13,9 @@ vi.mock("../api/client", async (importOriginal) => {
       startSession: vi.fn(),
       submit: vi.fn(),
       deleteSession: vi.fn(),
+      listStarredIds: vi.fn(),
+      starQuestion: vi.fn(),
+      unstarQuestion: vi.fn(),
     },
   };
 });
@@ -20,6 +23,9 @@ vi.mock("../api/client", async (importOriginal) => {
 const startSession = vi.mocked(api.startSession);
 const submit = vi.mocked(api.submit);
 const deleteSession = vi.mocked(api.deleteSession);
+const listStarredIds = vi.mocked(api.listStarredIds);
+const starQuestion = vi.mocked(api.starQuestion);
+const unstarQuestion = vi.mocked(api.unstarQuestion);
 
 const doc: DocumentSummary = {
   id: 7,
@@ -74,6 +80,9 @@ describe("PracticePage sessions", () => {
     vi.clearAllMocks();
     startSession.mockResolvedValue(session);
     deleteSession.mockResolvedValue(undefined as never);
+    listStarredIds.mockResolvedValue({ question_ids: [] });
+    starQuestion.mockResolvedValue({ question_id: 1, starred: true });
+    unstarQuestion.mockResolvedValue({ question_id: 1, starred: false });
   });
 
   it("discards the provisional session when you leave without submitting", async () => {
@@ -83,6 +92,21 @@ describe("PracticePage sessions", () => {
     unmount();
 
     await waitFor(() => expect(deleteSession).toHaveBeenCalledWith(42));
+  });
+
+  it("persists a starred question while practising", async () => {
+    renderPage();
+    await screen.findByText("Ready to begin");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Begin — enter fullscreen/ }));
+    });
+    await screen.findByText("Exit");
+
+    fireEvent.click(screen.getByRole("button", { name: /Star for review/ }));
+
+    expect(await screen.findByRole("button", { name: /★ Starred/ })).toBeInTheDocument();
+    await waitFor(() => expect(starQuestion).toHaveBeenCalledWith(1));
   });
 
   it("keeps the session once the attempt is submitted", async () => {
@@ -119,6 +143,7 @@ describe("PracticePage five options", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     deleteSession.mockResolvedValue(undefined as never);
+    listStarredIds.mockResolvedValue({ question_ids: [] });
     startSession.mockResolvedValue({
       session_id: 7,
       document: doc,
