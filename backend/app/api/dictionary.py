@@ -1,22 +1,35 @@
-"""Local Merriam-Webster dictionary: status + lookup (0 token)."""
+"""Local dictionary lookup: custom words first, then Merriam-Webster."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
 
 from app import dictionary
+from app.repos import custom_dictionary as custom_repo
 from app.repos import settings as settings_repo
 
 router = APIRouter(prefix="/api/dictionary", tags=["dictionary"])
 
-SOURCE_CHOICES = ("auto", "standard", "learner")
+SOURCE_CHOICES = ("auto", "standard")
+
+
+def _mark(entry: dict) -> dict:
+    return {**entry, "source": entry.get("source") or "standard"}
+
+
+def _headwords(entries: list[dict]) -> set[str]:
+    return {dictionary.normalize(entry.get("headword") or "") for entry in entries}
 
 
 @router.get("/status")
 def dictionary_status() -> dict:
     standard = dictionary.status("standard")
-    standard["learner"] = dictionary.status("learner")
+    standard["learner_count"] = int(standard.get("learner_count") or 0)
     standard["learner_enabled"] = settings_repo.learner_definitions_enabled()
+    standard["custom_dictionary"] = {
+        "enabled": settings_repo.custom_dictionary_enabled(),
+        "count": custom_repo.count_entries(),
+    }
     return standard
 
 
@@ -32,28 +45,56 @@ def dictionary_lookup(
             detail=f"source must be one of {', '.join(SOURCE_CHOICES)}",
         )
 
-    kind = source
-    fallback = ""
-    if kind == "auto":
-        learner = dictionary.status("learner")
-        use_learner = settings_repo.learner_definitions_enabled() and learner["available"]
-        kind = "learner" if use_learner else "standard"
+    custom_enabled = (
+        source == "auto" and settings_repo.custom_dictionary_enabled()
+    )
+    custom = (
+        custom_repo.lookup(q, limit=limit)
+        if custom_enabled
+        else {"exact": [], "matches": [], "entry_count": custom_repo.count_entries()}
+    )
 
+    warning = ""
     try:
-        result = dictionary.lookup(q, limit=limit, kind=kind)
+        merriam = dictionary.lookup(q, limit=limit)
     except dictionary.DictionaryError as exc:
-        if source == "auto" and kind == "learner":
-            try:
-                result = dictionary.lookup(q, limit=limit, kind="standard")
-            except dictionary.DictionaryError as fallback_exc:
-                raise HTTPException(status_code=409, detail=str(fallback_exc)) from fallback_exc
-            fallback = (
-                f"Learner's dictionary unavailable ({exc}); "
-                "used the standard dictionary."
-            )
-        else:
+        if not custom["exact"] and not custom["matches"]:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
+        merriam = {"exact": [], "matches": [], "entry_count": 0}
+        warning = f"Merriam-Webster unavailable ({exc}); showing only your dictionary."
 
-    result["fallback"] = fallback
-    result["learner"] = result["source"] == "learner"
-    return result
+    custom_exact = [_mark(entry) for entry in custom["exact"]]
+    hidden = _headwords(custom_exact)
+    merriam_exact = [
+        _mark(entry)
+        for entry in merriam["exact"]
+        if dictionary.normalize(entry.get("headword") or "") not in hidden
+    ]
+    exact = [*custom_exact, *merriam_exact]
+
+    seen = {(entry["source"], entry["id"]) for entry in exact}
+    matches = [entry for entry in custom["matches"] if (entry["source"], entry["id"]) not in seen]
+    seen.update((entry["source"], entry["id"]) for entry in matches)
+    for entry in merriam["matches"]:
+        marked = _mark(entry)
+        key = (marked["source"], marked["id"])
+        if key in seen:
+            continue
+        matches.append(marked)
+        seen.add(key)
+        if len(matches) >= limit:
+            break
+
+    return {
+        "query": q,
+        "exact": exact,
+        "matches": matches[:limit],
+        "entry_count": merriam["entry_count"],
+        "source": "standard",
+        "learner_enabled": settings_repo.learner_definitions_enabled(),
+        "custom_dictionary": {
+            "enabled": settings_repo.custom_dictionary_enabled(),
+            "count": custom["entry_count"],
+        },
+        "warning": warning,
+    }

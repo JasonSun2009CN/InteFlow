@@ -2,7 +2,7 @@
 
 > 本地优先的学习工作流：**导入题库（PDF/DOCX/Markdown）→ 刷题 → 逐题复盘错题 → 写解析 / 查词 / 问 AI → 导出错题分析与生词文件。**
 >
-> 状态快照：**2026-10-20** ｜ pytest **296 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 135 passed, 5 skipped。
+> 状态快照：**2026-10-20** ｜ pytest **304 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 138 passed, 5 skipped。
 > 相关文档：[`README.md`](README.md) · [`README-cn.md`](README-cn.md) · [`AGENT.md`](AGENT.md) ·
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/IFMD.md`](docs/IFMD.md) · [`docs/IDEAS.md`](docs/IDEAS.md)
 
@@ -36,7 +36,7 @@
   导入时未识别到选项按填空处理；设置里加"题目识别 API 兜底"开关与"用户名"。
 - ✅ **作答历史 + 删除**：Sessions 页按时间倒序列出每次作答，可搜索、可删除（`GET/DELETE /api/sessions`）。**只有提交过（submit）的作答才记录**；打开考试不产生记录。
 - ✅ **生词本 + 本地韦氏词典（2026-10-19/20）**：Vocabulary 页 = 左侧考试索引 + 右侧词表编辑器（手动增改、查词、按条添加、导出 xlsx）；
-  复盘工作台拖词入生词本，本地 `.eudb` 解析成 SQLite 索引（标准 + 可选学习者词典，0 token），可选 AI 在真实候选里选义。
+  复盘工作台拖词入生词本，本地 `.eudb` 解析成 SQLite 索引（含词条内 Definition for English Learners 栏目，0 token），可选 AI 在真实候选里选义；Settings 的 **My dictionary** 支持导入/增删用户词典并优先查词。
 - ✅ **单词考试（2026-10-20）**：Vocabulary 页顶部 **Word list / Word test** 两 tab。从当前词表随机抽题（手输数量或全测）；
   模式 **English → Chinese**（手写释义，本地宽松匹配）与 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）。
   结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码（大卷拆多个 QR，另可下载 `.json`）。
@@ -53,7 +53,7 @@
 导入（PDF/DOCX/Markdown/OCR/流水线/内置题库）· 答案录入（网格 + 批量粘贴）·
 练习（全屏、计时、题号导航、标记、键盘、多选/填空）· 结果复盘（全屏工作台 + 折叠导航 + 分析编辑器 + 过滤 + regrade）·
 工作区（手写解析 / 词汇表 v2 / AI 讲解 / 导出入口）· 导出（PDF / DOCX / 生词 xlsx）·
-设置（19 家 LLM 服务商目录 + 用户名 + AI 兜底/生词本/单词考试评分开关）· 整套解析 Notebook 预览与导出 · 学科分类 · 错题集/精选题集 · 测试（pytest 296 / vitest 135）。
+设置（19 家 LLM 服务商目录 + 用户名 + AI 兜底/生词本/自定义词典/单词考试评分开关）· 整套解析 Notebook 预览与导出 · 学科分类 · 错题集/精选题集 · 测试（pytest 304 / vitest 138）。
 
 ---
 
@@ -86,8 +86,8 @@
 ## 4. 验收与命令
 
 ```bash
-cd backend && ../.venv/bin/python -m pytest -q   # 296 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q   # 304 passed, 1 skipped
 cd frontend && npm run build                     # 0 错误
-cd frontend && npm test                          # 135 passed, 5 skipped
+cd frontend && npm test                          # 138 passed, 5 skipped
 ./scripts/dev.sh                                 # 后端 :8000 + 前端 :5173
 ```

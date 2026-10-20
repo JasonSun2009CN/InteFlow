@@ -143,7 +143,7 @@ def choose_definition(
         }
 
     fallback = candidates[0]
-    fallback_pos = first_pos(fallback.get("definition") or "")
+    fallback_pos = fallback.get("pos") or first_pos(fallback.get("definition") or "")
     fallback_definition = first_sense(fallback.get("definition") or "")
 
     if not use_ai:
@@ -201,7 +201,7 @@ def choose_definition(
     if not definition:
         definition = first_sense(chosen.get("definition") or "")
     if not pos:
-        pos = first_pos(chosen.get("definition") or "")
+        pos = chosen.get("pos") or first_pos(chosen.get("definition") or "")
 
     return {
         "entry_id": chosen["id"],
@@ -213,31 +213,65 @@ def choose_definition(
     }
 
 
-def candidates_for(
-    word: str, limit: int = 6, kind: str = "standard"
-) -> list[dict]:
-    """Full definitions for the exact/prefix matches of one word.
+def candidates_for(word: str, limit: int = 6, use_learner: bool = False) -> list[dict]:
+    """Candidate senses for one word: user dictionary first, then MW.
 
-    ``DictionaryError`` is intentionally not swallowed: the caller can tell the
-    user whether the file is missing or the index could not be built.
+    Custom entries use string ids (``custom:12``) so they can never collide with
+    Merriam-Webster row ids. The chosen candidate is resolved by the caller.
     """
     from app import dictionary
+    from app.repos import custom_dictionary as custom_repo
+    from app.repos import settings as settings_repo
 
-    result = dictionary.lookup(word, limit=limit, kind=kind)
+    out: list[dict] = []
+    hidden: set[str] = set()
+    if settings_repo.custom_dictionary_enabled():
+        custom = custom_repo.lookup(word, limit=limit)
+        for entry in custom.get("exact", []):
+            hidden.add(dictionary.normalize(entry["headword"]))
+            out.append(
+                {
+                    **entry,
+                    "id": f"custom:{entry['id']}",
+                    "custom_id": entry["id"],
+                    "source": "custom",
+                }
+            )
+
+    try:
+        result = dictionary.lookup(word, limit=limit)
+    except dictionary.DictionaryError:
+        return out[:limit]
+
+    def from_entry(entry: dict) -> dict:
+        standard = entry.get("definition") or ""
+        learner = entry.get("learner_definition") or ""
+        preferred = learner if use_learner and learner else standard
+        return {
+            **entry,
+            "definition": preferred,
+            "pos": first_pos(standard),
+            "source": "standard",
+            "learner": bool(use_learner and learner),
+        }
 
     seen: set[int] = set()
-    out: list[dict] = []
     for entry in result.get("exact", []):
-        if entry["id"] not in seen:
-            out.append(entry)
-            seen.add(entry["id"])
+        if entry["id"] in seen:
+            continue
+        if dictionary.normalize(entry["headword"]) in hidden:
+            continue
+        out.append(from_entry(entry))
+        seen.add(entry["id"])
     for suggestion in result.get("matches", []):
         if len(out) >= limit:
             break
         if suggestion["id"] in seen:
             continue
-        full = dictionary.get_entry(suggestion["id"], kind=kind)
+        full = dictionary.get_entry(suggestion["id"])
         if full:
-            out.append(full)
+            if dictionary.normalize(full["headword"]) in hidden:
+                continue
+            out.append(from_entry(full))
             seen.add(full["id"])
     return out[:limit]

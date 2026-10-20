@@ -7,6 +7,7 @@ import {
   type ProviderInfo,
 } from "../api/client";
 import { Button, ThemePicker } from "../components/ui";
+import CustomDictionaryManager from "../components/CustomDictionaryManager";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -22,6 +23,8 @@ export default function SettingsPage() {
   const [vocabAiSense, setVocabAiSense] = useState(true);
   const [vocabLearner, setVocabLearner] = useState(false);
   const [vocabExamAi, setVocabExamAi] = useState(false);
+  const [customDictionary, setCustomDictionary] = useState(true);
+  const [customOpen, setCustomOpen] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
@@ -41,6 +44,7 @@ export default function SettingsPage() {
         setVocabAiSense(s.vocab_ai_sense);
         setVocabLearner(s.vocab_learner_definitions);
         setVocabExamAi(s.vocab_exam_ai_grading);
+        setCustomDictionary(s.custom_dictionary_enabled);
         setProviders(list);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
@@ -80,6 +84,7 @@ export default function SettingsPage() {
         vocab_ai_sense: vocabAiSense,
         vocab_learner_definitions: vocabLearner,
         vocab_exam_ai_grading: vocabExamAi,
+        custom_dictionary_enabled: customDictionary,
         ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
       });
       setStored(saved);
@@ -335,18 +340,48 @@ export default function SettingsPage() {
               />
               <span>
                 <span className="block text-sm font-medium text-slate-800">
-                  Use learner&apos;s definitions
+                  Definition for English Learners
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-slate-600">
-                  Prefer a learner&apos;s dictionary when one is installed. Place its{" "}
-                  <code className="rounded bg-slate-200 px-1">.eudb</code> file in{" "}
-                  <code className="rounded bg-slate-200 px-1">dictionary/learners/</code>;
-                  lookups and captured senses use it first, then fall back to the standard
-                  dictionary. The standard Collegiate file does not include learner
-                  definitions on its own.
+                  When the local Merriam-Webster entry includes its{" "}
+                  <em>Definition for English Learners</em> section (usually harder
+                  words), use that simpler definition first. Entries without the section
+                  fall back to the ordinary definition. This is part of the same
+                  dictionary — no extra file and no tokens.
                 </span>
               </span>
             </label>
+
+            <div className="flex items-start gap-3">
+              <input
+                id="custom-dictionary"
+                type="checkbox"
+                aria-label="Use my dictionary first"
+                checked={customDictionary}
+                onChange={(e) => setCustomDictionary(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="min-w-0 flex-1">
+                <label
+                  htmlFor="custom-dictionary"
+                  className="block text-sm font-medium text-slate-800"
+                >
+                  Use my dictionary first
+                </label>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  Check your own words before Merriam-Webster. If a word is missing,
+                  lookup falls back to the local MW dictionary. Import CSV / TSV / JSON /
+                  TXT, or add words by hand.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCustomOpen(true)}
+                  className="mt-2 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-slate-50"
+                >
+                  Manage my dictionary
+                </button>
+              </span>
+            </div>
 
             <label className="flex items-start gap-3" htmlFor="vocab-exam-ai">
               <input
@@ -399,6 +434,10 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {customOpen && (
+        <CustomDictionaryManager onClose={() => setCustomOpen(false)} />
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-296%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-304%20passed-2E7D32)
 
 ---
 
@@ -64,7 +64,11 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **单词考试** | Vocabulary 页内 **Word list / Word test** 两 tab：随机抽题或全测，**English → Chinese**（手写释义，本地宽松判分）或 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）；结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码；可选 AI 严格判分 |
 | **错题集 / 精选题集** | 侧栏 **Review**：**Mistakes** 按题去重并保留最近一次作答（后来做对自动移出）；**Starred** 是练习/复盘/错题列表中点星收藏的题目。支持按套题/题干/选项搜索、exam 过滤、时间正倒序，并共用分析编辑器；旧分析只读列出 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
-| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底**、**AI 选义**、**学习者词典**、**单词考试 AI 评分** |
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底**、**AI 选义**、**Definition for English Learners**、**My dictionary**、**单词考试 AI 评分** |
+
+> **词典说明**：本地韦氏 `.eudb` 的索引里会保留部分词条自带的 **Definition for English Learners** 栏目；
+> 开启对应设置后优先显示该栏，没有就回退普通释义。**My dictionary** 是独立的用户词典，可在 Settings
+> 导入 CSV / TSV / JSON / TXT 或手动增删；开启后查词先自定义、再韦氏，全部 0 token。
 
 ## 两条铁律
 
@@ -266,9 +270,10 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 5. **API Key** 只写不回显（掩码显示）；
 6. **Model** 填模型名；
 7. **AI sense matching**：拖词入生词本时是否让模型选最贴合上下文的韦氏释义（关闭 = 取第一条，0 token）；
-8. **Use learner's definitions**：是否优先使用 `dictionary/learners/` 里的学习者词典（缺失自动回退标准词典）；
-9. **AI grading for word tests**：提交单词考试时是否让模型判分（关闭 = 本地判分、0 token；无 key/失败自动回退本地）；
-10. **Save settings** / **Test connection**。
+8. **Definition for English Learners**：词条自带该栏目时优先使用（没有则回退普通释义）；
+9. **My dictionary**：是否优先查用户自定义词典；**Manage my dictionary** 可导入 CSV/TSV/JSON/TXT 或逐条增删；
+10. **AI grading for word tests**：提交单词考试时是否让模型判分（关闭 = 本地判分、0 token；无 key/失败自动回退本地）；
+11. **Save settings** / **Test connection**。
 
 Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 
@@ -288,9 +293,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 | `INTEFLOW_OCR_LANG` | `eng` | Tesseract OCR 语言 |
 | `INTEFLOW_DEFAULT_SECTION` | `rw` | 转换器未识别到板块标题时的回退标签 |
 | `INTEFLOW_DICTIONARY` | `./dictionary` | 标准 Eudic `.eudb` 文件或目录 |
-| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | 标准词典索引路径 |
-| `INTEFLOW_LEARNER_DICTIONARY` | `./dictionary/learners` | 可选学习者 `.eudb` 文件或目录 |
-| `INTEFLOW_LEARNER_DICTIONARY_INDEX` | `data/dictionary/learners.db` | 学习者词典索引路径 |
+| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | 词典索引路径（源文件或索引版本变化时自动重建） |
 
 端口：后端 `8000`、前端 `5173`。
 
@@ -299,7 +302,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 296 passed, 1 skipped；用临时数据目录，不动你的数据）
+# 后端测试（基线 304 passed, 1 skipped；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -321,8 +324,8 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI 装配（/api/health、12 个 router）
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects · review
+│   │   ├── main.py            FastAPI 装配（/api/health、13 个 router）
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · custom_dictionary · vocabulary · word_exam · subjects · review
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD 解析 + 回写（确定性状态机；多选/填空）
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook(复盘) · math_render(+mathjax 桥)
@@ -333,12 +336,13 @@ InteFlow/
 │   │   ├── word_exam.py       单词考试：抽题 / 本地判分 / 可选 AI 判分
 │   │   ├── repos/subjects.py  学科：CRUD + 试卷归属
 │   │   ├── repos/review.py    错题集 + 精选题集
+│   │   ├── repos/custom_dictionary.py 用户自定义词典：CRUD、导入、查词
 │   │   └── builtin/           内置题库（44 单元随仓库分发）
-│   ├── tests/                 pytest（296）
+│   ├── tests/                 pytest（304）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
 │   ├── src/pages/             ExamHome · Library(Import) · Sessions · Review (Mistakes) · Vocabulary · AnswerKey · Practice · Result · Settings
-│   ├── src/components/        复盘分屏 · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · 导入/资料库 UI
+│   ├── src/components/        复盘分屏 · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · CustomDictionaryManager · 导入/资料库 UI
 │   └── src/lib/               wordExamQr（紧凑 JSON + 多段 QR）· subjects（调色板）· theme · sections
 ├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）
 ├── InteFlow.command           macOS 双击启动

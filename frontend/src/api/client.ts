@@ -174,9 +174,9 @@ export interface WordGrid {
   view: WordView;
 }
 
-/** Local Merriam-Webster index state (`GET /api/dictionary/status`). */
+/** Local dictionary index state (`GET /api/dictionary/status`). */
 export interface DictionaryStatus {
-  kind: "standard" | "learner";
+  kind: "standard";
   available: boolean;
   indexed: boolean;
   stale: boolean;
@@ -184,13 +184,17 @@ export interface DictionaryStatus {
   source_name: string | null;
   index_path: string;
   entry_count: number;
+  /** Number of MW entries that have a "Definition for English Learners" block. */
+  learner_count: number;
+  learner_enabled: boolean;
+  custom_dictionary: {
+    enabled: boolean;
+    count: number;
+  };
   built_at: string | null;
   title: string | null;
   author: string | null;
   building: boolean;
-  /** Only present on the standard status returned by `/api/dictionary/status`. */
-  learner?: Omit<DictionaryStatus, "learner">;
-  learner_enabled?: boolean;
 }
 
 export interface DictionaryEntry {
@@ -198,7 +202,11 @@ export interface DictionaryEntry {
   headword: string;
   /** Full English-English text on exact matches; null on suggestions. */
   definition: string | null;
+  /** MW's optional in-entry Definition for English Learners section. */
+  learner_definition: string | null;
   snippet: string;
+  pos?: string;
+  source: "standard" | "custom";
 }
 
 export interface DictionaryLookup {
@@ -206,10 +214,36 @@ export interface DictionaryLookup {
   exact: DictionaryEntry[];
   matches: DictionaryEntry[];
   entry_count: number;
-  source: "standard" | "learner";
-  learner: boolean;
-  /** Set when an automatic learner lookup had to fall back. */
-  fallback: string;
+  source: "standard";
+  learner_enabled: boolean;
+  custom_dictionary: {
+    enabled: boolean;
+    count: number;
+  };
+  warning: string;
+}
+
+/** One row in the user's own dictionary. */
+export interface CustomDictionaryEntry {
+  id: number;
+  word: string;
+  pos: string;
+  definition: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomDictionary {
+  enabled: boolean;
+  count: number;
+  entries: CustomDictionaryEntry[];
+}
+
+export interface CustomDictionaryImport {
+  added: number;
+  updated: number;
+  skipped: number;
+  total: number;
 }
 
 /** One exam in the vocabulary collection. */
@@ -314,12 +348,12 @@ export interface WordEntryResult {
   used_ai?: boolean;
   pos?: string;
   definition?: string;
-  entry_id?: number | null;
+  entry_id?: number | string | null;
   dictionary_word?: string | null;
   reason?: string;
   warning?: string;
   selected?: string;
-  source?: "standard" | "learner";
+  source?: "standard" | "custom";
   dictionary_title?: string | null;
   learner?: boolean;
 }
@@ -436,6 +470,7 @@ export interface AppSettings {
   vocab_ai_sense: boolean;
   vocab_learner_definitions: boolean;
   vocab_exam_ai_grading: boolean;
+  custom_dictionary_enabled: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -459,6 +494,7 @@ export interface SettingsInput {
   vocab_ai_sense?: boolean;
   vocab_learner_definitions?: boolean;
   vocab_exam_ai_grading?: boolean;
+  custom_dictionary_enabled?: boolean;
 }
 
 export class ApiError extends Error {
@@ -686,7 +722,7 @@ export const api = {
       entry_id: number;
       context?: string;
       question_no?: number | null;
-      source?: "standard" | "learner";
+      source?: "standard" | "custom";
     },
   ) =>
     request<WordEntryResult>(`/api/documents/${docId}/words/entries/from-entry`, {
@@ -722,6 +758,33 @@ export const api = {
   dictionaryLookup: (query: string, limit = 20) => {
     const params = new URLSearchParams({ q: query, limit: String(limit) });
     return request<DictionaryLookup>(`/api/dictionary/lookup?${params}`);
+  },
+
+  /** The user's own dictionary (global, stored in app.db). */
+  getCustomDictionary: (search = "", limit = 500) => {
+    const params = new URLSearchParams({ q: search, limit: String(limit) });
+    return request<CustomDictionary>(`/api/custom-dictionary?${params}`);
+  },
+
+  addCustomDictionaryEntry: (input: { word: string; definition: string; pos?: string }) =>
+    request<CustomDictionaryEntry & { count: number }>("/api/custom-dictionary/entries", {
+      method: "POST",
+      ...json(input),
+    }),
+
+  deleteCustomDictionaryEntry: (entryId: number) =>
+    request<{ deleted: number; count: number }>(
+      `/api/custom-dictionary/entries/${entryId}`,
+      { method: "DELETE" },
+    ),
+
+  importCustomDictionary: async (file: File): Promise<CustomDictionaryImport> => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<CustomDictionaryImport>("/api/custom-dictionary/import", {
+      method: "POST",
+      body: form,
+    });
   },
 
   /** Export questions + answers + explanations as PDF/DOCX (0 token). */

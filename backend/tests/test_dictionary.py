@@ -62,7 +62,11 @@ def eudb_file(tmp_path: Path) -> Path:
         tmp_path / "webster.eudb",
         [
             ("u\u00b7biq\u00b7ui\u00b7tous", "adj.<br>Function: adjective<br>: existing everywhere"),
-            ("abate", "v.<br>Function: verb<br>: to make less in amount"),
+            (
+                "abate",
+                "v.<br>Function: verb<br>: to make less in amount"
+                "<br>Definition for English Learners<br>: to become weaker : decrease",
+            ),
             ("abatement", "n.<br>Function: noun<br>: the act of abating"),
         ],
     )
@@ -124,6 +128,35 @@ def test_html_to_text_splits_nested_homographs() -> None:
     assert "2elate" in text.splitlines()[1]
 
 
+def test_split_learner_definition_extracts_the_in_entry_section() -> None:
+    text = (
+        "v.\nFunction: verb\n: to make less in amount\n"
+        "Definition for English Learners\n: to become weaker : decrease"
+    )
+    standard, learner = eudb.split_learner_definition(text)
+    assert standard.endswith("to make less in amount")
+    assert "Definition for English" not in standard
+    assert learner == ": to become weaker : decrease"
+
+
+def test_split_learner_definition_handles_heading_variants() -> None:
+    for heading in (
+        "Definition for English-Language Learners:",
+        "Definition of abate for English Learners",
+        "Learner's definition of abate",
+        "Definition for English Learners from Merriam-Webster's Learner's Dictionary",
+    ):
+        standard, learner = eudb.split_learner_definition(f": ordinary\n{heading}\n: easier")
+        assert standard == ": ordinary"
+        assert learner == ": easier"
+
+
+def test_split_learner_definition_falls_back_without_a_section() -> None:
+    standard, learner = eudb.split_learner_definition(": slow learners at school")
+    assert standard == ": slow learners at school"
+    assert learner == ""
+
+
 def test_parse_meta_handles_eudic_prefix(tmp_path: Path) -> None:
     raw = (
         "somedict@A concise dictionary\n\u4f5c\u8005\uff1aSomeone\n"
@@ -166,6 +199,7 @@ def test_status_before_and_after_index(dictionary_env: Path) -> None:
     assert built["indexed"] is True
     assert built["stale"] is False
     assert built["entry_count"] == 3
+    assert built["learner_count"] == 1
     assert built["title"] == "Test Webster"
     assert dictionary_env.is_file()
 
@@ -175,6 +209,11 @@ def test_lookup_exact_prefix_and_contains(dictionary_env: Path) -> None:
     assert result["entry_count"] == 3
     assert [entry["headword"] for entry in result["exact"]] == ["ubiquitous"]
     assert "existing everywhere" in result["exact"][0]["definition"]
+    assert result["exact"][0]["learner_definition"] is None
+
+    abate = dictionary.lookup("abate")["exact"][0]
+    assert "make less" in abate["definition"]
+    assert "become weaker" in abate["learner_definition"]
 
     prefix = dictionary.lookup("abat")
     assert [entry["headword"] for entry in prefix["exact"]] == []
@@ -198,6 +237,17 @@ def test_lookup_rebuilds_a_stale_index(dictionary_env: Path, eudb_file: Path) ->
     assert dictionary.status()["entry_count"] == 1
 
 
+def test_an_old_index_version_is_stale(dictionary_env: Path) -> None:
+    import sqlite3
+
+    dictionary.ensure_index()
+    assert dictionary.status()["stale"] is False
+    with sqlite3.connect(dictionary_env) as conn:
+        conn.execute("UPDATE meta SET value = '1' WHERE key = 'version'")
+    assert dictionary.status()["stale"] is True
+    assert dictionary.status()["learner_count"] == 1
+
+
 def test_lookup_without_source_raises(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("INTEFLOW_DICTIONARY", str(tmp_path / "missing.eudb"))
     monkeypatch.setenv("INTEFLOW_DICTIONARY_INDEX", str(tmp_path / "mw.db"))
@@ -217,41 +267,6 @@ def test_ensure_index_reports_missing_source(tmp_path: Path, monkeypatch) -> Non
 # --------------------------------------------------------------------------
 
 
-def test_learner_dictionary_has_its_own_index(
-    dictionary_env: Path, tmp_path: Path, monkeypatch
-) -> None:
-    learner = build_eudb(
-        tmp_path / "learners" / "advanced-learner.eudb",
-        [("abate", "v.<br>Function: verb<br>: to become weaker : decrease")],
-        title="Merriam-Webster's Advanced Learner's English Dictionary",
-    )
-    learner_index = tmp_path / "index" / "learners.db"
-    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(learner))
-    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY_INDEX", str(learner_index))
-
-    before = dictionary.status("learner")
-    assert before["available"] is True
-    assert before["indexed"] is False
-
-    result = dictionary.lookup("abate", kind="learner")
-    assert result["source"] == "learner"
-    assert "become weaker" in result["exact"][0]["definition"]
-    assert learner_index.is_file()
-
-    status = dictionary.status("learner")
-    assert status["kind"] == "learner"
-    assert status["entry_count"] == 1
-    assert status["title"].startswith("Merriam-Webster's Advanced")
-
-
-def test_learner_source_is_optional(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(tmp_path / "missing.eudb"))
-    status = dictionary.status("learner")
-    assert status["available"] is False
-    with pytest.raises(dictionary.DictionaryError, match="learner's dictionary"):
-        dictionary.ensure_index(kind="learner")
-
-
 def test_dictionary_api_status_and_lookup(client, dictionary_env: Path) -> None:
     status = client.get("/api/dictionary/status")
     assert status.status_code == 200
@@ -263,40 +278,27 @@ def test_dictionary_api_status_and_lookup(client, dictionary_env: Path) -> None:
     body = found.json()
     assert body["exact"][0]["headword"] == "abate"
     assert "less in amount" in body["exact"][0]["definition"]
+    assert "become weaker" in body["exact"][0]["learner_definition"]
 
     assert client.get("/api/dictionary/lookup", params={"q": ""}).status_code == 422
 
 
-def test_dictionary_api_auto_uses_learner_when_enabled(
-    client, dictionary_env: Path, tmp_path: Path, monkeypatch
+def test_dictionary_api_reports_learner_section_settings(
+    client, dictionary_env: Path, monkeypatch
 ) -> None:
     from app.repos import settings as settings_repo
 
-    learner = build_eudb(
-        tmp_path / "learners" / "learner.eudb",
-        [("abate", "v.<br>Function: verb<br>: to become weaker")],
-        title="Learner's Dictionary",
-    )
-    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(learner))
-    monkeypatch.setenv(
-        "INTEFLOW_LEARNER_DICTIONARY_INDEX", str(tmp_path / "index" / "learners.db")
-    )
+    dictionary.ensure_index()
     monkeypatch.setattr(settings_repo, "learner_definitions_enabled", lambda: True)
-
     status = client.get("/api/dictionary/status").json()
     assert status["learner_enabled"] is True
-    assert status["learner"]["available"] is True
+    assert status["learner_count"] == 1
+    assert "learner" not in status  # no separate learner dictionary anymore
 
     body = client.get("/api/dictionary/lookup", params={"q": "abate"}).json()
-    assert body["source"] == "learner"
-    assert body["learner"] is True
-    assert "become weaker" in body["exact"][0]["definition"]
-
-    explicit = client.get(
-        "/api/dictionary/lookup", params={"q": "abate", "source": "standard"}
-    ).json()
-    assert explicit["source"] == "standard"
-    assert "make less" in explicit["exact"][0]["definition"]
+    assert body["learner_enabled"] is True
+    assert body["exact"][0]["source"] == "standard"
+    assert "become weaker" in body["exact"][0]["learner_definition"]
 
 
 def test_dictionary_api_rejects_an_unknown_source(client, dictionary_env: Path) -> None:

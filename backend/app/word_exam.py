@@ -24,6 +24,7 @@ import re
 import unicodedata
 
 from app import dictionary, llm, vocab_assist
+from app.repos import custom_dictionary as custom_repo
 from app.repos import settings as settings_repo
 from app.repos import words as words_repo
 
@@ -177,50 +178,59 @@ def _spelling_matches(response: str, expected: str) -> bool:
 # --------------------------------------------------------------------------
 
 
-def _preferred_kind() -> str:
-    try:
-        learner = dictionary.status("learner")
-    except Exception:  # noqa: BLE001 - dictionary status is advisory only
-        return "standard"
-    if settings_repo.learner_definitions_enabled() and learner.get("available"):
-        return "learner"
-    return "standard"
-
-
 def _dictionary_reference(word: str, cache: dict[str, dict | None]) -> dict | None:
-    """First exact Merriam-Webster sense for a word (cached per request)."""
+    """First exact dictionary sense for a word (cached per request).
+
+    The user dictionary wins; then MW's in-entry learner section (when enabled);
+    then the normal MW definition.
+    """
     key = (word or "").casefold().strip()
     if not key:
         return None
     if key in cache:
         return cache[key]
 
-    kinds = [_preferred_kind()]
-    if kinds[0] != "standard":
-        kinds.append("standard")
-
     reference: dict | None = None
-    for kind in kinds:
+    if settings_repo.custom_dictionary_enabled():
         try:
-            result = dictionary.lookup(word, limit=3, kind=kind)
+            custom = custom_repo.lookup(word, limit=1)
+        except Exception:  # noqa: BLE001 - custom dictionary is advisory
+            custom = {"exact": []}
+        exact = custom.get("exact") or []
+        if exact:
+            entry = exact[0]
+            definition = entry.get("definition") or ""
+            sense = vocab_assist.first_sense(definition)
+            if sense:
+                reference = {
+                    "sense": sense,
+                    "pos": entry.get("pos") or vocab_assist.first_pos(definition),
+                    "definition": definition,
+                    "source": "custom",
+                    "headword": entry.get("headword") or word,
+                }
+
+    if reference is None:
+        try:
+            result = dictionary.lookup(word, limit=3)
         except dictionary.DictionaryError:
-            continue
+            result = {"exact": []}
         exact = result.get("exact") or []
-        if not exact:
-            continue
-        entry = exact[0]
-        definition = entry.get("definition") or ""
-        sense = vocab_assist.first_sense(definition)
-        if not sense:
-            continue
-        reference = {
-            "sense": sense,
-            "pos": vocab_assist.first_pos(definition),
-            "definition": definition,
-            "source": result.get("source", kind),
-            "headword": entry.get("headword") or word,
-        }
-        break
+        if exact:
+            entry = exact[0]
+            definition = entry.get("definition") or ""
+            learner = entry.get("learner_definition") or ""
+            use_learner = settings_repo.learner_definitions_enabled()
+            preferred = learner if use_learner and learner else definition
+            sense = vocab_assist.first_sense(preferred)
+            if sense:
+                reference = {
+                    "sense": sense,
+                    "pos": vocab_assist.first_pos(definition),
+                    "definition": preferred,
+                    "source": "learner" if use_learner and learner else "standard",
+                    "headword": entry.get("headword") or word,
+                }
 
     cache[key] = reference
     return reference
@@ -344,8 +354,16 @@ def _ai_reference(meaning: str, reference: dict | None) -> str:
     if reference:
         definition = " ".join((reference.get("definition") or "").split())
         if definition:
+            source = reference.get("source")
+            label = (
+                "My dictionary"
+                if source == "custom"
+                else "Definition for English Learners"
+                if source == "learner"
+                else "Merriam-Webster"
+            )
             parts.append(
-                f"Merriam-Webster ({reference.get('headword')}): "
+                f"{label} ({reference.get('headword')}): "
                 f"{definition[:AI_REFERENCE]}"
             )
     return "\n".join(parts)

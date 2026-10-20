@@ -33,6 +33,7 @@ const settings: AppSettings = {
   vocab_ai_sense: true,
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
+  custom_dictionary_enabled: true,
 };
 
 beforeEach(() => {
@@ -43,16 +44,21 @@ beforeEach(() => {
 });
 
 describe("SettingsPage vocabulary options", () => {
-  it("loads and saves the AI sense and learner definition toggles", async () => {
+  it("loads and saves the AI sense and English-learner definition toggles", async () => {
     render(<SettingsPage />);
 
     const aiSense = await screen.findByRole("checkbox", { name: /AI sense matching/ });
-    const learner = screen.getByRole("checkbox", { name: /Use learner's definitions/ });
+    const learner = screen.getByRole("checkbox", {
+      name: /Definition for English Learners/,
+    });
+    const custom = screen.getByRole("checkbox", { name: /Use my dictionary first/ });
     expect(aiSense).toBeChecked();
     expect(learner).not.toBeChecked();
+    expect(custom).toBeChecked();
 
     fireEvent.click(aiSense);
     fireEvent.click(learner);
+    fireEvent.click(custom);
     fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
     await waitFor(() =>
@@ -60,6 +66,7 @@ describe("SettingsPage vocabulary options", () => {
         expect.objectContaining({
           vocab_ai_sense: false,
           vocab_learner_definitions: true,
+          custom_dictionary_enabled: false,
         }),
       ),
     );

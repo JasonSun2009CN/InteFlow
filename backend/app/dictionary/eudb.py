@@ -56,6 +56,19 @@ _SUP_RE = re.compile(rb"(?is)<sup[^>]*>.*?</sup>")
 _SPACE_RE = re.compile(r"[ \t]+")
 _WS_RE = re.compile(r"\s+")
 
+#: Some Merriam-Webster entries append a separate "Definition for English
+#: Learners" block. It is not a second dictionary: it is a section inside this
+#: entry, and only exists for some (often harder) words.
+_LEARNER_HEADING_RE = re.compile(
+    r"(?im)^[ \t]*(?:"
+    r"definition\s+(?:of\s+[^\n]{1,120}?\s+)?for\s+english(?:[-\s]language)?\s+learners?"
+    r"|definition\s+of\s+english(?:[-\s]language)?\s+learners?"
+    r"|learner[’']?s?\s+definition(?:\s+of\s+[^\n]{1,120})?"
+    r"|english\s+learner[’']?s?\s+definition"
+    r"|学习者释义"
+    r")\s*(?:from[^\n]*)?\s*:?\s*$"
+)
+
 #: U+00B7 is the syllable separator MW prints inside headwords
 #: (``ubiq·ui·tous``); U+00AD / U+200B are invisible break hints.
 _INVISIBLE = {0x00B7: None, 0x00AD: None, 0x200B: None}
@@ -95,6 +108,25 @@ def html_to_text(body: bytes) -> str:
         if line:
             lines.append(line)
     return "\n".join(lines)
+
+
+def split_learner_definition(text: str) -> tuple[str, str]:
+    """Split one entry's text into ``(standard, definition_for_learners)``.
+
+    The learner block is a *section of the same Merriam-Webster entry*, not a
+    separate dictionary. Entries without that section simply return
+    ``(text, "")`` so callers fall back to the ordinary definition.
+    """
+    text = (text or "").strip()
+    match = _LEARNER_HEADING_RE.search(text)
+    if not match:
+        return text, ""
+
+    learner = text[match.end() :].strip()
+    if not learner:
+        return text, ""
+    standard = text[: match.start()].strip()
+    return (standard or learner), learner
 
 
 def parse_header(source: Path) -> tuple[dict[str, str], int, tuple[int, ...], int]:

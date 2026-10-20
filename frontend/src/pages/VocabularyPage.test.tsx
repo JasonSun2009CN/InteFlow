@@ -87,25 +87,13 @@ const status: DictionaryStatus = {
   source_name: "mw.eudb",
   index_path: "/data/dictionary/mw.db",
   entry_count: 92006,
+  learner_count: 1200,
+  learner_enabled: false,
+  custom_dictionary: { enabled: true, count: 0 },
   built_at: "2026-10-19T10:00:00+00:00",
   title: "Merriam-Webster's Collegiate Dictionary",
   author: "Merriam-Webster",
   building: false,
-  learner_enabled: false,
-  learner: {
-    kind: "learner",
-    available: false,
-    indexed: false,
-    stale: true,
-    source: null,
-    source_name: null,
-    index_path: "/data/dictionary/learners.db",
-    entry_count: 0,
-    built_at: null,
-    title: null,
-    author: null,
-    building: false,
-  },
 };
 
 const settings: AppSettings = {
@@ -120,6 +108,7 @@ const settings: AppSettings = {
   vocab_ai_sense: true,
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
+  custom_dictionary_enabled: true,
 };
 
 function renderPage() {
@@ -199,14 +188,17 @@ describe("VocabularyPage", () => {
           id: 12,
           headword: "elate",
           definition: "v.\nFunction: verb\n: to fill with joy or pride",
+          learner_definition: null,
           snippet: "v. Function: verb : to fill with joy or pride",
+          source: "standard",
         },
       ],
       matches: [],
       entry_count: 92006,
       source: "standard",
-      learner: false,
-      fallback: "",
+      learner_enabled: false,
+      custom_dictionary: { enabled: true, count: 0 },
+      warning: "",
     });
     addWordFromEntry.mockResolvedValue({
       grid,
@@ -238,22 +230,26 @@ describe("VocabularyPage", () => {
     );
   });
 
-  it("uses the learner source from a lookup when adding", async () => {
+  it("uses the in-entry Definition for English Learners section", async () => {
+    dictionaryStatus.mockResolvedValue({ ...status, learner_enabled: true });
     dictionaryLookup.mockResolvedValue({
       query: "abate",
       exact: [
         {
           id: 77,
           headword: "abate",
-          definition: "v.\nFunction: verb\n: to become weaker",
-          snippet: "v. Function: verb : to become weaker",
+          definition: "v.\nFunction: verb\n: to make less in amount",
+          learner_definition: "to become weaker : decrease",
+          snippet: "v. Function: verb : to make less in amount",
+          source: "standard",
         },
       ],
       matches: [],
       entry_count: 50000,
-      source: "learner",
-      learner: true,
-      fallback: "",
+      source: "standard",
+      learner_enabled: true,
+      custom_dictionary: { enabled: true, count: 0 },
+      warning: "",
     });
     addWordFromEntry.mockResolvedValue({
       grid,
@@ -264,8 +260,9 @@ describe("VocabularyPage", () => {
       matched: true,
       used_ai: false,
       pos: "v.",
-      definition: "to become weaker",
-      source: "learner",
+      definition: "to become weaker : decrease",
+      source: "standard",
+      learner: true,
     });
     renderPage();
     await screen.findByTestId("vocab-grid");
@@ -275,13 +272,68 @@ describe("VocabularyPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Look up" }));
 
-    expect(await screen.findByText("Learner's definition")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Definition for English Learners"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("to become weaker : decrease")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     await waitFor(() =>
       expect(addWordFromEntry).toHaveBeenCalledWith(7, {
         entry_id: 77,
-        source: "learner",
+        source: "standard",
+      }),
+    );
+  });
+
+  it("shows and adds entries from my dictionary", async () => {
+    dictionaryLookup.mockResolvedValue({
+      query: "zzword",
+      exact: [
+        {
+          id: 3,
+          headword: "zzword",
+          definition: "my own definition",
+          learner_definition: null,
+          snippet: "my own definition",
+          source: "custom",
+        },
+      ],
+      matches: [],
+      entry_count: 92006,
+      source: "standard",
+      learner_enabled: false,
+      custom_dictionary: { enabled: true, count: 1 },
+      warning: "",
+    });
+    addWordFromEntry.mockResolvedValue({
+      grid,
+      row: grid.rows[0],
+      row_id: "r1",
+      word: "zzword",
+      created: true,
+      matched: true,
+      used_ai: false,
+      pos: "",
+      definition: "my own definition",
+      source: "custom",
+    });
+    renderPage();
+    await screen.findByTestId("vocab-grid");
+
+    fireEvent.change(screen.getByLabelText("Look up a word"), {
+      target: { value: "zzword" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Look up" }));
+
+    expect(await screen.findByText("My dictionary")).toBeInTheDocument();
+    expect(screen.getByText("my own definition")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+
+    await waitFor(() =>
+      expect(addWordFromEntry).toHaveBeenCalledWith(7, {
+        entry_id: 3,
+        source: "custom",
       }),
     );
   });

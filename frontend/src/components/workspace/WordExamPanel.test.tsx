@@ -53,6 +53,7 @@ const settings: AppSettings = {
   vocab_ai_sense: true,
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
+  custom_dictionary_enabled: true,
 };
 
 const exam: WordExam = {

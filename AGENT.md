@@ -28,12 +28,12 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **296 passed, 1 skipped** |
+| 后端测试 | `pytest` **304 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **135 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **138 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
-| API 面 | 61 条（见 `docs/ARCHITECTURE.md`） |
-| 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；可选 `dictionary/learners/` 学习者词典 |
+| API 面 | 65 条（见 `docs/ARCHITECTURE.md`） |
+| 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
 > 整套解析 Notebook 预览、作答历史 Sessions 页、多答案选择题 + 填空题、设置里的用户名与 AI 识别兜底开关；
@@ -42,9 +42,15 @@
 > 2026-10-19 新增：**Vocabulary 生词本**（左侧 6 tab 的占位页已替换）+ **本地韦氏词典** + 复盘工作台
 > 改为 **2-of-4 分屏**（题目 / 分析 / AI Tutor / 生词本），支持从题目/选项拖词入表并由 AI 选义。
 >
-> 2026-10-20：Settings 增加 **AI sense matching** 与 **Use learner's definitions** 两个开关。
-> 关闭前者时拖词不调用 LLM，直接用第一条韦氏释义；开启后者时优先使用
-> `dictionary/learners/` 里的学习者词典索引（`data/dictionary/learners.db`），缺失则自动回退标准词典。
+> 2026-10-20：Settings 增加 **AI sense matching** 与 **Definition for English Learners** 两个开关。
+> 关闭前者时拖词不调用 LLM，直接用第一条韦氏释义；后者不是另一本词典，而是韦氏词条内部的
+> *Definition for English Learners* 栏目：有该栏目的词优先用它，没有就回退普通释义。索引在构建时把栏目
+> 拆到 `learner_definition` 列，`learner_count` 记录有多少词带该栏目（当前这份 `韦氏大辞典.eudb` 实测为 0，
+> 即文件本身不带该栏目；换含栏目的版本后自动生效）。
+>
+> 2026-10-20：**用户自定义词典（My dictionary）**。Settings 可导入 CSV/TSV/JSON/TXT 或手动增删词条；
+> 词典存在 `app.db` 的 `custom_dictionary_entries` 表。开启 `custom_dictionary_enabled`（默认开）后，查词
+> 先查自定义词典，未命中再回退韦氏；拖词候选、逐条添加、单词考试的释义引用也会优先使用自定义词条。0 token。
 >
 > 2026-10-20：**单词考试（Word test）** 已落地，入口在 Vocabulary 页顶部 **Word list / Word test** 两个 tab。
 > 从当前试卷词表随机抽题（可设数量或全测），两种模式：**English → Chinese**（手写释义）与
@@ -105,7 +111,7 @@
 | 分析存储与导出 | 一套试卷 = 一套分析（`analysis_pages` 一题一页，按题序）；旧 `questions.explain` 首次读取时映射迁入（`id` 为 null）。复盘页顶部 **Notebook** 全屏预览：试卷标题 → 所有已写解析的题目（题干/图表/解析）+ 导出按钮。导出 md / docx / pdf **只含已写解析的题**：浏览器下载 + 在 `data/exports/` 存一份，响应头 `X-Export-Path` 显示路径；封面页含设置里的用户名 |
 | 题型扩展（2026-10-19） | 选择题支持多选（头部 `multi=1`，答案 `A,C`）；新增填空题（`kind=blank`，无选项，答案 `a \| b` 多个可接受答案）；**导入时未识别到选项一律按填空题处理** |
 | AI 识别兜底开关 | 设置项 `llm_fallback`（默认开）。关闭时导入失败会提示启用；`convert/pdf.py` 与 `imports.run_ai_fallback` 均检查该开关 |
-| 生词释义开关（2026-10-20） | 设置项 `vocab_ai_sense`（默认开）：关闭后拖词不调用 LLM，使用第一条真实韦氏释义并提示。设置项 `vocab_learner_definitions`（默认关）：开启后优先使用 `dictionary/learners/*.eudb`（或 `INTEFLOW_LEARNER_DICTIONARY`）的学习者释义；未安装/构建失败/查不到时自动回退标准词典。当前 `韦氏大辞典.eudb` 是 Collegiate，本身不含 learner 释义 |
+| 生词释义开关（2026-10-20） | 设置项 `vocab_ai_sense`（默认开）：关闭后拖词不调用 LLM，使用第一条真实韦氏释义并提示。设置项 `vocab_learner_definitions`（默认关）：开启后优先使用韦氏词条内部的 **Definition for English Learners** 栏目；词条没有该栏目时自动回退普通释义。**不再有单独的 learner `.eudb`**。设置项 `custom_dictionary_enabled`（默认开）：优先查用户自定义词典，未命中再查韦氏 |
 | 作答历史 | 左侧栏 Sessions 页：按做题时间倒序，可搜索、可逐条删除（`GET/DELETE /api/sessions`）。**只有提交过（submit）的作答才算一条记录**；开始练习只建临时 session，中途离开即删除 |
 | Normalize | **彻底删除**（前端入口 + 后端接口/任务/测试）。`convert/normalize.py` 是文本清洗工具，**保留**，与已删功能无关 |
 | 视觉风格（2026-10-19） | **5 套主题**：Clear Blue（默认）/ Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial，在 Settings → Appearance 里切换并存在 `localStorage`（`inteflow.theme`）。实现：`frontend/src/theme.ts` 管状态，`index.css` 里 `.app-theme[data-theme=…]` 声明语义变量、再由一条共享规则映射到全部 Tailwind 颜色族（外加各主题的特征样式：显示字体 / 圆角 / 描边主按钮 / 导航标记 / 遮罩 / 背景光）。**全屏练习页明确不跟随主题**（保留原 slate/blue），复盘页跟随；旧 `.paper-app` 作用域已删除 |
@@ -114,7 +120,8 @@
 | 单词考试（已实现 2026-10-20） | Vocabulary 页内 **Word list / Word test** 两 tab。模式：English → Chinese（手写释义，本地宽松匹配）、Chinese → English（看 Meaning/韦氏兜底释义拼写，忽略大小写/空格/标点；Word 列可用 `;` `/` `\|` 分隔多个可接受拼写）。测试量可手输或全测；题目从当前词表随机抽取。结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码（大卷自动拆多个 QR，`IFWT1\|<id>\|part/total\|`）。Settings 的 `vocab_exam_ai_grading` 默认关；开启后提交时 AI 参考词表 + 韦氏释义严格判分，失败回退本地 |
 | 学科分类（已实现 2026-10-20） | 全局 `subjects`（名称 + 调色板颜色），每套试卷最多一个 `subject_id`。Library 行内下拉直接归类/现场创建；Answer-key 页顶部同样可改；Library 的 **Manage subjects** 支持增删改与过滤；Exams 首页显示徽章并按学科筛选。删除学科只把试卷变为 Uncategorized。姓名大小写不敏感去重，0 token |
 | 精选题集（已实现 2026-10-20） | `question_stars`（每题最多一行，级联删除）。练习页/复盘工作台/Mistakes 列表点星即时持久化；Review 页 **Starred** tab 展示，支持搜索、exam 过滤、时间排序、取消星标与查看分析。与错题集共用同一分析编辑器 |
-| 查词 / 生词释义 | **本地韦氏词典**（Eudic `.eudb` → `data/dictionary/mw.db`，92,006 条，0 token）。只显示英英原文；首次查词自动建索引。拖词入表时**可**显式调用一次 LLM 在真实候选中选义（`vocab_ai_sense`，不能编造条目）；关闭/无 key/失败回退第一条释义并提示。`vocab_learner_definitions` 可优先使用本地学习者词典并回退 |
+| 查词 / 生词释义 | **本地韦氏词典**（Eudic `.eudb` → `data/dictionary/mw.db`，92,006 条，0 token）。只显示英英原文；首次查词自动建索引。拖词入表时**可**显式调用一次 LLM 在真实候选中选义（`vocab_ai_sense`，不能编造条目）；关闭/无 key/失败回退第一条释义并提示。`vocab_learner_definitions` 优先使用词条内的 Definition for English Learners 栏目并回退普通释义 |
+| 用户自定义词典（2026-10-20） | 单本全局词典，存 `custom_dictionary_entries`（word/pos/definition，word_key 唯一）；Settings 支持手动增删与 CSV/TSV/JSON/TXT 导入。查词先自定义后韦氏；拖词候选与 `from-entry` 支持 `source=custom`；全部 0 token |
 | 查词 / 错题分析导出 | 查词已实现（本地词典）；**错题分析导出已实现**（一套试卷一套笔记本，md/docx/pdf 存 `data/exports/`） |
 | LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
@@ -125,7 +132,7 @@
 1. **计时方案**：`PracticePage` 目前只有**正计时**（`useState` + `setInterval`）。
    需要加"倒计时"模式：开始屏选择 + 手输 `mm:ss` + 记住上次（`localStorage`）。
    倒计时到 0 时的行为（自动交卷 / 只提示）**还没定，做之前先问用户**。
-2. ~~**查词（占位）**~~ **已实现（2026-10-19）**：本地 Merriam-Webster（Eudic `.eudb`）索引 + 查词接口 + Vocabulary 页 + 复盘拖词选义。`dictionary/` 只放用户自己的 `.eudb`，已在 `.gitignore`；学习者词典可放 `dictionary/learners/`。
+2. ~~**查词（占位）**~~ **已实现（2026-10-19/20）**：本地 Merriam-Webster（Eudic `.eudb`）索引 + 查词接口 + Vocabulary 页 + 复盘拖词选义；词条内 Definition for English Learners 栏目可优先使用；用户自定义词典可在 Settings 导入/维护并优先查词。
 3. ~~**错题分析导出（占位）**~~ **已实现（2026-10-19）**：一套试卷一套分析笔记本，可导出 md/docx/pdf 并留副本到 `data/exports/`；复盘页 Notebook 可先预览整套解析，导出只包含已写解析的题。单词表导出仍是 xlsx。
 4. **UI/UX 打磨**（用户逐页审查）：已完成——左侧栏 6 tab 工作区（窄屏抽屉）+ 纸墨风同步 + 复盘页全屏重构
    （2026-10-19）。继续审查中：练习界面、复盘工作台（分析编辑器/导航/抽屉）的细节可能还要微调。
@@ -149,11 +156,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 296 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 304 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 135 passed, 5 skipped
+cd frontend && npm test         # 138 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -162,10 +169,12 @@ cd frontend && npm test         # 135 passed, 5 skipped
 
 | 路径 | 作用 |
 |---|---|
-| `backend/app/main.py` | FastAPI 装配（`/api/health`、12 个 router） |
+| `backend/app/main.py` | FastAPI 装配（`/api/health`、13 个 router） |
 | `backend/app/db.py` | SQLite 连接 / `SCHEMA` / `_migrate` / 路径常量（`ifmd_path()`） |
-| `backend/app/dictionary/` | Eudic `.eudb` 解析 + 派生 SQLite 索引 + 本地查词（`dictionary.store`） |
-| `backend/app/vocab_assist.py` | 拖词选义：词性/首义提取、候选（标准/学习者）、可选 LLM 选义、回退与警告 |
+| `backend/app/dictionary/` | Eudic `.eudb` 解析 + 派生 SQLite 索引 + 本地查词；构建时拆分词条内的 Definition for English Learners 栏目 |
+| `backend/app/vocab_assist.py` | 拖词选义：词性/首义提取、候选（自定义词典 + 韦氏/learner 栏目）、可选 LLM 选义、回退与警告 |
+| `backend/app/repos/custom_dictionary.py` · `backend/app/api/custom_dictionary.py` | 用户自定义词典：CRUD、CSV/TSV/JSON/TXT 导入、查词与候选 |
+| `frontend/src/components/CustomDictionaryManager.tsx` | Settings 里的自定义词典导入/新增/删除弹窗 |
 | `backend/app/word_exam.py` | 单词考试核心：从词表抽题、本地宽松判分（拼写/释义）、可选 AI 严格判分（参考词表 + 韦氏）与回退 |
 | `backend/app/repos/subjects.py` · `backend/app/api/subjects.py` | 学科分类：CRUD（名称大小写不敏感去重、调色板）+ 试卷归属；删除学科回退 Uncategorized |
 | `backend/app/repos/review.py` · `backend/app/api/review.py` | 错题集（最近一次错题去重）+ 精选题集（`question_stars`）+ 星标接口；分析/科目/作答一起返回 |
@@ -175,8 +184,8 @@ cd frontend && npm test         # 135 passed, 5 skipped
 | `backend/app/convert/docx.py` | DOCX → InteFlow-MD（zip 安全校验） |
 | `backend/app/ifmd/parser.py` · `writer.py` | InteFlow-MD 解析 / 回写（确定性状态机；多选/填空/多答案） |
 | `backend/app/sections.py` | 板块标签（`label()` / `DEFAULT_SECTION`） |
-| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **vocabulary** · **word_exam** · **subjects** |
-| `backend/app/repos/` | documents · imports · sessions · **analyses** · words（grid v2 + 结构化词条） · settings |
+| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **custom_dictionary** · **vocabulary** · **word_exam** · **subjects** · **review** |
+| `backend/app/repos/` | documents · imports · sessions · **analyses** · words（grid v2 + 结构化词条） · **custom_dictionary** · **subjects** · **review** · settings |
 | `backend/app/export/` | PDF / DOCX / **notebook（复盘笔记本）** / 数学公式桥接 |
 | `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
 | `frontend/src/pages/` | ExamHome · **Library(Import)** · **Sessions** · **Review (MistakesPage)** · **Vocabulary** · AnswerKey · **Practice** · Result · Settings |

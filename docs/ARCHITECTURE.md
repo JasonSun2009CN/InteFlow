@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 135 passed, 5 skipped。
+> 基线：pytest **304 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 138 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -20,7 +20,7 @@ flowchart LR
   UI -- "/api/* (Vite dev proxy :5173 -> :8000)" --> API
 
   subgraph Backend["FastAPI (app.main)"]
-    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / vocabulary / word_exam / subjects / review"]
+    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / custom_dictionary / vocabulary / word_exam / subjects / review"]
     CONV["convert: pdf · twocolumn · docx · images · normalize · ocr · llm_fallback"]
     PARSE["ifmd.parser (deterministic state machine)"]
     REPOS["repos: documents · imports · sessions · analyses · words · settings · subjects · review"]
@@ -48,8 +48,8 @@ flowchart LR
   REPOS --> DB[("SQLite  data/app.db")]
   REPOS --> FS[("data/docs/<id>/doc.ifmd.md + assets/")]
   DICT --> MW[("data/dictionary/mw.db (derived index)")]
-  DICT --> LRN[("data/dictionary/learners.db (optional learner index)")]
-  DICT -. parses .-> EUDB[("dictionary/*.eudb + dictionary/learners/*.eudb (user-installed, gitignored)")]
+  DICT -. reads in-entry learner section -> LEARN["learner_definition column (same index)"]
+  DICT -. parses .-> EUDB[("dictionary/*.eudb (user-installed, gitignored)")]
   CONV --> FS
   LLM -- httpx --> PROV[("LLM providers (only on explicit user action)")]
 ```
@@ -61,7 +61,7 @@ flowchart LR
 - **单文件数据库 + 文件系统并存**：SQLite 存索引与结构化题，`doc.ifmd.md` 存原始 InteFlow-MD（source of truth），`assets/` 存图片。
 - **不局限于 SAT**：题目的 `sec` 是自由标签（见 §3、`app/sections.py`）。
 - **一套试卷 = 一套复盘笔记本**：分析正文存 `analysis_pages`（一题一页，按题序）；复盘页顶部 **Notebook** 全屏预览（标题 + 所有已写解析的题干/图表/解析），导出 PDF/DOCX/MD 只含已写解析的题，并在 `data/exports/` 留一份副本（响应头 `X-Export-Path`）。
-- **词典纯本地**：`.eudb` 只在首次查词时解析成本地 SQLite 索引（标准 `data/dictionary/mw.db`，可选学习者 `data/dictionary/learners.db`，均 0 token）；`dictionary/` 里的版权文件不入库。拖词入生词本时可显式调用一次 LLM 选释义（Settings 的 `vocab_ai_sense` 可关）；关闭/无 key/失败时回退第一条韦氏释义。`vocab_learner_definitions` 开启后优先学习者词典，缺失自动回退标准词典。
+- **词典纯本地**：`.eudb` 只在首次查词时解析成本地 SQLite 索引 `data/dictionary/mw.db`（0 token）；`dictionary/` 里的版权文件不入库。部分词条内部的 **Definition for English Learners** 栏目在构建时拆到 `learner_definition`，`vocab_learner_definitions` 开启时优先使用、没有则回退普通释义。用户自定义词典存在 `app.db`，开启时先查自定义再查韦氏。拖词入生词本时可显式调用一次 LLM 选释义（`vocab_ai_sense` 可关）；关闭/无 key/失败时回退第一条释义。
 
 ---
 
@@ -77,12 +77,10 @@ repo/
 │   └── src/                 页面/组件/api client（见 §4）
 ├── scripts/dev.sh           一键起后端(:8000)+前端(:5173)
 ├── dictionary/              用户放置的 Eudic .eudb（版权文件，gitignore）
-│   └── learners/            可选：学习者词典 .eudb（优先于标准词典）
 ├── data/                    运行期数据（gitignore）
 │   ├── app.db               SQLite
 │   ├── docs/<id>/           doc.ifmd.md + assets/
-│   ├── dictionary/mw.db     由标准 .eudb 生成的可重建索引（约 33 MB）
-│   ├── dictionary/learners.db 由学习者 .eudb 生成的可重建索引（可选）
+│   ├── dictionary/mw.db     由 .eudb 生成的可重建索引（含 learner_definition 列）
 │   ├── tmp/                 上传暂存（用完即删）
 │   ├── jobs/                导入流水线暂存
 │   └── exports/             导出产物目录
@@ -91,9 +89,7 @@ repo/
 
 环境变量：`INTEFLOW_DATA`（数据根，默认 `./data`）、`INTEFLOW_API`（Vite 代理目标，默认 `http://localhost:8000`）、
 `INTEFLOW_OCR_LANG`（Tesseract 语言，默认 `eng`）、`INTEFLOW_DEFAULT_SECTION`（无板块标题时的回退标签，默认 `rw`）、
-`INTEFLOW_DICTIONARY`（标准 `.eudb` 文件或目录，默认 `./dictionary`）、`INTEFLOW_DICTIONARY_INDEX`（索引路径，默认 `data/dictionary/mw.db`）、
-`INTEFLOW_LEARNER_DICTIONARY`（可选学习者 `.eudb` 文件或目录，默认扫描 `./dictionary/learners` 及文件名/标题含 learner/高阶/学习的 `.eudb`）、
-`INTEFLOW_LEARNER_DICTIONARY_INDEX`（学习者索引路径，默认 `data/dictionary/learners.db`）。
+`INTEFLOW_DICTIONARY`（标准 `.eudb` 文件或目录，默认 `./dictionary`）、`INTEFLOW_DICTIONARY_INDEX`（索引路径，默认 `data/dictionary/mw.db`）。
 
 ---
 
@@ -193,6 +189,15 @@ erDiagram
     int version "2"
     text updated_at
   }
+  custom_dictionary_entries {
+    int id PK
+    text word
+    text word_key "unique normalized key"
+    text pos
+    text definition
+    text created_at
+    text updated_at
+  }
   settings {
     text key PK
     text value
@@ -213,7 +218,7 @@ App.tsx (BrowserRouter)
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
     ├── "/mistakes"             MistakesPage      —— Review：Mistakes / Starred 两集合（搜索/过滤/排序/分析）
     ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
-    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 单词考试评分开关
+    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 自定义词典 / 单词考试评分开关
     ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览 + 学科归类（含侧栏）
     ├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时，无侧栏、保持 slate/blue）
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
@@ -227,7 +232,7 @@ components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/
              WordExamPanel 单词考试设置/作答 · WordExamResultView 结果 + 二维码/JSON 下载 ·
              usePersistentLayout · useMediaQuery · icons）·
              SubjectControls（学科徽章 / 筛选条 / 行内选择 + 现场创建 / 管理弹窗） ·
-             ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · ui/（设计系统原语；Review 用 SlidingTabs 滑块切换）
+             ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · CustomDictionaryManager（Settings 导入/增删） · ui/（设计系统原语；Review 用 SlidingTabs 滑块切换）
 lib/         sections.ts（板块标签，与后端 sections.py 对齐）· wordExamQr.ts（紧凑分享 JSON + 多段 QR 分块）
              subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）
 api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
@@ -252,7 +257,7 @@ api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 
 ```
 app/
-├── main.py                 FastAPI 装配（lifespan=init_db；CORS；12 个 router）
+├── main.py                 FastAPI 装配（lifespan=init_db；CORS；13 个 router）
 ├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR，ifmd_path()）
 ├── imports.py              导入流水线服务：detect → convert → commit（确定性，0 token；PDF/DOCX/InteFlow-MD 单一代码路径）
 ├── sections.py             板块标签（KNOWN_LABELS / DEFAULT_SECTION / label()）
@@ -265,7 +270,8 @@ app/
 │   ├── settings.py         读写配置/Provider 目录/probe
 │   ├── analysis.py         复盘笔记本 CRUD + 导出（md/docx/pdf）+ meta（用户名/历史）
 │   ├── ai.py               AI 讲解（显式触发；唯一 LLM 入口）
-│   ├── dictionary.py       本地韦氏词典 status / lookup（0 token）
+│   ├── dictionary.py       本地韦氏词典 status / lookup（自定义优先 + learner 栏目，0 token）
+│   ├── custom_dictionary.py 用户自定义词典 CRUD / 导入
 │   ├── vocabulary.py       全部试卷的生词本概览（计数 + 预览）
 │   ├── word_exam.py        单词考试：开始（随机抽题、答案留后端）/ 提交判分
 │   ├── subjects.py         学科 CRUD（名称/颜色）+ 试卷归属；文档 PATCH 在 documents.py
@@ -298,7 +304,8 @@ app/
 │   │                         + 结构化条目：summaries / add_entry / update_entry / delete_entry（按列名映射、按词去重）
 │   ├── subjects.py         学科：list / create / update / delete / exists（名称大小写不敏感去重、调色板轮换）
 │   ├── review.py           错题（最近一次）与精选题查询、分析聚合、星标增删
-│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本两个开关 / 单词考试 AI 评分）
+│   ├── custom_dictionary.py 自定义词典：CRUD / 查词 / CSV·TSV·JSON·TXT 导入
+│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本/自定义词典/单词考试开关）
 ├── export/                  PDF/DOCX 导出（0 token）
 │   ├── model.py            ExportDoc/ExportQuestion（聚合题目 + 词汇表；section_label 来自 sections.py）
 │   ├── notebook.py         复盘笔记本渲染：Markdown / PDF / DOCX（含封面页）
@@ -375,28 +382,38 @@ AI 讲解（显式）        POST /api/ai/answer {document_id, question_id}     
 分析页 Write/Preview，900ms 防抖自动保存 + ⌘S，Preview 用 `remark-breaks` 保留单换行；
 顶部 **Notebook** 打开整套解析预览，**Export** 打开导出抽屉（导出不再是分屏工具）。
 
-### 6.4 本地词典与生词本
+### 6.4 本地词典、自定义词典与生词本
 
 ```
-dictionary/*.eudb ─────────────► dictionary.eudb（流式 zlib 块 + HTML 片段解析）
-dictionary/learners/*.eudb ────►（同一个 parser，独立索引）
-                  ─► dictionary.store.ensure_index(kind) ─► data/dictionary/mw.db
-                                                           或 data/dictionary/learners.db
-                                                     （首次查词自动构建；源文件变更则重建）
-GET  /api/dictionary/status                  -> 标准状态 + `learner` 子状态 + `learner_enabled`
-GET  /api/dictionary/lookup?q=...&source=    -> auto（按设置选 learner）/ standard / learner
+dictionary/*.eudb ─────────────► eudb（流式 zlib 块 + HTML 片段解析）
+                  ─► split_learner_definition()（词条内 Definition for English Learners 栏目）
+                  ─► dictionary.store.ensure_index() ─► data/dictionary/mw.db
+                     entries(definition, learner_definition) + meta(version, learner_count)
+                     （首次查词自动构建；INDEX_VERSION / 源文件变更则重建）
+app.db custom_dictionary_entries ◄─ Settings 手动增删 / CSV·TSV·JSON·TXT 导入
+GET  /api/dictionary/status                  -> 词典状态 + learner_count/learner_enabled + custom 计数
+GET  /api/dictionary/lookup?q=...&source=    -> auto（自定义优先，再韦氏）/ standard（只韦氏）
+GET  /api/custom-dictionary                  -> 自定义词典状态 + 词条
+POST /api/custom-dictionary/entries          -> 新增/覆盖一个自定义词条
+DELETE /api/custom-dictionary/entries/{id}   -> 删除词条
+POST /api/custom-dictionary/import           -> 导入 CSV/TSV/JSON/TXT
 GET  /api/vocabulary                         -> 每套试卷的词表计数 + 前 4 个词预览
 POST /api/documents/{id}/words/entries       -> 手动加词（按词去重；POS/Meaning/Notes 列按需创建）
-POST /api/documents/{id}/words/entries/from-entry     -> 用户点选某条（带 source=standard|learner，0 token）
-POST /api/documents/{id}/words/entries/from-selection -> 拖词：查候选 + 可选 AI 选最贴合上下文的释义
+POST /api/documents/{id}/words/entries/from-entry     -> 用户点选某条（source=standard|custom，0 token）
+POST /api/documents/{id}/words/entries/from-selection -> 拖词：自定义+韦氏候选 + 可选 AI 选义
 ```
 
-拖词流程：题目/选项里的文本选择用原生拖拽（`application/x-inteflow-word`）落到生词本 pane；
-后端取该题 material + stem + options 作为上下文，向 LLM 只提供真实候选条目 id（校验，不能编造），
-返回 `{entry_id, pos, definition, source}`；`vocab_ai_sense` 关闭时直接取第一条候选，不调用 LLM；
-无 key / LLM 失败 / 无法解析时同样回退第一条韦氏释义并附 `warning`。`vocab_learner_definitions`
-开启且学习者索引可用时优先 `learner`，构建失败或词典里没有该词时自动回退 `standard` 并在
-`warning` / `fallback` 中说明。词典里完全没有该词时仍会把词加入词表（无释义），不会让拖拽死路。
+- **Definition for English Learners 不是另一本词典**：它是部分韦氏词条内部的一个栏目。构建索引时
+  `split_learner_definition()` 把它拆到 `learner_definition`；`vocab_learner_definitions` 开启时优先使用，
+  词条没有该栏目就回退 `definition`。不再扫描 `dictionary/learners/`，也没有独立 learner 索引。
+- **用户自定义词典**是全局词表（`custom_dictionary_entries`，word_key 大小写/标点归一化唯一），存在
+  `app.db`；`custom_dictionary_enabled` 开启时查词先自定义再韦氏。Settings 的 **Manage my dictionary**
+  支持导入与逐条增删。
+- 拖词流程：题目/选项里的文本选择用原生拖拽（`application/x-inteflow-word`）落到生词本 pane；
+  后端取该题 material + stem + options 作为上下文，向 LLM 只提供真实候选条目 id（自定义候选 id 形如
+  `custom:12`，校验，不能编造），返回 `{entry_id, pos, definition, source}`；`vocab_ai_sense` 关闭时
+  直接取第一条候选，不调用 LLM；无 key / LLM 失败 / 无法解析时回退第一条并附 `warning`。
+  词典里完全没有该词时仍会把词加入词表（无释义），不会让拖拽死路。
 
 ### 6.5 单词考试（0 token；AI 评分为显式可选）
 
@@ -466,7 +483,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 
 ---
 
-## 7. 当前 API 面（61 条）
+## 7. 当前 API 面（65 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -502,8 +519,12 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | GET | `/api/vocabulary` | 全部试卷的生词本概览（计数 + 预览） |
 | GET/POST | `/api/subjects` | 学科列表（含试卷数）/ 新建学科 |
 | PATCH/DELETE | `/api/subjects/{id}` | 改名/换色 / 删除（试卷移回 Uncategorized） |
-| GET | `/api/dictionary/status` | 标准 + 学习者词典状态（安装/索引/条目数） |
-| GET | `/api/dictionary/lookup` | 本地查词（`source=auto|standard|learner`；精确英英原文 + 建议） |
+| GET | `/api/dictionary/status` | 韦氏索引状态 + `learner_count/learner_enabled` + 自定义词典计数 |
+| GET | `/api/dictionary/lookup` | 本地查词（`source=auto|standard`；自定义优先，再韦氏；返回 learner_definition） |
+| GET | `/api/custom-dictionary` | 用户自定义词典状态 + 词条（可搜索） |
+| POST | `/api/custom-dictionary/entries` | 新增/覆盖一个自定义词条 |
+| DELETE | `/api/custom-dictionary/entries/{id}` | 删除一个自定义词条 |
+| POST | `/api/custom-dictionary/import` | 导入 CSV / TSV / JSON / TXT |
 | GET | `/api/documents/{id}/export/{fmt}` | 导出 PDF / DOCX（0 token；数学经 MathJax SVG） |
 | GET | `/api/documents/{id}/assets/{name}` | 题目图片 |
 | GET | `/api/builtin` | 列出题库 |

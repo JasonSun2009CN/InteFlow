@@ -173,6 +173,18 @@ CREATE TABLE IF NOT EXISTS word_grids (
   updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS custom_dictionary_entries (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  word       TEXT NOT NULL,
+  word_key   TEXT NOT NULL UNIQUE,
+  pos        TEXT NOT NULL DEFAULT '',
+  definition TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_custom_dictionary_key
+  ON custom_dictionary_entries(word_key);
+
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT NOT NULL
@@ -277,6 +289,23 @@ def _migrate(conn: sqlite3.Connection) -> None:
             "CREATE INDEX IF NOT EXISTS idx_question_stars_document"
             " ON question_stars(document_id)"
         )
+
+    # user-managed dictionary (2026-10-20): plain word/pos/definition rows.
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS custom_dictionary_entries ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " word TEXT NOT NULL,"
+        " word_key TEXT NOT NULL UNIQUE,"
+        " pos TEXT NOT NULL DEFAULT '',"
+        " definition TEXT NOT NULL,"
+        " created_at TEXT NOT NULL DEFAULT (datetime('now')),"
+        " updated_at TEXT NOT NULL DEFAULT (datetime('now'))"
+        ")"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_custom_dictionary_key"
+        " ON custom_dictionary_entries(word_key)"
+    )
 
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
     additions = (

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   api,
   ApiError,
+  type DictionaryEntry,
   type DictionaryLookup,
   type DictionaryStatus,
   type VocabularyDocument,
@@ -231,14 +232,14 @@ function VocabularyDetail({
     }
   }
 
-  async function addEntry(entryId: number) {
+  async function addEntry(entry: DictionaryEntry) {
     resetMessages();
     if (!(await save())) return;
     setBusy(true);
     try {
       const result = await api.addWordFromEntry(docId, {
-        entry_id: entryId,
-        ...(lookup ? { source: lookup.source } : {}),
+        entry_id: entry.id,
+        source: entry.source,
       });
       setGrid(result.grid);
       setDirty(false);
@@ -426,24 +427,17 @@ function VocabularyDetail({
               )}
               {status?.indexed && (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  {dictionaryTitle} · {status.entry_count.toLocaleString()} entries · local,
-                  no tokens.
+                  {dictionaryTitle} · {status.entry_count.toLocaleString()} entries
+                  {status.learner_enabled && status.learner_count > 0
+                    ? ` · ${status.learner_count.toLocaleString()} with English-learner definitions`
+                    : ""}{" "}
+                  · local, no tokens.
                 </p>
               )}
-              {status?.learner_enabled && !status.learner?.available && (
-                <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs leading-5 text-amber-800">
-                  Learner&apos;s definitions are on, but no learner&apos;s .eudb was found
-                  in <code>dictionary/learners/</code>. Using the standard dictionary.
-                </p>
-              )}
-              {status?.learner?.available && (
+              {status && status.custom_dictionary.count > 0 && (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  {status.learner_enabled
-                    ? "Learner's dictionary in use"
-                    : "Learner's dictionary installed — turn it on in Settings"}
-                  {status.learner.indexed
-                    ? ` · ${status.learner.entry_count.toLocaleString()} entries.`
-                    : " · its index builds on first lookup."}
+                  My dictionary: {status.custom_dictionary.count.toLocaleString()} words
+                  {status.custom_dictionary.enabled ? " · checked first" : " · off in Settings"}.
                 </p>
               )}
               {lookupErr && (
@@ -451,42 +445,53 @@ function VocabularyDetail({
                   {lookupErr}
                 </p>
               )}
-              {lookup?.fallback && (
+              {lookup?.warning && (
                 <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                  {lookup.fallback}
+                  {lookup.warning}
                 </p>
               )}
 
               {lookup && (
                 <div className="mt-3 space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    {lookup.source === "learner"
-                      ? "Learner's definition"
-                      : "Collegiate definition"}
-                  </p>
                   {lookup.exact.length === 0 && (
                     <p className="text-xs text-slate-500">
                       No exact entry. Pick a suggestion below.
                     </p>
                   )}
-                  {lookup.exact.map((entry) => (
-                    <div key={entry.id} className="rounded-lg border bg-slate-50 p-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-slate-800">{entry.headword}</span>
-                        <button
-                          type="button"
-                          onClick={() => void addEntry(entry.id)}
-                          disabled={busy}
-                          className="ml-auto rounded border bg-white px-2 py-0.5 text-xs font-medium hover:bg-slate-100 disabled:opacity-40"
-                        >
-                          Add
-                        </button>
+                  {lookup.exact.map((entry) => {
+                    const learner =
+                      status?.learner_enabled && entry.learner_definition
+                        ? entry.learner_definition
+                        : null;
+                    const definition = learner ?? entry.definition;
+                    const label =
+                      entry.source === "custom"
+                        ? "My dictionary"
+                        : learner
+                          ? "Definition for English Learners"
+                          : "Collegiate definition";
+                    return (
+                      <div key={`${entry.source}-${entry.id}`} className="rounded-lg border bg-slate-50 p-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-800">{entry.headword}</span>
+                          <button
+                            type="button"
+                            onClick={() => void addEntry(entry)}
+                            disabled={busy}
+                            className="ml-auto rounded border bg-white px-2 py-0.5 text-xs font-medium hover:bg-slate-100 disabled:opacity-40"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          {label}
+                        </p>
+                        <p className="mt-0.5 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-slate-600">
+                          {definition}
+                        </p>
                       </div>
-                      <p className="mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-slate-600">
-                        {entry.definition}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {lookup.matches.length > 0 && (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
@@ -495,7 +500,7 @@ function VocabularyDetail({
                       <div className="mt-1 flex flex-wrap gap-1">
                         {lookup.matches.map((entry) => (
                           <button
-                            key={entry.id}
+                            key={`${entry.source}-${entry.id}`}
                             type="button"
                             onClick={() => setQuery(entry.headword)}
                             title={entry.snippet}
@@ -515,9 +520,9 @@ function VocabularyDetail({
               <p className="font-medium text-slate-700">How words get here</p>
               <p className="mt-1">
                 Drag a word from a question or option onto the Vocabulary pane in the review
-                workspace — the Merriam-Webster sense that fits the sentence is added. AI
-                sense matching and learner&apos;s definitions can be toggled in Settings. You
-                can also add words here or edit any cell above.
+                workspace — the dictionary sense that fits the sentence is added. AI sense
+                matching, English-learner definitions, and My dictionary can be toggled in
+                Settings. You can also add words here or edit any cell above.
               </p>
             </div>
           </aside>

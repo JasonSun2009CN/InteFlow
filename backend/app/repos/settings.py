@@ -17,6 +17,7 @@ ALLOWED_KEYS = (
     "vocab_ai_sense",
     "vocab_learner_definitions",
     "vocab_exam_ai_grading",
+    "custom_dictionary_enabled",
 )
 
 
@@ -52,8 +53,13 @@ def vocabulary_ai_sense_enabled() -> bool:
 
 
 def learner_definitions_enabled() -> bool:
-    """Whether to prefer a learner's dictionary when one is installed."""
+    """Whether to prefer the in-entry "Definition for English Learners" section."""
     return get_all().get("vocab_learner_definitions", "0") == "1"
+
+
+def custom_dictionary_enabled() -> bool:
+    """Whether the user's own dictionary is consulted before Merriam-Webster."""
+    return get_all().get("custom_dictionary_enabled", "1") != "0"
 
 
 def word_exam_ai_grading_enabled() -> bool:

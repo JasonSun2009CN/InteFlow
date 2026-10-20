@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-296%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-304%20passed-2E7D32)
 
 ---
 
@@ -64,12 +64,13 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
 | **Review** | **Mistakes** (every wrong answer, one row per question using the latest attempt; corrected later = removed) and **Starred** (questions you star while practising or reviewing). Search papers/stems/options, filter by exam, sort newest/oldest, and read or edit the shared analysis; extra legacy analyses are shown read-only |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **learner's definitions**, **AI grading for word tests** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests** |
 
 > **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
-> Put the standard file in `dictionary/`; optionally put a learner's dictionary in `dictionary/learners/`
-> and enable **Use learner's definitions**. The index is built automatically on first lookup (0 token).
-> See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+> Put the file in `dictionary/`; the index is built automatically on first lookup (0 token). Some entries carry
+> Merriam-Webster's own **Definition for English Learners** section — enable that option to prefer it, with the
+> ordinary definition as fallback. **My dictionary** is separate: import CSV/TSV/JSON/TXT or add words in Settings,
+> and lookups check it before Merriam-Webster. See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Two iron rules
 
@@ -301,9 +302,10 @@ Both tabs share the same toolbar and right-hand editor:
 5. **API Key** (write-only, masked);
 6. **Model**;
 7. **AI sense matching** — let the model choose the Merriam-Webster sense when a word is dragged into the vocabulary pane (off = first sense, no tokens);
-8. **Use learner's definitions** — prefer a learner's dictionary installed under `dictionary/learners/` (falls back to the standard dictionary);
-9. **AI grading for word tests** — grade submitted word tests with the model (off = local grading, 0 token; failures fall back to local);
-10. **Save settings** / **Test connection**.
+8. **Definition for English Learners** — prefer the in-entry learner section when Merriam-Webster has one (otherwise use the normal definition);
+9. **My dictionary** — check your own words before Merriam-Webster; **Manage my dictionary** imports CSV/TSV/JSON/TXT or adds/deletes entries;
+10. **AI grading for word tests** — grade submitted word tests with the model (off = local grading, 0 token; failures fall back to local);
+11. **Save settings** / **Test connection**.
 
 Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 
@@ -323,9 +325,7 @@ Base URLs are kept exactly as each vendor documents them: OpenAI-style ones alre
 | `INTEFLOW_OCR_LANG` | `eng` | Tesseract OCR language |
 | `INTEFLOW_DEFAULT_SECTION` | `rw` | Fallback section label when the converter finds no section heading |
 | `INTEFLOW_DICTIONARY` | `./dictionary` | Standard Eudic `.eudb` file or folder |
-| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | Standard dictionary index |
-| `INTEFLOW_LEARNER_DICTIONARY` | `./dictionary/learners` | Optional learner's Eudic `.eudb` file or folder |
-| `INTEFLOW_LEARNER_DICTIONARY_INDEX` | `data/dictionary/learners.db` | Learner's dictionary index |
+| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | Dictionary index (rebuilds when the source or index version changes) |
 
 Ports: backend `8000`, frontend `5173`.
 
@@ -334,7 +334,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 296 passed, 1 skipped; uses a temp data dir)
+# backend tests (baseline 304 passed, 1 skipped; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -356,8 +356,8 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI wiring (/api/health, 12 routers)
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects · review
+│   │   ├── main.py            FastAPI wiring (/api/health, 13 routers)
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · custom_dictionary · vocabulary · word_exam · subjects · review
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD parser + writer (deterministic state machine; multi / blank)
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook (review) · math_render (+ mathjax bridge)
@@ -368,12 +368,13 @@ InteFlow/
 │   │   ├── word_exam.py       word-test build / local grading / optional AI grading
 │   │   ├── repos/subjects.py  subject groups: CRUD + paper assignment
 │   │   ├── repos/review.py    mistakes + starred collections
+│   │   ├── repos/custom_dictionary.py  user dictionary: CRUD, import, lookup
 │   │   └── builtin/           built-in bank (44 units shipped with the repo)
-│   ├── tests/                 pytest (296)
+│   ├── tests/                 pytest (304)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
 │   ├── src/pages/             ExamHome · Library(Import) · Sessions · Review (Mistakes) · Vocabulary · AnswerKey · Practice · Result · Settings
-│   ├── src/components/        workspace panes · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · import/library UI
+│   ├── src/components/        workspace panes · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · CustomDictionaryManager · import/library UI
 │   └── src/lib/               wordExamQr (compact JSON + multi-part QR) · subjects (palette) · theme · sections
 ├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)
 ├── InteFlow.command           macOS double-click start

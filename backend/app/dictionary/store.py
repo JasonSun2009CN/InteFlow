@@ -10,17 +10,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.db import DATA_DIR, REPO_ROOT
-from app.dictionary.eudb import EudbError, html_to_text, iter_entries
+from app.dictionary.eudb import (
+    EudbError,
+    html_to_text,
+    iter_entries,
+    split_learner_definition,
+)
 
-INDEX_VERSION = 1
+INDEX_VERSION = 2
 MAX_DEFINITION = 12_000
 SNIPPET = 220
 _INVISIBLE = {0x00B7: None, 0x00AD: None, 0x200B: None}
 
-KINDS = ("standard", "learner")
-#: Filename/title hints for an installed learner's dictionary. A separate file
-#: is preferred; the hint scan only runs when no ``learners/`` folder exists.
-LEARNER_HINTS = ("learner", "learners", "advanced learner", "高阶", "学习")
+KINDS = ("standard",)
 
 _BUILD_LOCK = threading.Lock()
 _STATE_LOCK = threading.Lock()
@@ -28,10 +30,11 @@ _BUILDING = False
 
 SCHEMA = """
 CREATE TABLE entries (
-  id           INTEGER PRIMARY KEY AUTOINCREMENT,
-  headword     TEXT NOT NULL,
-  headword_key TEXT NOT NULL,
-  definition   TEXT NOT NULL
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  headword           TEXT NOT NULL,
+  headword_key       TEXT NOT NULL,
+  definition         TEXT NOT NULL,
+  learner_definition TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE meta (
   key   TEXT PRIMARY KEY,
@@ -62,52 +65,9 @@ def _first_eudb(folder: Path) -> Path | None:
     return candidates[0] if candidates else None
 
 
-def _dictionary_root() -> Path:
-    """The folder that holds the standard dictionary, if it is a folder."""
-    configured = os.environ.get("INTEFLOW_DICTIONARY")
-    if configured:
-        path = Path(configured).expanduser()
-        return path if path.is_dir() else path.parent
-    return REPO_ROOT / "dictionary"
-
-
-def _looks_like_learner(path: Path) -> bool:
-    name = path.name.casefold()
-    if any(hint in name for hint in LEARNER_HINTS):
-        return True
-    try:
-        from app.dictionary.eudb import parse_header
-
-        meta, _count, _offsets, _size = parse_header(path)
-    except (OSError, ValueError):
-        return False
-    title = meta.get("title", "").casefold()
-    return any(hint in title for hint in LEARNER_HINTS)
-
-
 def source_path(kind: str = "standard") -> Path | None:
     """The configured ``.eudb`` file, or ``None`` when none is installed."""
-    kind = _kind(kind)
-    if kind == "learner":
-        configured = os.environ.get("INTEFLOW_LEARNER_DICTIONARY")
-        if configured:
-            path = Path(configured).expanduser()
-            if path.is_dir():
-                return _first_eudb(path)
-            return path if path.is_file() else None
-
-        root = _dictionary_root()
-        preferred = _first_eudb(root / "learners")
-        if preferred is not None:
-            return preferred
-        standard = source_path("standard")
-        for candidate in sorted(root.glob("*.eudb")):
-            if candidate == standard:
-                continue
-            if _looks_like_learner(candidate):
-                return candidate
-        return None
-
+    _kind(kind)
     configured = os.environ.get("INTEFLOW_DICTIONARY")
     if configured:
         path = Path(configured).expanduser()
@@ -119,13 +79,7 @@ def source_path(kind: str = "standard") -> Path | None:
 
 
 def index_path(kind: str = "standard") -> Path:
-    kind = _kind(kind)
-    if kind == "learner":
-        configured = os.environ.get("INTEFLOW_LEARNER_DICTIONARY_INDEX")
-        if configured:
-            return Path(configured).expanduser()
-        return DATA_DIR / "dictionary" / "learners.db"
-
+    _kind(kind)
     configured = os.environ.get("INTEFLOW_DICTIONARY_INDEX")
     if configured:
         return Path(configured).expanduser()
@@ -165,6 +119,7 @@ def _status_unlocked(kind: str = "standard") -> dict:
     index = index_path(kind)
     meta = _read_meta(index)
     indexed = bool(meta)
+    learner_count = int(meta.get("learner_count", 0) or 0)
     stale = True
     if source is None:
         return {
@@ -176,6 +131,7 @@ def _status_unlocked(kind: str = "standard") -> dict:
             "source_name": None,
             "index_path": str(index),
             "entry_count": int(meta.get("entry_count", 0) or 0),
+            "learner_count": learner_count,
             "built_at": meta.get("built_at"),
             "title": meta.get("title") or None,
             "author": meta.get("author") or None,
@@ -186,7 +142,8 @@ def _status_unlocked(kind: str = "standard") -> dict:
     if indexed:
         try:
             same = (
-                int(meta.get("source_size", -1)) == stat.st_size
+                int(meta.get("version", -1)) == INDEX_VERSION
+                and int(meta.get("source_size", -1)) == stat.st_size
                 and int(meta.get("source_mtime_ns", -1)) == stat.st_mtime_ns
             )
         except ValueError:
@@ -202,6 +159,7 @@ def _status_unlocked(kind: str = "standard") -> dict:
         "source_name": source.name,
         "index_path": str(index),
         "entry_count": int(meta.get("entry_count", 0) or 0),
+        "learner_count": learner_count,
         "built_at": meta.get("built_at"),
         "title": meta.get("title") or None,
         "author": meta.get("author") or None,
@@ -229,18 +187,17 @@ def ensure_index(force: bool = False, kind: str = "standard") -> dict:
     global _BUILDING
 
     kind = _kind(kind)
-    label = "learner's dictionary" if kind == "learner" else "Merriam-Webster dictionary"
 
     with _BUILD_LOCK:
         current = _status_unlocked(kind)
         if current["available"] and current["indexed"] and not current["stale"] and not force:
             return current
         if not current["available"]:
-            raise DictionaryError(f"no {label} .eudb file was found")
+            raise DictionaryError("no Merriam-Webster .eudb file was found")
 
         source = source_path(kind)
         if source is None:  # pragma: no cover - guarded by status
-            raise DictionaryError(f"no {label} .eudb file was found")
+            raise DictionaryError("no Merriam-Webster .eudb file was found")
 
         with _STATE_LOCK:
             _BUILDING = True
@@ -273,20 +230,30 @@ def _build(source: Path, target: Path, kind: str = "standard") -> None:
             "PRAGMA temp_store=MEMORY;"
             + SCHEMA
         )
-        batch: list[tuple[str, str, str]] = []
+        batch: list[tuple[str, str, str, str]] = []
         inserted = 0
+        learner_count = 0
         for entry in iter_entries(source):
-            batch.append((entry.headword, normalize(entry.headword), html_to_text(entry.body)))
+            definition, learner = split_learner_definition(html_to_text(entry.body))
+            if learner:
+                learner_count += 1
+            batch.append(
+                (entry.headword, normalize(entry.headword), definition, learner)
+            )
             if len(batch) >= 500:
                 conn.executemany(
-                    "INSERT INTO entries (headword, headword_key, definition) VALUES (?, ?, ?)",
+                    "INSERT INTO entries"
+                    " (headword, headword_key, definition, learner_definition)"
+                    " VALUES (?, ?, ?, ?)",
                     batch,
                 )
                 inserted += len(batch)
                 batch.clear()
         if batch:
             conn.executemany(
-                "INSERT INTO entries (headword, headword_key, definition) VALUES (?, ?, ?)",
+                "INSERT INTO entries"
+                " (headword, headword_key, definition, learner_definition)"
+                " VALUES (?, ?, ?, ?)",
                 batch,
             )
             inserted += len(batch)
@@ -302,6 +269,7 @@ def _build(source: Path, target: Path, kind: str = "standard") -> None:
                 ("source_mtime_ns", str(stat.st_mtime_ns)),
                 ("built_at", built_at),
                 ("entry_count", str(inserted or count)),
+                ("learner_count", str(learner_count)),
                 ("title", meta.get("title", "")),
                 ("author", meta.get("author", "")),
             ],
@@ -336,10 +304,12 @@ def _escape_like(value: str) -> str:
 
 def _row(row: sqlite3.Row, full: bool = False) -> dict:
     definition = row["definition"] or ""
+    learner = row["learner_definition"] or ""
     return {
         "id": row["id"],
         "headword": row["headword"],
         "definition": definition[:MAX_DEFINITION] if full else None,
+        "learner_definition": (learner[:MAX_DEFINITION] or None) if full else None,
         "snippet": " ".join(definition.split())[:SNIPPET],
     }
 
@@ -366,7 +336,7 @@ def lookup(query: str, limit: int = 20, kind: str = "standard") -> dict:
     pattern = _escape_like(key)
     with _connect(index) as conn:
         exact = conn.execute(
-            "SELECT id, headword, definition FROM entries"
+            "SELECT id, headword, definition, learner_definition FROM entries"
             " WHERE headword_key = ? ORDER BY id LIMIT 3",
             (key,),
         ).fetchall()
@@ -374,7 +344,7 @@ def lookup(query: str, limit: int = 20, kind: str = "standard") -> dict:
         matches: list[sqlite3.Row] = []
         seen = {row["id"] for row in exact}
         prefix = conn.execute(
-            "SELECT id, headword, definition FROM entries"
+            "SELECT id, headword, definition, learner_definition FROM entries"
             " WHERE headword_key LIKE ? ESCAPE '\\'"
             " ORDER BY length(headword_key), headword_key LIMIT ?",
             (pattern + "%", limit + len(seen)),
@@ -386,7 +356,7 @@ def lookup(query: str, limit: int = 20, kind: str = "standard") -> dict:
 
         if len(matches) < 8:
             contains = conn.execute(
-                "SELECT id, headword, definition FROM entries"
+                "SELECT id, headword, definition, learner_definition FROM entries"
                 " WHERE headword_key LIKE ? ESCAPE '\\'"
                 " ORDER BY length(headword_key), headword_key LIMIT ?",
                 ("%" + pattern + "%", limit + len(seen)),
@@ -415,7 +385,7 @@ def get_entry(entry_id: int, kind: str = "standard") -> dict | None:
         ensure_index(kind=kind)
     with _connect(index) as conn:
         row = conn.execute(
-            "SELECT id, headword, definition FROM entries WHERE id = ?",
+            "SELECT id, headword, definition, learner_definition FROM entries WHERE id = ?",
             (int(entry_id),),
         ).fetchone()
     return _row(row, full=True) if row else None

@@ -14,8 +14,6 @@
 
 <!-- 从这里开始往下写 -->
 
-### 💡 复盘页错题 chips 想按 section 分组
-- 错题较多时一长排不好找。
 
 ### ✅ 加入单词考试功能（2026-10-20）
 - purpose: 用于测试单词背诵效果
@@ -79,7 +77,7 @@
 - 从题目或选项里**选中单词拖到生词本 pane**：本地韦氏词典查候选，AI 只在真实候选里选最贴合上下文的释义；无 key/失败回退第一条释义并提示；无词条也照样入表。
 - 左侧栏 **Vocabulary** 页：左侧考试索引 + 右侧词表编辑器（手动增改、查词、按条添加、导出 xlsx）。每套试卷一份词表，按词去重。
 - `.eudb` 本地解析，首次查词自动建索引 `data/dictionary/mw.db`（92,006 条）；只显示英英原文，0 token；`dictionary/` 版权文件已 gitignore。
-- 2026-10-20：Settings 增加 `vocab_ai_sense`（关闭后拖词不调用 LLM）与 `vocab_learner_definitions`（优先 `dictionary/learners/*.eudb` 的学习者释义，缺失自动回退标准词典）。当前 Collegiate 文件本身不含 learner 释义，需另装学习者词典。
+- 2026-10-20：Settings 增加 `vocab_ai_sense`（关闭后拖词不调用 LLM）与 `vocab_learner_definitions`。后者不是另一本 learner 词典，而是韦氏词条内部的 **Definition for English Learners** 栏目：构建索引时拆到 `learner_definition`，有就优先、没有回退普通释义。当前这份 `韦氏大辞典.eudb` 实测 `learner_count = 0`（未带该栏目），所以会回退普通释义；换成含该栏目的版本后会自动使用。
 - 在这套词表/词性/释义数据上的“单词考试”（中译英、英译中）已实现，见下方 ✅ 条目。
 
 ### ✅ 添加“需复习题目”的功能（2026-10-20）
@@ -105,6 +103,12 @@
   - 代码：`backend/app/repos/subjects.py` + `backend/app/api/subjects.py` + `PATCH /api/documents/{id}`；
     前端 `SubjectControls.tsx` + `lib/subjects.ts`；`subjects` 表 + `documents.subject_id`（自动迁移）。
 
-### 用户自定义词典
+### ✅ 用户自定义词典（2026-10-20）
 - 导入词典
 - 选择词典
+- **已实现（2026-10-20）**：Settings → **My dictionary** 可导入 CSV / TSV / JSON / TXT，也可手动增删词条。
+  - 词条存 `app.db` 的 `custom_dictionary_entries`（word/pos/definition，word_key 唯一），全局共享。
+  - 设置 `custom_dictionary_enabled` 默认开：查词先查自定义词典，未命中再回退韦氏；拖词候选、逐条添加、
+    单词考试释义引用也优先使用。
+  - 代码：`backend/app/repos/custom_dictionary.py` + `backend/app/api/custom_dictionary.py`；
+    前端 `components/CustomDictionaryManager.tsx`；测试 `test_custom_dictionary.py`。

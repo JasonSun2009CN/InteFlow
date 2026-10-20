@@ -317,24 +317,14 @@ def test_from_selection_skips_the_llm_when_matching_is_off(client, monkeypatch) 
     assert "off" in body["warning"]
 
 
-def test_from_selection_prefers_the_learner_dictionary(client, monkeypatch) -> None:
+def test_from_selection_passes_the_learner_preference(client, monkeypatch) -> None:
     doc_id, _ = _doc(client)
     monkeypatch.setattr(settings_repo, "learner_definitions_enabled", lambda: True)
     monkeypatch.setattr(settings_repo, "vocabulary_ai_sense_enabled", lambda: False)
-    monkeypatch.setattr(
-        dictionary,
-        "status",
-        lambda kind="standard": {
-            "available": True,
-            "indexed": True,
-            "entry_count": 2,
-            "title": "Learner" if kind == "learner" else "Standard",
-        },
-    )
     seen: dict = {}
 
     def candidates(word, **kwargs):
-        seen["kind"] = kwargs.get("kind")
+        seen["use_learner"] = kwargs.get("use_learner")
         return DEFINITIONS
 
     monkeypatch.setattr(vocab_assist, "candidates_for", candidates)
@@ -344,53 +334,46 @@ def test_from_selection_prefers_the_learner_dictionary(client, monkeypatch) -> N
         json={"text": "elate", "context": "The team was elate after the win."},
     ).json()
 
-    assert seen["kind"] == "learner"
-    assert body["source"] == "learner"
-    assert body["learner"] is True
-    assert body["dictionary_title"] == "Learner"
+    assert seen["use_learner"] is True
+    assert body["source"] == "standard"
+    assert body["learner"] is False
     assert body["used_ai"] is False
 
 
-def test_from_selection_falls_back_when_learner_dictionary_fails(
-    client, monkeypatch
-) -> None:
+def test_from_selection_can_use_a_custom_candidate(client, monkeypatch) -> None:
     doc_id, _ = _doc(client)
-    monkeypatch.setattr(settings_repo, "learner_definitions_enabled", lambda: True)
     monkeypatch.setattr(settings_repo, "vocabulary_ai_sense_enabled", lambda: False)
     monkeypatch.setattr(
-        dictionary,
-        "status",
-        lambda kind="standard": {
-            "available": True,
-            "indexed": True,
-            "entry_count": 2,
-            "title": "Standard",
-        },
+        vocab_assist,
+        "candidates_for",
+        lambda word, **kwargs: [
+            {
+                "id": "custom:9",
+                "custom_id": 9,
+                "headword": "elate",
+                "definition": "my own meaning",
+                "pos": "v.",
+                "source": "custom",
+            }
+        ],
     )
-
-    def candidates(word, **kwargs):
-        if kwargs.get("kind") == "learner":
-            raise dictionary.DictionaryError("learner index is broken")
-        return DEFINITIONS
-
-    monkeypatch.setattr(vocab_assist, "candidates_for", candidates)
 
     body = client.post(
         f"/api/documents/{doc_id}/words/entries/from-selection",
-        json={"text": "elate"},
+        json={"text": "elate", "context": "The team was elate after the win."},
     ).json()
 
-    assert body["source"] == "standard"
+    assert body["source"] == "custom"
+    assert body["dictionary_title"] == "My dictionary"
+    assert body["definition"] == "my own meaning"
     assert body["learner"] is False
-    assert "Learner's dictionary unavailable" in body["warning"]
 
 
 def test_from_entry_adds_the_chosen_sense_without_ai(client, monkeypatch) -> None:
     doc_id, _ = _doc(client)
-    seen: dict = {}
+    monkeypatch.setattr(settings_repo, "learner_definitions_enabled", lambda: True)
 
-    def fake_entry(entry_id, kind="standard"):
-        seen["kind"] = kind
+    def fake_entry(entry_id, **kwargs):
         return {
             "id": entry_id,
             "headword": "ubiquitous",
@@ -398,6 +381,7 @@ def test_from_entry_adds_the_chosen_sense_without_ai(client, monkeypatch) -> Non
                 "adj.\nPronunciation: yü-'bi-kwə-təs\nFunction: adjective\n"
                 ": existing or being everywhere at the same time"
             ),
+            "learner_definition": "existing everywhere",
         }
 
     monkeypatch.setattr(dictionary, "get_entry", fake_entry)
@@ -407,20 +391,20 @@ def test_from_entry_adds_the_chosen_sense_without_ai(client, monkeypatch) -> Non
         json={
             "entry_id": 42,
             "context": "Smartphones are ubiquitous today.",
-            "source": "learner",
+            "source": "standard",
         },
     ).json()
 
     assert body["matched"] is True
     assert body["used_ai"] is False
     assert body["entry_id"] == 42
-    assert body["source"] == "learner"
-    assert seen["kind"] == "learner"
+    assert body["source"] == "standard"
+    assert body["learner"] is True
     assert body["pos"] == "adj."
-    assert body["definition"] == "existing or being everywhere at the same time"
+    assert body["definition"] == "existing everywhere"
     cells = _cells_by_name(body["grid"], body["row"])
     assert cells["Word"] == "ubiquitous"
-    assert cells["Meaning"] == "existing or being everywhere at the same time"
+    assert cells["Meaning"] == "existing everywhere"
 
 
 def test_from_entry_rejects_an_unknown_source(client) -> None:
