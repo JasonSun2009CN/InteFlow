@@ -1,6 +1,7 @@
 export { Button, buttonClasses } from "./Button";
 export { Input } from "./Input";
 export { Tabs } from "./Tabs";
+export { SlidingTabs } from "./SlidingTabs";
 export { Badge } from "./Badge";
 export { EmptyState } from "./EmptyState";
 export { Banner } from "./Banner";

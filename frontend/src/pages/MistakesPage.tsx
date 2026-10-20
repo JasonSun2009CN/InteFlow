@@ -10,7 +10,7 @@ import {
 import AnalysisEditor from "../components/workspace/AnalysisEditor";
 import RichText from "../components/RichText";
 import { SubjectBadge } from "../components/SubjectControls";
-import { Tabs } from "../components/ui";
+import { SlidingTabs } from "../components/ui";
 import { sectionLabel } from "../lib/sections";
 
 type Collection = "mistakes" | "starred";
@@ -300,8 +300,9 @@ export default function MistakesPage() {
         </Link>
       </header>
 
-      <div className="mt-4 border-b border-slate-200">
-        <Tabs
+      <div className="mt-4">
+        <SlidingTabs
+          ariaLabel="Review sets"
           tabs={[
             {
               key: "mistakes",
@@ -319,7 +320,7 @@ export default function MistakesPage() {
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         <input
           type="search"
           value={query}

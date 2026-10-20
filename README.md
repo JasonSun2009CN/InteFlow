@@ -263,7 +263,7 @@ Open **Vocabulary** in the sidebar. The page has two tabs:
 
 ### 6. Review sets (mistakes + starred)
 
-Open **Review** in the sidebar. The page has two tabs:
+Open **Review** in the sidebar. The page has two tabs, switched with the sliding segmented control at the top:
 
 - **Mistakes** — every question you missed in a submitted attempt. Each question appears once, using your
   **latest attempt** (a later correct attempt removes it). This is not a session log: repeated misses do not

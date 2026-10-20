@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 133 passed, 5 skipped。
+> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 135 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -227,7 +227,7 @@ components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/
              WordExamPanel 单词考试设置/作答 · WordExamResultView 结果 + 二维码/JSON 下载 ·
              usePersistentLayout · useMediaQuery · icons）·
              SubjectControls（学科徽章 / 筛选条 / 行内选择 + 现场创建 / 管理弹窗） ·
-             ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · ui/（设计系统原语）
+             ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · ui/（设计系统原语；Review 用 SlidingTabs 滑块切换）
 lib/         sections.ts（板块标签，与后端 sections.py 对齐）· wordExamQr.ts（紧凑分享 JSON + 多段 QR 分块）
              subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）
 api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）

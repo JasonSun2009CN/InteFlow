@@ -2,7 +2,7 @@
 
 > 本地优先的学习工作流：**导入题库（PDF/DOCX/Markdown）→ 刷题 → 逐题复盘错题 → 写解析 / 查词 / 问 AI → 导出错题分析与生词文件。**
 >
-> 状态快照：**2026-10-20** ｜ pytest **296 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 133 passed, 5 skipped。
+> 状态快照：**2026-10-20** ｜ pytest **296 passed, 1 skipped** ｜ `npm run build` 0 错误 ｜ `npm test` 135 passed, 5 skipped。
 > 相关文档：[`README.md`](README.md) · [`README-cn.md`](README-cn.md) · [`AGENT.md`](AGENT.md) ·
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [`docs/IFMD.md`](docs/IFMD.md) · [`docs/IDEAS.md`](docs/IDEAS.md)
 
@@ -46,14 +46,14 @@
   删除学科只把试卷移回 Uncategorized，不影响题目/答案/分析/词表；0 token。
 - ✅ **Review：错题集 + 精选题集（2026-10-20）**：侧栏 **Review** 页内分 **Mistakes / Starred**。
   错题按题去重并保留最近一次作答（后来做对自动移出），精选题来自练习/复盘/错题列表里点的星（`question_stars`）。
-  两栏支持按套题/题干/选项搜索、exam 过滤、时间正/倒序，复用分析编辑器查看/编辑；旧分析也一并只读列出。0 token。
+  两栏用顶部滑动分段控件切换，支持按套题/题干/选项搜索、exam 过滤、时间正/倒序，复用分析编辑器查看/编辑；旧分析也一并只读列出。0 token。
 - ✅ **移除 Normalize**：前端入口与后端接口/任务/测试全部删除（`convert/normalize.py` 文本清洗工具保留）。
 
 ### 沿用前身（已实现，直接可用）
 导入（PDF/DOCX/Markdown/OCR/流水线/内置题库）· 答案录入（网格 + 批量粘贴）·
 练习（全屏、计时、题号导航、标记、键盘、多选/填空）· 结果复盘（全屏工作台 + 折叠导航 + 分析编辑器 + 过滤 + regrade）·
 工作区（手写解析 / 词汇表 v2 / AI 讲解 / 导出入口）· 导出（PDF / DOCX / 生词 xlsx）·
-设置（19 家 LLM 服务商目录 + 用户名 + AI 兜底/生词本/单词考试评分开关）· 整套解析 Notebook 预览与导出 · 学科分类 · 错题集/精选题集 · 测试（pytest 296 / vitest 133）。
+设置（19 家 LLM 服务商目录 + 用户名 + AI 兜底/生词本/单词考试评分开关）· 整套解析 Notebook 预览与导出 · 学科分类 · 错题集/精选题集 · 测试（pytest 296 / vitest 135）。
 
 ---
 
@@ -88,6 +88,6 @@
 ```bash
 cd backend && ../.venv/bin/python -m pytest -q   # 296 passed, 1 skipped
 cd frontend && npm run build                     # 0 错误
-cd frontend && npm test                          # 133 passed, 5 skipped
+cd frontend && npm test                          # 135 passed, 5 skipped
 ./scripts/dev.sh                                 # 后端 :8000 + 前端 :5173
 ```
