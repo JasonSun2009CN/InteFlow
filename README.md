@@ -169,7 +169,9 @@ npm run dev
 Open <http://localhost:5173>. The left sidebar has six tabs: **Exams** (pick one to take),
 **Library** (import a file, add the built-in bank, manage your exam list, group papers by subject), **Sessions** (every **submitted**
 attempt, searchable/deletable), **Review**, **Vocabulary** and **Settings**. **Review** holds the mistake and starred
-sets; **Vocabulary** holds the per-paper word lists and the word test.
+sets; **Vocabulary** holds the per-paper word lists and the word test. On desktop, use the collapse button at the top
+of the sidebar to switch it to an **icon-only compact rail**; the choice is remembered (`inteflow.sidebar.compact`).
+The mobile drawer always stays expanded.
 
 1. Open **Library** in the sidebar.
 2. **Upload a file**: drop it on *Drag a file here*, or click **choose a file**.

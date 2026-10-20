@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 131 passed, 5 skipped。
+> 基线：pytest **296 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 133 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -219,7 +219,7 @@ App.tsx (BrowserRouter)
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
     └── "/manage"               → 重定向到 /library（兼容旧链接）
 
-components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/Settings）· RichText (markdown+KaTeX+图片) ·
+components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/Settings；桌面可 Compact 为图标栏）· RichText (markdown+KaTeX+图片) ·
              workspace/（Workspace 四选二分屏 · WorkspacePane 每侧工具切换器 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
              AnalysisEditor Pages 式分析页 (Write/Preview + 自动保存 + 单换行保留) · AiTutorPane AI 讲解 pane ·
              VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） · ExportDrawer 顶栏导出抽屉 ·
@@ -243,7 +243,8 @@ api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 主题选择存在 `localStorage`（`inteflow.theme`），入口在 Settings → Appearance（`components/ui/ThemePicker.tsx`），
 状态由 `src/theme.ts` 的 `useTheme()` 提供，`main.tsx` 在首帧前 `initTheme()` 写到 `<html data-theme>`。
 **全屏练习页渲染在 `.app-theme` 之外**，保持原 slate/blue（并显式 `color-scheme: light`）；复盘页跟随主题。
-移动端左侧栏收成顶部条 + 抽屉（`AppSidebar`）。
+移动端左侧栏收成顶部条 + 抽屉（`AppSidebar`）。桌面端可切到 **Compact**：80px 图标栏、hover 原生 tooltip；
+状态存 `localStorage` 键 `inteflow.sidebar.compact`，移动端始终显示完整抽屉。
 
 ---
 

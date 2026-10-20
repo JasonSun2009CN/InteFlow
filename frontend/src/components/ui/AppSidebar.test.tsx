@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
-import { AppSidebar } from "./AppSidebar";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AppSidebar, SIDEBAR_COMPACT_KEY } from "./AppSidebar";
 
 function renderAt(path: string) {
   return render(
@@ -12,6 +12,11 @@ function renderAt(path: string) {
 }
 
 describe("AppSidebar", () => {
+  beforeEach(() => {
+    vi.mocked(window.localStorage.getItem).mockReset().mockReturnValue(null);
+    vi.mocked(window.localStorage.setItem).mockReset();
+  });
+
   it("lists the workspace tabs", () => {
     renderAt("/");
 
@@ -44,5 +49,36 @@ describe("AppSidebar", () => {
 
     renderAt("/doc/7/answers");
     expect(screen.queryByRole("link", { current: "page" })).not.toBeInTheDocument();
+  });
+
+  it("collapses to icons only and remembers the choice", () => {
+    const { container } = renderAt("/library");
+    const nav = screen.getByRole("navigation", { name: "Main" });
+    expect(nav).toHaveAttribute("data-compact", "false");
+    expect(container.querySelector('img[src="/favicon.svg"]')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+
+    expect(nav).toHaveAttribute("data-compact", "true");
+    expect(container.querySelector('img[src="/favicon.svg"]')).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(window.localStorage.setItem).toHaveBeenLastCalledWith(
+      SIDEBAR_COMPACT_KEY,
+      "1",
+    );
+  });
+
+  it("starts compact when the preference is stored", () => {
+    vi.mocked(window.localStorage.getItem).mockReturnValue("1");
+    renderAt("/");
+
+    expect(screen.getByRole("navigation", { name: "Main" })).toHaveAttribute(
+      "data-compact",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toBeInTheDocument();
   });
 });
