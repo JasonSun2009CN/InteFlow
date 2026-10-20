@@ -154,7 +154,8 @@ CREATE TABLE IF NOT EXISTS word_grids (
   rows_json    TEXT NOT NULL DEFAULT '[]',
   columns_json TEXT,
   view_json    TEXT,
-  version      INTEGER NOT NULL DEFAULT 1
+  version      INTEGER NOT NULL DEFAULT 1,
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS settings (
@@ -260,9 +261,13 @@ def _migrate(conn: sqlite3.Connection) -> None:
             ("columns_json", "TEXT"),
             ("view_json", "TEXT"),
             ("version", "INTEGER NOT NULL DEFAULT 1"),
+            ("updated_at", "TEXT"),
         ):
             if name not in grid_cols:
                 conn.execute(f"ALTER TABLE word_grids ADD COLUMN {name} {ddl}")
+        conn.execute(
+            "UPDATE word_grids SET updated_at = COALESCE(updated_at, datetime('now'))"
+        )
 
     # questions / session_items (2026-10-19): blank questions + multiple answers.
     # `answer` stays the single-letter column (old data + export paths), the new

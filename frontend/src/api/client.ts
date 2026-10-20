@@ -148,6 +148,81 @@ export interface WordGrid {
   view: WordView;
 }
 
+/** Local Merriam-Webster index state (`GET /api/dictionary/status`). */
+export interface DictionaryStatus {
+  available: boolean;
+  indexed: boolean;
+  stale: boolean;
+  source: string | null;
+  source_name: string | null;
+  index_path: string;
+  entry_count: number;
+  built_at: string | null;
+  title: string | null;
+  author: string | null;
+  building: boolean;
+}
+
+export interface DictionaryEntry {
+  id: number;
+  headword: string;
+  /** Full English-English text on exact matches; null on suggestions. */
+  definition: string | null;
+  snippet: string;
+}
+
+export interface DictionaryLookup {
+  query: string;
+  exact: DictionaryEntry[];
+  matches: DictionaryEntry[];
+  entry_count: number;
+}
+
+/** One exam in the vocabulary collection. */
+export interface VocabularyDocument {
+  document_id: number;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  word_count: number;
+  preview: string[];
+  columns: { id: string; name: string }[];
+  has_grid: boolean;
+}
+
+export interface VocabularyOverview {
+  documents: VocabularyDocument[];
+  total_documents: number;
+  total_words: number;
+}
+
+export interface WordEntryInput {
+  word: string;
+  meaning?: string;
+  pos?: string;
+  notes?: string;
+  context?: string;
+  source?: string;
+  question_no?: number | null;
+}
+
+export interface WordEntryResult {
+  grid: WordGrid;
+  row: VocabRow;
+  row_id: string;
+  word: string;
+  created: boolean;
+  matched?: boolean;
+  used_ai?: boolean;
+  pos?: string;
+  definition?: string;
+  entry_id?: number | null;
+  dictionary_word?: string | null;
+  reason?: string;
+  warning?: string;
+  selected?: string;
+}
+
 /** One question's analysis page — the notebook is one page per question. */
 export interface AnalysisPage {
   id: number | null;
@@ -375,6 +450,59 @@ export const api = {
     }),
 
   wordsExportUrl: (docId: number) => `/api/documents/${docId}/words/export`,
+
+  /** Add one structured word (de-duplicates by word; creates POS if needed). */
+  addWordEntry: (docId: number, input: WordEntryInput) =>
+    request<WordEntryResult>(`/api/documents/${docId}/words/entries`, {
+      method: "POST",
+      ...json(input),
+    }),
+
+  updateWordEntry: (
+    docId: number,
+    rowId: string,
+    patch: Partial<Pick<WordEntryInput, "word" | "meaning" | "pos" | "notes">>,
+  ) =>
+    request<{ grid: WordGrid; row: VocabRow; row_id: string }>(
+      `/api/documents/${docId}/words/entries/${rowId}`,
+      { method: "PATCH", ...json(patch) },
+    ),
+
+  deleteWordEntry: (docId: number, rowId: string) =>
+    request<{ grid: WordGrid; deleted: number }>(
+      `/api/documents/${docId}/words/entries/${rowId}`,
+      { method: "DELETE" },
+    ),
+
+  /** Drag-to-vocabulary: AI picks the Merriam-Webster sense for the context. */
+  addWordFromSelection: (
+    docId: number,
+    input: { text: string; context?: string; question_id?: number | null },
+  ) =>
+    request<WordEntryResult>(`/api/documents/${docId}/words/entries/from-selection`, {
+      method: "POST",
+      ...json(input),
+    }),
+
+  /** Add the exact MW entry a user picked in dictionary lookup (0 token). */
+  addWordFromEntry: (
+    docId: number,
+    input: { entry_id: number; context?: string; question_no?: number | null },
+  ) =>
+    request<WordEntryResult>(`/api/documents/${docId}/words/entries/from-entry`, {
+      method: "POST",
+      ...json(input),
+    }),
+
+  /** Every exam's vocabulary list, with counts and a short preview. */
+  getVocabulary: () => request<VocabularyOverview>("/api/vocabulary"),
+
+  dictionaryStatus: () => request<DictionaryStatus>("/api/dictionary/status"),
+
+  dictionaryLookup: (query: string, limit = 20) => {
+    const params = new URLSearchParams({ q: query, limit: String(limit) });
+    return request<DictionaryLookup>(`/api/dictionary/lookup?${params}`);
+  },
 
   /** Export questions + answers + explanations as PDF/DOCX (0 token). */
   exportUrl: (docId: number, fmt: "pdf" | "docx") =>

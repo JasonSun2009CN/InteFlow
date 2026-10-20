@@ -28,15 +28,19 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **218 passed, 1 skipped** |
+| 后端测试 | `pytest` **251 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **88 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **108 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
-| API 面 | 41 条（见 `docs/ARCHITECTURE.md`） |
+| API 面 | 49 条（见 `docs/ARCHITECTURE.md`） |
+| 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db` |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
 > 整套解析 Notebook 预览、作答历史 Sessions 页、多答案选择题 + 填空题、设置里的用户名与 AI 识别兜底开关；
 > Normalize 已彻底移除。2026-10-19 修复：分析页异步加载后不再显示空白；Preview 保留单换行（remark-breaks）。
+>
+> 2026-10-19 新增：**Vocabulary 生词本**（左侧 6 tab 的占位页已替换）+ **本地韦氏词典** + 复盘工作台
+> 改为 **2-of-4 分屏**（题目 / 分析 / AI Tutor / 生词本），支持从题目/选项拖词入表并由 AI 选义。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -70,8 +74,8 @@
 | 题目模型 | 把 `sec` **泛化为自由板块标签**（去掉 `CHECK (sec IN ('rw','math'))`），SAT 卷仍填 `rw`/`math` |
 | 内置题库 | **保留**（开箱即用的示例题库） |
 | 计时 | 正计时 + 倒计时两种；倒计时**开始屏手输 + 记住上次**（存本地） |
-| 主界面信息架构 | **左侧栏 6 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Sessions（作答历史）/ Mistakes（错题集合，占位）/ Vocabulary（单词集合，占位）/ Settings。**练习页与复盘页全屏无侧栏**；答案录入在侧栏布局内。窄屏侧栏变抽屉 |
-| 复盘（分析模式，2026-10-19） | 进入复盘**隐藏左侧栏**；题号导航默认缩到左上角、点击旋转展开为**悬浮**面板（All / Wrong / Correct），点击某题即选中并收起；左侧题面 + 右侧 **Pages 式**分析编辑器（Write / Preview、900ms 防抖自动保存 + ⌘S）；AI 讲解 / 单词表 / 导出收进工具栏抽屉 |
+| 主界面信息架构 | **左侧栏 6 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Sessions（作答历史）/ Mistakes（错题集合，占位）/ Vocabulary（生词本）/ Settings。**练习页与复盘页全屏无侧栏**；答案录入在侧栏布局内。窄屏侧栏变抽屉 |
+| 复盘（分析模式，2026-10-19） | 进入复盘**隐藏左侧栏**；题号导航默认缩到左上角、点击旋转展开为**悬浮**面板（All / Wrong / Correct），点击某题即选中并收起；**2-of-4 分屏**：题目 / 分析 / AI Tutor / 生词本，每侧可切换到另外三者；选择已在另一侧的工具则左右互换；默认左题目右分析；分隔条可拖拽/方向键。导出与 Notebook 放顶栏（不占用分屏）。 |
 | 分析存储与导出 | 一套试卷 = 一套分析（`analysis_pages` 一题一页，按题序）；旧 `questions.explain` 首次读取时映射迁入（`id` 为 null）。复盘页顶部 **Notebook** 全屏预览：试卷标题 → 所有已写解析的题目（题干/图表/解析）+ 导出按钮。导出 md / docx / pdf **只含已写解析的题**：浏览器下载 + 在 `data/exports/` 存一份，响应头 `X-Export-Path` 显示路径；封面页含设置里的用户名 |
 | 题型扩展（2026-10-19） | 选择题支持多选（头部 `multi=1`，答案 `A,C`）；新增填空题（`kind=blank`，无选项，答案 `a \| b` 多个可接受答案）；**导入时未识别到选项一律按填空题处理** |
 | AI 识别兜底开关 | 设置项 `llm_fallback`（默认开）。关闭时导入失败会提示启用；`convert/pdf.py` 与 `imports.run_ai_fallback` 均检查该开关 |
@@ -79,8 +83,9 @@
 | Normalize | **彻底删除**（前端入口 + 后端接口/任务/测试）。`convert/normalize.py` 是文本清洗工具，**保留**，与已删功能无关 |
 | 视觉风格（2026-10-19） | **5 套主题**：Clear Blue（默认）/ Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial，在 Settings → Appearance 里切换并存在 `localStorage`（`inteflow.theme`）。实现：`frontend/src/theme.ts` 管状态，`index.css` 里 `.app-theme[data-theme=…]` 声明语义变量、再由一条共享规则映射到全部 Tailwind 颜色族（外加各主题的特征样式：显示字体 / 圆角 / 描边主按钮 / 导航标记 / 遮罩 / 背景光）。**全屏练习页明确不跟随主题**（保留原 slate/blue），复盘页跟随；旧 `.paper-app` 作用域已删除 |
 | 错题集合（待做） | 汇总所有 session 的错题，**按题目去重**（保留最近一次作答），可按试卷/板块过滤 |
-| 单词集合（待做） | **一套试题对应一份词表**；重刷同一试卷再加词是**在原词表上修改**，不新建 |
-| 查词 / 错题分析导出 | 查词**先做占位**，细节后续再定；**错题分析导出已实现**（一套试卷一套笔记本，md/docx/pdf 存 `data/exports/`） |
+| 单词集合（已实现 2026-10-19） | **一套试题对应一份词表**；重刷同一试卷再加词是**在原词表上修改**，不新建。Vocabulary 页 = 左侧考试索引 + 右侧词表编辑器（手动增删改、查词、导出 xlsx） |
+| 查词 / 生词释义 | **本地韦氏词典**（Eudic `.eudb` → `data/dictionary/mw.db`，92,006 条，0 token）。只显示英英原文；首次查词自动建索引。拖词入表时**显式**调用一次 LLM 在真实候选中选义（不能编造条目）；无 key/失败回退第一条释义并提示 |
+| 查词 / 错题分析导出 | 查词已实现（本地词典）；**错题分析导出已实现**（一套试卷一套笔记本，md/docx/pdf 存 `data/exports/`） |
 | LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
 
@@ -90,12 +95,11 @@
 1. **计时方案**：`PracticePage` 目前只有**正计时**（`useState` + `setInterval`）。
    需要加"倒计时"模式：开始屏选择 + 手输 `mm:ss` + 记住上次（`localStorage`）。
    倒计时到 0 时的行为（自动交卷 / 只提示）**还没定，做之前先问用户**。
-2. **查词（占位）**：应用内词典查询。数据源（本地词典 / AI 释义 / 两者）未定。
+2. ~~**查词（占位）**~~ **已实现（2026-10-19）**：本地 Merriam-Webster（Eudic `.eudb`）索引 + 查词接口 + Vocabulary 页 + 复盘拖词选义。`dictionary/` 只放用户自己的 `.eudb`，已在 `.gitignore`。
 3. ~~**错题分析导出（占位）**~~ **已实现（2026-10-19）**：一套试卷一套分析笔记本，可导出 md/docx/pdf 并留副本到 `data/exports/`；复盘页 Notebook 可先预览整套解析，导出只包含已写解析的题。单词表导出仍是 xlsx。
 4. **UI/UX 打磨**（用户逐页审查）：已完成——左侧栏 6 tab 工作区（窄屏抽屉）+ 纸墨风同步 + 复盘页全屏重构
    （2026-10-19）。继续审查中：练习界面、复盘工作台（分析编辑器/导航/抽屉）的细节可能还要微调。
-5. **Mistakes / Vocabulary 两个 tab 目前是占位页**（`Coming soon`）。实现要点：错题按题去重（保留最近作答）；
-   词汇 = 每套试题一份词表，重刷时在原表上增改。做之前先与用户确认接口形态。
+5. **Mistakes 仍是占位页**（`Coming soon`）：错题按题去重（保留最近作答）。Vocabulary 已完成（每套试题一份词表 + 本地韦氏查词 + 拖词选义）。
 
 ### 泛化的尾项
 - `guess_sec()` 的启发式仍是 SAT 调参（`rw`/`math` 信号）；无标题时回退到
@@ -115,11 +119,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 218 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 251 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 88 passed, 5 skipped
+cd frontend && npm test         # 108 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -128,23 +132,25 @@ cd frontend && npm test         # 88 passed, 5 skipped
 
 | 路径 | 作用 |
 |---|---|
-| `backend/app/main.py` | FastAPI 装配（`/api/health`、7 个 router） |
+| `backend/app/main.py` | FastAPI 装配（`/api/health`、9 个 router） |
 | `backend/app/db.py` | SQLite 连接 / `SCHEMA` / `_migrate` / 路径常量（`ifmd_path()`） |
+| `backend/app/dictionary/` | Eudic `.eudb` 解析 + 派生 SQLite 索引 + 本地查词（`dictionary.store`） |
+| `backend/app/vocab_assist.py` | 拖词选义：词性/首义提取、候选、显式 LLM 选义、回退与警告 |
 | `backend/app/imports.py` | 导入流水线服务：detect → convert → commit（0 token；AI 兜底受设置开关控制） |
 | `backend/app/convert/pdf.py` | PyMuPDF → InteFlow-MD（含 OCR 分支、无选项 → 填空） |
 | `backend/app/convert/twocolumn.py` | 双栏版面 profile（原 bluebook.py） |
 | `backend/app/convert/docx.py` | DOCX → InteFlow-MD（zip 安全校验） |
 | `backend/app/ifmd/parser.py` · `writer.py` | InteFlow-MD 解析 / 回写（确定性状态机；多选/填空/多答案） |
 | `backend/app/sections.py` | 板块标签（`label()` / `DEFAULT_SECTION`） |
-| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** |
-| `backend/app/repos/` | documents · imports · sessions · **analyses** · words · settings |
+| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **vocabulary** |
+| `backend/app/repos/` | documents · imports · sessions · **analyses** · words（grid v2 + 结构化词条） · settings |
 | `backend/app/export/` | PDF / DOCX / **notebook（复盘笔记本）** / 数学公式桥接 |
 | `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
 | `frontend/src/pages/` | ExamHome · **Library(Import)** · **Sessions** · **Mistakes** · **Vocabulary** · AnswerKey · **Practice** · Result · Settings |
 | `frontend/src/components/ui/AppSidebar.tsx` | 工作区左侧栏（6 tab，移动端抽屉） |
 | `frontend/src/index.css` | 设计令牌 + `@theme`；主题层：`.app-theme[data-theme=…]` 语义变量 → Tailwind 颜色族映射 + 各主题特征样式 |
 | `frontend/src/theme.ts` | 主题注册表（id / 名称 / 说明 / 色板）+ `localStorage` 持久化 + `useTheme()`；`components/ui/ThemePicker.tsx` 是 Settings 里的选择器 |
-| `frontend/src/components/workspace/` | 复盘工作台（Workspace / QuestionNav / AnalysisEditor / NotebookPreview / StudyDrawer / VocabularySheet / VocabGrid / Splitter） |
+| `frontend/src/components/workspace/` | 复盘工作台（Workspace 2-of-4 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / ExportDrawer / NotebookPreview / VocabGrid / Splitter / usePersistentLayout） |
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type DragEvent } from "react";
 import { Link } from "react-router-dom";
 import {
   api,
@@ -10,18 +10,22 @@ import {
 } from "../../api/client";
 import RichText from "../RichText";
 import { buttonClasses } from "../ui";
+import AiTutorPane from "./AiTutorPane";
 import AnalysisEditor from "./AnalysisEditor";
+import ExportDrawer from "./ExportDrawer";
 import NotebookPreview from "./NotebookPreview";
 import QuestionNav, { type Filter } from "./QuestionNav";
 import Splitter from "./Splitter";
-import StudyDrawer from "./StudyDrawer";
+import VocabularyPane, { WORD_MIME } from "./VocabularyPane";
+import WorkspacePane, { toolLabel } from "./WorkspacePane";
 import { MenuIcon } from "./icons";
 import { useMediaQuery } from "./useMediaQuery";
-import { useWorkspaceLayout } from "./usePersistentLayout";
+import { useWorkspaceLayout, type WorkspaceTool } from "./usePersistentLayout";
 import { sectionLabel } from "../../lib/sections";
 
-const QUESTION_MIN = 24;
-const QUESTION_MAX = 68;
+const PANE_MIN = 22;
+const PANE_MAX = 78;
+const DEFAULT_SPLIT = 42;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -60,13 +64,13 @@ interface Props {
 }
 
 /**
- * Review workspace: the question on the left, a Pages-style analysis notebook
- * on the right.
+ * Review workspace: a 2-of-4 split.
  *
- * Every question owns exactly one analysis page, so selecting a question swaps
- * both panes together. The question list is a floating overlay in the top-left
- * corner (collapsed by default) and never squeezes the reading area; the AI
- * tutor, vocabulary grid and exports live in the study drawer.
+ * Question, Analysis, AI Tutor and Vocabulary are peers. Each side can switch
+ * to any of the other three; choosing the tool already shown on the opposite
+ * side swaps the two panes. The default is Question | Analysis. The question
+ * list stays a floating overlay, and exports live in the top bar so they never
+ * compete with the reading surface.
  */
 export default function Workspace({ detail, result, t, sessionId }: Props) {
   const docId = detail.document_id;
@@ -74,13 +78,51 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [navOpen, setNavOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [notebookOpen, setNotebookOpen] = useState(false);
-  const [mobilePane, setMobilePane] = useState<"question" | "analysis">("question");
+  const [mobileSide, setMobileSide] = useState<0 | 1>(0);
   const [pages, setPages] = useState<Record<number, string>>({});
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // Stored layouts can be stale (older release / hand-edited localStorage):
+  // fall back to the default pair instead of rendering an invalid tool.
+  const validTool = (tool: WorkspaceTool) =>
+    tool === "question" || tool === "analysis" || tool === "ai" || tool === "vocabulary";
+  const leftTool: WorkspaceTool = validTool(layout.leftTool) ? layout.leftTool : "question";
+  const rightTool: WorkspaceTool =
+    validTool(layout.rightTool) && layout.rightTool !== leftTool
+      ? layout.rightTool
+      : leftTool === "analysis"
+        ? "question"
+        : "analysis";
+  const split = clamp(layout.split, PANE_MIN, PANE_MAX);
+
+  function chooseTool(side: "left" | "right", tool: WorkspaceTool) {
+    if (side === "left") {
+      setLayout((current) =>
+        rightTool === tool
+          ? { ...current, leftTool: tool, rightTool: current.leftTool }
+          : { ...current, leftTool: tool },
+      );
+    } else {
+      setLayout((current) =>
+        leftTool === tool
+          ? { ...current, leftTool: current.rightTool, rightTool: tool }
+          : { ...current, rightTool: tool },
+      );
+    }
+  }
+
+  /** Native text selection → custom drag payload for the vocabulary pane. */
+  function startWordDrag(event: DragEvent<HTMLDivElement>) {
+    const selection = window.getSelection()?.toString().trim();
+    if (!selection) return;
+    event.dataTransfer.setData(WORD_MIME, selection);
+    event.dataTransfer.setData("text/plain", selection);
+    event.dataTransfer.effectAllowed = "copy";
+  }
 
   const matchesFilter = (i: ResultItem) =>
     filter === "all" ? true : filter === "correct" ? i.is_correct === true : i.is_correct === false;
@@ -288,6 +330,35 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
     />
   );
 
+  function renderTool(tool: WorkspaceTool) {
+    switch (tool) {
+      case "question":
+        return (
+          <div
+            className="h-full min-h-0 overflow-y-auto p-4"
+            onDragStart={startWordDrag}
+            title="Select a word, then drag it onto the Vocabulary pane"
+          >
+            {(leftTool === "vocabulary" || rightTool === "vocabulary") && (
+              <p className="mb-3 rounded-lg border border-dashed border-blue-300 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+                Select a word here, then drag it onto the Vocabulary pane — AI picks the
+                Merriam-Webster sense that fits the sentence.
+              </p>
+            )}
+            {questionPane}
+          </div>
+        );
+      case "analysis":
+        return <div className="h-full min-h-0">{analysisPane}</div>;
+      case "ai":
+        return <AiTutorPane docId={docId} item={selected} sessionId={sessionId} />;
+      case "vocabulary":
+        return <VocabularyPane docId={docId} item={selected} />;
+    }
+  }
+
+  const mobileTools: WorkspaceTool[] = [leftTool, rightTool];
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-slate-100">
       {/* ---- top bar -------------------------------------------------------- */}
@@ -339,10 +410,10 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             Notebook
           </button>
           <button
-            onClick={() => setDrawerOpen(true)}
+            onClick={() => setExportOpen(true)}
             className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
           >
-            Study tools
+            Export
           </button>
           <Link
             to={`/doc/${docId}/practice`}
@@ -368,58 +439,70 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
         </p>
       )}
 
-      {/* ---- split: question | analysis page -------------------------------- */}
+      {/* ---- 2-of-4 split: any two of question / analysis / AI / vocabulary -- */}
       {isDesktop ? (
         <div className="flex min-h-0 flex-1">
-          <div
-            data-testid="question-pane"
-            className="min-h-0 min-w-0 overflow-y-auto p-4"
-            style={{ width: `${layout.questionWidth}%` }}
-          >
-            {questionPane}
+          <div className="min-h-0 min-w-0" style={{ width: `${split}%` }}>
+            <WorkspacePane
+              side="left"
+              tool={leftTool}
+              onChoose={(tool) => chooseTool("left", tool)}
+            >
+              {renderTool(leftTool)}
+            </WorkspacePane>
           </div>
           <Splitter
             orientation="vertical"
-            label="Resize question and analysis panes"
+            label="Resize workspace panes"
             onResize={(delta) =>
               setLayout((l) => ({
                 ...l,
-                questionWidth: clamp(
-                  l.questionWidth + (delta / Math.max(window.innerWidth, 1)) * 100,
-                  QUESTION_MIN,
-                  QUESTION_MAX,
+                split: clamp(
+                  l.split + (delta / Math.max(window.innerWidth, 1)) * 100,
+                  PANE_MIN,
+                  PANE_MAX,
                 ),
               }))
             }
-            onReset={() => setLayout((l) => ({ ...l, questionWidth: 42 }))}
+            onReset={() => setLayout((l) => ({ ...l, split: DEFAULT_SPLIT }))}
           />
-          <div data-testid="analysis-pane" className="min-h-0 min-w-0 flex-1 border-l bg-white">
-            {analysisPane}
+          <div className="min-h-0 min-w-0 flex-1">
+            <WorkspacePane
+              side="right"
+              tool={rightTool}
+              onChoose={(tool) => chooseTool("right", tool)}
+            >
+              {renderTool(rightTool)}
+            </WorkspacePane>
           </div>
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex shrink-0 gap-1 border-b bg-white px-2 py-1.5">
-            {(["question", "analysis"] as const).map((pane) => (
+            {mobileTools.map((tool, index) => (
               <button
-                key={pane}
-                onClick={() => setMobilePane(pane)}
-                aria-pressed={mobilePane === pane}
-                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium capitalize ${
-                  mobilePane === pane
+                key={`${index}-${tool}`}
+                onClick={() => setMobileSide(index as 0 | 1)}
+                aria-pressed={mobileSide === index}
+                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium ${
+                  mobileSide === index
                     ? "bg-slate-100 text-slate-900"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                {pane}
+                {toolLabel(tool)}
               </button>
             ))}
           </div>
-          {mobilePane === "question" ? (
-            <div className="min-h-0 flex-1 overflow-y-auto p-3">{questionPane}</div>
-          ) : (
-            <div className="min-h-0 flex-1">{analysisPane}</div>
-          )}
+          <div className="min-h-0 flex-1">
+            <WorkspacePane
+              side={mobileSide === 0 ? "left" : "right"}
+              tool={mobileTools[mobileSide]}
+              onChoose={(tool) => chooseTool(mobileSide === 0 ? "left" : "right", tool)}
+            >
+              {renderTool(mobileTools[mobileSide])}
+            </WorkspacePane>
+          </div>
         </div>
       )}
 
@@ -443,21 +526,18 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
               onSelect={(qid) => {
                 setSelectedId(qid);
                 setNavOpen(false);
-                setMobilePane("question");
+                setMobileSide(0);
               }}
             />
           </div>
         </div>
       )}
 
-      {drawerOpen && (
-        <StudyDrawer
+      {exportOpen && (
+        <ExportDrawer
           docId={docId}
-          item={selected}
           sessionId={sessionId}
-          tab={layout.drawerTab}
-          onTab={(tab) => setLayout((l) => ({ ...l, drawerTab: tab }))}
-          onClose={() => setDrawerOpen(false)}
+          onClose={() => setExportOpen(false)}
         />
       )}
 

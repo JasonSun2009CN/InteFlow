@@ -19,7 +19,6 @@ const FOOTER_ROUTES = [
   /^\/sessions$/,
   /^\/library$/,
   /^\/mistakes$/,
-  /^\/vocabulary$/,
   /^\/settings$/,
 ];
 

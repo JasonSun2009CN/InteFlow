@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
 from app import imports as imports_service
-from app import repos
+from app import dictionary, repos, vocab_assist
 from app.db import assets_dir
 from app.export import build_export, render_docx_bytes, render_pdf_bytes
 from app.repos import words as words_repo
@@ -52,8 +52,57 @@ class WordsPayload(BaseModel):
     headers: Any = None
 
 
+class WordEntryPayload(BaseModel):
+    word: str
+    meaning: str = ""
+    pos: str = ""
+    notes: str = ""
+    context: str = ""
+    source: str = ""
+    question_no: int | None = None
+
+
+class WordEntryPatch(BaseModel):
+    word: str | None = None
+    meaning: str | None = None
+    pos: str | None = None
+    notes: str | None = None
+
+
+class SelectionPayload(BaseModel):
+    text: str
+    context: str = ""
+    question_id: int | None = None
+
+
+class EntryPayload(BaseModel):
+    entry_id: int
+    context: str = ""
+    question_no: int | None = None
+
+
 def _fail(message: str, status: int = 422) -> None:
     raise HTTPException(status_code=status, detail=message)
+
+
+_SELECTION_EDGE = " \t\r\n\"'“”‘’.,;:!?()[]{}<>"
+
+
+def _clean_selection(text: str) -> str:
+    return " ".join(text.split()).strip(_SELECTION_EDGE)[:120]
+
+
+def _question_context(doc_id: int, question_id: int | None, fallback: str):
+    """Return ``(question_no, context)``; the client's context wins."""
+    if question_id is None:
+        return None, " ".join(fallback.split())[:2000]
+    question = repos.documents.get_question(doc_id, question_id)
+    if question is None:
+        return None, " ".join(fallback.split())[:2000]
+    parts = [question.get("material") or "", question.get("stem") or "", *question.get("options", [])]
+    server_context = "\n".join(part for part in parts if part.strip())
+    context = fallback.strip() or server_context
+    return question.get("no"), " ".join(context.split())[:2000]
 
 
 @router.post("")
@@ -197,6 +246,191 @@ def put_words(doc_id: int, payload: WordsPayload) -> dict:
     except words_repo.GridError as exc:
         _fail(str(exc), 400)
         raise                                          # pragma: no cover
+
+
+@router.post("/{doc_id}/words/entries")
+def add_word_entry(doc_id: int, payload: WordEntryPayload) -> dict:
+    """Add one word to an exam's list (de-duplicates by word)."""
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+    try:
+        return words_repo.add_entry(doc_id, **payload.model_dump())
+    except words_repo.GridError as exc:
+        _fail(str(exc), 400)
+        raise                                          # pragma: no cover
+
+
+@router.patch("/{doc_id}/words/entries/{row_id}")
+def update_word_entry(doc_id: int, row_id: str, payload: WordEntryPatch) -> dict:
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+    try:
+        return words_repo.update_entry(
+            doc_id, row_id, payload.model_dump(exclude_unset=True)
+        )
+    except words_repo.EntryNotFound as exc:
+        _fail(str(exc), 404)
+        raise                                          # pragma: no cover
+    except words_repo.GridError as exc:
+        _fail(str(exc), 400)
+        raise                                          # pragma: no cover
+
+
+@router.delete("/{doc_id}/words/entries/{row_id}")
+def delete_word_entry(doc_id: int, row_id: str) -> dict:
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+    try:
+        return words_repo.delete_entry(doc_id, row_id)
+    except words_repo.EntryNotFound as exc:
+        _fail(str(exc), 404)
+        raise                                          # pragma: no cover
+
+
+@router.post("/{doc_id}/words/entries/from-entry")
+def add_word_from_entry(doc_id: int, payload: EntryPayload) -> dict:
+    """Add the exact Merriam-Webster entry the user picked (0 token).
+
+    Used by the Vocabulary page's dictionary lookup, where the user has already
+    chosen a sense by hand — no LLM call and no sense guessing.
+    """
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+
+    try:
+        entry = dictionary.get_entry(payload.entry_id)
+    except dictionary.DictionaryError as exc:
+        _fail(str(exc), 409)
+        raise                                          # pragma: no cover
+    if entry is None:
+        _fail("dictionary entry not found", 404)
+        raise                                          # pragma: no cover
+
+    definition = entry["definition"] or ""
+    pos = vocab_assist.first_pos(definition)
+    meaning = vocab_assist.first_sense(definition)
+    context = " ".join(payload.context.split())[:2000]
+    try:
+        result = words_repo.add_entry(
+            doc_id,
+            word=entry["headword"],
+            meaning=meaning,
+            pos=pos,
+            context=context,
+            source=entry["headword"],
+            question_no=payload.question_no,
+        )
+    except words_repo.GridError as exc:
+        _fail(str(exc), 400)
+        raise                                          # pragma: no cover
+    result.update(
+        {
+            "matched": True,
+            "used_ai": False,
+            "pos": pos,
+            "definition": meaning,
+            "entry_id": entry["id"],
+            "dictionary_word": entry["headword"],
+            "reason": "",
+            "warning": "",
+        }
+    )
+    return result
+
+
+@router.post("/{doc_id}/words/entries/from-selection")
+def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
+    """Drag-to-vocabulary: look the word up, let the LLM pick the best MW sense.
+
+    This is an explicit user action, so an LLM call is allowed. Without a key
+    (or without a matching entry) the word is still added, with a warning, so
+    the gesture never dead-ends.
+    """
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+
+    text = _clean_selection(payload.text)
+    if not text:
+        _fail("select a word first", 400)
+        raise                                          # pragma: no cover
+
+    question_no, context = _question_context(
+        doc_id, payload.question_id, payload.context
+    )
+    status = dictionary.status()
+    dictionary_error = ""
+    try:
+        candidates = vocab_assist.candidates_for(text)
+    except dictionary.DictionaryError as exc:
+        candidates = []
+        dictionary_error = str(exc)
+
+    if candidates:
+        choice = vocab_assist.choose_definition(text, context or text, candidates)
+        chosen = next(
+            (c for c in candidates if c["id"] == choice.get("entry_id")), candidates[0]
+        )
+        try:
+            result = words_repo.add_entry(
+                doc_id,
+                word=chosen["headword"],
+                meaning=choice["definition"],
+                pos=choice["pos"],
+                context=context,
+                source=chosen["headword"],
+                question_no=question_no,
+            )
+        except words_repo.GridError as exc:
+            _fail(str(exc), 400)
+            raise                                      # pragma: no cover
+        result.update(
+            {
+                "matched": True,
+                "used_ai": choice["used_ai"],
+                "pos": choice["pos"],
+                "definition": choice["definition"],
+                "entry_id": chosen["id"],
+                "dictionary_word": chosen["headword"],
+                "reason": choice["reason"],
+                "warning": choice["warning"],
+                "selected": text,
+            }
+        )
+        return result
+
+    try:
+        result = words_repo.add_entry(
+            doc_id, word=text, context=context, question_no=question_no
+        )
+    except words_repo.GridError as exc:
+        _fail(str(exc), 400)
+        raise                                          # pragma: no cover
+    result.update(
+        {
+            "matched": False,
+            "used_ai": False,
+            "pos": "",
+            "definition": "",
+            "entry_id": None,
+            "dictionary_word": None,
+            "reason": "",
+            "warning": (
+                dictionary_error
+                or (
+                    "Merriam-Webster is not installed; added without a definition."
+                    if not status["available"]
+                    else "No exact Merriam-Webster entry matched; added without a definition."
+                )
+            ),
+            "selected": text,
+        }
+    )
+    return result
 
 
 @router.get("/{doc_id}/words/export")

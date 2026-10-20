@@ -11,6 +11,9 @@ frontend/dist/
 # App data (PDFs, generated .ifmd.md, assets, SQLite db, exports)
 data/
 
+# Local Merriam-Webster dictionary (copyrighted source; user-installed)
+/dictionary/
+
 # Local env
 .env
 

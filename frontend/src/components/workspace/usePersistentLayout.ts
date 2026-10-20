@@ -65,21 +65,28 @@ function write<T>(key: string, value: T): void {
   }
 }
 
+/** The four peer tools that can occupy either workspace pane. */
+export type WorkspaceTool = "question" | "analysis" | "ai" | "vocabulary";
+
 /** Persistent layout for the review workspace, scoped to one document. */
 export interface WorkspaceLayout {
-  /** Width of the question pane, as a percentage of the split area. */
-  questionWidth: number;
-  drawerTab: "ai" | "vocabulary" | "export";
+  /** Tool on the left (desktop) / first mobile tab. */
+  leftTool: WorkspaceTool;
+  /** Tool on the right (desktop) / second mobile tab. */
+  rightTool: WorkspaceTool;
+  /** Left pane width, as a percentage of the split area. */
+  split: number;
 }
 
 export const DEFAULT_LAYOUT: WorkspaceLayout = {
-  questionWidth: 42,
-  drawerTab: "ai",
+  leftTool: "question",
+  rightTool: "analysis",
+  split: 42,
 };
 
 export function useWorkspaceLayout(docId: number) {
   return usePersistentState<WorkspaceLayout>(
-    `inteflow.workspace.v2.${docId}`,
+    `inteflow.workspace.v3.${docId}`,
     DEFAULT_LAYOUT,
   );
 }
