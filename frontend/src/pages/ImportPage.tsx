@@ -6,11 +6,15 @@ import {
   type BuiltinBank,
   type DocumentSummary,
   type ImportJob,
+  type Subject,
+  type SubjectRef,
 } from "../api/client";
 import BuiltinBankCard from "../components/BuiltinBankCard";
 import ImportPipeline from "../components/ImportPipeline";
 import LibraryList from "../components/LibraryList";
 import IfmdTemplate from "../components/IfmdTemplate";
+import { SubjectFilterBar, SubjectManager } from "../components/SubjectControls";
+import type { SubjectFilterValue } from "../lib/subjects";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -19,6 +23,10 @@ function errText(err: unknown): string {
 export default function ImportPage() {
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [banks, setBanks] = useState<BuiltinBank[] | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectFilter, setSubjectFilter] = useState<SubjectFilterValue>("all");
+  const [importSubjectId, setImportSubjectId] = useState<number | "">("");
+  const [managerOpen, setManagerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [job, setJob] = useState<ImportJob | null>(null);
@@ -34,6 +42,27 @@ export default function ImportPage() {
       setDocs(await api.listDocuments());
     } catch (err) {
       setError(errText(err));
+    }
+  }, []);
+
+  const refreshSubjects = useCallback(async () => {
+    try {
+      const next = await api.listSubjects();
+      setSubjects(next);
+      // If the active filter or import target was deleted, clear it.
+      setSubjectFilter((current) =>
+        typeof current === "number" && !next.some((item) => item.id === current)
+          ? "all"
+          : current,
+      );
+      setImportSubjectId((current) =>
+        typeof current === "number" && !next.some((item) => item.id === current)
+          ? ""
+          : current,
+      );
+    } catch (err) {
+      // grouping is optional: the library still works without it
+      console.warn("subjects unavailable:", err);
     }
   }, []);
 
@@ -53,12 +82,13 @@ export default function ImportPage() {
 
   useEffect(() => {
     void refresh();
+    void refreshSubjects();
     void refreshBanks();
     api
       .health()
       .then((h) => setOcr(h.ocr))
       .catch(() => setOcr(null)); // health is furniture; never block the page
-  }, [refresh, refreshBanks]);
+  }, [refresh, refreshBanks, refreshSubjects]);
 
   async function startImport(file: File) {
     setBusy(true);
@@ -66,6 +96,7 @@ export default function ImportPage() {
     setJob(null);
     setImported(null);
     cancelledRef.current = false;
+    const targetSubject = importSubjectId === "" ? null : importSubjectId;
     try {
       // POST /api/imports returns 202 immediately with status "converting";
       // the conversion runs in the background and we poll for per-page
@@ -92,8 +123,12 @@ export default function ImportPage() {
       }
       setJob(current);
       if (current.status === "done" && current.document_id) {
-        setImported(await api.getDocument(current.document_id));
-        await refresh();
+        let importedDoc = await api.getDocument(current.document_id);
+        if (targetSubject !== null) {
+          importedDoc = await api.setDocumentSubject(current.document_id, targetSubject);
+        }
+        setImported(importedDoc);
+        await Promise.all([refresh(), refreshSubjects()]);
       }
     } catch (err) {
       setError(errText(err));
@@ -122,8 +157,15 @@ export default function ImportPage() {
       const done = await api.commitImport(job.id);
       setJob(done);
       if (done.document_id) {
-        setImported(await api.getDocument(done.document_id));
-        await refresh();
+        let importedDoc = await api.getDocument(done.document_id);
+        if (importSubjectId !== "") {
+          importedDoc = await api.setDocumentSubject(
+            done.document_id,
+            importSubjectId,
+          );
+        }
+        setImported(importedDoc);
+        await Promise.all([refresh(), refreshSubjects()]);
       }
     } catch (err) {
       setError(errText(err));
@@ -161,11 +203,44 @@ export default function ImportPage() {
     try {
       await api.deleteDocument(doc.id);
       if (imported?.id === doc.id) setImported(null);
-      await refresh();
+      await Promise.all([refresh(), refreshSubjects()]);
     } catch (err) {
       setError(errText(err));
     }
   }
+
+  function onSubjectChanged(docId: number, subject: SubjectRef | null) {
+    setDocs((current) =>
+      current?.map((doc) => (doc.id === docId ? { ...doc, subject } : doc)) ?? current,
+    );
+    setImported((current) =>
+      current && current.id === docId ? { ...current, subject } : current,
+    );
+  }
+
+  async function onSubjectsManaged() {
+    await Promise.all([refresh(), refreshSubjects()]);
+  }
+
+  const allDocs = docs ?? [];
+  const subjectCounts = new Map<number, number>();
+  let uncategorized = 0;
+  for (const doc of allDocs) {
+    if (doc.subject) {
+      subjectCounts.set(doc.subject.id, (subjectCounts.get(doc.subject.id) ?? 0) + 1);
+    } else {
+      uncategorized += 1;
+    }
+  }
+  const filteredDocs = allDocs.filter((doc) => {
+    if (subjectFilter === "all") return true;
+    if (subjectFilter === "none") return doc.subject === null;
+    return doc.subject?.id === subjectFilter;
+  });
+  const filters = subjects.map((subject) => ({
+    ...subject,
+    document_count: subjectCounts.get(subject.id) ?? 0,
+  }));
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
@@ -206,6 +281,35 @@ export default function ImportPage() {
               <code className="rounded bg-amber-100 px-1">pyobjc-framework-Vision</code> on macOS.
             </p>
           ))}
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
+          <label className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-slate-600">
+            <span>Subject for this import</span>
+            <select
+              value={importSubjectId}
+              onChange={(event) =>
+                setImportSubjectId(
+                  event.target.value === "" ? "" : Number(event.target.value),
+                )
+              }
+              className="max-w-[16rem] rounded-md border border-slate-300 bg-white px-2 py-1 text-sm focus:border-blue-400 focus:outline-none"
+            >
+              <option value="">No subject</option>
+              {subjects.map((subject) => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => setManagerOpen(true)}
+            className="text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
+          >
+            Manage subjects
+          </button>
+        </div>
 
         <div
           onDragOver={(e) => {
@@ -297,16 +401,50 @@ export default function ImportPage() {
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Your exams</h2>
+
+        {docs && docs.length > 0 && (
+          <div className="mt-3">
+            <SubjectFilterBar
+              subjects={filters}
+              value={subjectFilter}
+              onChange={setSubjectFilter}
+              total={allDocs.length}
+              uncategorized={uncategorized}
+              onManage={() => setManagerOpen(true)}
+            />
+          </div>
+        )}
+
         {docs === null && <p className="mt-3 text-sm text-slate-500">Loading…</p>}
         {docs?.length === 0 && (
           <p className="mt-3 text-sm text-slate-500">Nothing imported yet.</p>
         )}
+        {docs && docs.length > 0 && filteredDocs.length === 0 && (
+          <p className="mt-3 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
+            No exams in this subject yet.
+          </p>
+        )}
         <div className="mt-3">
-          {docs && docs.length > 0 && (
-            <LibraryList docs={docs} importedId={imported?.id ?? null} onDelete={onDelete} />
+          {filteredDocs.length > 0 && (
+            <LibraryList
+              docs={filteredDocs}
+              subjects={subjects}
+              importedId={imported?.id ?? null}
+              onDelete={onDelete}
+              onSubjectChanged={onSubjectChanged}
+              onSubjectsChanged={() => void refreshSubjects()}
+            />
           )}
         </div>
       </section>
+
+      {managerOpen && (
+        <SubjectManager
+          subjects={subjects}
+          onClose={() => setManagerOpen(false)}
+          onChanged={onSubjectsManaged}
+        />
+      )}
     </div>
   );
 }

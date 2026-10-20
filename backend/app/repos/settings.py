@@ -16,6 +16,7 @@ ALLOWED_KEYS = (
     "llm_fallback",
     "vocab_ai_sense",
     "vocab_learner_definitions",
+    "vocab_exam_ai_grading",
 )
 
 
@@ -53,3 +54,8 @@ def vocabulary_ai_sense_enabled() -> bool:
 def learner_definitions_enabled() -> bool:
     """Whether to prefer a learner's dictionary when one is installed."""
     return get_all().get("vocab_learner_definitions", "0") == "1"
+
+
+def word_exam_ai_grading_enabled() -> bool:
+    """Whether submitting a word test may ask the LLM to grade answers."""
+    return get_all().get("vocab_exam_ai_grading", "0") == "1"

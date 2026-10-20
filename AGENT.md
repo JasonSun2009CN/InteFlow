@@ -20,7 +20,7 @@
 ## 2. 两条铁律（不变量）
 
 1. **LLM 不在主链路**：导入/解析/判分/导出全部确定性本地计算，**0 token**；只有用户显式点击
-   （AI 讲解 / 连通性测试）才调用外部 API。
+   （AI 讲解 / 连通性测试 / 在设置里开启 AI 评分后的单词考试提交）才调用外部 API。
 2. **本地优先**：所有数据在 `data/`（SQLite + 每篇文档的 `doc.ifmd.md` 与图片），不上传云端。
 3. 界面全英文；与维护者交流用中文；**有疑问必须先用 `question` 工具问，不许自己猜**。
 
@@ -28,11 +28,11 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **260 passed, 1 skipped** |
+| 后端测试 | `pytest` **288 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **110 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **125 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
-| API 面 | 49 条（见 `docs/ARCHITECTURE.md`） |
+| API 面 | 56 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；可选 `dictionary/learners/` 学习者词典 |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
@@ -45,6 +45,19 @@
 > 2026-10-20：Settings 增加 **AI sense matching** 与 **Use learner's definitions** 两个开关。
 > 关闭前者时拖词不调用 LLM，直接用第一条韦氏释义；开启后者时优先使用
 > `dictionary/learners/` 里的学习者词典索引（`data/dictionary/learners.db`），缺失则自动回退标准词典。
+>
+> 2026-10-20：**单词考试（Word test）** 已落地，入口在 Vocabulary 页顶部 **Word list / Word test** 两个 tab。
+> 从当前试卷词表随机抽题（可设数量或全测），两种模式：**English → Chinese**（手写释义）与
+> **Chinese → English (spelling)**（看释义拼单词）。默认本地判分 0 token：拼写忽略大小写/空格/标点，
+> 释义用宽松匹配（精确 / 分段 / 足够长的子串 / 多词包含）；Settings 新增
+> `vocab_exam_ai_grading`（默认关），开启后提交时由模型参考词表释义 + 韦氏词典严格判分，失败自动回退本地。
+> 结果页显示正确率、考察范围、每题正确答案/用户答案，并生成**紧凑 JSON 二维码**；题量大时自动拆成
+> 多个 QR（`IFWT1|<id>|part/total|`），另可下载 `.json`。
+>
+> 2026-10-20：**学科分类（Subjects）** 已落地。用户可自由创建/改名/换色/删除学科（如 SAT Math、Physics），
+> 每套试卷最多归属一个学科。Library 列表、Answer-key 页顶部可直接下拉归类（选 “+ New subject…” 可现场创建并
+> 自动归类）；Library 还提供 Manage subjects 管理与按学科过滤，Exams 首页显示学科徽章并可按学科筛选。
+> 删除学科只把试卷移回 Uncategorized，不删试卷；导入时也可先选目标学科。0 token，全部本地。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -89,6 +102,8 @@
 | 视觉风格（2026-10-19） | **5 套主题**：Clear Blue（默认）/ Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial，在 Settings → Appearance 里切换并存在 `localStorage`（`inteflow.theme`）。实现：`frontend/src/theme.ts` 管状态，`index.css` 里 `.app-theme[data-theme=…]` 声明语义变量、再由一条共享规则映射到全部 Tailwind 颜色族（外加各主题的特征样式：显示字体 / 圆角 / 描边主按钮 / 导航标记 / 遮罩 / 背景光）。**全屏练习页明确不跟随主题**（保留原 slate/blue），复盘页跟随；旧 `.paper-app` 作用域已删除 |
 | 错题集合（待做） | 汇总所有 session 的错题，**按题目去重**（保留最近一次作答），可按试卷/板块过滤 |
 | 单词集合（已实现 2026-10-19） | **一套试题对应一份词表**；重刷同一试卷再加词是**在原词表上修改**，不新建。Vocabulary 页 = 左侧考试索引 + 右侧词表编辑器（手动增删改、查词、导出 xlsx） |
+| 单词考试（已实现 2026-10-20） | Vocabulary 页内 **Word list / Word test** 两 tab。模式：English → Chinese（手写释义，本地宽松匹配）、Chinese → English（看 Meaning/韦氏兜底释义拼写，忽略大小写/空格/标点；Word 列可用 `;` `/` `\|` 分隔多个可接受拼写）。测试量可手输或全测；题目从当前词表随机抽取。结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码（大卷自动拆多个 QR，`IFWT1\|<id>\|part/total\|`）。Settings 的 `vocab_exam_ai_grading` 默认关；开启后提交时 AI 参考词表 + 韦氏释义严格判分，失败回退本地 |
+| 学科分类（已实现 2026-10-20） | 全局 `subjects`（名称 + 调色板颜色），每套试卷最多一个 `subject_id`。Library 行内下拉直接归类/现场创建；Answer-key 页顶部同样可改；Library 的 **Manage subjects** 支持增删改与过滤；Exams 首页显示徽章并按学科筛选。删除学科只把试卷变为 Uncategorized。姓名大小写不敏感去重，0 token |
 | 查词 / 生词释义 | **本地韦氏词典**（Eudic `.eudb` → `data/dictionary/mw.db`，92,006 条，0 token）。只显示英英原文；首次查词自动建索引。拖词入表时**可**显式调用一次 LLM 在真实候选中选义（`vocab_ai_sense`，不能编造条目）；关闭/无 key/失败回退第一条释义并提示。`vocab_learner_definitions` 可优先使用本地学习者词典并回退 |
 | 查词 / 错题分析导出 | 查词已实现（本地词典）；**错题分析导出已实现**（一套试卷一套笔记本，md/docx/pdf 存 `data/exports/`） |
 | LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
@@ -104,7 +119,7 @@
 3. ~~**错题分析导出（占位）**~~ **已实现（2026-10-19）**：一套试卷一套分析笔记本，可导出 md/docx/pdf 并留副本到 `data/exports/`；复盘页 Notebook 可先预览整套解析，导出只包含已写解析的题。单词表导出仍是 xlsx。
 4. **UI/UX 打磨**（用户逐页审查）：已完成——左侧栏 6 tab 工作区（窄屏抽屉）+ 纸墨风同步 + 复盘页全屏重构
    （2026-10-19）。继续审查中：练习界面、复盘工作台（分析编辑器/导航/抽屉）的细节可能还要微调。
-5. **Mistakes 仍是占位页**（`Coming soon`）：错题按题去重（保留最近作答）。Vocabulary 已完成（每套试题一份词表 + 本地韦氏查词 + 拖词选义）。
+5. **Mistakes 仍是占位页**（`Coming soon`）：错题按题去重（保留最近作答）。Vocabulary 已完成（每套试题一份词表 + 本地韦氏查词 + 拖词选义）；**单词考试已完成（2026-10-20，Word test tab）**；**学科分类已完成（2026-10-20，Subjects）**。
 
 ### 泛化的尾项
 - `guess_sec()` 的启发式仍是 SAT 调参（`rw`/`math` 信号）；无标题时回退到
@@ -124,11 +139,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 260 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 288 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 110 passed, 5 skipped
+cd frontend && npm test         # 125 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -137,17 +152,19 @@ cd frontend && npm test         # 110 passed, 5 skipped
 
 | 路径 | 作用 |
 |---|---|
-| `backend/app/main.py` | FastAPI 装配（`/api/health`、9 个 router） |
+| `backend/app/main.py` | FastAPI 装配（`/api/health`、11 个 router） |
 | `backend/app/db.py` | SQLite 连接 / `SCHEMA` / `_migrate` / 路径常量（`ifmd_path()`） |
 | `backend/app/dictionary/` | Eudic `.eudb` 解析 + 派生 SQLite 索引 + 本地查词（`dictionary.store`） |
 | `backend/app/vocab_assist.py` | 拖词选义：词性/首义提取、候选（标准/学习者）、可选 LLM 选义、回退与警告 |
+| `backend/app/word_exam.py` | 单词考试核心：从词表抽题、本地宽松判分（拼写/释义）、可选 AI 严格判分（参考词表 + 韦氏）与回退 |
+| `backend/app/repos/subjects.py` · `backend/app/api/subjects.py` | 学科分类：CRUD（名称大小写不敏感去重、调色板）+ 试卷归属；删除学科回退 Uncategorized |
 | `backend/app/imports.py` | 导入流水线服务：detect → convert → commit（0 token；AI 兜底受设置开关控制） |
 | `backend/app/convert/pdf.py` | PyMuPDF → InteFlow-MD（含 OCR 分支、无选项 → 填空） |
 | `backend/app/convert/twocolumn.py` | 双栏版面 profile（原 bluebook.py） |
 | `backend/app/convert/docx.py` | DOCX → InteFlow-MD（zip 安全校验） |
 | `backend/app/ifmd/parser.py` · `writer.py` | InteFlow-MD 解析 / 回写（确定性状态机；多选/填空/多答案） |
 | `backend/app/sections.py` | 板块标签（`label()` / `DEFAULT_SECTION`） |
-| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **vocabulary** |
+| `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **vocabulary** · **word_exam** · **subjects** |
 | `backend/app/repos/` | documents · imports · sessions · **analyses** · words（grid v2 + 结构化词条） · settings |
 | `backend/app/export/` | PDF / DOCX / **notebook（复盘笔记本）** / 数学公式桥接 |
 | `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
@@ -155,8 +172,10 @@ cd frontend && npm test         # 110 passed, 5 skipped
 | `frontend/src/components/ui/AppSidebar.tsx` | 工作区左侧栏（6 tab，移动端抽屉） |
 | `frontend/src/index.css` | 设计令牌 + `@theme`；主题层：`.app-theme[data-theme=…]` 语义变量 → Tailwind 颜色族映射 + 各主题特征样式 |
 | `frontend/src/theme.ts` | 主题注册表（id / 名称 / 说明 / 色板）+ `localStorage` 持久化 + `useTheme()`；`components/ui/ThemePicker.tsx` 是 Settings 里的选择器 |
-| `frontend/src/components/workspace/` | 复盘工作台（Workspace 2-of-4 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / ExportDrawer / NotebookPreview / VocabGrid / Splitter / usePersistentLayout） |
+| `frontend/src/components/workspace/` | 复盘工作台（Workspace 2-of-4 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / ExportDrawer / NotebookPreview / VocabGrid / **WordExamPanel / WordExamResultView** / Splitter / usePersistentLayout） |
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
+| `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
+| `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |
 

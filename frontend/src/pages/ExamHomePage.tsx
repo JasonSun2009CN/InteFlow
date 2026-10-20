@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { api, ApiError, type DocumentSummary } from "../api/client";
+import { api, ApiError, type DocumentSummary, type Subject } from "../api/client";
 import { buttonClasses } from "../components/ui";
+import { SubjectBadge, SubjectFilterBar } from "../components/SubjectControls";
 import { useCountUp } from "../lib/useCountUp";
+import type { SubjectFilterValue } from "../lib/subjects";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -67,6 +69,7 @@ function Stat({
 export default function ExamHomePage() {
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [subjectFilter, setSubjectFilter] = useState<SubjectFilterValue>("all");
 
   const load = useCallback(() => {
     setDocs(null);
@@ -86,6 +89,41 @@ export default function ExamHomePage() {
   const needsKeys =
     docs?.filter((doc) => doc.needs_answers && doc.answered_count < doc.question_count)
       .length ?? 0;
+
+  const subjects = useMemo(() => {
+    const counts = new Map<number, { subject: NonNullable<DocumentSummary["subject"]>; n: number }>();
+    let uncategorized = 0;
+    for (const doc of docs ?? []) {
+      if (doc.subject) {
+        const current = counts.get(doc.subject.id);
+        if (current) current.n += 1;
+        else counts.set(doc.subject.id, { subject: doc.subject, n: 1 });
+      } else {
+        uncategorized += 1;
+      }
+    }
+    const list: Subject[] = [...counts.values()]
+      .map(({ subject, n }) => ({
+        ...subject,
+        document_count: n,
+        created_at: "",
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    return { list, uncategorized };
+  }, [docs]);
+
+  const effectiveFilter: SubjectFilterValue =
+    typeof subjectFilter === "number" &&
+    !subjects.list.some((subject) => subject.id === subjectFilter)
+      ? "all"
+      : subjectFilter;
+
+  const visibleDocs =
+    docs?.filter((doc) => {
+      if (effectiveFilter === "all") return true;
+      if (effectiveFilter === "none") return doc.subject === null;
+      return doc.subject?.id === effectiveFilter;
+    }) ?? [];
 
   return (
     <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
@@ -124,6 +162,18 @@ export default function ExamHomePage() {
           </dl>
         </div>
       </section>
+
+      {docs && docs.length > 0 && subjects.list.length > 0 && (
+        <div className="mb-6">
+          <SubjectFilterBar
+            subjects={subjects.list}
+            value={effectiveFilter}
+            onChange={setSubjectFilter}
+            total={docs.length}
+            uncategorized={subjects.uncategorized}
+          />
+        </div>
+      )}
 
       <section aria-labelledby="exam-list-heading" aria-busy={docs === null}>
         <div className="flex items-baseline justify-between gap-4 border-b border-ink-900/80 pb-2">
@@ -190,9 +240,24 @@ export default function ExamHomePage() {
           </div>
         )}
 
-        {docs && docs.length > 0 && (
+        {docs && docs.length > 0 && visibleDocs.length === 0 && (
+          <div className="border-b border-paper-200 py-12 text-center">
+            <p className="font-display text-2xl tracking-tight text-ink-900">
+              No exams in this subject.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSubjectFilter("all")}
+              className="mt-3 text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 hover:text-ink-900"
+            >
+              Show all exams
+            </button>
+          </div>
+        )}
+
+        {visibleDocs.length > 0 && (
           <ol className="divide-y divide-paper-200">
-            {docs.map((doc, index) => {
+            {visibleDocs.map((doc, index) => {
               const needsKey =
                 doc.needs_answers && doc.answered_count < doc.question_count;
               const added = formatAdded(doc.created_at);
@@ -216,6 +281,12 @@ export default function ExamHomePage() {
                       </Link>
                     </h3>
                     <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
+                      {doc.subject && (
+                        <>
+                          <SubjectBadge subject={doc.subject} />
+                          <span aria-hidden="true">·</span>
+                        </>
+                      )}
                       <span className="tabular-nums">
                         {doc.question_count.toLocaleString("en-US")} questions
                       </span>

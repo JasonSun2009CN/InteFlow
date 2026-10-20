@@ -75,6 +75,7 @@ const detail: SessionDetail = {
     question_count: 1,
     answered_count: 1,
     needs_answers: false,
+    subject: null,
     created_at: "2026-10-19 09:15:00",
   },
   questions: [],

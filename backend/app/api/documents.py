@@ -42,6 +42,12 @@ class ExplainPayload(BaseModel):
     content: str = ""
 
 
+class DocumentPatch(BaseModel):
+    """Metadata changes; today only the subject assignment."""
+
+    subject_id: int | None = None
+
+
 class WordsPayload(BaseModel):
     """Vocabulary grid body: v2 (``columns``/``rows``/``view``) or legacy
     v1 (``headers``/``rows``). Fields are validated in the repo so a single
@@ -135,6 +141,21 @@ def get_document(doc_id: int) -> dict:
         _fail("document not found", 404)
         raise                                          # pragma: no cover
     return doc
+
+
+@router.patch("/{doc_id}")
+def patch_document(doc_id: int, payload: DocumentPatch) -> dict:
+    if "subject_id" not in payload.model_fields_set:
+        _fail("nothing to update", 400)
+    if repos.documents.get_document(doc_id) is None:
+        _fail("document not found", 404)
+    if payload.subject_id is not None and not repos.subjects.exists(payload.subject_id):
+        _fail("subject not found", 404)
+    updated = repos.documents.set_subject(doc_id, payload.subject_id)
+    if updated is None:  # pragma: no cover - checked above
+        _fail("document not found", 404)
+        raise                                          # pragma: no cover
+    return updated
 
 
 @router.get("/{doc_id}/questions")

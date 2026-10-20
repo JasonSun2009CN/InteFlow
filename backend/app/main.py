@@ -7,7 +7,19 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import ai, analysis, builtin, dictionary, documents, imports, sessions, settings, vocabulary
+from app.api import (
+    ai,
+    analysis,
+    builtin,
+    dictionary,
+    documents,
+    imports,
+    sessions,
+    settings,
+    subjects,
+    vocabulary,
+    word_exam,
+)
 from app.convert import ocr
 from app.db import init_db
 
@@ -36,6 +48,8 @@ app.include_router(ai.router)
 app.include_router(analysis.router)
 app.include_router(dictionary.router)
 app.include_router(vocabulary.router)
+app.include_router(word_exam.router)
+app.include_router(subjects.router)
 
 
 @app.get("/api/health")

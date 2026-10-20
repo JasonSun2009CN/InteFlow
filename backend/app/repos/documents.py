@@ -149,10 +149,26 @@ def update_questions(doc_id: int, questions: list[Question]) -> int:
         return changed
 
 
+def _subject_ref(row: Any) -> dict | None:
+    """The paper's subject, when it has one."""
+    if row["subject_id"] is None or row["subject_name"] is None:
+        return None
+    return {
+        "id": row["subject_id"],
+        "name": row["subject_name"],
+        "color": row["subject_color"],
+    }
+
+
 def get_document(doc_id: int) -> dict | None:
     from app.db import one
 
-    row = one("SELECT * FROM documents WHERE id = ?", (doc_id,))
+    row = one(
+        "SELECT d.*, s.name AS subject_name, s.color AS subject_color"
+        " FROM documents d LEFT JOIN subjects s ON s.id = d.subject_id"
+        " WHERE d.id = ?",
+        (doc_id,),
+    )
     if row is None:
         return None
     counts = one(
@@ -172,8 +188,17 @@ def get_document(doc_id: int) -> dict | None:
         "question_count": row["question_count"],
         "answered_count": answered,
         "needs_answers": answered < total,
+        "subject": _subject_ref(row),
         "created_at": row["created_at"],
     }
+
+
+def set_subject(doc_id: int, subject_id: int | None) -> dict | None:
+    """Assign one subject (or ``None``) to a paper; returns the fresh document."""
+    from app.db import execute
+
+    execute("UPDATE documents SET subject_id = ? WHERE id = ?", (subject_id, doc_id))
+    return get_document(doc_id)
 
 
 def list_documents() -> list[dict]:

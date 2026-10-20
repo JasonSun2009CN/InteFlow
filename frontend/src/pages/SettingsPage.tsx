@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const [llmFallback, setLlmFallback] = useState(true);
   const [vocabAiSense, setVocabAiSense] = useState(true);
   const [vocabLearner, setVocabLearner] = useState(false);
+  const [vocabExamAi, setVocabExamAi] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
@@ -39,6 +40,7 @@ export default function SettingsPage() {
         setLlmFallback(s.llm_fallback);
         setVocabAiSense(s.vocab_ai_sense);
         setVocabLearner(s.vocab_learner_definitions);
+        setVocabExamAi(s.vocab_exam_ai_grading);
         setProviders(list);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
@@ -77,6 +79,7 @@ export default function SettingsPage() {
         llm_fallback: llmFallback,
         vocab_ai_sense: vocabAiSense,
         vocab_learner_definitions: vocabLearner,
+        vocab_exam_ai_grading: vocabExamAi,
         ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
       });
       setStored(saved);
@@ -341,6 +344,28 @@ export default function SettingsPage() {
                   lookups and captured senses use it first, then fall back to the standard
                   dictionary. The standard Collegiate file does not include learner
                   definitions on its own.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3" htmlFor="vocab-exam-ai">
+              <input
+                id="vocab-exam-ai"
+                type="checkbox"
+                checked={vocabExamAi}
+                onChange={(e) => setVocabExamAi(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  AI grading for word tests
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  When you submit a word test, ask the configured model to grade both
+                  directions. It receives the word-list meaning and Merriam-Webster
+                  references and is instructed to be strict. Turn this off to grade
+                  locally with no token cost. A failed or missing model falls back to
+                  local grading automatically.
                 </span>
               </span>
             </label>

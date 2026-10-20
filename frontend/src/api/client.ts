@@ -4,6 +4,30 @@
 export type Section = string;
 export type AnswersStatus = "inline" | "external" | "none";
 
+/** Palette ids accepted by the backend for user-defined subjects. */
+export type SubjectColor =
+  | "blue"
+  | "emerald"
+  | "amber"
+  | "rose"
+  | "violet"
+  | "cyan"
+  | "lime"
+  | "slate";
+
+/** The subject label carried by a paper. */
+export interface SubjectRef {
+  id: number;
+  name: string;
+  color: SubjectColor;
+}
+
+/** A managed subject, with how many papers currently use it. */
+export interface Subject extends SubjectRef {
+  document_count: number;
+  created_at: string;
+}
+
 export interface DocumentSummary {
   id: number;
   title: string;
@@ -12,6 +36,8 @@ export interface DocumentSummary {
   question_count: number;
   answered_count: number;
   needs_answers: boolean;
+  /** User-defined subject group, or null when uncategorized. */
+  subject: SubjectRef | null;
   created_at: string;
   warnings?: string[];
 }
@@ -204,6 +230,70 @@ export interface VocabularyOverview {
   total_words: number;
 }
 
+export type WordExamMode = "en-zh" | "zh-en";
+
+export interface WordExamQuestion {
+  row_id: string;
+  position: number;
+  prompt: string;
+  prompt_source: "word" | "list" | "dictionary";
+  pos: string;
+}
+
+export interface WordExamScope {
+  tested: number;
+  eligible: number;
+  total: number;
+  skipped: number;
+  positions: number[];
+  all: boolean;
+}
+
+/** A freshly generated word test — the correct answers stay on the server. */
+export interface WordExam {
+  document_id: number;
+  title: string;
+  mode: WordExamMode;
+  total_words: number;
+  eligible_words: number;
+  requested_count: number | null;
+  count: number;
+  skipped: number;
+  scope: WordExamScope;
+  questions: WordExamQuestion[];
+  ai_grading: boolean;
+  ai_available: boolean;
+}
+
+export type WordExamMethod = "spelling" | "lenient" | "ai" | "fallback";
+
+export interface WordExamResultItem {
+  row_id: string;
+  position: number;
+  word: string;
+  prompt: string;
+  expected: string;
+  response: string;
+  is_correct: boolean;
+  method: WordExamMethod;
+  reason: string;
+  pos: string;
+}
+
+export interface WordExamResult {
+  document_id: number;
+  title: string;
+  mode: WordExamMode;
+  total: number;
+  correct: number;
+  accuracy: number;
+  ai_requested: boolean;
+  ai_available: boolean;
+  ai_grading: boolean;
+  warning: string;
+  items: WordExamResultItem[];
+}
+
 export interface WordEntryInput {
   word: string;
   meaning?: string;
@@ -307,6 +397,7 @@ export interface AppSettings {
   llm_fallback: boolean;
   vocab_ai_sense: boolean;
   vocab_learner_definitions: boolean;
+  vocab_exam_ai_grading: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -329,6 +420,7 @@ export interface SettingsInput {
   llm_fallback?: boolean;
   vocab_ai_sense?: boolean;
   vocab_learner_definitions?: boolean;
+  vocab_exam_ai_grading?: boolean;
 }
 
 export class ApiError extends Error {
@@ -396,6 +488,34 @@ export const api = {
     request<ImportJob>(`/api/imports/${jobId}/ai-fallback`, { method: "POST" }),
 
   getDocument: (id: number) => request<DocumentSummary>(`/api/documents/${id}`),
+
+  /** Rename/metadata patch; currently used to assign a subject. */
+  setDocumentSubject: (id: number, subjectId: number | null) =>
+    request<DocumentSummary>(`/api/documents/${id}`, {
+      method: "PATCH",
+      ...json({ subject_id: subjectId }),
+    }),
+
+  /** User-defined subject groups (global across papers). */
+  listSubjects: () => request<Subject[]>("/api/subjects"),
+
+  createSubject: (name: string, color?: SubjectColor) =>
+    request<Subject>("/api/subjects", {
+      method: "POST",
+      ...json({ name, color }),
+    }),
+
+  updateSubject: (
+    id: number,
+    patch: { name?: string; color?: SubjectColor },
+  ) =>
+    request<Subject>(`/api/subjects/${id}`, {
+      method: "PATCH",
+      ...json(patch),
+    }),
+
+  deleteSubject: (id: number) =>
+    request<{ deleted: number }>(`/api/subjects/${id}`, { method: "DELETE" }),
 
   /** Built-in banks shipped with the app — discovered server-side. */
   listBanks: () => request<BuiltinBank[]>("/api/builtin"),
@@ -516,6 +636,26 @@ export const api = {
 
   /** Every exam's vocabulary list, with counts and a short preview. */
   getVocabulary: () => request<VocabularyOverview>("/api/vocabulary"),
+
+  /** Build a word test from one exam's list (answers are withheld). */
+  startWordExam: (
+    docId: number,
+    input: { mode: WordExamMode; count: number | null },
+  ) =>
+    request<WordExam>(`/api/documents/${docId}/word-exam`, {
+      method: "POST",
+      ...json(input),
+    }),
+
+  /** Grade a submitted word test (local, or AI when enabled in Settings). */
+  gradeWordExam: (
+    docId: number,
+    input: { mode: WordExamMode; items: { row_id: string; response: string }[] },
+  ) =>
+    request<WordExamResult>(`/api/documents/${docId}/word-exam/grade`, {
+      method: "POST",
+      ...json(input),
+    }),
 
   dictionaryStatus: () => request<DictionaryStatus>("/api/dictionary/status"),
 

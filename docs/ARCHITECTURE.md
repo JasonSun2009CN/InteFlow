@@ -1,9 +1,9 @@
 # InteFlow — Architecture
 
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
-> PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式点击时调用（导入主链路 0 token）。
+> PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **260 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 110 passed, 5 skipped。
+> 基线：pytest **288 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 125 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -20,12 +20,14 @@ flowchart LR
   UI -- "/api/* (Vite dev proxy :5173 -> :8000)" --> API
 
   subgraph Backend["FastAPI (app.main)"]
-    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / vocabulary"]
+    API["routers: documents / imports / builtin / sessions / settings / ai / analysis / dictionary / vocabulary / word_exam / subjects"]
     CONV["convert: pdf · twocolumn · docx · images · normalize · ocr · llm_fallback"]
     PARSE["ifmd.parser (deterministic state machine)"]
     REPOS["repos: documents · imports · sessions · analyses · words · settings"]
     DICT["dictionary: Eudic .eudb parser + SQLite indexes (standard / learner, 0 token)"]
     ASSIST["vocab_assist: MW sense selection (explicit, optional AI)"]
+    EXAM["word_exam: build / local grading / optional AI grading (explicit)"]
+    SUBJ["subjects: user-defined labels for exam papers (0 token)"]
     SEC["sections.py (free-form section labels)"]
     LLM["llm.base -> providers.py (19 providers, 2 protocols)"]
     API --> CONV
@@ -33,7 +35,10 @@ flowchart LR
     API --> REPOS
     API --> DICT
     API --> ASSIST
+    API --> EXAM
+    API --> SUBJ
     ASSIST --> LLM
+    EXAM --> LLM
     CONV --> PARSE
     API --> LLM
   end
@@ -48,7 +53,7 @@ flowchart LR
 ```
 
 ### 关键不变量（Iron rules）
-- **LLM 不在导入主链路**：导入是纯确定性转换，0 token；AI 仅在用户显式点击时调用。
+- **LLM 不在导入主链路**：导入/判分默认是纯确定性转换，0 token；AI 仅在用户显式操作时调用（AI 讲解、连通性测试、设置开启 `vocab_exam_ai_grading` 后的单词考试提交）。
 - **正确答案不出后端**：练习接口 `quiz_questions()` 剥掉 `answer` 字段；只有提交/复盘接口返回。
 - **本地优先**：全部数据在 `data/`（SQLite 单文件 + 文档/图片），无云依赖。
 - **单文件数据库 + 文件系统并存**：SQLite 存索引与结构化题，`doc.ifmd.md` 存原始 InteFlow-MD（source of truth），`assets/` 存图片。
@@ -103,7 +108,14 @@ erDiagram
   questions ||--o{ analysis_pages : "one page"
   documents ||--o{ vocab : "reserved"
   documents ||--o{ notes : "reserved"
+  subjects  ||--o{ documents : "optional label"
 
+  subjects {
+    int id PK
+    text name "case-insensitive unique"
+    text color "palette id"
+    text created_at
+  }
   documents {
     int id PK
     text title
@@ -115,6 +127,7 @@ erDiagram
     text import_source "pdf|docx|ifmd.md|builtin"
     int used_ai
     text report_json
+    int subject_id FK "nullable -> subjects.id"
     text created_at
   }
   questions {
@@ -186,13 +199,13 @@ erDiagram
 ```
 App.tsx (BrowserRouter)
 └── AppShell  —— 非考试页包在纸墨工作区（左侧栏 + 移动抽屉）；复盘与练习全屏无壳
-    ├── "/"                     ExamHomePage      —— Exams：选卷开考（统计 + 编号行）
-    ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 内置题库卡 + 试卷列表
+    ├── "/"                     ExamHomePage      —— Exams：选卷开考（统计 + 学科筛选 + 编号行）
+    ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 内置题库卡 + 试卷列表 + 学科管理
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
     ├── "/mistakes"             MistakesPage      —— 错题分析集合（占位）
-    ├── "/vocabulary"           VocabularyPage    —— 单词集合：左考试索引 + 右词表编辑器 + 本地韦氏查词
-    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底开关
-    ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览（含侧栏）
+    ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
+    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 单词考试评分开关
+    ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览 + 学科归类（含侧栏）
     ├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时，无侧栏、保持 slate/blue）
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
     └── "/manage"               → 重定向到 /library（兼容旧链接）
@@ -202,9 +215,12 @@ components/  AppSidebar（六个 tab：Exams/Library/Sessions/Mistakes/Vocabular
              AnalysisEditor Pages 式分析页 (Write/Preview + 自动保存 + 单换行保留) · AiTutorPane AI 讲解 pane ·
              VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） · ExportDrawer 顶栏导出抽屉 ·
              NotebookPreview 整套解析预览/导出 · VocabGrid v2 电子表格 · Splitter 分隔条 ·
+             WordExamPanel 单词考试设置/作答 · WordExamResultView 结果 + 二维码/JSON 下载 ·
              usePersistentLayout · useMediaQuery · icons）·
+             SubjectControls（学科徽章 / 筛选条 / 行内选择 + 现场创建 / 管理弹窗） ·
              ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · ui/（设计系统原语）
-lib/         sections.ts（板块标签，与后端 sections.py 对齐）
+lib/         sections.ts（板块标签，与后端 sections.py 对齐）· wordExamQr.ts（紧凑分享 JSON + 多段 QR 分块）
+             subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）
 api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 ```
 
@@ -226,7 +242,7 @@ api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 
 ```
 app/
-├── main.py                 FastAPI 装配（lifespan=init_db；CORS；9 个 router）
+├── main.py                 FastAPI 装配（lifespan=init_db；CORS；11 个 router）
 ├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR，ifmd_path()）
 ├── imports.py              导入流水线服务：detect → convert → commit（确定性，0 token；PDF/DOCX/InteFlow-MD 单一代码路径）
 ├── sections.py             板块标签（KNOWN_LABELS / DEFAULT_SECTION / label()）
@@ -240,11 +256,14 @@ app/
 │   ├── analysis.py         复盘笔记本 CRUD + 导出（md/docx/pdf）+ meta（用户名/历史）
 │   ├── ai.py               AI 讲解（显式触发；唯一 LLM 入口）
 │   ├── dictionary.py       本地韦氏词典 status / lookup（0 token）
-│   └── vocabulary.py       全部试卷的生词本概览（计数 + 预览）
+│   ├── vocabulary.py       全部试卷的生词本概览（计数 + 预览）
+│   ├── word_exam.py        单词考试：开始（随机抽题、答案留后端）/ 提交判分
+│   └── subjects.py         学科 CRUD（名称/颜色）+ 试卷归属；文档 PATCH 在 documents.py
 ├── dictionary/
 │   ├── eudb.py             Eudic .eudb 容器解析（header / zlib blocks / HTML→纯文本）
 │   └── store.py            派生 SQLite 索引构建 + 状态 + 精确/前缀/包含查询
 ├── vocab_assist.py         拖词选义：词性/首义提取 + 标准/学习者候选 + 可选 LLM 选择 + 回退
+├── word_exam.py            单词考试核心：抽题（词表 Meaning，缺失回退韦氏首义）+ 本地判分 + 可选 AI 严格判分与回退
 ├── ifmd/parser.py          InteFlow-MD -> Question[]（确定性状态机 + 结构校验）
 ├── ifmd/writer.py          ParsedDoc -> InteFlow-MD 文本（反序列化，round-trip 用）
 ├── convert/
@@ -266,7 +285,8 @@ app/
 │   ├── analyses.py         复盘页持久化（list/get/save/delete；迁移旧 questions.explain）
 │   ├── words.py            词汇表 grid v2（columns_json + rows_json + view_json；v1 读取自愈升级）
 │   │                         + 结构化条目：summaries / add_entry / update_entry / delete_entry（按列名映射、按词去重）
-│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本两个开关）
+│   ├── subjects.py         学科：list / create / update / delete / exists（名称大小写不敏感去重、调色板轮换）
+│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本两个开关 / 单词考试 AI 评分）
 ├── export/                  PDF/DOCX 导出（0 token）
 │   ├── model.py            ExportDoc/ExportQuestion（聚合题目 + 词汇表；section_label 来自 sections.py）
 │   ├── notebook.py         复盘笔记本渲染：Markdown / PDF / DOCX（含封面页）
@@ -366,10 +386,54 @@ POST /api/documents/{id}/words/entries/from-selection -> 拖词：查候选 + �
 开启且学习者索引可用时优先 `learner`，构建失败或词典里没有该词时自动回退 `standard` 并在
 `warning` / `fallback` 中说明。词典里完全没有该词时仍会把词加入词表（无释义），不会让拖拽死路。
 
+### 6.5 单词考试（0 token；AI 评分为显式可选）
+
+```
+Vocabulary → Word test tab
+POST /api/documents/{id}/word-exam          {mode, count|null}
+   -> 从词表非空条目随机抽题（count=null 或 >= 可考词数 = 全测）
+   -> zh-en: 题面 = Meaning（为空时回退韦氏首义）；en-zh: 题面 = Word
+   -> 正确答案留在后端，questions 只含 row_id / position / prompt / pos
+POST /api/documents/{id}/word-exam/grade    {mode, items:[{row_id, response}]}
+   -> 本地判分：
+      zh-en 拼写：忽略大小写/空格/标点；Word 列可用 ; / | 换行 逗号 列多个可接受拼写
+      en-zh 释义：NFKC 归一化后 精确 / 分段 / 足够长子串（>=40%）/ 多词 token 包含
+   -> 若 Settings 的 vocab_exam_ai_grading 开启且已配置模型：每 20 题一批交给 LLM，
+      参考「词表释义 + 韦氏词典」，提示词要求严格，不接受含糊/宽泛答案；
+      失败/无 key/无法解析时回退本地判分并在 warning 说明
+   -> 返回每题 word / prompt / expected / response / is_correct / method / reason
+      + total / correct / accuracy / ai_requested / ai_available / ai_grading
+```
+
+结果页（`WordExamResultView`）显示正确率与考察范围、逐题正确答案/用户答案，
+并把分享数据编码为**紧凑 JSON 二维码**：`lib/wordExamQr.ts` 生成 payload（含 accuracy、
+tested positions、每题 expected/response），按 900 字节分块、每块前缀
+`IFWT1|<exam-id>|part/total|`；题量大时渲染多个 QR，同时提供 `.json` 下载。
+`MAX_QUESTIONS = 500`，`WordExamPanel` 只有在首次点击 **Word test** tab 时才挂载
+（避免 Vocabulary 页为未打开的面板请求设置）。
+
+### 6.6 学科分类（Subjects，0 token）
+
+```
+GET    /api/subjects                 -> 学科列表（含 document_count）
+POST   /api/subjects                 -> {name, color?}；名称去空白、最长 40、大小写不敏感唯一
+PATCH  /api/subjects/{id}            -> {name?, color?}；改名会同步到所有使用该学科的试卷
+DELETE /api/subjects/{id}            -> 删除学科；FK ON DELETE SET NULL 把试卷移回 Uncategorized
+PATCH  /api/documents/{id}           -> {subject_id: number|null}；null = 移出学科
+```
+
+- 学科是**全局标签**（一张 `subjects` 表），每套试卷最多一个 `documents.subject_id`；不是逐题标签。
+  逐题的 `sec` 仍是自由板块标签（rw/math/…），两者互不替代。
+- 颜色存调色板 id（`blue/emerald/amber/rose/violet/cyan/lime/slate`），前后端共享同一套；
+  创建时未指定颜色则按已有数量轮换。
+- 前端入口：Library 每行内联下拉（含 `+ New subject…`，创建后自动归类）、Import 卡片可预选本次导入的学科、
+  Answer-key 页顶部可改；Library 的 **Manage subjects** 弹窗支持增删改，并可按学科/Uncategorized 过滤；
+  Exams 首页显示学科徽章与筛选 chips。
+- 删除学科只影响归类，不删试卷、题目、答案、分析或词表。
 
 ---
 
-## 7. 当前 API 面（49 条）
+## 7. 当前 API 面（56 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -382,6 +446,7 @@ POST /api/documents/{id}/words/entries/from-selection -> 拖词：查候选 + �
 | DELETE | `/api/imports/{id}` | 删除任务 |
 | GET/POST | `/api/documents` | 列表 |
 | GET/DELETE | `/api/documents/{id}` | 详情 / 删除（级联） |
+| PATCH | `/api/documents/{id}` | 修改元数据（目前为 `subject_id` 归类；`null` = Uncategorized） |
 | GET | `/api/documents/{id}/questions` | 题目（含答案，后端用） |
 | GET | `/api/documents/{id}/history` | 练习历史 |
 | PUT | `/api/documents/{id}/answers` | 补录答案（多选/填空校验，同步 InteFlow-MD） |
@@ -399,7 +464,11 @@ POST /api/documents/{id}/words/entries/from-selection -> 拖词：查候选 + �
 | POST | `/api/documents/{id}/words/entries/from-entry` | 按词典条目 id + source 加词（0 token） |
 | POST | `/api/documents/{id}/words/entries/from-selection` | 拖词入表：可选 AI 选最贴合上下文的韦氏释义 |
 | GET | `/api/documents/{id}/words/export` | 词汇表 .xlsx |
+| POST | `/api/documents/{id}/word-exam` | 从词表随机出卷（`count=null` 全测；答案留后端） |
+| POST | `/api/documents/{id}/word-exam/grade` | 提交判分（本地；设置开启时 AI 严格判分，失败回退） |
 | GET | `/api/vocabulary` | 全部试卷的生词本概览（计数 + 预览） |
+| GET/POST | `/api/subjects` | 学科列表（含试卷数）/ 新建学科 |
+| PATCH/DELETE | `/api/subjects/{id}` | 改名/换色 / 删除（试卷移回 Uncategorized） |
 | GET | `/api/dictionary/status` | 标准 + 学习者词典状态（安装/索引/条目数） |
 | GET | `/api/dictionary/lookup` | 本地查词（`source=auto|standard|learner`；精确英英原文 + 建议） |
 | GET | `/api/documents/{id}/export/{fmt}` | 导出 PDF / DOCX（0 token；数学经 MathJax SVG） |
@@ -413,7 +482,7 @@ POST /api/documents/{id}/words/entries/from-selection -> 拖词：查候选 + �
 | POST | `/api/sessions/{id}/submit` | 提交判分 |
 | POST | `/api/sessions/{id}/regrade` | 补键重判 |
 | DELETE | `/api/sessions/{id}` | 删除一次作答 |
-| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions`） |
+| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions` / `vocab_exam_ai_grading`） |
 | GET | `/api/settings/providers` | Provider 目录 |
 | POST | `/api/settings/test` | 连通性测试 |
 | POST | `/api/ai/answer` | AI 讲解（显式） |

@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
-import type { DocumentSummary } from "../api/client";
+import type { DocumentSummary, Subject, SubjectRef } from "../api/client";
+import { SubjectPicker } from "./SubjectControls";
 
 interface Props {
   docs: DocumentSummary[];
+  subjects: Subject[];
   importedId?: number | null;
   onDelete: (doc: DocumentSummary) => void;
+  onSubjectChanged: (docId: number, subject: SubjectRef | null) => void;
+  onSubjectsChanged: () => void;
 }
 
 function answerProgress(doc: DocumentSummary): string {
@@ -12,7 +16,14 @@ function answerProgress(doc: DocumentSummary): string {
   return `${doc.answered_count}/${doc.question_count} answers`;
 }
 
-export default function LibraryList({ docs, importedId, onDelete }: Props) {
+export default function LibraryList({
+  docs,
+  subjects,
+  importedId,
+  onDelete,
+  onSubjectChanged,
+  onSubjectsChanged,
+}: Props) {
   return (
     <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border bg-white shadow-sm">
       {docs.map((doc) => (
@@ -40,6 +51,15 @@ export default function LibraryList({ docs, importedId, onDelete }: Props) {
             <p className="truncate text-sm text-slate-500">
               {doc.source_filename} · {doc.question_count} questions · {answerProgress(doc)}
             </p>
+            <SubjectPicker
+              docId={doc.id}
+              title={doc.title}
+              subjects={subjects}
+              value={doc.subject}
+              onChange={(subject) => onSubjectChanged(doc.id, subject)}
+              onSubjectsChanged={onSubjectsChanged}
+              className="mt-1.5"
+            />
           </div>
           <div className="flex shrink-0 flex-wrap gap-2 text-sm">
             <Link

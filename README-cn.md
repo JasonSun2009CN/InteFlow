@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-218%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-288%20passed-2E7D32)
 
 ---
 
@@ -55,20 +55,21 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
 | **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等 |
 | **资料库** | 文档列表（题数、已作答数、答案状态）、练习历史、删除（级联） |
+| **学科分类** | 自定义学科（如 SAT Math、Physics）+ 颜色；每套试卷最多一个学科，可在 Library 行内或答案页顶部直接归类、现场新建；支持改名/换色/删除与按学科筛选。删除学科只把试卷移回 Uncategorized，不影响题目/答案/分析/词表 |
 | **答案录入** | 选择题 A–Z 网格（题面有几个选项就显示几个，如 AMC 的 A–E；**多选**题可勾多个）+ **填空题多答案**（加号添加可接受答案）+ **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA` / 多选 `3-AC` / `1-E`）+ 校验 + 预览，同步回写源文件 |
 | **练习** | 考试风格全屏、**正计时 / 倒计时两种计时**、单题视图、题号导航、标记、键盘 `选项字母` / `← →`、多选与填空作答、交卷确认 |
 | **结果 / 复盘** | 得分 / 分板块 / 用时统计、**全屏复盘**（无侧栏）、`All · Correct · Wrong` 过滤、左上角可折叠题号导航、左题面 + 右 Pages 式分析编辑器（自动保存 / 续写）、补键重判（regrade） |
 | **工作区** | 每题分析页（Markdown，支持公式/图片）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出抽屉 |
+| **生词本** | 一套试卷一份词表（Word · POS · Meaning · Notes）、本地韦氏词典查词、拖词入表、按条添加、`.xlsx` 导出 |
+| **单词考试** | Vocabulary 页内 **Word list / Word test** 两 tab：随机抽题或全测，**English → Chinese**（手写释义，本地宽松判分）或 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）；结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码；可选 AI 严格判分 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
-| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底开关** |
-
-> **规划中（已留入口，细节待定）：** 应用内**查词**（选中单词查词典）。
-> 见 [`docs/IDEAS.md`](docs/IDEAS.md) 与 [`ROADMAP.md`](ROADMAP.md)。
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底**、**AI 选义**、**学习者词典**、**单词考试 AI 评分** |
 
 ## 两条铁律
 
-1. **LLM 不在主链路**：导入/解析/判分/导出全部是确定性本地计算，**0 token**；只有你在复盘页显式点了
-   **AI Answer**（或手动点了连通性测试）才会调用外部 API。
+1. **LLM 不在主链路**：导入/解析/判分/导出默认都是确定性本地计算，**0 token**；只有显式操作才会调用外部 API：
+   复盘页点 **AI Answer**、手动点连通性测试，或在 Settings 开启 **AI grading for word tests** 后提交单词考试
+   （默认关闭；无 key/失败会自动回退本地判分）。
 2. **本地优先**：所有数据都在仓库的 `data/` 目录（`app.db` + 每篇文档的 `doc.ifmd.md` 和图片），不上传任何云端。
 
 ## 环境要求
@@ -156,8 +157,8 @@ npm run dev
 
 ### 1. 导入题库
 
-打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 删除）、
-**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表）、**Settings**（LLM / 用户名 / 兜底 / 生词本开关）。
+打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 学科管理 / 删除）、
+**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表 + 单词考试）、**Settings**（LLM / 用户名 / 兜底 / 生词本 / 单词考试评分开关）。
 
 1. 点侧栏 **Library** 进入题库页。
 2. **上传文件**：把文件拖到 *Drag a file here* 区域，或点 **choose a file**。
@@ -167,6 +168,11 @@ npm run dev
    - 有疑点 → 停在复核阶段，由你点 **Commit** 落库或 **Cancel** 取消（全程 0 token）。
 4. **（可选）用内置题库**：Library 页的题库卡展开后按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
 5. **回首页开考**：返回 **Select an exam**，新导入的卷子直接点 **Start** 开考。
+
+**按学科分组（可选）**：Library 每套试卷那一行有 **Subject** 下拉，选已有学科，或点 **+ New subject…**
+现场创建（如 *SAT Math*）并立即归类；上传框上方也能预选“这次导入归到哪个学科”。**Manage subjects**
+可改名、换色、删除；删除只把试卷移回 *Uncategorized*，题目、答案、分析、词表都不动。**Exams** 首页显示
+学科徽章并支持按学科筛选，答案录入页顶部也能直接改学科。
 
 <details>
 <summary>没有题库文件？自己写 IFMD</summary>
@@ -205,18 +211,34 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 - **左右分屏**：左侧显示当前题的题干、正确选项、你的选择；右侧是 **Pages 式分析编辑器**（一题一页）。
 - **分析编辑器**：支持 Markdown（公式 `$x^2$`、图片 `![](assets/…)`）；`Write` / `Preview` 切换；输入后**自动保存**（约 0.9 秒防抖，也可 `⌘S` / 点 Save）。下次进入自动续写。
 - **Notebook（整套解析预览）**：复盘页顶部 **Notebook** 按钮打开全屏预览——从试卷标题开始，依次显示所有已写解析的题目（题干、图表、解析），并可直接导出。
-- **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §5）。
+- **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §6）。
 - 若答卷时没答案键，保存后会自动重判（regrade）。
 
-### 5. 导出
+### 5. 生词本与单词考试
+
+侧栏点 **Vocabulary**，页面顶部有两个 tab：
+
+- **Word list**：左侧选试卷，右侧编辑该卷词表（Word · POS · Meaning · Notes）。可手动增删改、用本地韦氏词典查词、
+  在复盘工作区把题目/选项里的词拖进生词本，并导出 `.xlsx`。
+- **Word test**：选择当前试卷、考试模式和题量：
+  1. **English → Chinese**：显示英文单词，手写释义。本地判分刻意**宽松**（精确、分段、足够长的子串，或多词全部命中）。
+  2. **Chinese → English**：显示 Meaning 列（为空时回退韦氏首义），拼写英文单词；忽略大小写、空格和标点。
+     Word 列可用 `;`、`/`、`|`、换行分隔多个可接受拼写（全是单个词时也支持逗号）。
+  3. 选择题量或 **test all** 开始；题目从当前词表随机抽取，正确答案在提交前不会下发到前端。
+  4. 提交后显示正确率、考察的单词范围，以及每题正确答案/你的答案；结果同时编码成**紧凑 JSON 二维码**
+     （题量大时自动拆成多个 QR，前缀 `IFWT1|<id>|part/total|`），也可下载 `.json`。
+  5. AI 评分**默认关闭**。在 Settings 打开 **AI grading for word tests** 后，模型会参考词表释义 + 韦氏词典
+     严格判分两种模式（提示词明确拒绝含糊/宽泛答案）；没有配置 key 或调用失败时自动回退本地判分并提示。
+
+### 6. 导出
 
 - **复盘笔记本**：复盘页顶部 **Notebook** 先预览整套解析，再导出 **Markdown / DOCX / PDF**（工具栏 **Export** 同样可导出）。一份试卷一套分析（封面含用户名与成绩），**只包含已写解析的题目**；浏览器下载的同时会在 `data/exports/` 留一份，界面会显示保存路径。
 - **整份文档**：Library 里对文档导出 **PDF** / **DOCX**（题目、答案与解析）。
 - **生词本**：**Export .xlsx**。
 
-### 6. 设置（用户名 / LLM / 兜底 / 生词本开关）
+### 7. 设置（用户名 / LLM / 兜底 / 生词本 / 单词考试评分）
 
-**除 AI 讲解外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
+**除 AI 讲解 / 单词考试 AI 评分外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
 1. **Your name**：填名字，用于复盘笔记本导出封面；
 2. **AI recognition fallback**：导入识别失败时的 LLM 兜底开关（默认开）；关闭后导入失败会提示你启用，
@@ -227,7 +249,8 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 6. **Model** 填模型名；
 7. **AI sense matching**：拖词入生词本时是否让模型选最贴合上下文的韦氏释义（关闭 = 取第一条，0 token）；
 8. **Use learner's definitions**：是否优先使用 `dictionary/learners/` 里的学习者词典（缺失自动回退标准词典）；
-9. **Save settings** / **Test connection**。
+9. **AI grading for word tests**：提交单词考试时是否让模型判分（关闭 = 本地判分、0 token；无 key/失败自动回退本地）；
+10. **Save settings** / **Test connection**。
 
 Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 
@@ -258,7 +281,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 218 passed, 1 skipped；用临时数据目录，不动你的数据）
+# 后端测试（基线 288 passed, 1 skipped；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -280,19 +303,24 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI 装配（/api/health、7 个 router）
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis
+│   │   ├── main.py            FastAPI 装配（/api/health、11 个 router）
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD 解析 + 回写（确定性状态机；多选/填空）
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook(复盘) · math_render(+mathjax 桥)
 │   │   ├── repos/ · llm/      持久化 · LLM 传输层
 │   │   ├── sections.py        自由板块标签
 │   │   ├── providers.py       19 家服务商目录
+│   │   ├── vocab_assist.py    拖词选义（可选 AI）
+│   │   ├── word_exam.py       单词考试：抽题 / 本地判分 / 可选 AI 判分
+│   │   ├── repos/subjects.py  学科：CRUD + 试卷归属
 │   │   └── builtin/           内置题库（44 单元随仓库分发）
-│   ├── tests/                 pytest（218）
+│   ├── tests/                 pytest（288）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/components/        复盘分屏 · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · 导入/资料库 UI
+│   └── src/lib/               wordExamQr（紧凑 JSON + 多段 QR）· subjects（调色板）· theme · sections
 ├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）
 ├── InteFlow.command           macOS 双击启动
 ├── start.bat                  Windows 双击启动

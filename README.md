@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwindcss&logoColor=white)
-![Tests](https://img.shields.io/badge/pytest-218%20passed-2E7D32)
+![Tests](https://img.shields.io/badge/pytest-288%20passed-2E7D32)
 
 ---
 
@@ -56,12 +56,14 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
 | **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent |
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
+| **Subjects** | User-defined subject groups (e.g. SAT Math, Physics) with a color; assign each paper inline from Library or the answer-key header, create a subject on the spot, manage/rename/recolor/delete it, filter Library and Exams by subject. Deleting a group only moves its papers to Uncategorized |
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
 | **Practice** | Exam-style fullscreen, **count-up or countdown timer**, single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
 | **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
 | **Workspace** | **2-of-4 pane split** (Question · Analysis · AI Tutor · Vocabulary) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, export drawer |
+| **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **learner's definitions** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **learner's definitions**, **AI grading for word tests** |
 
 > **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
 > Put the standard file in `dictionary/`; optionally put a learner's dictionary in `dictionary/learners/`
@@ -70,8 +72,9 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 
 ## Two iron rules
 
-1. **The LLM is never on the main path.** Import / parse / grade / export are all deterministic local computation,
-   **0 token**. An external API is only called when you explicitly click **AI Answer** (or run the connectivity test).
+1. **The LLM is never on the main path.** Import / parse / grade / export default to deterministic local computation,
+   **0 token**. An external API is only called when you explicitly act: click **AI Answer**, run the connectivity test,
+   or submit a word test after enabling **AI grading for word tests** in Settings (off by default; failures fall back to local grading).
 2. **Local-first.** All data lives under `data/` in this repo (`app.db` + each document's `doc.ifmd.md` and images).
    Nothing is uploaded to any cloud.
 
@@ -163,9 +166,9 @@ npm run dev
 ### 1. Import a question bank
 
 Open <http://localhost:5173>. The left sidebar has six tabs: **Exams** (pick one to take),
-**Library** (import a file, add the built-in bank, manage your exam list), **Sessions** (every **submitted**
-attempt, searchable/deletable), **Mistakes**, **Vocabulary** and **Settings**. **Mistakes** and **Vocabulary** are
-placeholders for now.
+**Library** (import a file, add the built-in bank, manage your exam list, group papers by subject), **Sessions** (every **submitted**
+attempt, searchable/deletable), **Mistakes**, **Vocabulary** and **Settings**. **Mistakes** is a placeholder for now;
+**Vocabulary** holds the per-paper word lists and the word test.
 
 1. Open **Library** in the sidebar.
 2. **Upload a file**: drop it on *Drag a file here*, or click **choose a file**.
@@ -177,6 +180,13 @@ placeholders for now.
    - Suspicious pages → it pauses at review so you can **Commit** or **Cancel** (0 token throughout).
 4. **(Optional) built-in bank**: expand the bank card on the Library page, grouped by date, and click **Add** per unit or **Add all**.
 5. **Back home to practice**: return to **Select an exam** and click **Start**.
+
+**Group papers by subject (optional).** In **Library**, each paper's row has a **Subject** dropdown — pick an
+existing group or **+ New subject…** to create one (e.g. *SAT Math*) and assign it in the same step. You can also
+preselect a subject above the upload box for the next import. **Manage subjects** renames, recolors, or deletes
+groups; deleting one moves its papers to *Uncategorized* without touching questions, answers, analysis, or word
+lists. The **Exams** home page shows each paper's subject badge and has filter chips, and the answer-key page lets
+you change the subject too.
 
 <details>
 <summary>No bank file? Write your own IFMD by hand</summary>
@@ -223,10 +233,32 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 - **Notebook**: the top-bar button opens a full-exam preview — the exam title, then every question that already
   has analysis (stem, figures and notes), with export buttons.
 - **Toolbar drawer**: `AI` (explicit LLM explain), `Vocabulary` (this paper's word sheet, `.xlsx` export),
-  `Export` (review notebook — see §5).
+  `Export` (review notebook — see §6).
 - If the key was missing while you practiced, saving re-grades automatically (regrade).
 
-### 5. Export
+### 5. Vocabulary & word tests
+
+Open **Vocabulary** in the sidebar. The page has two tabs:
+
+- **Word list** — pick a paper on the left, then edit its word sheet on the right (Word · POS · Meaning · Notes).
+  You can add words manually, look them up in the local Merriam-Webster dictionary, drag a word from a question or
+  option into the review workspace's vocabulary pane, and export the sheet as `.xlsx`.
+- **Word test** — pick the paper (the list follows the selected paper), choose a mode and how many words to test:
+  1. **English → Chinese** — the English word is shown; type its meaning. Local grading is deliberately lenient
+     (exact, a listed segment, a long-enough substring, or all words of a multi-word answer).
+  2. **Chinese → English** — the Meaning column is shown (if empty, the first Merriam-Webster sense); spell the
+     English word. Case, spaces and punctuation are ignored. A Word cell may list several accepted spellings
+     separated by `;`, `/`, `|`, a newline, or commas when every item is a single word.
+  3. Choose a count or **test all**, then start. Questions are sampled randomly from the current paper's list;
+     correct answers stay on the server until you submit.
+  4. After submitting you get accuracy, the tested word range, and a per-word table with the correct answer and
+     yours. The result is also encoded as **compact JSON QR codes** (large tests are split into multiple parts,
+     prefixed `IFWT1|<id>|part/total|`), and a `.json` download is offered.
+  5. AI grading is **off by default**. Turn on **AI grading for word tests** in Settings to have the model grade
+     both modes against the word-list meaning plus Merriam-Webster, with strict instructions to reject vague
+     answers; if no key is configured or a call fails, the app falls back to local grading and says so.
+
+### 6. Export
 
 - **Review notebook**: preview it with **Notebook** in the review top bar, then export **Markdown / DOCX / PDF**
   (also available in the **Export** drawer). One notebook per exam (cover with your name and score), containing
@@ -235,9 +267,9 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 - **Whole document**: export **PDF** / **DOCX** (questions, answers and analysis) from the Library.
 - **Vocabulary**: **Export .xlsx**.
 
-### 6. Settings (name / LLM / fallback / vocabulary)
+### 7. Settings (name / LLM / fallback / vocabulary / word tests)
 
-**Not required for anything except AI explain.** Open **Settings** (`/settings`) from the sidebar:
+**Not required for anything except AI explain / word-test AI grading.** Open **Settings** (`/settings`) from the sidebar:
 
 1. **Your name** — used on the review notebook cover;
 2. **AI recognition fallback** — LLM fallback when import recognition fails (on by default); with it off, a
@@ -248,7 +280,8 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 6. **Model**;
 7. **AI sense matching** — let the model choose the Merriam-Webster sense when a word is dragged into the vocabulary pane (off = first sense, no tokens);
 8. **Use learner's definitions** — prefer a learner's dictionary installed under `dictionary/learners/` (falls back to the standard dictionary);
-9. **Save settings** / **Test connection**.
+9. **AI grading for word tests** — grade submitted word tests with the model (off = local grading, 0 token; failures fall back to local);
+10. **Save settings** / **Test connection**.
 
 Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 
@@ -279,7 +312,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 218 passed, 1 skipped; uses a temp data dir)
+# backend tests (baseline 288 passed, 1 skipped; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -301,19 +334,24 @@ cd frontend && npm test
 InteFlow/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            FastAPI wiring (/api/health, 7 routers)
-│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis
+│   │   ├── main.py            FastAPI wiring (/api/health, 11 routers)
+│   │   ├── api/               documents · imports · builtin · sessions · settings · ai · analysis · dictionary · vocabulary · word_exam · subjects
 │   │   ├── convert/           pdf · docx · twocolumn · images · normalize · ocr/ · llm_fallback
 │   │   ├── ifmd/              InteFlow-MD parser + writer (deterministic state machine; multi / blank)
 │   │   ├── export/            PDF (WeasyPrint) · docx · notebook (review) · math_render (+ mathjax bridge)
 │   │   ├── repos/ · llm/      persistence · LLM transport
 │   │   ├── sections.py        free-form section labels
 │   │   ├── providers.py       19-provider catalog
+│   │   ├── vocab_assist.py    drag-to-add sense selection (optional AI)
+│   │   ├── word_exam.py       word-test build / local grading / optional AI grading
+│   │   ├── repos/subjects.py  subject groups: CRUD + paper assignment
 │   │   └── builtin/           built-in bank (44 units shipped with the repo)
-│   ├── tests/                 pytest (218)
+│   ├── tests/                 pytest (288)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4
-│   └── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/pages/             ExamHome · Library(Import) · Sessions · Mistakes · Vocabulary · AnswerKey · Practice · Result · Settings
+│   ├── src/components/        workspace panes · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · import/library UI
+│   └── src/lib/               wordExamQr (compact JSON + multi-part QR) · subjects (palette) · theme · sections
 ├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)
 ├── InteFlow.command           macOS double-click start
 ├── start.bat                  Windows double-click start

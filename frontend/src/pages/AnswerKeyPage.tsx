@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Plus, X } from "lucide-react";
-import { api, ApiError, type DocumentSummary, type Question } from "../api/client";
+import {
+  api,
+  ApiError,
+  type DocumentSummary,
+  type Question,
+  type Subject,
+} from "../api/client";
+import { SubjectPicker } from "../components/SubjectControls";
 import RichText from "../components/RichText";
 
 /** Letters of a question's options, in order ("A", "B", …). Falls back to a
@@ -47,6 +54,7 @@ export default function AnswerKeyPage() {
   /** Set when the user just submitted an attempt that needs grading. */
   const pendingSession = searchParams.get("session");
   const [doc, setDoc] = useState<DocumentSummary | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [questions, setQuestions] = useState<Question[] | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [bulk, setBulk] = useState("");
@@ -54,13 +62,27 @@ export default function AnswerKeyPage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  function refreshSubjects() {
+    api
+      .listSubjects()
+      .then(setSubjects)
+      .catch(() => {
+        /* grouping is optional */
+      });
+  }
+
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.getDocument(docId), api.getQuestions(docId)])
-      .then(([d, qs]) => {
+    Promise.all([
+      api.getDocument(docId),
+      api.getQuestions(docId),
+      api.listSubjects().catch(() => [] as Subject[]),
+    ])
+      .then(([d, qs, ss]) => {
         if (cancelled) return;
         setDoc(d);
         setQuestions(qs);
+        setSubjects(ss);
         setAnswers(
           Object.fromEntries(
             qs.filter((q) => q.answers.length > 0).map((q) => [q.ext_id, q.answers]),
@@ -206,6 +228,15 @@ export default function AnswerKeyPage() {
             {total} questions · {filled}/{total} filled
             {doc.answers_status !== "none" && ` · source had: ${doc.answers_status} answers`}
           </p>
+          <SubjectPicker
+            docId={doc.id}
+            title={doc.title}
+            subjects={subjects}
+            value={doc.subject}
+            onChange={(subject) => setDoc((current) => (current ? { ...current, subject } : current))}
+            onSubjectsChanged={refreshSubjects}
+            className="mt-1.5"
+          />
         </div>
         <div className="flex gap-2">
           <button

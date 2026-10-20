@@ -312,6 +312,44 @@ def _columns_for(grid: dict) -> dict[str, dict | None]:
     return {"word": word, "pos": pos, "meaning": meaning, "notes": notes}
 
 
+def entries(doc_id: int) -> list[dict]:
+    """The document's non-empty word rows, in list order.
+
+    ``position`` is the row's 1-based place in the *whole* grid (blank rows
+    included), so a word exam can report the exact slice of the list it used.
+    Standard columns are resolved by name (Word / POS / Meaning / Notes), the
+    same mapping the structured-entry helpers use.
+    """
+    grid = get_grid(doc_id)
+    fields = _columns_for(grid)
+    word_col = fields["word"]
+    if word_col is None:
+        return []
+
+    out: list[dict] = []
+    for position, row in enumerate(grid["rows"], start=1):
+        cells = row.get("cells", {}) if isinstance(row, dict) else {}
+        word = (cells.get(word_col["id"]) or "").strip()
+        if not word:
+            continue
+
+        def value(key: str) -> str:
+            column = fields.get(key)
+            return (cells.get(column["id"]) or "").strip() if column else ""
+
+        out.append(
+            {
+                "row_id": row["id"],
+                "position": position,
+                "word": word,
+                "pos": value("pos"),
+                "meaning": value("meaning"),
+                "notes": value("notes"),
+            }
+        )
+    return out
+
+
 def summaries() -> list[dict]:
     """One row per document, with its vocabulary count and a short preview."""
     rows = query(

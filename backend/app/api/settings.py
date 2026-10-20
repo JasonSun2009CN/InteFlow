@@ -43,6 +43,7 @@ class SettingsPayload(BaseModel):
     llm_fallback: bool | None = None  # allow AI question recognition when parsing fails
     vocab_ai_sense: bool | None = None  # AI picks the MW sense on drag-to-vocabulary
     vocab_learner_definitions: bool | None = None  # prefer a learner's dictionary
+    vocab_exam_ai_grading: bool | None = None  # AI may grade word-test answers
 
 
 def _mask(key: str) -> str:
@@ -64,6 +65,7 @@ def _load() -> dict[str, str]:
         "llm_fallback": stored.get("llm_fallback", "1"),
         "vocab_ai_sense": stored.get("vocab_ai_sense", "1"),
         "vocab_learner_definitions": stored.get("vocab_learner_definitions", "0"),
+        "vocab_exam_ai_grading": stored.get("vocab_exam_ai_grading", "0"),
     }
 
 
@@ -79,6 +81,7 @@ def _view(s: dict[str, str]) -> dict:
         "llm_fallback": s["llm_fallback"] != "0",
         "vocab_ai_sense": s["vocab_ai_sense"] != "0",
         "vocab_learner_definitions": s["vocab_learner_definitions"] == "1",
+        "vocab_exam_ai_grading": s["vocab_exam_ai_grading"] == "1",
     }
 
 
@@ -126,6 +129,10 @@ def put_settings(payload: SettingsPayload) -> dict:
     if payload.vocab_learner_definitions is not None:
         updates["vocab_learner_definitions"] = (
             "1" if payload.vocab_learner_definitions else "0"
+        )
+    if payload.vocab_exam_ai_grading is not None:
+        updates["vocab_exam_ai_grading"] = (
+            "1" if payload.vocab_exam_ai_grading else "0"
         )
     settings_repo.set_values(updates)
     return _view(_load())

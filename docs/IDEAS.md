@@ -10,17 +10,6 @@
 
 ---
 
-## 使用示例（可删除）
-
-### 💡 [P1] 开始屏记住上次的计时设置
-- 现在倒计时每次都要重新输入，希望默认带入上一次的值。
-- 备注：可能存 `localStorage`，键名 `inteflow.timer.last`。
-
-### 💡 复盘页错题 chips 想按 section 分组
-- 错题较多时一长排不好找。
-
----
-
 ## 我的想法
 
 <!-- 从这里开始往下写 -->
@@ -28,7 +17,7 @@
 ### 💡 复盘页错题 chips 想按 section 分组
 - 错题较多时一长排不好找。
 
-### 加入单词考试功能
+### ✅ 加入单词考试功能（2026-10-20）
 - purpose: 用于测试单词背诵效果
 - usage: 选择单词表，选择考试模式，开始测试，生成测试结果和二维码，二维码信息包括正确率和考察的单词范围，每个单词的正确答案的用户答案
 - position：开在vocabulary栏中，一个是查看单词表，一个是单词测试
@@ -37,6 +26,19 @@
 - 方案1：调用模型API
     会消耗tokens
 - 方案2：和单词表中完全相同对应
+- **已实现（2026-10-20）**：Vocabulary 页顶部 **Word list / Word test** 两 tab。
+  - 抽题：从当前试卷词表随机抽取；可输入数量或全测（上限 500）。中译英题面用 Meaning 列，
+    为空时回退本地韦氏词典首义；英译中题面是英文单词。正确答案只留在后端，提交后才返回。
+  - 本地判分（默认，0 token）：中译英拼写忽略大小写/空格/标点，Word 列可用 `;` `/` `|` 换行分隔多个可接受拼写；
+    英译中使用宽松匹配（精确 / 分段 / 足够长的子串 [≥40%] / 多词 token 包含）。
+  - AI 判分：Settings 的 `vocab_exam_ai_grading` 默认关闭；开启后提交时参考「词表释义 + 韦氏词典」严格判分两种模式，
+    每 20 题一批；无 key / 调用失败 / 返回不可解析时回退本地并在结果里提示。
+  - 结果页：正确率、考察范围、逐题正确答案/用户答案；同时生成**紧凑 JSON 二维码**
+    （含正确率、考察单词位置、每题 expected/response）。题量大时自动拆成多个 QR，
+    每块前缀 `IFWT1|<id>|part/total|`，另提供 `.json` 下载。
+  - 代码：`backend/app/word_exam.py` + `backend/app/api/word_exam.py`；
+    前端 `WordExamPanel` / `WordExamResultView` / `lib/wordExamQr.ts`；测试覆盖见
+    `backend/tests/test_word_exam.py`、`WordExamPanel.test.tsx`、`wordExamQr.test.ts`。
 
 ### ✅ 不同themes
 - 在 Settings → Appearance 中设置（存 `localStorage`，键 `inteflow.theme`）
@@ -78,13 +80,24 @@
 - 左侧栏 **Vocabulary** 页：左侧考试索引 + 右侧词表编辑器（手动增改、查词、按条添加、导出 xlsx）。每套试卷一份词表，按词去重。
 - `.eudb` 本地解析，首次查词自动建索引 `data/dictionary/mw.db`（92,006 条）；只显示英英原文，0 token；`dictionary/` 版权文件已 gitignore。
 - 2026-10-20：Settings 增加 `vocab_ai_sense`（关闭后拖词不调用 LLM）与 `vocab_learner_definitions`（优先 `dictionary/learners/*.eudb` 的学习者释义，缺失自动回退标准词典）。当前 Collegiate 文件本身不含 learner 释义，需另装学习者词典。
-- 后续可在这套词表/词性/释义数据上做“单词考试”（中译英、英译中、拼写）。
+- 在这套词表/词性/释义数据上的“单词考试”（中译英、英译中）已实现，见下方 ✅ 条目。
 
 ### 添加“需复习题目”的功能
 - 把mistake界面分开成两部分，一半放错题，一般放用户标记的题目
 - 设想：mistake界面换个名字，然后在mistake里面分categories，支持按时间顺序排，支持搜索套题和题干、选项的内容。
 - 要显示题目的分析（如果有的话），如果有多个分析的话都显示
 
-### 学科题目分类
+### ✅ 学科题目分类（2026-10-20）
 - 支持用户给套题进行学科分类：EG SAT Math
 - 在题目栏中进行categorize
+- **已实现（2026-10-20）**：全局自定义学科（名称 + 颜色），每套试卷最多一个学科。
+  - Library 每行内联 **Subject** 下拉：选已有学科，或 `+ New subject…` 现场创建并自动归类；
+    上传框上方可预选本次导入的学科；**Manage subjects** 支持改名/换色/删除。
+  - Answer-key 页顶部也能直接改学科；Exams 首页显示学科徽章，并可按学科/Uncategorized 筛选。
+  - 删除学科只把试卷移回 Uncategorized，不影响题目、答案、分析或词表；名称大小写不敏感去重，0 token。
+  - 代码：`backend/app/repos/subjects.py` + `backend/app/api/subjects.py` + `PATCH /api/documents/{id}`；
+    前端 `SubjectControls.tsx` + `lib/subjects.ts`；`subjects` 表 + `documents.subject_id`（自动迁移）。
+
+### 用户自定义词典
+- 导入词典
+- 选择词典

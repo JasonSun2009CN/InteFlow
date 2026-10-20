@@ -13,6 +13,8 @@ vi.mock("../api/client", async (importOriginal) => {
       getDocument: vi.fn(),
       getQuestions: vi.fn(),
       putAnswers: vi.fn(),
+      listSubjects: vi.fn(),
+      setDocumentSubject: vi.fn(),
     },
   };
 });
@@ -20,6 +22,8 @@ vi.mock("../api/client", async (importOriginal) => {
 const getDocument = vi.mocked(api.getDocument);
 const getQuestions = vi.mocked(api.getQuestions);
 const putAnswers = vi.mocked(api.putAnswers);
+const listSubjects = vi.mocked(api.listSubjects);
+const setDocumentSubject = vi.mocked(api.setDocumentSubject);
 
 const doc: DocumentSummary = {
   id: 7,
@@ -29,6 +33,7 @@ const doc: DocumentSummary = {
   question_count: 3,
   answered_count: 0,
   needs_answers: true,
+  subject: null,
   created_at: "2026-10-19 09:15:00",
 };
 
@@ -96,6 +101,7 @@ describe("AnswerKeyPage", () => {
     vi.clearAllMocks();
     getDocument.mockResolvedValue(doc);
     getQuestions.mockResolvedValue(questions);
+    listSubjects.mockResolvedValue([]);
   });
 
   it("renders choice toggles, a multi badge and blank inputs", async () => {
@@ -103,6 +109,32 @@ describe("AnswerKeyPage", () => {
     expect(await screen.findByText("October Review")).toBeInTheDocument();
     expect(screen.getByText("multi")).toBeInTheDocument();
     expect(screen.getByLabelText("Accepted answer 1 for question 3")).toBeInTheDocument();
+  });
+
+  it("assigns a subject to the paper from the answer-key header", async () => {
+    const subject = {
+      id: 3,
+      name: "SAT Math",
+      color: "emerald" as const,
+      document_count: 1,
+      created_at: "2026-10-20 10:00:00",
+    };
+    listSubjects.mockResolvedValue([subject]);
+    setDocumentSubject.mockResolvedValue({
+      ...doc,
+      subject: { id: subject.id, name: subject.name, color: subject.color },
+    });
+    renderPage();
+
+    const select = await screen.findByRole("combobox", {
+      name: "Subject for October Review",
+    });
+    fireEvent.change(select, { target: { value: "3" } });
+
+    await waitFor(() =>
+      expect(setDocumentSubject).toHaveBeenCalledWith(7, 3),
+    );
+    await waitFor(() => expect(select).toHaveValue("3"));
   });
 
   it("lets a multi question hold several answers", async () => {

@@ -22,6 +22,7 @@ const exam: DocumentSummary = {
   question_count: 40,
   answered_count: 12,
   needs_answers: true,
+  subject: null,
   created_at: "2026-10-19 09:15:00",
 };
 
@@ -55,6 +56,31 @@ describe("ExamHomePage", () => {
       "href",
       "/doc/7/practice",
     );
+  });
+
+  it("filters exams by subject", async () => {
+    const math = {
+      ...exam,
+      id: 8,
+      title: "Math Paper",
+      subject: { id: 1, name: "SAT Math", color: "emerald" as const },
+    };
+    const reading = {
+      ...exam,
+      id: 9,
+      title: "Reading Paper",
+      subject: { id: 2, name: "SAT Reading", color: "blue" as const },
+    };
+    listDocuments.mockResolvedValue([math, reading]);
+    renderHome();
+
+    expect(await screen.findByText("Math Paper")).toBeInTheDocument();
+    expect(screen.getByText("Reading Paper")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /SAT Math/ }));
+
+    expect(screen.getByText("Math Paper")).toBeInTheDocument();
+    expect(screen.queryByText("Reading Paper")).not.toBeInTheDocument();
   });
 
   it("shows the empty state with a library entry point", async () => {

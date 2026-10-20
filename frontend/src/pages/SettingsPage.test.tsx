@@ -32,6 +32,7 @@ const settings: AppSettings = {
   llm_fallback: true,
   vocab_ai_sense: true,
   vocab_learner_definitions: false,
+  vocab_exam_ai_grading: false,
 };
 
 beforeEach(() => {
@@ -63,5 +64,23 @@ describe("SettingsPage vocabulary options", () => {
       ),
     );
     expect(await screen.findByText("Settings saved.")).toBeInTheDocument();
+  });
+
+  it("saves the AI word-test grading toggle", async () => {
+    render(<SettingsPage />);
+
+    const examAi = await screen.findByRole("checkbox", {
+      name: /AI grading for word tests/,
+    });
+    expect(examAi).not.toBeChecked();
+
+    fireEvent.click(examAi);
+    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
+
+    await waitFor(() =>
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ vocab_exam_ai_grading: true }),
+      ),
+    );
   });
 });

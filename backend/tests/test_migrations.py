@@ -64,10 +64,42 @@ def test_migrate_adds_missing_document_columns() -> None:
     _migrate(conn)
 
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
-    assert {"builtin_key", "import_source", "used_ai", "report_json"} <= cols
+    assert {
+        "builtin_key",
+        "import_source",
+        "used_ai",
+        "report_json",
+        "subject_id",
+    } <= cols
+    tables = {
+        row[0]
+        for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+    }
+    assert "subjects" in tables
     row = conn.execute("SELECT * FROM documents WHERE id = 1").fetchone()
     assert row["title"] == "old row"                 # data preserved
     assert row["used_ai"] == 0                        # default backfilled
+    conn.close()
+
+
+def test_schema_then_migrate_upgrades_an_old_documents_table() -> None:
+    """Older DBs must not trip over the subject index before the column exists."""
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        "CREATE TABLE documents (id INTEGER PRIMARY KEY, title TEXT,"
+        " source_filename TEXT NOT NULL DEFAULT '', ifmd_path TEXT NOT NULL DEFAULT '',"
+        " answers_status TEXT NOT NULL DEFAULT 'none', question_count INTEGER NOT NULL DEFAULT 0,"
+        " created_at TEXT NOT NULL DEFAULT (datetime('now')))"
+    )
+    conn.execute("INSERT INTO documents (id, title) VALUES (1, 'old row')")
+
+    conn.executescript(SCHEMA)
+    _migrate(conn)
+
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
+    assert "subject_id" in cols
+    assert conn.execute("SELECT title FROM documents WHERE id = 1").fetchone()["title"] == "old row"
     conn.close()
 
 

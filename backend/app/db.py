@@ -33,6 +33,13 @@ def assets_dir(doc_id: int) -> Path:
     return doc_dir(doc_id) / "assets"
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS subjects (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL COLLATE NOCASE UNIQUE,  -- user-defined subject label
+  color      TEXT NOT NULL DEFAULT 'blue',         -- palette id (blue|emerald|...)
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS documents (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   title           TEXT NOT NULL,
@@ -44,6 +51,7 @@ CREATE TABLE IF NOT EXISTS documents (
   import_source   TEXT,                          -- pdf|docx|ifmd.md|builtin
   used_ai         INTEGER NOT NULL DEFAULT 0,    -- 1 if any AI was used to import
   report_json     TEXT,                          -- per-page conversion report (JSON)
+  subject_id      INTEGER REFERENCES subjects(id) ON DELETE SET NULL,
   created_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -237,20 +245,36 @@ def _migrate(conn: sqlite3.Connection) -> None:
         conn.execute("PRAGMA legacy_alter_table = OFF")
         conn.execute("PRAGMA foreign_keys = ON")
 
+    # user-defined subjects (2026-10-20): a paper belongs to at most one.
+    # Create the lookup table first so an old documents table can reference it.
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS subjects ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " name TEXT NOT NULL COLLATE NOCASE UNIQUE,"
+        " color TEXT NOT NULL DEFAULT 'blue',"
+        " created_at TEXT NOT NULL DEFAULT (datetime('now'))"
+        ")"
+    )
     cols = {row["name"] for row in conn.execute("PRAGMA table_info(documents)")}
     additions = (
         ("builtin_key", "TEXT"),
         ("import_source", "TEXT"),
         ("used_ai", "INTEGER NOT NULL DEFAULT 0"),
         ("report_json", "TEXT"),
+        ("subject_id", "INTEGER REFERENCES subjects(id) ON DELETE SET NULL"),
     )
-    for name, ddl in additions:
-        if name not in cols:
-            conn.execute(f"ALTER TABLE documents ADD COLUMN {name} {ddl}")
-    conn.execute(
-        "CREATE UNIQUE INDEX IF NOT EXISTS ux_documents_builtin_key"
-        " ON documents(builtin_key) WHERE builtin_key IS NOT NULL"
-    )
+    if cols:
+        for name, ddl in additions:
+            if name not in cols:
+                conn.execute(f"ALTER TABLE documents ADD COLUMN {name} {ddl}")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_documents_subject"
+            " ON documents(subject_id)"
+        )
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS ux_documents_builtin_key"
+            " ON documents(builtin_key) WHERE builtin_key IS NOT NULL"
+        )
 
     # word_grids v2 (batch 10): stable column/row ids, widths, saved view.
     if conn.execute(

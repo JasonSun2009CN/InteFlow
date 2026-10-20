@@ -10,6 +10,8 @@ import {
   type WordGrid,
 } from "../api/client";
 import VocabGrid from "../components/workspace/VocabGrid";
+import WordExamPanel from "../components/workspace/WordExamPanel";
+import { Tabs } from "../components/ui";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -528,6 +530,8 @@ function VocabularyDetail({
 export default function VocabularyPage() {
   const [overview, setOverview] = useState<VocabularyOverview | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [view, setView] = useState<"list" | "test">("list");
+  const [testMounted, setTestMounted] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   async function refresh() {
@@ -575,11 +579,49 @@ export default function VocabularyPage() {
           {err ? `Could not load vocabulary: ${err}` : "Loading vocabulary…"}
         </div>
       ) : selected ? (
-        <VocabularyDetail
-          key={selected.document_id}
-          doc={selected}
-          onChanged={() => void refresh()}
-        />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="shrink-0 border-b border-slate-200 bg-white px-3 pt-1">
+            <Tabs
+              tabs={[
+                { key: "list", label: "Word list" },
+                { key: "test", label: "Word test" },
+              ]}
+              activeKey={view}
+              onChange={(key) => {
+                if (key === "test") setTestMounted(true);
+                setView(key === "test" ? "test" : "list");
+              }}
+            />
+          </div>
+
+          <div
+            id="list-panel"
+            role="tabpanel"
+            aria-labelledby="list-tab"
+            className={view === "list" ? "flex min-h-0 flex-1 flex-col" : "hidden"}
+          >
+            <VocabularyDetail
+              key={selected.document_id}
+              doc={selected}
+              onChanged={() => void refresh()}
+            />
+          </div>
+
+          {testMounted && (
+            <div
+              id="test-panel"
+              role="tabpanel"
+              aria-labelledby="test-tab"
+              className={view === "test" ? "flex min-h-0 flex-1 flex-col" : "hidden"}
+            >
+              <WordExamPanel
+                key={`test-${selected.document_id}`}
+                doc={selected}
+                onBack={() => setView("list")}
+              />
+            </div>
+          )}
+        </div>
       ) : (
         <div className="grid min-h-0 flex-1 place-items-center p-8 text-center">
           <div>

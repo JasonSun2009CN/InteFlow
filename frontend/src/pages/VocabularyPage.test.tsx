@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   api,
+  type AppSettings,
   type DictionaryStatus,
   type VocabularyOverview,
   type WordGrid,
@@ -22,6 +23,7 @@ vi.mock("../api/client", async (importOriginal) => {
       addWordFromEntry: vi.fn(),
       dictionaryStatus: vi.fn(),
       dictionaryLookup: vi.fn(),
+      getSettings: vi.fn(),
     },
   };
 });
@@ -33,6 +35,7 @@ const addWordEntry = vi.mocked(api.addWordEntry);
 const addWordFromEntry = vi.mocked(api.addWordFromEntry);
 const dictionaryStatus = vi.mocked(api.dictionaryStatus);
 const dictionaryLookup = vi.mocked(api.dictionaryLookup);
+const getSettings = vi.mocked(api.getSettings);
 
 const overview: VocabularyOverview = {
   documents: [
@@ -105,6 +108,20 @@ const status: DictionaryStatus = {
   },
 };
 
+const settings: AppSettings = {
+  provider: "orcarouter",
+  protocol: "openai",
+  base_url: "https://example.test/v1",
+  model: "demo-model",
+  api_key_masked: "",
+  api_key_set: false,
+  user_name: "",
+  llm_fallback: true,
+  vocab_ai_sense: true,
+  vocab_learner_definitions: false,
+  vocab_exam_ai_grading: false,
+};
+
 function renderPage() {
   return render(
     <MemoryRouter>
@@ -119,6 +136,7 @@ beforeEach(() => {
   getWords.mockResolvedValue(grid);
   putWords.mockImplementation(async (_docId, next) => next);
   dictionaryStatus.mockResolvedValue(status);
+  getSettings.mockResolvedValue(settings);
 });
 
 describe("VocabularyPage", () => {
@@ -280,5 +298,21 @@ describe("VocabularyPage", () => {
 
     expect(screen.getByText(/Merriam-Webster is not installed/)).toBeInTheDocument();
     expect(screen.getByText("dictionary/")).toBeInTheDocument();
+  });
+
+  it("switches from the word list to the word test", async () => {
+    renderPage();
+    await screen.findByTestId("vocab-grid");
+
+    fireEvent.click(screen.getByRole("tab", { name: "Word test" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Word test" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start test" })).toBeInTheDocument();
+    expect(getSettings).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Word list" }));
+    expect(screen.getByTestId("vocab-grid")).toBeInTheDocument();
   });
 });
