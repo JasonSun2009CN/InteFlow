@@ -157,7 +157,7 @@ npm run dev
 ### 1. 导入题库
 
 打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 删除）、
-**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（单词整理集合，占位）、**Settings**（LLM / 用户名 / 兜底开关）。
+**Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Mistakes**（错题分析集合，占位）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表）、**Settings**（LLM / 用户名 / 兜底 / 生词本开关）。
 
 1. 点侧栏 **Library** 进入题库页。
 2. **上传文件**：把文件拖到 *Drag a file here* 区域，或点 **choose a file**。
@@ -214,7 +214,7 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 - **整份文档**：Library 里对文档导出 **PDF** / **DOCX**（题目、答案与解析）。
 - **生词本**：**Export .xlsx**。
 
-### 6. 设置（用户名 / LLM / 兜底开关）
+### 6. 设置（用户名 / LLM / 兜底 / 生词本开关）
 
 **除 AI 讲解外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
@@ -225,7 +225,9 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 4. **Base URL** 可覆盖；
 5. **API Key** 只写不回显（掩码显示）；
 6. **Model** 填模型名；
-7. **Save settings** / **Test connection**。
+7. **AI sense matching**：拖词入生词本时是否让模型选最贴合上下文的韦氏释义（关闭 = 取第一条，0 token）；
+8. **Use learner's definitions**：是否优先使用 `dictionary/learners/` 里的学习者词典（缺失自动回退标准词典）；
+9. **Save settings** / **Test connection**。
 
 Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 
@@ -244,6 +246,10 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 | `INTEFLOW_API` | `http://localhost:8000` | Vite 开发代理的后端地址 |
 | `INTEFLOW_OCR_LANG` | `eng` | Tesseract OCR 语言 |
 | `INTEFLOW_DEFAULT_SECTION` | `rw` | 转换器未识别到板块标题时的回退标签 |
+| `INTEFLOW_DICTIONARY` | `./dictionary` | 标准 Eudic `.eudb` 文件或目录 |
+| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | 标准词典索引路径 |
+| `INTEFLOW_LEARNER_DICTIONARY` | `./dictionary/learners` | 可选学习者 `.eudb` 文件或目录 |
+| `INTEFLOW_LEARNER_DICTIONARY_INDEX` | `data/dictionary/learners.db` | 学习者词典索引路径 |
 
 端口：后端 `8000`、前端 `5173`。
 

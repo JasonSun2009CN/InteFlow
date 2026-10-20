@@ -17,6 +17,11 @@ MAX_DEFINITION = 12_000
 SNIPPET = 220
 _INVISIBLE = {0x00B7: None, 0x00AD: None, 0x200B: None}
 
+KINDS = ("standard", "learner")
+#: Filename/title hints for an installed learner's dictionary. A separate file
+#: is preferred; the hint scan only runs when no ``learners/`` folder exists.
+LEARNER_HINTS = ("learner", "learners", "advanced learner", "高阶", "学习")
+
 _BUILD_LOCK = threading.Lock()
 _STATE_LOCK = threading.Lock()
 _BUILDING = False
@@ -44,20 +49,83 @@ class DictionaryError(RuntimeError):
 # --------------------------------------------------------------------------
 
 
-def source_path() -> Path | None:
+def _kind(kind: str) -> str:
+    if kind not in KINDS:
+        raise DictionaryError(f"unknown dictionary kind {kind!r}")
+    return kind
+
+
+def _first_eudb(folder: Path) -> Path | None:
+    if not folder.is_dir():
+        return None
+    candidates = sorted(folder.glob("*.eudb"))
+    return candidates[0] if candidates else None
+
+
+def _dictionary_root() -> Path:
+    """The folder that holds the standard dictionary, if it is a folder."""
+    configured = os.environ.get("INTEFLOW_DICTIONARY")
+    if configured:
+        path = Path(configured).expanduser()
+        return path if path.is_dir() else path.parent
+    return REPO_ROOT / "dictionary"
+
+
+def _looks_like_learner(path: Path) -> bool:
+    name = path.name.casefold()
+    if any(hint in name for hint in LEARNER_HINTS):
+        return True
+    try:
+        from app.dictionary.eudb import parse_header
+
+        meta, _count, _offsets, _size = parse_header(path)
+    except (OSError, ValueError):
+        return False
+    title = meta.get("title", "").casefold()
+    return any(hint in title for hint in LEARNER_HINTS)
+
+
+def source_path(kind: str = "standard") -> Path | None:
     """The configured ``.eudb`` file, or ``None`` when none is installed."""
+    kind = _kind(kind)
+    if kind == "learner":
+        configured = os.environ.get("INTEFLOW_LEARNER_DICTIONARY")
+        if configured:
+            path = Path(configured).expanduser()
+            if path.is_dir():
+                return _first_eudb(path)
+            return path if path.is_file() else None
+
+        root = _dictionary_root()
+        preferred = _first_eudb(root / "learners")
+        if preferred is not None:
+            return preferred
+        standard = source_path("standard")
+        for candidate in sorted(root.glob("*.eudb")):
+            if candidate == standard:
+                continue
+            if _looks_like_learner(candidate):
+                return candidate
+        return None
+
     configured = os.environ.get("INTEFLOW_DICTIONARY")
     if configured:
         path = Path(configured).expanduser()
     else:
         path = REPO_ROOT / "dictionary"
     if path.is_dir():
-        candidates = sorted(path.glob("*.eudb"))
-        return candidates[0] if candidates else None
+        return _first_eudb(path)
     return path if path.is_file() else None
 
 
-def index_path() -> Path:
+def index_path(kind: str = "standard") -> Path:
+    kind = _kind(kind)
+    if kind == "learner":
+        configured = os.environ.get("INTEFLOW_LEARNER_DICTIONARY_INDEX")
+        if configured:
+            return Path(configured).expanduser()
+        return DATA_DIR / "dictionary" / "learners.db"
+
     configured = os.environ.get("INTEFLOW_DICTIONARY_INDEX")
     if configured:
         return Path(configured).expanduser()
@@ -92,14 +160,15 @@ def _read_meta(index: Path) -> dict[str, str]:
         return {}
 
 
-def _status_unlocked() -> dict:
-    source = source_path()
-    index = index_path()
+def _status_unlocked(kind: str = "standard") -> dict:
+    source = source_path(kind)
+    index = index_path(kind)
     meta = _read_meta(index)
     indexed = bool(meta)
     stale = True
     if source is None:
         return {
+            "kind": kind,
             "available": False,
             "indexed": indexed,
             "stale": True,
@@ -125,6 +194,7 @@ def _status_unlocked() -> dict:
         stale = not same
 
     return {
+        "kind": kind,
         "available": True,
         "indexed": indexed,
         "stale": stale,
@@ -144,9 +214,9 @@ def _is_building() -> bool:
         return _BUILDING
 
 
-def status() -> dict:
-    """Describe the dictionary without building anything."""
-    return _status_unlocked()
+def status(kind: str = "standard") -> dict:
+    """Describe one dictionary source without building anything."""
+    return _status_unlocked(_kind(kind))
 
 
 # --------------------------------------------------------------------------
@@ -154,35 +224,38 @@ def status() -> dict:
 # --------------------------------------------------------------------------
 
 
-def ensure_index(force: bool = False) -> dict:
+def ensure_index(force: bool = False, kind: str = "standard") -> dict:
     """Build the derived SQLite index if it is missing or stale."""
     global _BUILDING
 
+    kind = _kind(kind)
+    label = "learner's dictionary" if kind == "learner" else "Merriam-Webster dictionary"
+
     with _BUILD_LOCK:
-        current = _status_unlocked()
+        current = _status_unlocked(kind)
         if current["available"] and current["indexed"] and not current["stale"] and not force:
             return current
         if not current["available"]:
-            raise DictionaryError("no Merriam-Webster .eudb file was found")
+            raise DictionaryError(f"no {label} .eudb file was found")
 
-        source = source_path()
+        source = source_path(kind)
         if source is None:  # pragma: no cover - guarded by status
-            raise DictionaryError("no Merriam-Webster .eudb file was found")
+            raise DictionaryError(f"no {label} .eudb file was found")
 
         with _STATE_LOCK:
             _BUILDING = True
         try:
-            _build(source, index_path())
+            _build(source, index_path(kind), kind)
         except (EudbError, OSError, sqlite3.Error) as exc:
             raise DictionaryError(f"could not index the dictionary: {exc}") from exc
         finally:
             with _STATE_LOCK:
                 _BUILDING = False
 
-    return _status_unlocked()
+    return _status_unlocked(kind)
 
 
-def _build(source: Path, target: Path) -> None:
+def _build(source: Path, target: Path, kind: str = "standard") -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
     temp = target.with_name(target.name + ".tmp")
     if temp.exists():
@@ -223,6 +296,7 @@ def _build(source: Path, target: Path) -> None:
             "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
             [
                 ("version", str(INDEX_VERSION)),
+                ("kind", kind),
                 ("source", str(source)),
                 ("source_size", str(stat.st_size)),
                 ("source_mtime_ns", str(stat.st_mtime_ns)),
@@ -270,15 +344,22 @@ def _row(row: sqlite3.Row, full: bool = False) -> dict:
     }
 
 
-def lookup(query: str, limit: int = 20) -> dict:
+def lookup(query: str, limit: int = 20, kind: str = "standard") -> dict:
     """Exact matches plus prefix/contains suggestions for one query."""
+    kind = _kind(kind)
     key = normalize(query)
     limit = max(1, min(int(limit), 50))
     if not key:
-        return {"query": query, "exact": [], "matches": [], "entry_count": 0}
+        return {
+            "query": query,
+            "exact": [],
+            "matches": [],
+            "entry_count": 0,
+            "source": kind,
+        }
 
-    current = ensure_index()
-    index = index_path()
+    current = ensure_index(kind=kind)
+    index = index_path(kind)
     if not index.is_file():  # pragma: no cover - ensure_index guarantees it
         raise DictionaryError("the dictionary index is missing")
 
@@ -322,14 +403,16 @@ def lookup(query: str, limit: int = 20) -> dict:
         "exact": [_row(row, full=True) for row in exact],
         "matches": [_row(row) for row in matches[:limit]],
         "entry_count": current["entry_count"],
+        "source": kind,
     }
 
 
-def get_entry(entry_id: int) -> dict | None:
+def get_entry(entry_id: int, kind: str = "standard") -> dict | None:
     """One full entry by id (used to feed candidate senses to the LLM)."""
-    index = index_path()
+    kind = _kind(kind)
+    index = index_path(kind)
     if not index.is_file():
-        ensure_index()
+        ensure_index(kind=kind)
     with _connect(index) as conn:
         row = conn.execute(
             "SELECT id, headword, definition FROM entries WHERE id = ?",

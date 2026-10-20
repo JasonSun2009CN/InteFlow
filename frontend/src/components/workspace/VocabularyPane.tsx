@@ -40,9 +40,9 @@ function contextOf(item: ResultItem | null): string {
  * Vocabulary pane: the exam's word list beside the question, with drag-and-drop.
  *
  * A word dragged from the question or an option is dropped here; the backend
- * looks it up in the local Merriam-Webster index and asks the LLM to pick the
- * sense that fits the context. Without an API key the first sense is used and a
- * warning is shown — the drop never dead-ends.
+ * looks it up in the local Merriam-Webster index and (when enabled in Settings)
+ * asks the LLM to pick the sense that fits the context. Otherwise the first
+ * sense is used and a warning is shown — the drop never dead-ends.
  */
 export default function VocabularyPane({ docId, item }: Props) {
   const [grid, setGrid] = useState<WordGrid | null>(null);
@@ -257,7 +257,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       {dropActive && (
         <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-blue-50/80">
           <p className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
-            Drop to add · AI picks the Merriam-Webster sense
+            Drop to add · Merriam-Webster sense for this sentence
           </p>
         </div>
       )}
@@ -265,7 +265,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       {dropping && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-white/80">
           <p className="rounded-lg border bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
-            Looking up the best sense…
+            Looking up the word…
           </p>
         </div>
       )}

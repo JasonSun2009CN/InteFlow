@@ -1,0 +1,67 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { api, type AppSettings } from "../api/client";
+import SettingsPage from "./SettingsPage";
+
+vi.mock("../api/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/client")>();
+  return {
+    ...actual,
+    api: {
+      ...actual.api,
+      getSettings: vi.fn(),
+      saveSettings: vi.fn(),
+      listProviders: vi.fn(),
+      testSettings: vi.fn(),
+    },
+  };
+});
+
+const getSettings = vi.mocked(api.getSettings);
+const saveSettings = vi.mocked(api.saveSettings);
+const listProviders = vi.mocked(api.listProviders);
+
+const settings: AppSettings = {
+  provider: "orcarouter",
+  protocol: "openai",
+  base_url: "https://example.test/v1",
+  model: "demo-model",
+  api_key_masked: "",
+  api_key_set: false,
+  user_name: "Alex",
+  llm_fallback: true,
+  vocab_ai_sense: true,
+  vocab_learner_definitions: false,
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  getSettings.mockResolvedValue(settings);
+  listProviders.mockResolvedValue([]);
+  saveSettings.mockImplementation(async (input) => ({ ...settings, ...input }));
+});
+
+describe("SettingsPage vocabulary options", () => {
+  it("loads and saves the AI sense and learner definition toggles", async () => {
+    render(<SettingsPage />);
+
+    const aiSense = await screen.findByRole("checkbox", { name: /AI sense matching/ });
+    const learner = screen.getByRole("checkbox", { name: /Use learner's definitions/ });
+    expect(aiSense).toBeChecked();
+    expect(learner).not.toBeChecked();
+
+    fireEvent.click(aiSense);
+    fireEvent.click(learner);
+    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
+
+    await waitFor(() =>
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          vocab_ai_sense: false,
+          vocab_learner_definitions: true,
+        }),
+      ),
+    );
+    expect(await screen.findByText("Settings saved.")).toBeInTheDocument();
+  });
+});

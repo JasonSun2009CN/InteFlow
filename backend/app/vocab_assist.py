@@ -124,7 +124,13 @@ def _parse_json(text: str) -> dict | None:
     return value if isinstance(value, dict) else None
 
 
-def choose_definition(word: str, context: str, candidates: list[dict]) -> dict:
+def choose_definition(
+    word: str,
+    context: str,
+    candidates: list[dict],
+    *,
+    use_ai: bool = True,
+) -> dict:
     """Return ``{entry_id, pos, definition, used_ai, reason, warning}``."""
     if not candidates:
         return {
@@ -139,6 +145,16 @@ def choose_definition(word: str, context: str, candidates: list[dict]) -> dict:
     fallback = candidates[0]
     fallback_pos = first_pos(fallback.get("definition") or "")
     fallback_definition = first_sense(fallback.get("definition") or "")
+
+    if not use_ai:
+        return {
+            "entry_id": fallback["id"],
+            "pos": fallback_pos,
+            "definition": fallback_definition,
+            "used_ai": False,
+            "reason": "",
+            "warning": "AI sense matching is off; used the first Merriam-Webster sense.",
+        }
 
     if not llm.configured():
         return {
@@ -197,7 +213,9 @@ def choose_definition(word: str, context: str, candidates: list[dict]) -> dict:
     }
 
 
-def candidates_for(word: str, limit: int = 6) -> list[dict]:
+def candidates_for(
+    word: str, limit: int = 6, kind: str = "standard"
+) -> list[dict]:
     """Full definitions for the exact/prefix matches of one word.
 
     ``DictionaryError`` is intentionally not swallowed: the caller can tell the
@@ -205,7 +223,7 @@ def candidates_for(word: str, limit: int = 6) -> list[dict]:
     """
     from app import dictionary
 
-    result = dictionary.lookup(word, limit=limit)
+    result = dictionary.lookup(word, limit=limit, kind=kind)
 
     seen: set[int] = set()
     out: list[dict] = []
@@ -218,7 +236,7 @@ def candidates_for(word: str, limit: int = 6) -> list[dict]:
             break
         if suggestion["id"] in seen:
             continue
-        full = dictionary.get_entry(suggestion["id"])
+        full = dictionary.get_entry(suggestion["id"], kind=kind)
         if full:
             out.append(full)
             seen.add(full["id"])

@@ -19,6 +19,8 @@ export default function SettingsPage() {
   const [model, setModel] = useState("");
   const [userName, setUserName] = useState("");
   const [llmFallback, setLlmFallback] = useState(true);
+  const [vocabAiSense, setVocabAiSense] = useState(true);
+  const [vocabLearner, setVocabLearner] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
@@ -35,6 +37,8 @@ export default function SettingsPage() {
         setModel(s.model);
         setUserName(s.user_name);
         setLlmFallback(s.llm_fallback);
+        setVocabAiSense(s.vocab_ai_sense);
+        setVocabLearner(s.vocab_learner_definitions);
         setProviders(list);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
@@ -71,6 +75,8 @@ export default function SettingsPage() {
         model: model.trim(),
         user_name: userName.trim(),
         llm_fallback: llmFallback,
+        vocab_ai_sense: vocabAiSense,
+        vocab_learner_definitions: vocabLearner,
         ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
       });
       setStored(saved);
@@ -291,6 +297,54 @@ export default function SettingsPage() {
               </span>
             </span>
           </label>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm font-medium text-slate-800">Vocabulary</p>
+          <div className="mt-3 space-y-3">
+            <label className="flex items-start gap-3" htmlFor="vocab-ai-sense">
+              <input
+                id="vocab-ai-sense"
+                type="checkbox"
+                checked={vocabAiSense}
+                onChange={(e) => setVocabAiSense(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  AI sense matching
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  When you drag a word into the Vocabulary pane, ask the configured model
+                  to choose the Merriam-Webster sense that fits the sentence. Turn this
+                  off to use the first sense every time with no token cost.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex items-start gap-3" htmlFor="vocab-learner">
+              <input
+                id="vocab-learner"
+                type="checkbox"
+                checked={vocabLearner}
+                onChange={(e) => setVocabLearner(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  Use learner&apos;s definitions
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  Prefer a learner&apos;s dictionary when one is installed. Place its{" "}
+                  <code className="rounded bg-slate-200 px-1">.eudb</code> file in{" "}
+                  <code className="rounded bg-slate-200 px-1">dictionary/learners/</code>;
+                  lookups and captured senses use it first, then fall back to the standard
+                  dictionary. The standard Collegiate file does not include learner
+                  definitions on its own.
+                </span>
+              </span>
+            </label>
+          </div>
         </div>
 
         <div className="flex gap-3 pt-1">

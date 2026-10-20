@@ -341,8 +341,8 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           >
             {(leftTool === "vocabulary" || rightTool === "vocabulary") && (
               <p className="mb-3 rounded-lg border border-dashed border-blue-300 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
-                Select a word here, then drag it onto the Vocabulary pane — AI picks the
-                Merriam-Webster sense that fits the sentence.
+                Select a word here, then drag it onto the Vocabulary pane — the
+                Merriam-Webster sense that fits the sentence is added.
               </p>
             )}
             {questionPane}

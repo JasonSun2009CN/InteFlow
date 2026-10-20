@@ -10,6 +10,7 @@ and can be rebuilt at any time.
 """
 
 from app.dictionary.store import (
+    KINDS,
     DictionaryError,
     ensure_index,
     get_entry,
@@ -21,6 +22,7 @@ from app.dictionary.store import (
 )
 
 __all__ = [
+    "KINDS",
     "DictionaryError",
     "ensure_index",
     "get_entry",

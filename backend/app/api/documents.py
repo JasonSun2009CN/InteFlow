@@ -18,6 +18,7 @@ from app.export import build_export, render_docx_bytes, render_pdf_bytes
 from app.repos import words as words_repo
 from app.ifmd.parser import OPTION_LETTERS, set_answers
 from app.repos import sessions as session_repo
+from app.repos import settings as settings_repo
 
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
@@ -79,6 +80,7 @@ class EntryPayload(BaseModel):
     entry_id: int
     context: str = ""
     question_no: int | None = None
+    source: str = "standard"
 
 
 def _fail(message: str, status: int = 422) -> None:
@@ -300,9 +302,12 @@ def add_word_from_entry(doc_id: int, payload: EntryPayload) -> dict:
     if repos.documents.get_document(doc_id) is None:
         _fail("document not found", 404)
         raise                                          # pragma: no cover
+    if payload.source not in dictionary.KINDS:
+        _fail(f"source must be one of {', '.join(dictionary.KINDS)}", 400)
+        raise                                          # pragma: no cover
 
     try:
-        entry = dictionary.get_entry(payload.entry_id)
+        entry = dictionary.get_entry(payload.entry_id, kind=payload.source)
     except dictionary.DictionaryError as exc:
         _fail(str(exc), 409)
         raise                                          # pragma: no cover
@@ -337,6 +342,7 @@ def add_word_from_entry(doc_id: int, payload: EntryPayload) -> dict:
             "dictionary_word": entry["headword"],
             "reason": "",
             "warning": "",
+            "source": payload.source,
         }
     )
     return result
@@ -344,11 +350,11 @@ def add_word_from_entry(doc_id: int, payload: EntryPayload) -> dict:
 
 @router.post("/{doc_id}/words/entries/from-selection")
 def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
-    """Drag-to-vocabulary: look the word up, let the LLM pick the best MW sense.
+    """Drag-to-vocabulary: look the word up and choose its MW definition.
 
-    This is an explicit user action, so an LLM call is allowed. Without a key
-    (or without a matching entry) the word is still added, with a warning, so
-    the gesture never dead-ends.
+    AI sense matching is an explicit user action and can be switched off in
+    Settings. Without AI (or without a matching entry) the word is still added
+    with a warning, so the gesture never dead-ends.
     """
     if repos.documents.get_document(doc_id) is None:
         _fail("document not found", 404)
@@ -362,16 +368,57 @@ def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
     question_no, context = _question_context(
         doc_id, payload.question_id, payload.context
     )
-    status = dictionary.status()
+
+    kind = "standard"
+    learner_note = ""
+    if settings_repo.learner_definitions_enabled():
+        learner = dictionary.status("learner")
+        if learner["available"]:
+            kind = "learner"
+
+    status = dictionary.status(kind)
     dictionary_error = ""
     try:
-        candidates = vocab_assist.candidates_for(text)
+        candidates = vocab_assist.candidates_for(text, kind=kind)
     except dictionary.DictionaryError as exc:
-        candidates = []
-        dictionary_error = str(exc)
+        if kind == "learner":
+            learner_note = (
+                f"Learner's dictionary unavailable ({exc}); "
+                "used the standard dictionary."
+            )
+            kind = "standard"
+            status = dictionary.status("standard")
+            try:
+                candidates = vocab_assist.candidates_for(text)
+            except dictionary.DictionaryError as fallback_exc:
+                candidates = []
+                dictionary_error = str(fallback_exc)
+        else:
+            candidates = []
+            dictionary_error = str(exc)
+
+    # A learner's dictionary may be narrower than the standard one; retry the
+    # standard source before giving up on a definition.
+    if not candidates and kind == "learner":
+        try:
+            candidates = vocab_assist.candidates_for(text)
+        except dictionary.DictionaryError:
+            candidates = []
+        if candidates:
+            kind = "standard"
+            status = dictionary.status("standard")
+            learner_note = (
+                "Not found in the learner's dictionary; "
+                "used the standard dictionary."
+            )
 
     if candidates:
-        choice = vocab_assist.choose_definition(text, context or text, candidates)
+        choice = vocab_assist.choose_definition(
+            text,
+            context or text,
+            candidates,
+            use_ai=settings_repo.vocabulary_ai_sense_enabled(),
+        )
         chosen = next(
             (c for c in candidates if c["id"] == choice.get("entry_id")), candidates[0]
         )
@@ -397,8 +444,11 @@ def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
                 "entry_id": chosen["id"],
                 "dictionary_word": chosen["headword"],
                 "reason": choice["reason"],
-                "warning": choice["warning"],
+                "warning": f"{learner_note} {choice['warning']}".strip(),
                 "selected": text,
+                "source": kind,
+                "dictionary_title": status.get("title"),
+                "learner": kind == "learner",
             }
         )
         return result
@@ -428,6 +478,9 @@ def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
                 )
             ),
             "selected": text,
+            "source": kind,
+            "dictionary_title": status.get("title"),
+            "learner": kind == "learner",
         }
     )
     return result

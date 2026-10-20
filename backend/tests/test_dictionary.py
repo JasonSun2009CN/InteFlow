@@ -51,6 +51,7 @@ def build_eudb(
     out += struct.pack("<i", len(blocks))
     out += b"".join(struct.pack("<Q", offset) for offset in offsets)
     out += b"".join(blocks)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(bytes(out))
     return path
 
@@ -216,6 +217,41 @@ def test_ensure_index_reports_missing_source(tmp_path: Path, monkeypatch) -> Non
 # --------------------------------------------------------------------------
 
 
+def test_learner_dictionary_has_its_own_index(
+    dictionary_env: Path, tmp_path: Path, monkeypatch
+) -> None:
+    learner = build_eudb(
+        tmp_path / "learners" / "advanced-learner.eudb",
+        [("abate", "v.<br>Function: verb<br>: to become weaker : decrease")],
+        title="Merriam-Webster's Advanced Learner's English Dictionary",
+    )
+    learner_index = tmp_path / "index" / "learners.db"
+    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(learner))
+    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY_INDEX", str(learner_index))
+
+    before = dictionary.status("learner")
+    assert before["available"] is True
+    assert before["indexed"] is False
+
+    result = dictionary.lookup("abate", kind="learner")
+    assert result["source"] == "learner"
+    assert "become weaker" in result["exact"][0]["definition"]
+    assert learner_index.is_file()
+
+    status = dictionary.status("learner")
+    assert status["kind"] == "learner"
+    assert status["entry_count"] == 1
+    assert status["title"].startswith("Merriam-Webster's Advanced")
+
+
+def test_learner_source_is_optional(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(tmp_path / "missing.eudb"))
+    status = dictionary.status("learner")
+    assert status["available"] is False
+    with pytest.raises(dictionary.DictionaryError, match="learner's dictionary"):
+        dictionary.ensure_index(kind="learner")
+
+
 def test_dictionary_api_status_and_lookup(client, dictionary_env: Path) -> None:
     status = client.get("/api/dictionary/status")
     assert status.status_code == 200
@@ -229,6 +265,45 @@ def test_dictionary_api_status_and_lookup(client, dictionary_env: Path) -> None:
     assert "less in amount" in body["exact"][0]["definition"]
 
     assert client.get("/api/dictionary/lookup", params={"q": ""}).status_code == 422
+
+
+def test_dictionary_api_auto_uses_learner_when_enabled(
+    client, dictionary_env: Path, tmp_path: Path, monkeypatch
+) -> None:
+    from app.repos import settings as settings_repo
+
+    learner = build_eudb(
+        tmp_path / "learners" / "learner.eudb",
+        [("abate", "v.<br>Function: verb<br>: to become weaker")],
+        title="Learner's Dictionary",
+    )
+    monkeypatch.setenv("INTEFLOW_LEARNER_DICTIONARY", str(learner))
+    monkeypatch.setenv(
+        "INTEFLOW_LEARNER_DICTIONARY_INDEX", str(tmp_path / "index" / "learners.db")
+    )
+    monkeypatch.setattr(settings_repo, "learner_definitions_enabled", lambda: True)
+
+    status = client.get("/api/dictionary/status").json()
+    assert status["learner_enabled"] is True
+    assert status["learner"]["available"] is True
+
+    body = client.get("/api/dictionary/lookup", params={"q": "abate"}).json()
+    assert body["source"] == "learner"
+    assert body["learner"] is True
+    assert "become weaker" in body["exact"][0]["definition"]
+
+    explicit = client.get(
+        "/api/dictionary/lookup", params={"q": "abate", "source": "standard"}
+    ).json()
+    assert explicit["source"] == "standard"
+    assert "make less" in explicit["exact"][0]["definition"]
+
+
+def test_dictionary_api_rejects_an_unknown_source(client, dictionary_env: Path) -> None:
+    resp = client.get(
+        "/api/dictionary/lookup", params={"q": "abate", "source": "learner-plus"}
+    )
+    assert resp.status_code == 400
 
 
 def test_dictionary_api_missing_file_is_409(client, tmp_path: Path, monkeypatch) -> None:

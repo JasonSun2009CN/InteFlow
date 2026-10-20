@@ -29,6 +29,23 @@ def test_defaults(client: TestClient) -> None:
     assert "base_url" in body and "model" in body
 
 
+def test_vocabulary_toggles_default_and_roundtrip(client: TestClient) -> None:
+    body = client.get("/api/settings").json()
+    assert body["vocab_ai_sense"] is True
+    assert body["vocab_learner_definitions"] is False
+
+    saved = client.put(
+        "/api/settings",
+        json={"vocab_ai_sense": False, "vocab_learner_definitions": True},
+    ).json()
+    assert saved["vocab_ai_sense"] is False
+    assert saved["vocab_learner_definitions"] is True
+
+    again = client.get("/api/settings").json()
+    assert again["vocab_ai_sense"] is False
+    assert again["vocab_learner_definitions"] is True
+
+
 def test_put_stores_and_masks_key(client: TestClient) -> None:
     put = client.put(
         "/api/settings",

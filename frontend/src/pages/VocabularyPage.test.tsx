@@ -76,6 +76,7 @@ const grid: WordGrid = {
 };
 
 const status: DictionaryStatus = {
+  kind: "standard",
   available: true,
   indexed: true,
   stale: false,
@@ -87,6 +88,21 @@ const status: DictionaryStatus = {
   title: "Merriam-Webster's Collegiate Dictionary",
   author: "Merriam-Webster",
   building: false,
+  learner_enabled: false,
+  learner: {
+    kind: "learner",
+    available: false,
+    indexed: false,
+    stale: true,
+    source: null,
+    source_name: null,
+    index_path: "/data/dictionary/learners.db",
+    entry_count: 0,
+    built_at: null,
+    title: null,
+    author: null,
+    building: false,
+  },
 };
 
 function renderPage() {
@@ -170,6 +186,9 @@ describe("VocabularyPage", () => {
       ],
       matches: [],
       entry_count: 92006,
+      source: "standard",
+      learner: false,
+      fallback: "",
     });
     addWordFromEntry.mockResolvedValue({
       grid,
@@ -194,7 +213,58 @@ describe("VocabularyPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
 
     await waitFor(() =>
-      expect(addWordFromEntry).toHaveBeenCalledWith(7, { entry_id: 12 }),
+      expect(addWordFromEntry).toHaveBeenCalledWith(7, {
+        entry_id: 12,
+        source: "standard",
+      }),
+    );
+  });
+
+  it("uses the learner source from a lookup when adding", async () => {
+    dictionaryLookup.mockResolvedValue({
+      query: "abate",
+      exact: [
+        {
+          id: 77,
+          headword: "abate",
+          definition: "v.\nFunction: verb\n: to become weaker",
+          snippet: "v. Function: verb : to become weaker",
+        },
+      ],
+      matches: [],
+      entry_count: 50000,
+      source: "learner",
+      learner: true,
+      fallback: "",
+    });
+    addWordFromEntry.mockResolvedValue({
+      grid,
+      row: grid.rows[0],
+      row_id: "r1",
+      word: "abate",
+      created: true,
+      matched: true,
+      used_ai: false,
+      pos: "v.",
+      definition: "to become weaker",
+      source: "learner",
+    });
+    renderPage();
+    await screen.findByTestId("vocab-grid");
+
+    fireEvent.change(screen.getByLabelText("Look up a word"), {
+      target: { value: "abate" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Look up" }));
+
+    expect(await screen.findByText("Learner's definition")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+
+    await waitFor(() =>
+      expect(addWordFromEntry).toHaveBeenCalledWith(7, {
+        entry_id: 77,
+        source: "learner",
+      }),
     );
   });
 

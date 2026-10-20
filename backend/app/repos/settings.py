@@ -14,6 +14,8 @@ ALLOWED_KEYS = (
     "model",
     "user_name",
     "llm_fallback",
+    "vocab_ai_sense",
+    "vocab_learner_definitions",
 )
 
 
@@ -41,3 +43,13 @@ def set_values(values: dict[str, str]) -> None:
 def llm_fallback_enabled() -> bool:
     """Whether AI may rescue an import whose deterministic parse failed."""
     return get_all().get("llm_fallback", "1") != "0"
+
+
+def vocabulary_ai_sense_enabled() -> bool:
+    """Whether drag-to-vocabulary may call the LLM to choose the best sense."""
+    return get_all().get("vocab_ai_sense", "1") != "0"
+
+
+def learner_definitions_enabled() -> bool:
+    """Whether to prefer a learner's dictionary when one is installed."""
+    return get_all().get("vocab_learner_definitions", "0") == "1"

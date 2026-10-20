@@ -234,7 +234,10 @@ function VocabularyDetail({
     if (!(await save())) return;
     setBusy(true);
     try {
-      const result = await api.addWordFromEntry(docId, { entry_id: entryId });
+      const result = await api.addWordFromEntry(docId, {
+        entry_id: entryId,
+        ...(lookup ? { source: lookup.source } : {}),
+      });
       setGrid(result.grid);
       setDirty(false);
       setMsg(
@@ -425,14 +428,40 @@ function VocabularyDetail({
                   no tokens.
                 </p>
               )}
+              {status?.learner_enabled && !status.learner?.available && (
+                <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs leading-5 text-amber-800">
+                  Learner&apos;s definitions are on, but no learner&apos;s .eudb was found
+                  in <code>dictionary/learners/</code>. Using the standard dictionary.
+                </p>
+              )}
+              {status?.learner?.available && (
+                <p className="mt-2 text-xs leading-5 text-slate-500">
+                  {status.learner_enabled
+                    ? "Learner's dictionary in use"
+                    : "Learner's dictionary installed — turn it on in Settings"}
+                  {status.learner.indexed
+                    ? ` · ${status.learner.entry_count.toLocaleString()} entries.`
+                    : " · its index builds on first lookup."}
+                </p>
+              )}
               {lookupErr && (
                 <p className="mt-2 rounded-lg bg-red-50 px-2 py-1.5 text-xs text-red-700">
                   {lookupErr}
                 </p>
               )}
+              {lookup?.fallback && (
+                <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                  {lookup.fallback}
+                </p>
+              )}
 
               {lookup && (
                 <div className="mt-3 space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    {lookup.source === "learner"
+                      ? "Learner's definition"
+                      : "Collegiate definition"}
+                  </p>
                   {lookup.exact.length === 0 && (
                     <p className="text-xs text-slate-500">
                       No exact entry. Pick a suggestion below.
@@ -484,8 +513,9 @@ function VocabularyDetail({
               <p className="font-medium text-slate-700">How words get here</p>
               <p className="mt-1">
                 Drag a word from a question or option onto the Vocabulary pane in the review
-                workspace — AI picks the Merriam-Webster sense that fits the sentence. You can
-                also add words here or edit any cell above.
+                workspace — the Merriam-Webster sense that fits the sentence is added. AI
+                sense matching and learner&apos;s definitions can be toggled in Settings. You
+                can also add words here or edit any cell above.
               </p>
             </div>
           </aside>

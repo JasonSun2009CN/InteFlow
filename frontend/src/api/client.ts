@@ -150,6 +150,7 @@ export interface WordGrid {
 
 /** Local Merriam-Webster index state (`GET /api/dictionary/status`). */
 export interface DictionaryStatus {
+  kind: "standard" | "learner";
   available: boolean;
   indexed: boolean;
   stale: boolean;
@@ -161,6 +162,9 @@ export interface DictionaryStatus {
   title: string | null;
   author: string | null;
   building: boolean;
+  /** Only present on the standard status returned by `/api/dictionary/status`. */
+  learner?: Omit<DictionaryStatus, "learner">;
+  learner_enabled?: boolean;
 }
 
 export interface DictionaryEntry {
@@ -176,6 +180,10 @@ export interface DictionaryLookup {
   exact: DictionaryEntry[];
   matches: DictionaryEntry[];
   entry_count: number;
+  source: "standard" | "learner";
+  learner: boolean;
+  /** Set when an automatic learner lookup had to fall back. */
+  fallback: string;
 }
 
 /** One exam in the vocabulary collection. */
@@ -221,6 +229,9 @@ export interface WordEntryResult {
   reason?: string;
   warning?: string;
   selected?: string;
+  source?: "standard" | "learner";
+  dictionary_title?: string | null;
+  learner?: boolean;
 }
 
 /** One question's analysis page — the notebook is one page per question. */
@@ -294,6 +305,8 @@ export interface AppSettings {
   api_key_set: boolean;
   user_name: string;
   llm_fallback: boolean;
+  vocab_ai_sense: boolean;
+  vocab_learner_definitions: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -314,6 +327,8 @@ export interface SettingsInput {
   clear_key?: boolean;
   user_name?: string;
   llm_fallback?: boolean;
+  vocab_ai_sense?: boolean;
+  vocab_learner_definitions?: boolean;
 }
 
 export class ApiError extends Error {
@@ -487,7 +502,12 @@ export const api = {
   /** Add the exact MW entry a user picked in dictionary lookup (0 token). */
   addWordFromEntry: (
     docId: number,
-    input: { entry_id: number; context?: string; question_no?: number | null },
+    input: {
+      entry_id: number;
+      context?: string;
+      question_no?: number | null;
+      source?: "standard" | "learner";
+    },
   ) =>
     request<WordEntryResult>(`/api/documents/${docId}/words/entries/from-entry`, {
       method: "POST",

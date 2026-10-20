@@ -59,12 +59,14 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
 | **Practice** | Exam-style fullscreen, **count-up or countdown timer**, single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
 | **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
-| **Workspace** | One analysis page per question (Markdown, formulas/images), vocabulary sheet `Word \| Meaning \| Notes` (add/edit/delete + export `.xlsx`), **AI explain** (explicit click), export drawer |
+| **Workspace** | **2-of-4 pane split** (Question · Analysis · AI Tutor · Vocabulary) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, export drawer |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback** toggle |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **learner's definitions** |
 
-> **Planned (placeholders in place, details TBD):** in-app **dictionary lookup** for selected words.
-> See [`docs/IDEAS.md`](docs/IDEAS.md) and [`ROADMAP.md`](ROADMAP.md).
+> **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
+> Put the standard file in `dictionary/`; optionally put a learner's dictionary in `dictionary/learners/`
+> and enable **Use learner's definitions**. The index is built automatically on first lookup (0 token).
+> See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Two iron rules
 
@@ -233,7 +235,7 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 - **Whole document**: export **PDF** / **DOCX** (questions, answers and analysis) from the Library.
 - **Vocabulary**: **Export .xlsx**.
 
-### 6. Settings (name / LLM / fallback)
+### 6. Settings (name / LLM / fallback / vocabulary)
 
 **Not required for anything except AI explain.** Open **Settings** (`/settings`) from the sidebar:
 
@@ -244,7 +246,9 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
 4. **Base URL** override;
 5. **API Key** (write-only, masked);
 6. **Model**;
-7. **Save settings** / **Test connection**.
+7. **AI sense matching** — let the model choose the Merriam-Webster sense when a word is dragged into the vocabulary pane (off = first sense, no tokens);
+8. **Use learner's definitions** — prefer a learner's dictionary installed under `dictionary/learners/` (falls back to the standard dictionary);
+9. **Save settings** / **Test connection**.
 
 Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 
@@ -263,6 +267,10 @@ Base URLs are kept exactly as each vendor documents them: OpenAI-style ones alre
 | `INTEFLOW_API` | `http://localhost:8000` | Vite dev-proxy backend target |
 | `INTEFLOW_OCR_LANG` | `eng` | Tesseract OCR language |
 | `INTEFLOW_DEFAULT_SECTION` | `rw` | Fallback section label when the converter finds no section heading |
+| `INTEFLOW_DICTIONARY` | `./dictionary` | Standard Eudic `.eudb` file or folder |
+| `INTEFLOW_DICTIONARY_INDEX` | `data/dictionary/mw.db` | Standard dictionary index |
+| `INTEFLOW_LEARNER_DICTIONARY` | `./dictionary/learners` | Optional learner's Eudic `.eudb` file or folder |
+| `INTEFLOW_LEARNER_DICTIONARY_INDEX` | `data/dictionary/learners.db` | Learner's dictionary index |
 
 Ports: backend `8000`, frontend `5173`.
 
