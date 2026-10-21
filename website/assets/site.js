@@ -15,6 +15,33 @@
   var reduceMotion =
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var isEnglish = /^en/i.test(doc.documentElement.lang || "");
+  var COPY = isEnglish
+    ? {
+        openNav: "Open navigation",
+        closeNav: "Close navigation",
+        showCount: function (shown) {
+          return "Showing " + shown + " items";
+        },
+        copied: "Copied",
+        copyFailed: "Copy failed",
+        themePreview: " theme preview"
+      }
+    : {
+        openNav: "打开导航",
+        closeNav: "关闭导航",
+        showCount: function (shown) {
+          return "显示 " + shown + " 项";
+        },
+        copied: "已复制",
+        copyFailed: "复制失败",
+        themePreview: " 主题预览"
+      };
+
+  function langHref(href) {
+    if (!isEnglish) return href;
+    return href + (href.indexOf("?") === -1 ? "?" : "&") + "lang=en";
+  }
 
   /* ------------------------------------------------------------ header + bar */
 
@@ -22,7 +49,7 @@
     if (!header || !menuBtn) return;
     header.classList.remove("is-open");
     menuBtn.setAttribute("aria-expanded", "false");
-    menuBtn.setAttribute("aria-label", "打开导航");
+    menuBtn.setAttribute("aria-label", COPY.openNav);
   }
 
   function onScroll() {
@@ -40,7 +67,7 @@
       var open = !header.classList.contains("is-open");
       header.classList.toggle("is-open", open);
       menuBtn.setAttribute("aria-expanded", String(open));
-      menuBtn.setAttribute("aria-label", open ? "关闭导航" : "打开导航");
+      menuBtn.setAttribute("aria-label", open ? COPY.closeNav : COPY.openNav);
     });
   }
 
@@ -188,7 +215,7 @@
         }
       });
 
-      if (filterCount) filterCount.textContent = "显示 " + shown + " 项";
+      if (filterCount) filterCount.textContent = COPY.showCount(shown);
     });
   });
 
@@ -227,6 +254,19 @@
     }
   };
 
+  if (isEnglish) {
+    var THEME_NOTES_EN = {
+      "clear-blue": "Blue and white, clean borders — the closest to the interface you know from test day. The default theme.",
+      "paper-ink": "Warm paper, serif headings and a single stamp red. Like a quiet printed workbook, made for long reading sessions.",
+      "minimal-light": "Neutral greys, no ornament, maximum information density. Close to Notion / Linear and easy on the eyes over long sessions.",
+      "midnight-navy": "A dark navy academic interface with cool blue highlights and low-glare borders. For night sessions or a dark-mode preference.",
+      "warm-editorial": "Cream background, terracotta accents and large type. Livelier than Paper & Ink, with a magazine-like reading feel."
+    };
+    Object.keys(THEME_NOTES_EN).forEach(function (id) {
+      if (THEMES[id]) THEMES[id].note = THEME_NOTES_EN[id];
+    });
+  }
+
   var themeButtons = Array.prototype.slice.call(
     doc.querySelectorAll("[data-theme-id]")
   );
@@ -260,7 +300,7 @@
 
     if (themeName) themeName.textContent = theme.name;
     if (themeNote) themeNote.textContent = theme.note;
-    if (themeOpen) themeOpen.setAttribute("href", theme.href);
+    if (themeOpen) themeOpen.setAttribute("href", langHref(theme.href));
     if (themePalette) {
       themePalette.innerHTML = theme.palette
         .map(function (color) {
@@ -276,8 +316,8 @@
     }
 
     if (themeLoading) themeLoading.classList.remove("is-ready");
-    themeFrame.title = theme.name + " 主题预览";
-    themeFrame.src = theme.href;
+    themeFrame.title = theme.name + COPY.themePreview;
+    themeFrame.src = langHref(theme.href);
     fitThemeFrame();
 
     window.clearTimeout(themeLoadTimer);
@@ -379,7 +419,7 @@
   function copyText(text, button) {
     var original = button.textContent;
     var done = function () {
-      button.textContent = "已复制";
+      button.textContent = COPY.copied;
       button.classList.add("is-copied");
       window.setTimeout(function () {
         button.textContent = original;
@@ -387,7 +427,7 @@
       }, 1600);
     };
     var fail = function () {
-      button.textContent = "复制失败";
+      button.textContent = COPY.copyFailed;
       window.setTimeout(function () {
         button.textContent = original;
       }, 1600);

@@ -13,6 +13,10 @@
 (function () {
   "use strict";
 
+  var backHref = /[?&]lang=en(?:&|$)/.test(window.location.search)
+    ? "../en.html"
+    : "../index.html";
+
   /* ---------------------------------------------------------------- themes */
 
   var THEMES = [
@@ -195,7 +199,9 @@
     }).join("");
 
     return (
-      '<a class="brand" href="../index.html" title="Back to the InteFlow website">' +
+      '<a class="brand" href="' +
+      backHref +
+      '" title="Back to the InteFlow website">' +
       '<span class="brand-mark">IF</span>' +
       '<span class="brand-name">InteFlow</span>' +
       "</a>" +
@@ -210,7 +216,9 @@
       "</select>" +
       "</label>" +
       '<p class="sidebar-note"><strong>Theme preview</strong><br>Real components, same data as the gallery.</p>' +
-      '<a class="preview-back" href="../index.html">← Back to the website</a>' +
+      '<a class="preview-back" href="' +
+      backHref +
+      '">← Back to the website</a>' +
       "</div>"
     );
   }

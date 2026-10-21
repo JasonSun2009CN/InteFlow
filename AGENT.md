@@ -28,9 +28,9 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **304 passed, 1 skipped** |
+| 后端测试 | `pytest` **305 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **138 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **142 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
 | API 面 | 65 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
@@ -74,11 +74,16 @@
 > 2026-10-20：**左侧栏 Compact 模式**。桌面端可在侧栏顶部收缩为 80px 图标栏（仅图标 + hover 原生 tooltip），
 > 再点展开；状态存 `localStorage` 键 `inteflow.sidebar.compact`。移动端始终使用完整抽屉，不受影响。
 >
-> 2026-10-21：**项目官网** `website/`（纯静态，无依赖、无构建）。中文落地页覆盖全部功能：
-> 两条铁律、五步工作流、22 项功能索引（可筛选）、五套主题实时预览、InteFlow-MD / 架构 / 数据目录代码页、
-> FAQ、快速开始。主题预览页复用 `theme-examples` 的 `base.css` + `mock.js` + 5 份 token CSS（改为 6 tab 导航，
+> 2026-10-21：**项目官网** `website/`（纯静态，无依赖、无构建）。**中英双语落地页**
+> （`index.html` / `en.html`，页头右上角切换）覆盖全部功能：两条铁律、五步工作流、22 项功能索引（可筛选）、
+> 五套主题实时预览、InteFlow-MD / 架构 / 数据目录代码页、FAQ、快速开始。主题预览页复用 `theme-examples` 的 `base.css` + `mock.js` + 5 份 token CSS（改为 6 tab 导航，
 > 并带 `← Back to the website`）。部署由 `.github/workflows/pages.yml` 发布 `website/` 到 GitHub Pages
 > （仓库 Settings → Pages → Source: GitHub Actions）；本地预览见 `website/README.md`。
+>
+> 2026-10-21：**错题分析模板**已落地。Settings → **Analysis template** 保存一份全局 Markdown 模板
+> （settings 键 `analysis_template`）；复盘工作台与 Review 页共用的分析编辑器在题目**没有已保存分析**时
+> 自动把模板填为草稿（有分析绝不覆盖，notebook 加载完成后才填）。模板未改动不会自动保存，避免空白题被算作
+> “已分析”而进入导出；用户开始输入后才走原有自动保存。0 token。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -115,6 +120,7 @@
 | 主界面信息架构 | **左侧栏 6 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Sessions（作答历史）/ Review（错题集 + 精选题集）/ Vocabulary（生词本）/ Settings。**练习页与复盘页全屏无侧栏**；答案录入在侧栏布局内。窄屏侧栏变抽屉；桌面端可 **Compact** 为 80px 图标栏（存 `inteflow.sidebar.compact`，移动端不生效） |
 | 复盘（分析模式，2026-10-19） | 进入复盘**隐藏左侧栏**；题号导航默认缩到左上角、点击旋转展开为**悬浮**面板（All / Wrong / Correct），点击某题即选中并收起；**2-of-4 分屏**：题目 / 分析 / AI Tutor / 生词本，每侧可切换到另外三者；选择已在另一侧的工具则左右互换；默认左题目右分析；分隔条可拖拽/方向键。导出与 Notebook 放顶栏（不占用分屏）。 |
 | 分析存储与导出 | 一套试卷 = 一套分析（`analysis_pages` 一题一页，按题序）；旧 `questions.explain` 首次读取时映射迁入（`id` 为 null）。复盘页顶部 **Notebook** 全屏预览：试卷标题 → 所有已写解析的题目（题干/图表/解析）+ 导出按钮。导出 md / docx / pdf **只含已写解析的题**：浏览器下载 + 在 `data/exports/` 存一份，响应头 `X-Export-Path` 显示路径；封面页含设置里的用户名 |
+| 错题分析模板（2026-10-21） | Settings → **Analysis template** 一份全局 Markdown 模板（settings 键 `analysis_template`）。分析页没有已保存内容时自动填为草稿；已有分析绝不覆盖；模板未改动不落库（导出仍只算真正写过的题）；notebook 异步加载完成前不填。0 token |
 | 题型扩展（2026-10-19） | 选择题支持多选（头部 `multi=1`，答案 `A,C`）；新增填空题（`kind=blank`，无选项，答案 `a \| b` 多个可接受答案）；**导入时未识别到选项一律按填空题处理** |
 | AI 识别兜底开关 | 设置项 `llm_fallback`（默认开）。关闭时导入失败会提示启用；`convert/pdf.py` 与 `imports.run_ai_fallback` 均检查该开关 |
 | 生词释义开关（2026-10-20） | 设置项 `vocab_ai_sense`（默认开）：关闭后拖词不调用 LLM，使用第一条真实韦氏释义并提示。设置项 `vocab_learner_definitions`（默认关）：开启后优先使用韦氏词条内部的 **Definition for English Learners** 栏目；词条没有该栏目时自动回退普通释义。**不再有单独的 learner `.eudb`**。设置项 `custom_dictionary_enabled`（默认开）：优先查用户自定义词典，未命中再查韦氏 |
@@ -162,11 +168,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 304 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 305 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 138 passed, 5 skipped
+cd frontend && npm test         # 142 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -202,7 +208,7 @@ cd frontend && npm test         # 138 passed, 5 skipped
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
-| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` + `assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页） |
+| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` 中文 + `en.html` 英文，页头切换；`assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |

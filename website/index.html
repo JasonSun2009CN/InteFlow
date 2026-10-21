@@ -16,6 +16,8 @@
     />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://jasonsun2009cn.github.io/InteFlow/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://jasonsun2009cn.github.io/InteFlow/" />
+    <link rel="alternate" hreflang="en" href="https://jasonsun2009cn.github.io/InteFlow/en.html" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <script>
       document.documentElement.classList.add("js");
@@ -61,6 +63,7 @@
         </nav>
 
         <div class="header-actions">
+          <a class="lang-switch" href="en.html" hreflang="en" lang="en" aria-label="Switch to English">EN</a>
           <a
             class="ghost-link"
             href="https://github.com/JasonSun2009CN/InteFlow"
@@ -523,8 +526,9 @@
               <h3>分析笔记本</h3>
               <p>
                 每题一页 Pages 式编辑器，支持 Markdown、KaTeX 与图片；约 0.9 秒自动保存，⌘S 立即保存，离开再回来继续写。
+                空白的分析页会先用 Settings 里的错题分析模板填充，已有分析绝不覆盖。
               </p>
-              <ul class="feature-tags"><li>autosave</li><li>Write / Preview</li><li>Notebook</li></ul>
+              <ul class="feature-tags"><li>autosave</li><li>Write / Preview</li><li>Notebook</li><li>template</li></ul>
             </article>
 
             <article class="feature-card reveal" data-cat="review">
@@ -617,20 +621,20 @@
               <div class="feature-top"><span class="feature-no">21</span><span class="feature-cat">OUTPUT</span></div>
               <h3>设置与 AI 开关</h3>
               <p>
-                用户名（导出封面）、AI 识别兜底、AI 选义、Learner 释义、自定义词典、单词考试 AI
+                用户名（导出封面）、错题分析模板、AI 识别兜底、AI 选义、Learner 释义、自定义词典、单词考试 AI
                 评分。所有开关都写清默认值与回退行为。
               </p>
-              <ul class="feature-tags"><li>user name</li><li>fallbacks</li><li>key masking</li></ul>
+              <ul class="feature-tags"><li>user name</li><li>analysis template</li><li>fallbacks</li><li>key masking</li></ul>
             </article>
 
             <article class="feature-card reveal" data-cat="output">
               <div class="feature-top"><span class="feature-no">22</span><span class="feature-cat">OUTPUT</span></div>
               <h3>本地数据与可测试性</h3>
               <p>
-                SQLite + 文件系统并存，65 条 API，304 个后端测试与 138 个前端组件测试。MIT
+                SQLite + 文件系统并存，65 条 API，305 个后端测试与 142 个前端组件测试。MIT
                 开源，随时可以自己改一条链路。
               </p>
-              <ul class="feature-tags"><li>MIT</li><li>304 + 138 tests</li><li>65 endpoints</li></ul>
+              <ul class="feature-tags"><li>MIT</li><li>305 + 142 tests</li><li>65 endpoints</li></ul>
             </article>
           </div>
         </div>
@@ -644,7 +648,7 @@
           <div class="number-item reveal"><strong>92,006</strong><span>词典条目</span></div>
           <div class="number-item reveal"><strong>19</strong><span>LLM 服务商</span></div>
           <div class="number-item reveal"><strong>65</strong><span>API 端点</span></div>
-          <div class="number-item reveal"><strong>442</strong><span>自动化测试</span></div>
+          <div class="number-item reveal"><strong>447</strong><span>自动化测试</span></div>
         </div>
       </section>
 
@@ -902,7 +906,7 @@ cd InteFlow
                 <li><span>Storage</span><strong>SQLite + local files</strong></li>
                 <li><span>Convert</span><strong>PyMuPDF · python-docx · OCR</strong></li>
                 <li><span>Export</span><strong>WeasyPrint · openpyxl · MathJax</strong></li>
-                <li><span>Tests</span><strong>pytest 304 · frontend 138</strong></li>
+                <li><span>Tests</span><strong>pytest 305 · frontend 142</strong></li>
               </ul>
             </div>
           </div>
@@ -996,6 +1000,16 @@ cd InteFlow
               <div class="faq-answer">
                 <p>
                   应用界面是英文，按钮与页面名都和 README 一致；文档提供中文与英文两版。题库内容不受语言限制，中英混合的试卷都能导入与练习。这个官网用中文介绍，只是为了让第一次接触的人更快看懂完整链路。
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary><span class="faq-no">09</span>可以自定义错题分析的模板吗？<i aria-hidden="true"></i></summary>
+              <div class="faq-answer">
+                <p>
+                  可以。在 Settings → Analysis template 写一份 Markdown 模板，空的错题分析页会自动填入；已有分析绝不覆盖。
+                  模板只是初始草稿，未改动不会保存，开始写作后才走自动保存，所以不会把空白题误算成“已写解析”而进入导出。
                 </p>
               </div>
             </details>

@@ -306,6 +306,27 @@ code {
   transition: color 160ms var(--ease);
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 160ms var(--ease), border-color 160ms var(--ease),
+    background-color 160ms var(--ease);
+}
+
+.lang-switch:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--surface);
+}
+
 .ghost-link:hover {
   color: var(--accent);
 }

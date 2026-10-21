@@ -21,7 +21,8 @@ some browser APIs behave better over HTTP.
 
 ```
 website/
-├── index.html               # the landing page
+├── index.html               # Chinese landing page
+├── en.html                  # English landing page (language switch in the header)
 ├── 404.html
 ├── assets/
 │   ├── site.css             # all layout, components, responsive rules
@@ -63,9 +64,13 @@ processing. All URLs are relative, so the site works both at a project path
 
 ## Editing
 
-- **Copy and features** live in `index.html`. Feature cards use
-  `data-cat="import|practice|review|vocab|output"`; update the counts in the
-  filter bar and the `data-filter-count` default if you add or remove cards.
+- **Copy and features** live in `index.html` (Chinese) and `en.html` (English).
+  Feature cards use `data-cat="import|practice|review|vocab|output"`; update the
+  counts in the filter bar and the `data-filter-count` default if you add or
+  remove cards. Keep both language pages in sync: same sections, cards, ids and
+  links, only the human-visible copy differs. Dynamic labels (filter counts,
+  theme notes, copy feedback) are picked from `assets/site.js` based on
+  `<html lang>`.
 - **Theme metadata** for the interactive lab is the `THEMES` object near the
   top of `assets/site.js`. The five preview pages themselves keep their own copy
   of `THEMES` in `themes/assets/mock.js` for the in-preview switcher.
