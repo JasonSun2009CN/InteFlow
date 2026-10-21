@@ -24,7 +24,7 @@
 2. **本地优先**：所有数据在 `data/`（SQLite + 每篇文档的 `doc.ifmd.md` 与图片），不上传云端。
 3. 界面全英文；与维护者交流用中文；**有疑问必须先用 `question` 工具问，不许自己猜**。
 
-## 3. 当前状态（2026-10-20）
+## 3. 当前状态（2026-10-21）
 
 | 项 | 值 |
 |---|---|
@@ -73,6 +73,12 @@
 >
 > 2026-10-20：**左侧栏 Compact 模式**。桌面端可在侧栏顶部收缩为 80px 图标栏（仅图标 + hover 原生 tooltip），
 > 再点展开；状态存 `localStorage` 键 `inteflow.sidebar.compact`。移动端始终使用完整抽屉，不受影响。
+>
+> 2026-10-21：**项目官网** `website/`（纯静态，无依赖、无构建）。中文落地页覆盖全部功能：
+> 两条铁律、五步工作流、22 项功能索引（可筛选）、五套主题实时预览、InteFlow-MD / 架构 / 数据目录代码页、
+> FAQ、快速开始。主题预览页复用 `theme-examples` 的 `base.css` + `mock.js` + 5 份 token CSS（改为 6 tab 导航，
+> 并带 `← Back to the website`）。部署由 `.github/workflows/pages.yml` 发布 `website/` 到 GitHub Pages
+> （仓库 Settings → Pages → Source: GitHub Actions）；本地预览见 `website/README.md`。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -196,6 +202,8 @@ cd frontend && npm test         # 138 passed, 5 skipped
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
+| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` + `assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页） |
+| `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |
 

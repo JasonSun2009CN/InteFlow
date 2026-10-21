@@ -1,0 +1,186 @@
+/* ==========================================================================
+ * Theme 3 — Minimal Light
+ * --------------------------------------------------------------------------
+ * Neutral greys, no decorative colour, one near-black accent. Rows are
+ * separated by space rather than rules, hover does the work. Notion / Linear
+ * territory: quiet, dense, nothing shouting.
+ * ========================================================================== */
+
+:root,
+[data-theme="minimal-light"] {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f7f7;
+  --sidebar-bg: #fbfbfa;
+  --row-hover: #fafafa;
+
+  --text: #191919;
+  --text-muted: #5f5f5f;
+  --text-faint: #9b9b9b;
+
+  --border: #ececec;
+  --border-strong: #dcdcdc;
+
+  --accent: #1f1f1f;
+  --accent-hover: #000000;
+  --accent-text: #ffffff;
+  --accent-soft: #efefef;
+
+  --warn: #b45309;
+  --warn-soft: #fdf6ec;
+  --warn-text: #8a4a09;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --shadow-md: 0 10px 30px -14px rgb(0 0 0 / 0.35);
+
+  --font-display: var(--font-ui);
+  --tracking-label: 0;
+  --btn-transform: none;
+  --title-weight: 600;
+}
+
+.brand-mark {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 0.58rem;
+}
+
+.brand-name {
+  letter-spacing: -0.02em;
+}
+
+.hero-text {
+  padding-bottom: 0.5rem;
+}
+
+.title {
+  font-size: clamp(1.9rem, 5vw, 2.75rem);
+  letter-spacing: -0.035em;
+}
+
+.lede {
+  max-width: 30rem;
+  font-size: 0.88rem;
+}
+
+.stats {
+  gap: 1.75rem;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.stat-label {
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.55rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.nav-item {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.nav-item.is-active {
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.section-head {
+  border-bottom: 0;
+  padding-bottom: 0.25rem;
+}
+
+.section-title {
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+/* Rows float: no rules, hover reveals a rounded surface. */
+.exam-row {
+  border-bottom: 0;
+  border-radius: var(--radius-lg);
+  padding: 1rem 0.85rem;
+}
+
+.exam-row:hover {
+  background: var(--row-hover);
+}
+
+.exam-index {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  color: var(--text-faint);
+}
+
+.exam-title {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.exam-title a:hover {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.exam-meta {
+  gap: 0.35rem;
+  font-size: 0.72rem;
+}
+
+/* No middot here — a small round bullet instead. */
+.meta-item + .meta-item::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: 0.45rem;
+  border-radius: 50%;
+  background: var(--border-strong);
+  vertical-align: middle;
+}
+
+.btn {
+  border-radius: var(--radius-lg);
+  padding: 0.45rem 0.85rem;
+}
+
+.btn-primary {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.16);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.2);
+}
+
+.banner {
+  border-left: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.sidebar-note {
+  border: 0;
+  background: transparent;
+  padding: 0 0.1rem;
+}
+
+.sidebar {
+  border-right: 1px solid var(--border);
+}

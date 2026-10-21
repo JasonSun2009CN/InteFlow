@@ -349,6 +349,8 @@ InteFlow/
 ├── start.bat                  Windows 双击启动
 ├── scripts/dev.sh             一键起前后端（不做前置检查）
 ├── data/                      运行期数据（gitignore）
+├── website/                   项目官网（GitHub Pages）
+├── theme-examples/            5 套主题预览（设计参考）
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/
 ```
 
@@ -368,6 +370,7 @@ InteFlow/
 ## 相关文档
 
 - [`README.md`](README.md) — 英文 README
+- [`website/`](website/) — 项目官网（静态站点，GitHub Pages；本地预览 `python3 -m http.server 4173 --directory website`）
 - [`AGENT.md`](AGENT.md) — 项目交接 / 给 AI agent 与贡献者的工作说明（中文）
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — 系统架构、数据模型、API 面
 - [`docs/IFMD.md`](docs/IFMD.md) — InteFlow-MD 题目格式规范

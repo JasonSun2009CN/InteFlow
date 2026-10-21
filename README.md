@@ -381,6 +381,8 @@ InteFlow/
 ├── start.bat                  Windows double-click start
 ├── scripts/dev.sh             one-command dev environment (no preflight checks)
 ├── data/                      runtime data (git-ignored)
+├── website/                   static project website (GitHub Pages)
+├── theme-examples/            5 theme previews (design reference)
 └── docs/                      ARCHITECTURE · IFMD · IDEAS · legacy/
 ```
 
@@ -400,6 +402,7 @@ InteFlow/
 ## Docs
 
 - [`README-cn.md`](README-cn.md) — Chinese README
+- [`website/`](website/) — static project website (GitHub Pages; `python3 -m http.server 4173 --directory website`)
 - [`AGENT.md`](AGENT.md) — project handoff / working notes for AI agents and contributors (Chinese)
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — architecture, data model, API surface
 - [`docs/IFMD.md`](docs/IFMD.md) — the InteFlow-MD question format

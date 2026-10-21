@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="InteFlow">
+  <rect width="64" height="64" rx="13" fill="#14150f"/>
+  <g fill="#f4f1e8">
+    <rect x="14" y="10.4" width="9" height="29" rx="4.5"/>
+    <rect x="28" y="21.6" width="9" height="32" rx="4.5"/>
+    <rect x="28" y="21.6" width="22" height="9" rx="4.5"/>
+  </g>
+  <rect x="28" y="34.6" width="16" height="9" rx="4.5" fill="#e8431f"/>
+</svg>

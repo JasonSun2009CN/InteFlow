@@ -1,0 +1,102 @@
+/* ==========================================================================
+ * Theme 1 — Clear Blue (default)
+ * --------------------------------------------------------------------------
+ * The safe default: clear blue on white, square-ish corners, calm greys.
+ * Closest to what students already recognise from an exam app.
+ * ========================================================================== */
+
+:root,
+[data-theme="clear-blue"] {
+  --bg: #f2f5f9;
+  --surface: #ffffff;
+  --surface-2: #f6f9fc;
+  --sidebar-bg: #ffffff;
+  --row-hover: #f5f8fd;
+
+  --text: #101c30;
+  --text-muted: #46587a;
+  --text-faint: #8494ab;
+
+  --border: #e3e9f1;
+  --border-strong: #c2cddd;
+
+  --accent: #0057b8;
+  --accent-hover: #004592;
+  --accent-text: #ffffff;
+  --accent-soft: #e9f1fb;
+
+  --warn: #b45309;
+  --warn-soft: #fdf4e6;
+  --warn-text: #7c4a08;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-md: 0 8px 20px -10px rgb(16 28 48 / 0.4);
+
+  --font-display: var(--font-ui);
+  --tracking-label: 0.04em;
+  --btn-transform: none;
+  --title-weight: 700;
+}
+
+/* A hairline blue rule above the main heading reads instantly "official". */
+.hero-text {
+  border-top: 3px solid var(--accent);
+  padding-top: 1.5rem;
+}
+
+.title {
+  letter-spacing: -0.03em;
+}
+
+.brand-mark {
+  border-radius: 50%;
+}
+
+.nav-item.is-active {
+  position: relative;
+}
+
+.nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: -0.35rem;
+  top: 50%;
+  width: 3px;
+  height: 1.1rem;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.stat-value {
+  color: #0b2447;
+}
+
+.exam-title {
+  font-size: 1.06rem;
+  font-weight: 600;
+}
+
+.exam-row {
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.exam-title a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.section-head {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.btn-primary {
+  box-shadow: var(--shadow-sm, 0 1px 2px rgb(16 28 48 / 0.12));
+}
+
+.sidebar {
+  box-shadow: 1px 0 0 var(--border);
+}
