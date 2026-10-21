@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api, type AppSettings, type ResultItem, type SessionDetail, type SubmitResult } from "../../api/client";
@@ -40,6 +40,13 @@ function media(matches: boolean) {
         dispatchEvent: vi.fn(),
       }) as unknown as MediaQueryList,
   );
+}
+
+/** The icon-button switcher in one pane header. */
+function paneSwitch(side: "left" | "right") {
+  return within(screen.getByTestId(`${side}-pane`)).getByRole("group", {
+    name: `Switch ${side} pane`,
+  });
 }
 
 const emptyGrid = {
@@ -172,13 +179,20 @@ describe("Workspace", () => {
     expect(left).toHaveAttribute("data-tool", "question");
     expect(right).toHaveAttribute("data-tool", "analysis");
 
+    // Each pane header carries all four tools as icon buttons.
+    expect(within(paneSwitch("right")).getAllByRole("button")).toHaveLength(4);
+    expect(
+      within(paneSwitch("right")).getByRole("button", { name: "Analysis" }),
+    ).toHaveAttribute("aria-pressed", "true");
+
     await act(async () => {
-      fireEvent.change(screen.getByLabelText("Switch right pane"), {
-        target: { value: "ai" },
-      });
+      fireEvent.click(within(paneSwitch("right")).getByRole("button", { name: "AI Tutor" }));
     });
     expect(screen.getByTestId("right-pane")).toHaveAttribute("data-tool", "ai");
     expect(screen.getByTestId("left-pane")).toHaveAttribute("data-tool", "question");
+    expect(
+      within(paneSwitch("right")).getByRole("button", { name: "AI Tutor" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   it("swaps panes when a tool is chosen that is already on the other side", async () => {
@@ -190,9 +204,7 @@ describe("Workspace", () => {
     );
 
     await act(async () => {
-      fireEvent.change(screen.getByLabelText("Switch right pane"), {
-        target: { value: "vocabulary" },
-      });
+      fireEvent.click(within(paneSwitch("right")).getByRole("button", { name: "Vocabulary" }));
     });
     expect(await screen.findByTestId("vocabulary-pane")).toBeInTheDocument();
     expect(screen.getByTestId("left-pane")).toHaveAttribute("data-tool", "question");
@@ -200,9 +212,7 @@ describe("Workspace", () => {
 
     // Vocabulary now lives on the right; choosing it on the left must swap.
     await act(async () => {
-      fireEvent.change(screen.getByLabelText("Switch left pane"), {
-        target: { value: "vocabulary" },
-      });
+      fireEvent.click(within(paneSwitch("left")).getByRole("button", { name: "Vocabulary" }));
     });
     await waitFor(() => expect(getWords).toHaveBeenCalledTimes(2));
     expect(screen.getByTestId("left-pane")).toHaveAttribute("data-tool", "vocabulary");

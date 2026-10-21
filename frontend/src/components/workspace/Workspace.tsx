@@ -508,6 +508,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             <WorkspacePane
               side="left"
               tool={leftTool}
+              otherTool={rightTool}
               onChoose={(tool) => chooseTool("left", tool)}
             >
               {renderTool(leftTool)}
@@ -532,6 +533,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             <WorkspacePane
               side="right"
               tool={rightTool}
+              otherTool={leftTool}
               onChoose={(tool) => chooseTool("right", tool)}
             >
               {renderTool(rightTool)}
@@ -560,6 +562,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             <WorkspacePane
               side={mobileSide === 0 ? "left" : "right"}
               tool={mobileTools[mobileSide]}
+              otherTool={mobileTools[mobileSide === 0 ? 1 : 0]}
               onChoose={(tool) => chooseTool(mobileSide === 0 ? "left" : "right", tool)}
             >
               {renderTool(mobileTools[mobileSide])}

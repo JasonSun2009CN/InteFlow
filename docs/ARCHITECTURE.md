@@ -225,7 +225,7 @@ App.tsx (BrowserRouter)
     └── "/manage"               → 重定向到 /library（兼容旧链接）
 
 components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/Settings；桌面可 Compact 为图标栏）· RichText (markdown+KaTeX+图片) ·
-             workspace/（Workspace 四选二分屏 · WorkspacePane 每侧工具切换器 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
+             workspace/（Workspace 四选二分屏 · WorkspacePane 每侧头部四个图标按钮切换工具 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
              AnalysisEditor Pages 式分析页 (Write/Preview + 自动保存 + 单换行保留) · AiTutorPane AI 讲解 pane ·
              VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） · ExportDrawer 顶栏导出抽屉 ·
              NotebookPreview 整套解析预览/导出 · VocabGrid v2 电子表格 · Splitter 分隔条 ·
@@ -379,6 +379,7 @@ AI 讲解（显式）        POST /api/ai/answer {document_id, question_id}     
 
 界面：复盘页全屏（无侧栏）；题号导航默认缩到左上角，点击旋转展开为悬浮面板（All/Wrong/Correct），
 点击某题即选中并收起；四选二分屏（题目 / 分析 / AI Tutor / 生词本，默认左题目右分析，选择另一侧已有的工具则交换）；
+每侧头部把四个工具排成一行**图标 + 小字标签**按钮（Lucide 图标，当前项高亮 `aria-pressed`，另一侧的工具略淡并有“click to swap”提示），不再使用下拉菜单；
 分析页 Write/Preview，900ms 防抖自动保存 + ⌘S，Preview 用 `remark-breaks` 保留单换行；
 顶部 **Notebook** 打开整套解析预览，**Export** 打开导出抽屉（导出不再是分屏工具）。
 

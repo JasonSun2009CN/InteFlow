@@ -146,3 +146,10 @@
   - 0 token；代码：`backend/app/api/settings.py`、`frontend/src/pages/SettingsPage.tsx`、
     `frontend/src/components/workspace/AnalysisEditor.tsx`；测试 `test_settings_api.py`、
     `SettingsPage.test.tsx`、`AnalysisEditor.test.tsx`。
+
+### ✅ 复盘工具切换改成图标按钮（2026-10-21）
+
+- 复盘工作台每个 pane 头部的 “Switch…” 下拉菜单换成横向排列的四个**图标 + 小字标签**按钮
+  （Question / Analysis / AI Tutor / Vocabulary），当前工具高亮，另一侧的工具点按即左右交换。
+- **已实现（2026-10-21）**：`WorkspacePane.tsx` 用 Lucide 图标渲染四个按钮（`aria-pressed` 标记当前项，
+  `title` 提示 swap），`Workspace.tsx` 把另一侧的工具作为 `otherTool` 传入；测试更新在 `Workspace.test.tsx`。
