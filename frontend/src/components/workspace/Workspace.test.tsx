@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { api, type ResultItem, type SessionDetail, type SubmitResult } from "../../api/client";
+import { api, type AppSettings, type ResultItem, type SessionDetail, type SubmitResult } from "../../api/client";
 import Workspace from "./Workspace";
 
 vi.mock("../../api/client", async (importOriginal) => {
@@ -12,6 +12,7 @@ vi.mock("../../api/client", async (importOriginal) => {
       ...actual.api,
       getAnalysis: vi.fn(),
       getWords: vi.fn(),
+      getSettings: vi.fn(),
       listStarredIds: vi.fn(),
       starQuestion: vi.fn(),
       unstarQuestion: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock("../../api/client", async (importOriginal) => {
 
 const getAnalysis = vi.mocked(api.getAnalysis);
 const getWords = vi.mocked(api.getWords);
+const getSettings = vi.mocked(api.getSettings);
 const listStarredIds = vi.mocked(api.listStarredIds);
 const starQuestion = vi.mocked(api.starQuestion);
 
@@ -98,6 +100,7 @@ describe("Workspace", () => {
     media(false);
     getAnalysis.mockResolvedValue({ document_id: 7, title: "October Review", pages: [] });
     getWords.mockResolvedValue(emptyGrid);
+    getSettings.mockResolvedValue({ analysis_template: "" } as AppSettings);
     listStarredIds.mockResolvedValue({ question_ids: [] });
     starQuestion.mockResolvedValue({ question_id: 5, starred: true });
   });

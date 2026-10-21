@@ -82,6 +82,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   const [notebookOpen, setNotebookOpen] = useState(false);
   const [mobileSide, setMobileSide] = useState<0 | 1>(0);
   const [pages, setPages] = useState<Record<number, string>>({});
+  const [notebookLoaded, setNotebookLoaded] = useState(false);
   const [starred, setStarred] = useState<Set<number>>(new Set());
   const [loadError, setLoadError] = useState<string | null>(null);
   const [starError, setStarError] = useState<string | null>(null);
@@ -132,6 +133,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   // Load the notebook once per exam; it is the source of truth for page text.
   useEffect(() => {
     let cancelled = false;
+    setNotebookLoaded(false);
     api
       .getAnalysis(docId)
       .then((notebook) => {
@@ -141,10 +143,12 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
         );
         // Pages saved while the notebook was still loading win over the snapshot.
         setPages((prev) => ({ ...loaded, ...prev }));
+        setNotebookLoaded(true);
       })
       .catch((err) => {
         if (!cancelled) {
           setLoadError(err instanceof ApiError ? err.message : String(err));
+          setNotebookLoaded(true);
         }
       });
     return () => {
@@ -379,6 +383,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
       item={selected}
       content={selected ? (pages[selected.question_id] ?? "") : ""}
       onSaved={onSaved}
+      loaded={notebookLoaded}
     />
   );
 

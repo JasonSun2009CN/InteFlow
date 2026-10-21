@@ -13,6 +13,7 @@ ALLOWED_KEYS = (
     "api_key",
     "model",
     "user_name",
+    "analysis_template",
     "llm_fallback",
     "vocab_ai_sense",
     "vocab_learner_definitions",

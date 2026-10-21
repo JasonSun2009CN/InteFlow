@@ -10,6 +10,11 @@ interface Props {
   content: string;
   /** Called after a successful save so the parent can keep its copy in sync. */
   onSaved: (questionId: number, content: string) => void;
+  /**
+   * False while the notebook is still loading. The template is not applied
+   * before that, so a late page never replaces a template the user sees.
+   */
+  loaded?: boolean;
 }
 
 type Mode = "write" | "preview";
@@ -32,43 +37,85 @@ function answerText(item: ResultItem, values: string[]): string {
  * picked (so the analysis is written with the mistake in view); the body is a
  * Markdown analysis page that autosaves to the local database.
  */
-export default function AnalysisEditor({ docId, item, content, onSaved }: Props) {
+export default function AnalysisEditor({ docId, item, content, onSaved, loaded = true }: Props) {
   const [draft, setDraft] = useState(content);
   const [saved, setSaved] = useState(content);
+  /** The user's global template, fetched once from Settings. */
+  const [template, setTemplate] = useState("");
+  /** True while the textarea holds the untouched template (not saved yet). */
+  const [templateDraft, setTemplateDraft] = useState(false);
   const [mode, setMode] = useState<Mode>("write");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
 
   const questionId = item?.question_id ?? null;
-  const dirty = draft !== saved;
+  const dirty = draft !== saved && !templateDraft;
   const savedRef = useRef(saved);
   savedRef.current = saved;
   const draftRef = useRef(draft);
   draftRef.current = draft;
+  const templateDraftRef = useRef(templateDraft);
+  templateDraftRef.current = templateDraft;
+  /** Question the template was last applied to (prevents re-filling after a clear). */
+  const templateAppliedFor = useRef<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getSettings()
+      .then((settings) => {
+        if (cancelled) return;
+        const text = settings.analysis_template ?? "";
+        setTemplate(text.trim() ? text : "");
+      })
+      .catch(() => {
+        /* Settings are optional here: no template means an empty editor. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Switching pages swaps the draft; the previous page was already autosaved.
   useEffect(() => {
     setDraft(content);
     setSaved(content);
+    setTemplateDraft(false);
+    templateAppliedFor.current = null;
     setError(null);
     setFlash(null);
   }, [questionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fill an empty page with the user's template. It is deliberately *not*
+  // saved until the user edits: an untouched template must not turn every
+  // question into an "analyzed" page in exports.
+  useEffect(() => {
+    if (!loaded || questionId === null || !template) return;
+    if (templateAppliedFor.current === questionId) return;
+    if (content !== "" || saved !== "" || draft !== "") return;
+    templateAppliedFor.current = questionId;
+    setDraft(template);
+    setTemplateDraft(true);
+  }, [loaded, questionId, template, content, saved, draft]);
+
   // The notebook arrives asynchronously, after the editor has already mounted
   // with an empty body. Adopt the loaded page once it lands — but never clobber
-  // a draft the user has already started typing.
+  // a draft the user has already started typing. An untouched template is not
+  // a user draft, so a real page may still replace it.
   useEffect(() => {
-    if (draft !== savedRef.current) return;
+    if (draft !== savedRef.current && !templateDraftRef.current) return;
     if (content === savedRef.current) return;
     setDraft(content);
     setSaved(content);
+    setTemplateDraft(false);
   }, [content, draft]);
 
   // Do not lose the last <900ms of typing when switching pages or leaving.
   useEffect(() => {
     return () => {
-      if (questionId === null || draftRef.current === savedRef.current) return;
+      if (questionId === null || templateDraftRef.current) return;
+      if (draftRef.current === savedRef.current) return;
       const text = draftRef.current;
       void api
         .saveAnalysisPage(docId, questionId, text)
@@ -81,12 +128,13 @@ export default function AnalysisEditor({ docId, item, content, onSaved }: Props)
 
   const persist = useCallback(
     async (text: string) => {
-      if (questionId === null) return;
+      if (questionId === null || templateDraftRef.current) return;
       setSaving(true);
       setError(null);
       try {
         await api.saveAnalysisPage(docId, questionId, text);
         setSaved(text);
+        setTemplateDraft(false);
         onSaved(questionId, text);
         setFlash("Saved");
         window.setTimeout(() => setFlash(null), 1500);
@@ -99,12 +147,13 @@ export default function AnalysisEditor({ docId, item, content, onSaved }: Props)
     [docId, questionId, onSaved],
   );
 
-  // Autosave: debounce after the last keystroke.
+  // Autosave: debounce after the last keystroke. A pristine template is skipped.
   useEffect(() => {
-    if (questionId === null || draft === savedRef.current) return;
+    if (questionId === null || templateDraft) return;
+    if (draft === savedRef.current) return;
     const timer = window.setTimeout(() => void persist(draft), AUTOSAVE_MS);
     return () => window.clearTimeout(timer);
-  }, [draft, questionId, persist]);
+  }, [draft, questionId, templateDraft, persist]);
 
   // ⌘/Ctrl+S saves immediately (browsers otherwise offer "save page").
   useEffect(() => {
@@ -153,7 +202,15 @@ export default function AnalysisEditor({ docId, item, content, onSaved }: Props)
             {item.source ? ` · ${item.source}` : ""}
           </span>
           <span className="ml-auto text-xs text-slate-400">
-            {saving ? "Saving…" : flash ? `${flash} ✓` : dirty ? "unsaved changes" : ""}
+            {saving
+              ? "Saving…"
+              : flash
+                ? `${flash} ✓`
+                : templateDraft
+                  ? "template"
+                  : dirty
+                    ? "unsaved changes"
+                    : ""}
           </span>
         </div>
 
@@ -241,7 +298,10 @@ export default function AnalysisEditor({ docId, item, content, onSaved }: Props)
         {mode === "write" ? (
           <textarea
             value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              if (templateDraft) setTemplateDraft(false);
+            }}
             placeholder={
               "Why is the correct answer right — and why did you pick yours?\n\n" +
               "Markdown works here: **bold**, lists, $x^2$ formulas, ![figure](assets/name.png)."

@@ -64,7 +64,7 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | **单词考试** | Vocabulary 页内 **Word list / Word test** 两 tab：随机抽题或全测，**English → Chinese**（手写释义，本地宽松判分）或 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）；结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码；可选 AI 严格判分 |
 | **错题集 / 精选题集** | 侧栏 **Review**：**Mistakes** 按题去重并保留最近一次作答（后来做对自动移出）；**Starred** 是练习/复盘/错题列表中点星收藏的题目。支持按套题/题干/选项搜索、exam 过滤、时间正倒序，并共用分析编辑器；旧分析只读列出 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
-| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**题目识别 API 兜底**、**AI 选义**、**Definition for English Learners**、**My dictionary**、**单词考试 AI 评分** |
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**错题分析模板**、**题目识别 API 兜底**、**AI 选义**、**Definition for English Learners**、**My dictionary**、**单词考试 AI 评分** |
 
 > **词典说明**：本地韦氏 `.eudb` 的索引里会保留部分词条自带的 **Definition for English Learners** 栏目；
 > 开启对应设置后优先显示该栏，没有就回退普通释义。**My dictionary** 是独立的用户词典，可在 Settings
@@ -214,7 +214,7 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 
 - **左上角题目导航**：默认缩成一个小 pill，点击后箭头旋转、**悬浮展开**全部题号（状态色），可选 `All` / `Wrong` / `Correct`；点某题即选中并自动收起（`Esc` 或点空白处关闭）。
 - **左右分屏**：左侧显示当前题的题干、正确选项、你的选择；右侧是 **Pages 式分析编辑器**（一题一页）。
-- **分析编辑器**：支持 Markdown（公式 `$x^2$`、图片 `![](assets/…)`）；`Write` / `Preview` 切换；输入后**自动保存**（约 0.9 秒防抖，也可 `⌘S` / 点 Save）。下次进入自动续写。
+- **分析编辑器**：支持 Markdown（公式 `$x^2$`、图片 `![](assets/…)`）；`Write` / `Preview` 切换；输入后**自动保存**（约 0.9 秒防抖，也可 `⌘S` / 点 Save）。下次进入自动续写。空的题页会先用 Settings 里的 **Analysis template** 填充；已有分析绝不覆盖，模板本身也要等你开始改动后才会保存。
 - **Notebook（整套解析预览）**：复盘页顶部 **Notebook** 按钮打开全屏预览——从试卷标题开始，依次显示所有已写解析的题目（题干、图表、解析），并可直接导出。
 - **工具栏抽屉**：`AI`（显式调用 LLM 讲解）、`Vocabulary`（本卷生词表，可导出 `.xlsx`）、`Export`（导出复盘笔记本，见 §7）。
 - 若答卷时没答案键，保存后会自动重判（regrade）。
@@ -258,22 +258,23 @@ Library 页的模板卡提供一份可复制/下载的 `.ifmd.md` 模板，按 [
 - **整份文档**：Library 里对文档导出 **PDF** / **DOCX**（题目、答案与解析）。
 - **生词本**：**Export .xlsx**。
 
-### 8. 设置（用户名 / LLM / 兜底 / 生词本 / 单词考试评分）
+### 8. 设置（用户名 / 分析模板 / LLM / 兜底 / 生词本 / 单词考试评分）
 
 **除 AI 讲解 / 单词考试 AI 评分外都不需要配置。** 在侧栏点 **Settings**（`/settings`）：
 
 1. **Your name**：填名字，用于复盘笔记本导出封面；
-2. **AI recognition fallback**：导入识别失败时的 LLM 兜底开关（默认开）；关闭后导入失败会提示你启用，
+2. **Analysis template**：写错题分析的 Markdown 模板，空的题页会自动填入（不覆盖已有分析，未改动不会保存）；
+3. **AI recognition fallback**：导入识别失败时的 LLM 兜底开关（默认开）；关闭后导入失败会提示你启用，
    并在你打开开关、配好 API Key 后再试；
-3. **Provider** 下拉（内置 19 家目录，**默认 OrcaRouter**，含 Base URL 与默认模型）；
-4. **Base URL** 可覆盖；
-5. **API Key** 只写不回显（掩码显示）；
-6. **Model** 填模型名；
-7. **AI sense matching**：拖词入生词本时是否让模型选最贴合上下文的韦氏释义（关闭 = 取第一条，0 token）；
-8. **Definition for English Learners**：词条自带该栏目时优先使用（没有则回退普通释义）；
-9. **My dictionary**：是否优先查用户自定义词典；**Manage my dictionary** 可导入 CSV/TSV/JSON/TXT 或逐条增删；
-10. **AI grading for word tests**：提交单词考试时是否让模型判分（关闭 = 本地判分、0 token；无 key/失败自动回退本地）；
-11. **Save settings** / **Test connection**。
+4. **Provider** 下拉（内置 19 家目录，**默认 OrcaRouter**，含 Base URL 与默认模型）；
+5. **Base URL** 可覆盖；
+6. **API Key** 只写不回显（掩码显示）；
+7. **Model** 填模型名；
+8. **AI sense matching**：拖词入生词本时是否让模型选最贴合上下文的韦氏释义（关闭 = 取第一条，0 token）；
+9. **Definition for English Learners**：词条自带该栏目时优先使用（没有则回退普通释义）；
+10. **My dictionary**：是否优先查用户自定义词典；**Manage my dictionary** 可导入 CSV/TSV/JSON/TXT 或逐条增删；
+11. **AI grading for word tests**：提交单词考试时是否让模型判分（关闭 = 本地判分、0 token；无 key/失败自动回退本地）；
+12. **Save settings** / **Test connection**。
 
 Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（SDK 自己补），程序只在缺版本段时补 `/v1` —— 所以官方文档上的 URL 可以直接粘贴。
 

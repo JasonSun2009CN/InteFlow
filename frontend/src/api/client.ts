@@ -466,6 +466,7 @@ export interface AppSettings {
   api_key_masked: string;
   api_key_set: boolean;
   user_name: string;
+  analysis_template: string;
   llm_fallback: boolean;
   vocab_ai_sense: boolean;
   vocab_learner_definitions: boolean;
@@ -490,6 +491,7 @@ export interface SettingsInput {
   model?: string;
   clear_key?: boolean;
   user_name?: string;
+  analysis_template?: string;
   llm_fallback?: boolean;
   vocab_ai_sense?: boolean;
   vocab_learner_definitions?: boolean;

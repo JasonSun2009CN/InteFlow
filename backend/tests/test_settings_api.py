@@ -29,6 +29,22 @@ def test_defaults(client: TestClient) -> None:
     assert "base_url" in body and "model" in body
 
 
+def test_analysis_template_default_and_roundtrip(client: TestClient) -> None:
+    assert client.get("/api/settings").json()["analysis_template"] == ""
+
+    template = (
+        "**Why the key works**\n\n"
+        "- evidence:\n\n"
+        "**Why I picked mine**\n\n"
+        "**Takeaway**\n"
+    )
+    saved = client.put("/api/settings", json={"analysis_template": template}).json()
+    assert saved["analysis_template"] == template
+
+    again = client.get("/api/settings").json()
+    assert again["analysis_template"] == template
+
+
 def test_vocabulary_toggles_default_and_roundtrip(client: TestClient) -> None:
     body = client.get("/api/settings").json()
     assert body["vocab_ai_sense"] is True

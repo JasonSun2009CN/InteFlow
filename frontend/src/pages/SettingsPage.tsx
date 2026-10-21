@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("");
   const [userName, setUserName] = useState("");
+  const [analysisTemplate, setAnalysisTemplate] = useState("");
   const [llmFallback, setLlmFallback] = useState(true);
   const [vocabAiSense, setVocabAiSense] = useState(true);
   const [vocabLearner, setVocabLearner] = useState(false);
@@ -40,6 +41,7 @@ export default function SettingsPage() {
         setBaseUrl(s.base_url);
         setModel(s.model);
         setUserName(s.user_name);
+        setAnalysisTemplate(s.analysis_template);
         setLlmFallback(s.llm_fallback);
         setVocabAiSense(s.vocab_ai_sense);
         setVocabLearner(s.vocab_learner_definitions);
@@ -80,6 +82,7 @@ export default function SettingsPage() {
         base_url: baseUrl.trim(),
         model: model.trim(),
         user_name: userName.trim(),
+        analysis_template: analysisTemplate,
         llm_fallback: llmFallback,
         vocab_ai_sense: vocabAiSense,
         vocab_learner_definitions: vocabLearner,
@@ -180,6 +183,29 @@ export default function SettingsPage() {
           />
           <p className="mt-1 text-xs text-slate-500">
             Used as the cover-page name when you export an analysis notebook.
+          </p>
+        </div>
+
+        <div>
+          <label className={label} htmlFor="analysis-template">
+            Analysis template
+          </label>
+          <textarea
+            id="analysis-template"
+            className={input + " min-h-[10rem] resize-y font-mono text-[13px] leading-6"}
+            value={analysisTemplate}
+            placeholder={
+              "**Why the correct answer works**\n\n" +
+              "**Why I picked mine**\n\n" +
+              "**Takeaway**\n"
+            }
+            onChange={(e) => setAnalysisTemplate(e.target.value)}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Pre-filled into every empty analysis page (wrong answers, starred questions
+            and the review workspace). Markdown is supported. An existing analysis is
+            never overwritten, and the template itself is only saved once you start
+            editing the page.
           </p>
         </div>
 

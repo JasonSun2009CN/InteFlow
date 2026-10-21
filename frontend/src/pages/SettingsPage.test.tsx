@@ -34,6 +34,7 @@ const settings: AppSettings = {
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
+  analysis_template: "",
 };
 
 beforeEach(() => {
@@ -87,6 +88,30 @@ describe("SettingsPage vocabulary options", () => {
     await waitFor(() =>
       expect(saveSettings).toHaveBeenCalledWith(
         expect.objectContaining({ vocab_exam_ai_grading: true }),
+      ),
+    );
+  });
+
+  it("loads and saves the analysis template exactly as typed", async () => {
+    getSettings.mockResolvedValue({
+      ...settings,
+      analysis_template: "**Why the key works**\n\n**Takeaway**\n",
+    });
+    render(<SettingsPage />);
+
+    const field = await screen.findByLabelText("Analysis template");
+    expect(field).toHaveValue("**Why the key works**\n\n**Takeaway**\n");
+
+    fireEvent.change(field, {
+      target: { value: "**Why**\n- evidence\n\n**Takeaway**" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
+
+    await waitFor(() =>
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          analysis_template: "**Why**\n- evidence\n\n**Takeaway**",
+        }),
       ),
     );
   });

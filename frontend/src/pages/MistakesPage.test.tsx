@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { api, type ReviewItem } from "../api/client";
+import { api, type AppSettings, type ReviewItem } from "../api/client";
 import MistakesPage from "./MistakesPage";
 
 vi.mock("../api/client", async (importOriginal) => {
@@ -12,6 +12,7 @@ vi.mock("../api/client", async (importOriginal) => {
       ...actual.api,
       listMistakes: vi.fn(),
       listStarredQuestions: vi.fn(),
+      getSettings: vi.fn(),
       starQuestion: vi.fn(),
       unstarQuestion: vi.fn(),
       saveAnalysisPage: vi.fn(),
@@ -76,6 +77,7 @@ describe("MistakesPage", () => {
     vi.clearAllMocks();
     listMistakes.mockResolvedValue([reviewItem()]);
     listStarredQuestions.mockResolvedValue([]);
+    vi.mocked(api.getSettings).mockResolvedValue({ analysis_template: "" } as AppSettings);
     starQuestion.mockResolvedValue({ question_id: 1, starred: true });
     unstarQuestion.mockResolvedValue({ question_id: 1, starred: false });
     vi.mocked(api.saveAnalysisPage).mockResolvedValue({

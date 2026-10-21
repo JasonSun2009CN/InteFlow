@@ -132,3 +132,17 @@
     单词考试释义引用也优先使用。
   - 代码：`backend/app/repos/custom_dictionary.py` + `backend/app/api/custom_dictionary.py`；
     前端 `components/CustomDictionaryManager.tsx`；测试 `test_custom_dictionary.py`。
+
+### ✅ 错题分析模板（2026-10-21）
+
+- 写错题分析时，空白的分析页自动填入用户自己的模板；模板在 Settings 里填写。
+- **已实现（2026-10-21）**：单个**全局 Markdown 模板**，存 settings 键 `analysis_template`。
+  - Settings → **Analysis template** 文本框，随 **Save settings** 一起保存。
+  - 复盘工作台、Mistakes / Starred 共用的分析编辑器：当该题**没有任何已保存分析**时，把模板作为
+    初始草稿填入；有分析（含 legacy）绝不覆盖。
+  - 模板只是草稿，**未改动不会自动保存**（不会把每道题都变成“已分析”而影响导出）；用户开始输入后
+    才走原来的 0.9 秒自动保存 / `⌘S` / Save。
+  - 复盘工作台会等 notebook 加载完成后再填入，避免模板把异步到达的真实分析挤掉。
+  - 0 token；代码：`backend/app/api/settings.py`、`frontend/src/pages/SettingsPage.tsx`、
+    `frontend/src/components/workspace/AnalysisEditor.tsx`；测试 `test_settings_api.py`、
+    `SettingsPage.test.tsx`、`AnalysisEditor.test.tsx`。

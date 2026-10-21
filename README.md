@@ -64,7 +64,7 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
 | **Review** | **Mistakes** (every wrong answer, one row per question using the latest attempt; corrected later = removed) and **Starred** (questions you star while practising or reviewing). Search papers/stems/options, filter by exam, sort newest/oldest, and read or edit the shared analysis; extra legacy analyses are shown read-only |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **analysis template**, **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests** |
 
 > **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
 > Put the file in `dictionary/`; the index is built automatically on first lookup (0 token). Some entries carry
@@ -234,6 +234,8 @@ After submitting you land on `/session/:sid/result` (**fullscreen review, no sid
   editor** (one page per question) on the right.
 - **Analysis editor**: Markdown (formulas `$x^2$`, images `![](assets/…)`), `Write` / `Preview`, and
   **autosave** (~0.9 s debounce; `⌘S` or **Save** for immediate). It resumes next time you open the attempt.
+  Empty pages are pre-filled from the **Analysis template** in Settings; an existing analysis is never
+  overwritten, and the template itself is not saved until you start editing.
 - **Notebook**: the top-bar button opens a full-exam preview — the exam title, then every question that already
   has analysis (stem, figures and notes), with export buttons.
 - **Toolbar drawer**: `AI` (explicit LLM explain), `Vocabulary` (this paper's word sheet, `.xlsx` export),
@@ -290,22 +292,24 @@ Both tabs share the same toolbar and right-hand editor:
 - **Whole document**: export **PDF** / **DOCX** (questions, answers and analysis) from the Library.
 - **Vocabulary**: **Export .xlsx**.
 
-### 8. Settings (name / LLM / fallback / vocabulary / word tests)
+### 8. Settings (name / analysis template / LLM / fallback / vocabulary / word tests)
 
 **Not required for anything except AI explain / word-test AI grading.** Open **Settings** (`/settings`) from the sidebar:
 
 1. **Your name** — used on the review notebook cover;
-2. **AI recognition fallback** — LLM fallback when import recognition fails (on by default); with it off, a
+2. **Analysis template** — Markdown pre-filled into every empty analysis page (never overwrites an existing
+   analysis and is not saved until you edit the page);
+3. **AI recognition fallback** — LLM fallback when import recognition fails (on by default); with it off, a
    failed import tells you to enable it, then retry once the toggle is on and an API key is set;
-3. **Provider** dropdown (19-provider catalog, defaults to **OrcaRouter**, with Base URL + default model);
-4. **Base URL** override;
-5. **API Key** (write-only, masked);
-6. **Model**;
-7. **AI sense matching** — let the model choose the Merriam-Webster sense when a word is dragged into the vocabulary pane (off = first sense, no tokens);
-8. **Definition for English Learners** — prefer the in-entry learner section when Merriam-Webster has one (otherwise use the normal definition);
-9. **My dictionary** — check your own words before Merriam-Webster; **Manage my dictionary** imports CSV/TSV/JSON/TXT or adds/deletes entries;
-10. **AI grading for word tests** — grade submitted word tests with the model (off = local grading, 0 token; failures fall back to local);
-11. **Save settings** / **Test connection**.
+4. **Provider** dropdown (19-provider catalog, defaults to **OrcaRouter**, with Base URL + default model);
+5. **Base URL** override;
+6. **API Key** (write-only, masked);
+7. **Model**;
+8. **AI sense matching** — let the model choose the Merriam-Webster sense when a word is dragged into the vocabulary pane (off = first sense, no tokens);
+9. **Definition for English Learners** — prefer the in-entry learner section when Merriam-Webster has one (otherwise use the normal definition);
+10. **My dictionary** — check your own words before Merriam-Webster; **Manage my dictionary** imports CSV/TSV/JSON/TXT or adds/deletes entries;
+11. **AI grading for word tests** — grade submitted word tests with the model (off = local grading, 0 token; failures fall back to local);
+12. **Save settings** / **Test connection**.
 
 Base URLs are kept exactly as each vendor documents them: OpenAI-style ones already carry `/v1`, Anthropic-style ones do not (the SDK adds it), and the app inserts `/v1` only when it is missing — so both can be pasted verbatim.
 

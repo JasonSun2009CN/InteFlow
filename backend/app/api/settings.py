@@ -40,6 +40,7 @@ class SettingsPayload(BaseModel):
     model: str | None = None
     clear_key: bool = False          # explicit wipe; blank alone keeps the key
     user_name: str | None = None     # printed on page 1 of every analysis notebook
+    analysis_template: str | None = None  # pre-filled into empty analysis pages
     llm_fallback: bool | None = None  # allow AI question recognition when parsing fails
     vocab_ai_sense: bool | None = None  # AI picks the MW sense on drag-to-vocabulary
     vocab_learner_definitions: bool | None = None  # prefer the in-entry learner section
@@ -63,6 +64,7 @@ def _load() -> dict[str, str]:
         "api_key": stored.get("api_key", ""),
         "model": stored.get("model", ""),
         "user_name": stored.get("user_name", ""),
+        "analysis_template": stored.get("analysis_template", ""),
         "llm_fallback": stored.get("llm_fallback", "1"),
         "vocab_ai_sense": stored.get("vocab_ai_sense", "1"),
         "vocab_learner_definitions": stored.get("vocab_learner_definitions", "0"),
@@ -80,6 +82,7 @@ def _view(s: dict[str, str]) -> dict:
         "api_key_masked": _mask(s["api_key"]) if s["api_key"] else "",
         "api_key_set": bool(s["api_key"]),
         "user_name": s["user_name"],
+        "analysis_template": s["analysis_template"],
         "llm_fallback": s["llm_fallback"] != "0",
         "vocab_ai_sense": s["vocab_ai_sense"] != "0",
         "vocab_learner_definitions": s["vocab_learner_definitions"] == "1",
@@ -125,6 +128,9 @@ def put_settings(payload: SettingsPayload) -> dict:
         updates["api_key"] = payload.api_key.strip()
     if payload.user_name is not None:
         updates["user_name"] = payload.user_name.strip()
+    if payload.analysis_template is not None:
+        # Markdown: keep the author's line breaks and spacing exactly as typed.
+        updates["analysis_template"] = payload.analysis_template
     if payload.llm_fallback is not None:
         updates["llm_fallback"] = "1" if payload.llm_fallback else "0"
     if payload.vocab_ai_sense is not None:
