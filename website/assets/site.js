@@ -467,41 +467,53 @@
     var DEMO = isEnglish
       ? {
           ui: {
-            questionWord: "QUESTION",
-            prev: "← Previous",
-            next: "Next →",
+            title: "Demo · Mixed Practice",
+            subtitle: "Reading & Writing · 4 questions",
+            questionOf: function (number, total) {
+              return "Question " + number + " of " + total;
+            },
+            questionHeading: function (number, section, kind) {
+              return "Question " + number + " · " + section + " · " + kind;
+            },
+            palette: "Question palette",
+            passage: "Passage",
+            exit: "Exit",
             submit: "Submit",
-            submitNote: function (left) {
-              return left ? left + " unanswered" : "graded locally";
-            },
-            unanswered: function (left) {
-              return left + " unanswered — you can still submit.";
-            },
-            ready: "All answered — submit when ready.",
-            mark: "Mark for review",
-            marked: "Marked for review",
-            yourAnswer: "Your answer",
-            correctAnswer: "Correct answer",
-            notAnswered: "No answer",
-            correctTag: "Correct",
-            wrongTag: "Review",
-            correctOption: "Correct",
-            yourOption: "Your answer",
-            accepted: "Accepted answers",
+            prev: "Previous",
+            next: "Next",
+            star: "☆ Star for review",
+            starred: "★ Starred",
             resultKicker: "RESULT · 0 TOKEN",
+            resultSubtitle: "Submitted · graded locally · 0 token",
             resultNote: function (correct, total) {
               return correct + " of " + total + " correct";
             },
             timeNote: function (time) {
               return "Time " + time;
             },
-            reviewBtn: "Review answers →",
-            againBtn: "Try again",
-            backResult: "← Back to result",
+            scoreDetail: function (pct, wrong) {
+              return pct + "% · " + wrong + " wrong";
+            },
+            reviewSubtitle: function (time, total, graded) {
+              return time + " · " + total + " questions · " + graded + " graded";
+            },
+            reviewBtn: "Review answers",
+            againBtn: "Practice again",
+            back: "Back",
             review: "Review",
+            correctTag: "Correct",
+            wrongTag: "Wrong",
+            yourAnswer: "Your answer",
+            correctAnswer: "Correct answer",
+            notAnswered: "No answer",
+            correctOption: "Correct",
+            yourOption: "Your answer",
+            accepted: "Accepted answers",
             analysis: "ANALYSIS",
-            autosave: "0.9s autosave",
-            sample: "SAMPLE",
+            write: "Write",
+            preview: "Preview",
+            analysisNote:
+              "Demo: edits stay on this page. The real editor autosaves after about 0.9s and can export md / docx / pdf.",
             wordBank: "WORD BANK",
             words: function (n) {
               return n + " saved";
@@ -509,12 +521,25 @@
             vocabNote: "Tap + to keep a word in this browser. Nothing leaves the page.",
             addWord: "Add to word bank",
             addedWord: "Saved",
+            aiTitle: "AI Tutor",
+            aiTagline: "Explicit by design. The main path stays local and 0-token.",
+            aiButton: "Explain this question",
+            aiNote:
+              "Demo response. The real app sends only this question's context to your configured provider, and only when you click.",
+            toolQuestion: "Question",
+            toolAnalysis: "Analysis",
+            toolAi: "AI Tutor",
+            toolVocabulary: "Vocabulary",
+            notebook: "Notebook",
+            export: "Export",
+            toastNotebook:
+              "Demo only — the full app opens a Notebook preview and exports md / docx / pdf.",
+            toastExport:
+              "Demo only — the full app exports notebooks as md / docx / pdf and word lists as xlsx.",
+            toastExit:
+              "Demo only — in the full app, Exit leaves practice and discards an unsubmitted attempt.",
             blankPlaceholder: "Type one word…",
-            blankHint: "One word. Case and surrounding spaces do not matter.",
-            status: function (answered, total) {
-              return answered + " / " + total + " answered · local grading";
-            },
-            statusDone: "Submitted · graded in your browser · 0 token"
+            blankHint: "One word. Case and surrounding spaces do not matter."
           },
           questions: [
             {
@@ -532,6 +557,8 @@
               answer: "B",
               analysis:
                 "The author concedes that the committee's concerns were “not unreasonable”, then signals a turn with “Still”: the policy passed unchanged and outperformed predictions. That is measured approval — not contempt, indifference or hostility.\n\nConcession + “still” is a common pattern: acknowledge the other side, then land on a qualified but clear position.",
+              ai:
+                "Find the turn: “not unreasonable” concedes, “Still” states the author's position. The policy passed unchanged and beat predictions — so this is qualified approval.",
               words: [
                 { term: "reservations", pos: "n.", def: "doubts or concerns held back" },
                 { term: "amendment", pos: "n.", def: "a formal change to a text" },
@@ -553,6 +580,8 @@
               answer: "B",
               analysis:
                 "The sentence contrasts the committee's reservations with the policy's smooth first month. A reservation in this sense is a doubt held back — not a booking, an approval or a restriction. The next clause, “those reservations were not unreasonable”, confirms that these are concerns.\n\nSubstitute “doubts” back into the sentence: “the committee had doubts about the new policy.” The logic still holds.",
+              ai:
+                "Substitute each option back into the sentence. Only “doubts” keeps both the conceding clause and the contrast with the policy's success.",
               words: [
                 { term: "reservation", pos: "n.", def: "a doubt or objection" },
                 { term: "unreasonable", pos: "adj.", def: "not fair or sensible" }
@@ -571,6 +600,8 @@
               answer: "B",
               analysis:
                 "Subtract 7 from both sides: 3x = 15. Divide by 3: x = 5. Check: 3(5) + 7 = 22.\n\nThe trap is stopping early: 15 is the value of 3x, not x.",
+              ai:
+                "Undo the operations in reverse: subtract 7, then divide by 3. Substitute the result back into the original equation to check.",
               words: [{ term: "isolate", pos: "v.", def: "to get a variable alone on one side" }]
             },
             {
@@ -591,6 +622,8 @@
               ],
               analysis:
                 "The dash defines the blank: testing every hypothesis twice is careful, systematic work. “Meticulous” — extremely careful about detail — fits both meaning and register. “Careful”, “thorough”, “methodical” and “rigorous” are accepted too.\n\nWhen a blank is followed by a dash or colon, let the explanation choose the word.",
+              ai:
+                "The dash is a definition. “Testing every hypothesis twice” points to careful, systematic work; “meticulous” fits the register best.",
               words: [
                 { term: "meticulous", pos: "adj.", def: "extremely careful about detail" },
                 { term: "hypothesis", pos: "n.", def: "a proposed explanation to be tested" },
@@ -601,41 +634,53 @@
         }
       : {
           ui: {
-            questionWord: "题目",
-            prev: "← 上一题",
-            next: "下一题 →",
+            title: "演示 · 混合练习",
+            subtitle: "Reading & Writing · 4 题",
+            questionOf: function (number, total) {
+              return "第 " + number + " 题 / 共 " + total + " 题";
+            },
+            questionHeading: function (number, section, kind) {
+              return "第 " + number + " 题 · " + section + " · " + kind;
+            },
+            palette: "题号面板",
+            passage: "文章",
+            exit: "退出",
             submit: "交卷",
-            submitNote: function (left) {
-              return left ? left + " 题未答" : "本地判分";
-            },
-            unanswered: function (left) {
-              return "还有 " + left + " 题未作答，仍可交卷。";
-            },
-            ready: "都答完了，可以交卷。",
-            mark: "标记待看",
-            marked: "已标记",
-            yourAnswer: "你的答案",
-            correctAnswer: "正确答案",
-            notAnswered: "未作答",
-            correctTag: "正确",
-            wrongTag: "待复盘",
-            correctOption: "正确答案",
-            yourOption: "你的作答",
-            accepted: "可接受答案",
+            prev: "上一题",
+            next: "下一题",
+            star: "☆ 标记待看",
+            starred: "★ 已标记",
             resultKicker: "RESULT · 0 TOKEN",
+            resultSubtitle: "已交卷 · 本地判分 · 0 token",
             resultNote: function (correct, total) {
               return "答对 " + correct + " / " + total + " 题";
             },
             timeNote: function (time) {
               return "用时 " + time;
             },
-            reviewBtn: "查看复盘 →",
-            againBtn: "再试一次",
-            backResult: "← 返回成绩",
+            scoreDetail: function (pct, wrong) {
+              return pct + "% · 答错 " + wrong + " 题";
+            },
+            reviewSubtitle: function (time, total, graded) {
+              return time + " · " + total + " 题 · 已判 " + graded + " 题";
+            },
+            reviewBtn: "查看复盘",
+            againBtn: "再做一次",
+            back: "返回",
             review: "复盘",
+            correctTag: "正确",
+            wrongTag: "错误",
+            yourAnswer: "你的答案",
+            correctAnswer: "正确答案",
+            notAnswered: "未作答",
+            correctOption: "正确答案",
+            yourOption: "你的作答",
+            accepted: "可接受答案",
             analysis: "ANALYSIS",
-            autosave: "0.9s autosave",
-            sample: "示例",
+            write: "Write",
+            preview: "Preview",
+            analysisNote:
+              "演示里编辑只留在本页。真实编辑器约 0.9 秒自动保存，并可导出 md / docx / pdf。",
             wordBank: "WORD BANK",
             words: function (n) {
               return "已收录 " + n + " 个";
@@ -643,12 +688,25 @@
             vocabNote: "点 + 把词收进这个浏览器，0 token，不上传。",
             addWord: "加入生词本",
             addedWord: "已收录",
+            aiTitle: "AI Tutor",
+            aiTagline: "AI 只在显式点击后出现；主链路保持本地、0 token。",
+            aiButton: "让 AI 讲解这道题",
+            aiNote:
+              "演示文案。真实应用只在你点击时，把当前题目上下文发给已经配置好的服务商。",
+            toolQuestion: "题目",
+            toolAnalysis: "分析",
+            toolAi: "AI Tutor",
+            toolVocabulary: "生词本",
+            notebook: "Notebook",
+            export: "导出",
+            toastNotebook:
+              "仅演示：完整应用会打开整套 Notebook 预览，并可导出 md / docx / pdf。",
+            toastExport:
+              "仅演示：完整应用可把复盘导出为 md / docx / pdf，词表导出为 xlsx。",
+            toastExit:
+              "仅演示：完整应用的 Exit 会离开练习并丢弃未交卷的作答；这里会保留你的答案。",
             blankPlaceholder: "输入一个单词…",
-            blankHint: "只填一个词，大小写与首尾空格不影响判分。",
-            status: function (answered, total) {
-              return answered + " / " + total + " 已作答 · 本地判分";
-            },
-            statusDone: "已交卷 · 浏览器内判分 · 0 token"
+            blankHint: "只填一个词，大小写与首尾空格不影响判分。"
           },
           questions: [
             {
@@ -666,6 +724,8 @@
               answer: "B",
               analysis:
                 "作者先承认委员会的顾虑 “not unreasonable”，再用 “Still” 转折：政策原样通过，而且头一个月比批评者预测的更好。这是有保留的赞同（cautious approval），不是轻蔑、漠然或敌意。\n\n“让步 + still” 是态度题的常见结构：先承认对方，再落到一个有保留但明确的立场。",
+              ai:
+                "先找转折：“not unreasonable” 是让步，“Still” 才是作者立场。政策原样通过、表现好于预期，所以是有保留的赞同。",
               words: [
                 { term: "reservations", pos: "n.", def: "疑虑；保留意见（doubts held back）" },
                 { term: "amendment", pos: "n.", def: "修正；对文本的正式修改" },
@@ -687,6 +747,8 @@
               answer: "B",
               analysis:
                 "句子把委员会的 reservations 与政策头一个月的顺利表现作对比。这里的 reservation 是保留在心里的疑虑，不是预订、批准或限制；后一句 “those reservations were not unreasonable” 也确认了它指的是顾虑。\n\n把 doubts 代回原句：“the committee had doubts about the new policy.” 逻辑依然成立，所以选 doubts。",
+              ai:
+                "把每个选项代回原句。只有 doubts 能同时保住让步从句和转折关系。",
               words: [
                 { term: "reservation", pos: "n.", def: "保留意见；疑虑" },
                 { term: "unreasonable", pos: "adj.", def: "不合理的；缺乏道理的" }
@@ -705,6 +767,8 @@
               answer: "B",
               analysis:
                 "两边同时减 7：3x = 15；再除以 3：x = 5。代回检验：3(5) + 7 = 22。\n\n常见陷阱是提前停下：15 是 3x 的值，不是 x。",
+              ai:
+                "逆着运算走：先减 7，再除以 3；最后把结果代回原式检验。",
               words: [{ term: "isolate", pos: "v.", def: "隔离；把变量单独留在一边" }]
             },
             {
@@ -725,6 +789,8 @@
               ],
               analysis:
                 "破折号在解释空格：每个假设都测两遍，是细致、有条理的工作。meticulous（一丝不苟的）既符合词义，也符合句子语域；careful、thorough、methodical、rigorous 也都可以接受。\n\n空格后面跟着破折号或冒号时，让后面的解释来选词。",
+              ai:
+                "破折号就是定义。“testing every hypothesis twice” 指向细致、有条理；meticulous 最贴合语域。",
               words: [
                 { term: "meticulous", pos: "adj.", def: "一丝不苟的；极其细致的" },
                 { term: "hypothesis", pos: "n.", def: "假设；待检验的解释" },
@@ -735,13 +801,10 @@
         };
 
     var demoBody = demoRoot.querySelector("[data-demo-body]");
-    var demoStatus = demoRoot.querySelector("[data-demo-status]");
-    var demoTimer = demoRoot.querySelector("[data-demo-timer]");
-    var demoSteps = Array.prototype.slice.call(
-      demoRoot.querySelectorAll("[data-demo-step]")
-    );
+    var demoToast = demoRoot.querySelector("[data-demo-toast]");
     var VOCAB_KEY = "inteflow.website.demo.vocab";
     var savedWords = {};
+    var toastTimer = null;
 
     try {
       var storedWords = window.localStorage.getItem(VOCAB_KEY);
@@ -761,6 +824,11 @@
       submitted: false,
       view: "practice",
       reviewIndex: 0,
+      leftTool: "question",
+      rightTool: "analysis",
+      analysisMode: "write",
+      drafts: {},
+      aiShown: {},
       startedAt: null,
       elapsed: 0,
       running: false
@@ -797,14 +865,6 @@
       return String(demoState.answers[index] || "").trim() !== "";
     }
 
-    function unansweredCount() {
-      var left = 0;
-      DEMO.questions.forEach(function (question, index) {
-        if (!answered(index)) left += 1;
-      });
-      return left;
-    }
-
     function isCorrect(index) {
       var question = DEMO.questions[index];
       var answer = demoState.answers[index] || "";
@@ -818,7 +878,7 @@
       return answer === question.answer;
     }
 
-    function correctCount() {
+    function countCorrect() {
       var total = 0;
       DEMO.questions.forEach(function (question, index) {
         if (isCorrect(index)) total += 1;
@@ -830,54 +890,73 @@
       return Object.keys(savedWords).length;
     }
 
+    function showToast(message) {
+      if (!demoToast) return;
+      demoToast.textContent = message;
+      demoToast.hidden = false;
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(function () {
+        demoToast.hidden = true;
+      }, 3600);
+    }
+
     function ensureTimer() {
       if (demoState.startedAt || demoState.submitted) return;
       demoState.startedAt = Date.now();
       demoState.running = true;
     }
 
-    function updateFoot() {
-      if (!demoStatus) return;
-      demoStatus.textContent = demoState.submitted
-        ? DEMO.ui.statusDone
-        : DEMO.ui.status(
-            DEMO.questions.length - unansweredCount(),
-            DEMO.questions.length
-          );
+    function timerText() {
+      if (!demoState.startedAt) return formatTime(demoState.elapsed);
+      if (!demoState.running) return formatTime(demoState.elapsed);
+      return formatTime(Math.floor((Date.now() - demoState.startedAt) / 1000));
     }
 
-    function updateSteps() {
-      demoSteps.forEach(function (button) {
-        var name = button.getAttribute("data-demo-step");
-        var active = name === demoState.view;
-        var locked = demoState.submitted ? name === "practice" : name !== "practice";
-        button.disabled = locked;
-        button.classList.toggle("is-active", active);
-        button.setAttribute("aria-selected", String(active));
-      });
+    function paintTimer() {
+      var el = demoRoot.querySelector("[data-demo-timer]");
+      if (el) el.textContent = timerText();
     }
 
-    function renderNavPanel() {
-      var total = DEMO.questions.length;
-      var left = unansweredCount();
-      var marked = !!demoState.marked[demoState.index];
-      var html = '<aside class="demo-nav-panel">';
+    function analysisText(index) {
+      if (typeof demoState.drafts[index] === "string") return demoState.drafts[index];
+      return DEMO.questions[index].analysis;
+    }
 
-      html +=
-        '<div class="demo-nav-head"><span class="mono">' +
-        esc(DEMO.ui.questionWord) +
-        "</span><span>" +
-        pad(demoState.index + 1) +
-        " / " +
-        pad(total) +
-        "</span></div>";
+    function toolLabel(tool) {
+      return {
+        question: DEMO.ui.toolQuestion,
+        analysis: DEMO.ui.toolAnalysis,
+        ai: DEMO.ui.toolAi,
+        vocabulary: DEMO.ui.toolVocabulary
+      }[tool];
+    }
 
-      html += '<div class="demo-grid-nav">';
-      for (var index = 0; index < total; index += 1) {
+    function toolIcon(name) {
+      var paths = {
+        question:
+          '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M9.1 9a3 3 0 0 1 5.8 0c0 2-3 2.5-3 4"/><path d="M12 17h.01"/>',
+        analysis:
+          '<path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4M2 10h4M2 14h4M2 18h4"/><path d="M21.4 5.6a2.1 2.1 0 0 0-3-3L12 9v3h3Z"/>',
+        ai:
+          '<path d="m12 3-1.9 5.8L4 10.7l6.1 1.9L12 18.4l1.9-5.8L20 10.7l-6.1-1.9Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>',
+        vocabulary:
+          '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3Z"/>'
+      };
+      return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        paths[name] +
+        "</svg>"
+      );
+    }
+
+    function practicePalette() {
+      var html = "";
+      DEMO.questions.forEach(function (question, index) {
         var classes = ["demo-goto"];
-        if (answered(index)) classes.push("is-answered");
-        if (index === demoState.index) classes.push("is-current");
         if (demoState.marked[index]) classes.push("is-marked");
+        else if (answered(index)) classes.push("is-answered");
+        if (index === demoState.index) classes.push("is-current");
         html +=
           '<button class="' +
           classes.join(" ") +
@@ -890,50 +969,133 @@
           ">" +
           (index + 1) +
           "</button>";
-      }
-      html += "</div>";
+      });
+      return html;
+    }
 
-      html +=
-        '<button class="demo-mark" type="button" data-demo-mark aria-pressed="' +
+    function reviewPalette() {
+      var html = "";
+      DEMO.questions.forEach(function (question, index) {
+        var ok = isCorrect(index);
+        var classes = ["demo-goto", ok ? "is-correct" : "is-wrong"];
+        if (index === demoState.reviewIndex) classes.push("is-current");
+        html +=
+          '<button class="' +
+          classes.join(" ") +
+          '" type="button" data-demo-review="' +
+          index +
+          '" aria-label="Q' +
+          (index + 1) +
+          " · " +
+          esc(ok ? DEMO.ui.correctTag : DEMO.ui.wrongTag) +
+          '"' +
+          (index === demoState.reviewIndex ? ' aria-current="true"' : "") +
+          ">" +
+          (index + 1) +
+          "</button>";
+      });
+      return html;
+    }
+
+    function practiceOptions(question, answer) {
+      var html = '<ul class="demo-options">';
+      question.options.forEach(function (option) {
+        var selected = answer === option.key;
+        html +=
+          '<li><button class="demo-option' +
+          (selected ? " is-selected" : "") +
+          '" type="button" data-demo-option="' +
+          esc(option.key) +
+          '" aria-pressed="' +
+          selected +
+          '"><span class="demo-key">' +
+          esc(option.key) +
+          '</span><span class="demo-option-text">' +
+          esc(option.text) +
+          "</span></button></li>";
+      });
+      return html + "</ul>";
+    }
+
+    function reviewOptions(question, answer) {
+      var html = '<ul class="demo-options">';
+      question.options.forEach(function (option) {
+        var classes = ["demo-option", "is-static"];
+        var flag = "";
+        if (option.key === question.answer) {
+          classes.push("is-correct");
+          flag = DEMO.ui.correctOption;
+        }
+        if (option.key === answer && option.key !== question.answer) {
+          classes.push("is-wrong");
+          flag = DEMO.ui.yourOption;
+        }
+        if (option.key === answer && option.key === question.answer) {
+          flag = DEMO.ui.correctOption + " · " + DEMO.ui.yourOption;
+        }
+        html +=
+          '<li><div class="' +
+          classes.join(" ") +
+          '"><span class="demo-key">' +
+          esc(option.key) +
+          '</span><span class="demo-option-text">' +
+          esc(option.text) +
+          "</span>" +
+          (flag ? '<span class="demo-option-flag">' + esc(flag) + "</span>" : "") +
+          "</div></li>";
+      });
+      return html + "</ul>";
+    }
+
+    function starButton(index) {
+      var marked = !!demoState.marked[index];
+      return (
+        '<button class="demo-star" type="button" data-demo-mark aria-pressed="' +
         marked +
         '">' +
-        esc(marked ? DEMO.ui.marked : DEMO.ui.mark) +
-        "</button>";
-
-      html +=
-        '<button class="demo-submit" type="button" data-demo-submit>' +
-        esc(DEMO.ui.submit) +
-        "<small>" +
-        esc(DEMO.ui.submitNote(left)) +
-        "</small></button>";
-
-      html +=
-        '<p class="demo-hint">' +
-        esc(left ? DEMO.ui.unanswered(left) : DEMO.ui.ready) +
-        "</p>";
-      html += "</aside>";
-      return html;
+        esc(marked ? DEMO.ui.starred : DEMO.ui.star) +
+        "</button>"
+      );
     }
 
     function renderPractice() {
       var index = demoState.index;
       var question = DEMO.questions[index];
       var answer = demoState.answers[index] || "";
-      var html = '<div class="demo-practice"><div class="demo-question">';
+      var html = '<div class="demo-app"><header class="demo-appbar">';
 
       html +=
-        '<div class="demo-meta"><span class="demo-qno">Q' +
-        pad(index + 1) +
-        '</span><span class="demo-tag">' +
-        esc(question.section) +
-        '</span><span class="demo-tag">' +
-        esc(question.kindLabel) +
-        "</span></div>";
+        '<div class="demo-title"><strong>' +
+        esc(DEMO.ui.title) +
+        "</strong><small>" +
+        esc(DEMO.ui.subtitle) +
+        "</small></div>";
+      html += '<span class="demo-pos">' + esc(DEMO.ui.questionOf(index + 1, DEMO.questions.length)) + "</span>";
+      html += '<div class="demo-appbar-actions">';
+      html += '<span class="demo-clock" data-demo-timer>' + esc(timerText()) + "</span>";
+      html += '<button class="demo-btn" type="button" data-demo-exit>' + esc(DEMO.ui.exit) + "</button>";
+      html +=
+        '<button class="demo-btn demo-btn-primary" type="button" data-demo-submit>' +
+        esc(DEMO.ui.submit) +
+        "</button>";
+      html += "</div></header>";
 
+      html += '<main class="demo-main"><div class="demo-practice-grid' + (question.material ? "" : " is-single") + '">';
       if (question.material) {
-        html += '<p class="demo-material">' + esc(question.material) + "</p>";
+        html +=
+          '<aside class="demo-passage"><div class="demo-kicker">' +
+          esc(DEMO.ui.passage) +
+          "</div><p>" +
+          esc(question.material) +
+          "</p></aside>";
       }
 
+      html += '<section class="demo-qcard">';
+      html += '<div class="demo-qhead"><span>' +
+        esc(DEMO.ui.questionHeading(index + 1, question.section, question.kindLabel)) +
+        "</span>" +
+        starButton(index) +
+        "</div>";
       html += '<h3 class="demo-stem">' + esc(question.stem) + "</h3>";
 
       if (question.kind === "blank") {
@@ -947,99 +1109,71 @@
           '"></label>';
         html += '<p class="demo-blank-hint">' + esc(DEMO.ui.blankHint) + "</p>";
       } else {
-        html += '<ul class="demo-options">';
-        question.options.forEach(function (option) {
-          var selected = answer === option.key;
-          html +=
-            '<li><button class="demo-option' +
-            (selected ? " is-selected" : "") +
-            '" type="button" data-demo-option="' +
-            esc(option.key) +
-            '" aria-pressed="' +
-            selected +
-            '"><span class="demo-key">' +
-            esc(option.key) +
-            '</span><span class="demo-option-text">' +
-            esc(option.text) +
-            "</span></button></li>";
-        });
-        html += "</ul>";
+        html += practiceOptions(question, answer);
       }
 
-      html += '<div class="demo-actions">';
+      html += "</section></div></main>";
+      html += '<footer class="demo-practice-foot">';
       html +=
-        '<button class="demo-ghost" type="button" data-demo-prev' +
+        '<button class="demo-btn" type="button" data-demo-prev' +
         (index === 0 ? " disabled" : "") +
         ">" +
         esc(DEMO.ui.prev) +
         "</button>";
+      html += '<nav class="demo-palette" aria-label="' + esc(DEMO.ui.palette) + '">' + practicePalette() + "</nav>";
       html +=
-        '<span class="demo-actions-count">' +
-        pad(index + 1) +
-        " / " +
-        pad(DEMO.questions.length) +
-        "</span>";
-      html +=
-        '<button class="demo-ghost" type="button" data-demo-next' +
+        '<button class="demo-btn" type="button" data-demo-next' +
         (index === DEMO.questions.length - 1 ? " disabled" : "") +
         ">" +
         esc(DEMO.ui.next) +
         "</button>";
-      html += "</div>";
-
-      html += "</div>";
-      html += renderNavPanel();
-      html += "</div>";
+      html += "</footer></div>";
 
       demoBody.innerHTML = html;
+      paintTimer();
     }
 
     function renderResult() {
       var total = DEMO.questions.length;
-      var correct = correctCount();
+      var correct = countCorrect();
+      var wrong = total - correct;
       var percent = Math.round((correct / total) * 100);
-      var html = '<div class="demo-result"><div class="demo-score">';
+      var html = '<div class="demo-app"><header class="demo-appbar">';
 
-      html += '<p class="mono">' + esc(DEMO.ui.resultKicker) + "</p>";
       html +=
-        '<p class="demo-score-number"><strong>' +
-        correct +
-        "</strong><span>/ " +
-        total +
-        "</span></p>";
+        '<div class="demo-title"><strong>' +
+        esc(DEMO.ui.title) +
+        "</strong><small>" +
+        esc(DEMO.ui.resultSubtitle) +
+        "</small></div>";
+      html += '<div class="demo-score-inline"><strong>' + correct + "</strong><span> / " + total + "</span><small>" +
+        esc(DEMO.ui.scoreDetail(percent, wrong)) +
+        "</small></div>";
+      html += '<div class="demo-appbar-actions">';
+      html += '<button class="demo-btn" type="button" data-demo-reset>' + esc(DEMO.ui.againBtn) + "</button>";
       html +=
-        '<p class="demo-score-note">' + esc(DEMO.ui.resultNote(correct, total)) + "</p>";
-      html +=
-        '<p class="demo-score-time">' +
-        esc(DEMO.ui.timeNote(formatTime(demoState.elapsed))) +
-        "</p>";
-      html +=
-        '<div class="demo-score-bar"><i style="width:' + percent + '%"></i></div>';
-      html += '<div class="demo-result-actions">';
-      html +=
-        '<button class="btn btn-small btn-ink" type="button" data-demo-view="review">' +
+        '<button class="demo-btn demo-btn-primary" type="button" data-demo-view="review">' +
         esc(DEMO.ui.reviewBtn) +
         "</button>";
-      html +=
-        '<button class="btn btn-small btn-outline" type="button" data-demo-reset>' +
-        esc(DEMO.ui.againBtn) +
-        "</button>";
-      html += "</div></div>";
+      html += "</div></header>";
 
-      html += '<ul class="demo-result-list">';
+      html += '<main class="demo-main demo-main--center"><section class="demo-summary">';
+      html += '<p class="demo-kicker">' + esc(DEMO.ui.resultKicker) + "</p>";
+      html += '<div class="demo-summary-top"><div class="demo-big-score"><strong>' + correct + "</strong><span>/ " + total + "</span></div>";
+      html += '<div class="demo-summary-note">' + esc(DEMO.ui.resultNote(correct, total)) + "<small>" +
+        esc(DEMO.ui.timeNote(formatTime(demoState.elapsed))) + "</small></div></div>";
+      html += '<div class="demo-score-bar"><i style="width:' + percent + '%"></i></div>';
+
+      html += '<ul class="demo-summary-list">';
       DEMO.questions.forEach(function (question, index) {
         var ok = isCorrect(index);
         var answer = demoState.answers[index] || "";
         var your = answer || DEMO.ui.notAnswered;
-        var expected =
-          question.kind === "blank"
-            ? question.accept.slice(0, 3).join(" / ")
-            : question.answer;
-
+        var expected = question.kind === "blank" ? question.accept.slice(0, 3).join(" / ") : question.answer;
         html +=
-          '<li class="demo-result-row"><span>' +
+          '<li class="demo-summary-row"><span>' +
           pad(index + 1) +
-          '</span><div class="demo-result-main"><strong>' +
+          '</span><div class="demo-row-main"><strong>' +
           esc(question.kindLabel) +
           "</strong><small>" +
           esc(DEMO.ui.yourAnswer) +
@@ -1049,10 +1183,8 @@
           esc(DEMO.ui.correctAnswer) +
           ": " +
           esc(expected) +
-          '</small></div><span class="' +
-          (ok ? "demo-mark-ok" : "demo-mark-no") +
-          '" aria-label="' +
-          esc(ok ? DEMO.ui.correctTag : DEMO.ui.wrongTag) +
+          '</small></div><span class="demo-row-status ' +
+          (ok ? "is-correct" : "is-wrong") +
           '">' +
           (ok ? "✓" : "✕") +
           '</span><button class="demo-row-btn" type="button" data-demo-review="' +
@@ -1061,60 +1193,52 @@
           esc(DEMO.ui.review) +
           "</button></li>";
       });
-      html += "</ul></div>";
+      html += "</ul></section></main></div>";
 
       demoBody.innerHTML = html;
     }
 
-    function renderReview() {
+    function renderToolHeader(side, active, other) {
+      var html =
+        '<div class="demo-pane-tools" role="group" aria-label="' +
+        esc((isEnglish ? "Switch " : "切换") + (side === "left" ? (isEnglish ? "left" : "左侧") : (isEnglish ? "right" : "右侧")) + (isEnglish ? " pane" : "面板")) +
+        '">';
+      ["question", "analysis", "ai", "vocabulary"].forEach(function (tool) {
+        var classes = ["demo-tool"];
+        if (tool === active) classes.push("is-active");
+        html +=
+          '<button class="' +
+          classes.join(" ") +
+          '" type="button" data-demo-tool="' +
+          tool +
+          '" data-demo-side="' +
+          side +
+          '" aria-pressed="' +
+          (tool === active) +
+          '" title="' +
+          esc(toolLabel(tool)) +
+          '">' +
+          toolIcon(tool) +
+          "<span>" +
+          esc(toolLabel(tool)) +
+          "</span></button>";
+      });
+      return html + "</div>";
+    }
+
+    function renderQuestionTool() {
       var index = demoState.reviewIndex;
       var question = DEMO.questions[index];
       var answer = demoState.answers[index] || "";
       var ok = isCorrect(index);
-      var html = '<div class="demo-review">';
-
-      html += '<div class="demo-review-nav" role="tablist" aria-label="Review questions">';
-      DEMO.questions.forEach(function (item, itemIndex) {
-        var classes = [];
-        if (itemIndex === index) classes.push("is-active");
-        if (answered(itemIndex)) {
-          classes.push(isCorrect(itemIndex) ? "is-correct" : "is-wrong");
-        }
-        html +=
-          '<button class="' +
-          classes.join(" ") +
-          '" type="button" role="tab" aria-selected="' +
-          (itemIndex === index) +
-          '" data-demo-review="' +
-          itemIndex +
-          '" aria-label="Q' +
-          (itemIndex + 1) +
-          " · " +
-          esc(
-            !answered(itemIndex)
-              ? DEMO.ui.notAnswered
-              : isCorrect(itemIndex)
-                ? DEMO.ui.correctTag
-                : DEMO.ui.wrongTag
-          ) +
-          '"><span class="dot"></span>Q' +
-          pad(itemIndex + 1) +
-          "</button>";
-      });
-      html += "</div>";
-
-      html += '<div class="demo-review-body"><article class="demo-review-main">';
-      html +=
-        '<div class="demo-meta"><span class="demo-qno">Q' +
-        pad(index + 1) +
-        '</span><span class="demo-tag">' +
-        esc(question.section) +
-        '</span><span class="demo-tag">' +
-        esc(question.kindLabel) +
-        "</span></div>";
+      var html = '<div class="demo-pane-question"><div class="demo-qhead"><span>' +
+        esc(DEMO.ui.questionHeading(index + 1, question.section, question.kindLabel)) +
+        "</span>" +
+        starButton(index) +
+        "</div>";
 
       if (question.material) {
-        html += '<p class="demo-material">' + esc(question.material) + "</p>";
+        html += '<p class="demo-pane-passage">' + esc(question.material) + "</p>";
       }
       html += '<h3 class="demo-stem">' + esc(question.stem) + "</h3>";
 
@@ -1130,66 +1254,63 @@
           esc(question.accept.join(" / ")) +
           "</strong></div></div>";
       } else {
-        html += '<ul class="demo-options">';
-        question.options.forEach(function (option) {
-          var classes = ["demo-option"];
-          var flag = "";
-          if (option.key === question.answer) {
-            classes.push("is-correct");
-            flag = DEMO.ui.correctOption;
-          }
-          if (option.key === answer && option.key !== question.answer) {
-            classes.push("is-wrong");
-            flag = DEMO.ui.yourOption;
-          }
-          if (option.key === answer && option.key === question.answer) {
-            flag = DEMO.ui.correctOption + " · " + DEMO.ui.yourOption;
-          }
-          html +=
-            '<li><div class="' +
-            classes.join(" ") +
-            '"><span class="demo-key">' +
-            esc(option.key) +
-            '</span><span class="demo-option-text">' +
-            esc(option.text) +
-            "</span>" +
-            (flag ? '<span class="demo-option-flag">' + esc(flag) + "</span>" : "") +
-            "</div></li>";
-        });
-        html += "</ul>";
+        html += reviewOptions(question, answer);
       }
 
-      html +=
-        '<span class="demo-verdict ' +
-        (ok ? "is-correct" : "is-wrong") +
-        '">' +
+      html += '<span class="demo-verdict ' + (ok ? "is-correct" : "is-wrong") + '">' +
         esc(ok ? DEMO.ui.correctTag : DEMO.ui.wrongTag) +
-        "</span>";
+        "</span></div>";
+      return html;
+    }
 
-      html += '<section class="demo-analysis">';
-      html +=
-        '<div class="demo-analysis-head"><span class="mono">' +
-        esc(DEMO.ui.analysis) +
-        "</span><span>" +
-        esc(DEMO.ui.sample) +
+    function renderAnalysisTool() {
+      var index = demoState.reviewIndex;
+      var text = analysisText(index);
+      var html = '<div class="demo-analysis">';
+      html += '<div class="demo-analysis-head"><span class="demo-analysis-title">Q' +
+        pad(index + 1) +
         " · " +
-        esc(DEMO.ui.autosave) +
-        "</span></div>";
-      question.analysis.split("\n\n").forEach(function (paragraph) {
-        html += "<p>" + esc(paragraph) + "</p>";
-      });
-      html += "</section>";
-      html += "</article>";
-
-      html += '<aside class="demo-vocab">';
+        esc(DEMO.ui.analysis) +
+        '</span><div class="demo-tabs">';
       html +=
-        '<div class="demo-vocab-head"><span class="mono">' +
-        esc(DEMO.ui.wordBank) +
-        '</span><span data-demo-word-count>' +
-        esc(DEMO.ui.words(savedWordCount())) +
-        "</span></div>";
-      html += '<p class="demo-vocab-note">' + esc(DEMO.ui.vocabNote) + "</p>";
-      html += "<ul>";
+        '<button class="demo-tab' +
+        (demoState.analysisMode === "write" ? " is-active" : "") +
+        '" type="button" data-demo-analysis-mode="write">' +
+        esc(DEMO.ui.write) +
+        "</button>";
+      html +=
+        '<button class="demo-tab' +
+        (demoState.analysisMode === "preview" ? " is-active" : "") +
+        '" type="button" data-demo-analysis-mode="preview">' +
+        esc(DEMO.ui.preview) +
+        "</button>";
+      html += "</div></div>";
+
+      if (demoState.analysisMode === "preview") {
+        html += '<div class="demo-editor-preview">';
+        text.split("\n\n").forEach(function (paragraph) {
+          html += "<p>" + esc(paragraph) + "</p>";
+        });
+        html += "</div>";
+      } else {
+        html +=
+          '<textarea class="demo-editor" data-demo-analysis spellcheck="false" aria-label="' +
+          esc(DEMO.ui.analysis) +
+          '">' +
+          esc(text) +
+          "</textarea>";
+      }
+
+      html += '<p class="demo-demo-note">' + esc(DEMO.ui.analysisNote) + "</p></div>";
+      return html;
+    }
+
+    function renderVocabularyTool() {
+      var question = DEMO.questions[demoState.reviewIndex];
+      var html = '<div class="demo-vocab">';
+      html += '<div class="demo-vocab-head"><span class="mono">' + esc(DEMO.ui.wordBank) +
+        '</span><span data-demo-word-count>' + esc(DEMO.ui.words(savedWordCount())) + "</span></div>";
+      html += '<p class="demo-vocab-note">' + esc(DEMO.ui.vocabNote) + "</p><ul>";
       question.words.forEach(function (word) {
         var added = !!savedWords[String(word.term).toLowerCase()];
         html +=
@@ -1211,52 +1332,86 @@
           (added ? "✓" : "+") +
           "</button></li>";
       });
-      html += "</ul></aside></div>";
+      html += "</ul></div>";
+      return html;
+    }
 
-      html += '<div class="demo-review-foot">';
+    function renderAiTool() {
+      var index = demoState.reviewIndex;
+      var html = '<div class="demo-ai"><div class="demo-ai-icon">' + toolIcon("ai") + "</div>";
+      html += "<h4>" + esc(DEMO.ui.aiTitle) + "</h4>";
+      html += "<p>" + esc(DEMO.ui.aiTagline) + "</p>";
+      if (demoState.aiShown[index]) {
+        html += '<div class="demo-ai-response">' + esc(DEMO.questions[index].ai) + "</div>";
+        html += '<p class="demo-ai-note">' + esc(DEMO.ui.aiNote) + "</p>";
+      } else {
+        html +=
+          '<button class="demo-btn demo-btn-primary demo-ai-btn" type="button" data-demo-ai>' +
+          esc(DEMO.ui.aiButton) +
+          "</button>";
+      }
+      return html + "</div>";
+    }
+
+    function renderTool(tool) {
+      if (tool === "analysis") return renderAnalysisTool();
+      if (tool === "vocabulary") return renderVocabularyTool();
+      if (tool === "ai") return renderAiTool();
+      return renderQuestionTool();
+    }
+
+    function renderReview() {
+      var total = DEMO.questions.length;
+      var correct = countCorrect();
+      var wrong = total - correct;
+      var percent = Math.round((correct / total) * 100);
+      var html = '<div class="demo-app demo-app--review"><header class="demo-appbar demo-appbar--review">';
+
+      html += '<div class="demo-qnav" role="group" aria-label="' + esc(DEMO.ui.palette) + '">' + reviewPalette() + "</div>";
       html +=
-        '<button class="demo-ghost" type="button" data-demo-view="result">' +
-        esc(DEMO.ui.backResult) +
-        "</button>";
+        '<div class="demo-title"><strong>' +
+        esc(DEMO.ui.title) +
+        "</strong><small>" +
+        esc(DEMO.ui.reviewSubtitle(formatTime(demoState.elapsed), total, total)) +
+        "</small></div>";
+      html += '<div class="demo-score-inline"><strong>' + correct + "</strong><span> / " + total + "</span><small>" +
+        esc(DEMO.ui.scoreDetail(percent, wrong)) + "</small></div>";
+      html += '<div class="demo-appbar-actions">';
+      html += '<button class="demo-btn" type="button" data-demo-notebook>' + esc(DEMO.ui.notebook) + "</button>";
+      html += '<button class="demo-btn" type="button" data-demo-export>' + esc(DEMO.ui.export) + "</button>";
       html +=
-        '<button class="demo-reset" type="button" data-demo-reset>' +
-        esc(DEMO.ui.againBtn) +
+        '<button class="demo-btn demo-btn-primary" type="button" data-demo-view="result">' +
+        esc(DEMO.ui.back) +
         "</button>";
+      html += "</div></header>";
+
+      html += '<div class="demo-workspace">';
+      html += '<section class="demo-pane">' + renderToolHeader("left", demoState.leftTool, demoState.rightTool);
+      html += '<div class="demo-pane-body">' + renderTool(demoState.leftTool) + "</div></section>";
+      html += '<section class="demo-pane">' + renderToolHeader("right", demoState.rightTool, demoState.leftTool);
+      html += '<div class="demo-pane-body">' + renderTool(demoState.rightTool) + "</div></section>";
       html += "</div></div>";
 
       demoBody.innerHTML = html;
     }
 
-    function renderDemo() {
-      updateSteps();
-      if (demoState.view === "result") {
-        renderResult();
-      } else if (demoState.view === "review") {
-        renderReview();
-      } else {
-        renderPractice();
-      }
-      updateFoot();
-    }
-
-    function setDemoView(view) {
-      if (view !== "practice" && !demoState.submitted) return;
-      if (view === "practice" && demoState.submitted) return;
-      demoState.view = view;
-      renderDemo();
+    function render() {
+      if (demoState.view === "result") renderResult();
+      else if (demoState.view === "review") renderReview();
+      else renderPractice();
     }
 
     function submitDemo() {
       if (demoState.submitted) return;
+      ensureTimer();
       demoState.submitted = true;
       demoState.elapsed = demoState.startedAt
         ? Math.floor((Date.now() - demoState.startedAt) / 1000)
         : 0;
       demoState.running = false;
-      if (demoTimer) demoTimer.textContent = formatTime(demoState.elapsed);
       demoState.reviewIndex = findFirstWrong();
       demoState.view = "result";
-      renderDemo();
+      render();
     }
 
     function findFirstWrong() {
@@ -1273,20 +1428,34 @@
       demoState.submitted = false;
       demoState.view = "practice";
       demoState.reviewIndex = 0;
+      demoState.leftTool = "question";
+      demoState.rightTool = "analysis";
+      demoState.analysisMode = "write";
+      demoState.drafts = {};
+      demoState.aiShown = {};
       demoState.startedAt = null;
       demoState.elapsed = 0;
       demoState.running = false;
-      if (demoTimer) demoTimer.textContent = "00:00";
-      renderDemo();
+      if (demoToast) demoToast.hidden = true;
+      render();
+    }
+
+    function chooseTool(side, tool) {
+      if (side === "left") {
+        if (demoState.rightTool === tool) demoState.rightTool = demoState.leftTool;
+        demoState.leftTool = tool;
+      } else {
+        if (demoState.leftTool === tool) demoState.leftTool = demoState.rightTool;
+        demoState.rightTool = tool;
+      }
+      demoState.view = "review";
+      render();
     }
 
     function toggleWord(term) {
       var key = String(term).toLowerCase();
-      if (savedWords[key]) {
-        delete savedWords[key];
-      } else {
-        savedWords[key] = true;
-      }
+      if (savedWords[key]) delete savedWords[key];
+      else savedWords[key] = true;
 
       try {
         window.localStorage.setItem(VOCAB_KEY, JSON.stringify(Object.keys(savedWords)));
@@ -1314,23 +1483,17 @@
       var target = event.target.closest ? event.target.closest("button") : null;
       if (!target || !demoRoot.contains(target)) return;
 
-      if (target.hasAttribute("data-demo-step")) {
-        if (target.disabled) return;
-        setDemoView(target.getAttribute("data-demo-step"));
-        return;
-      }
-
       if (target.hasAttribute("data-demo-option")) {
         ensureTimer();
         demoState.answers[demoState.index] = target.getAttribute("data-demo-option");
-        renderDemo();
+        render();
         return;
       }
 
       if (target.hasAttribute("data-demo-goto")) {
         ensureTimer();
         demoState.index = parseInt(target.getAttribute("data-demo-goto"), 10) || 0;
-        renderDemo();
+        render();
         return;
       }
 
@@ -1338,7 +1501,7 @@
         if (demoState.index > 0) {
           ensureTimer();
           demoState.index -= 1;
-          renderDemo();
+          render();
         }
         return;
       }
@@ -1347,20 +1510,20 @@
         if (demoState.index < DEMO.questions.length - 1) {
           ensureTimer();
           demoState.index += 1;
-          renderDemo();
+          render();
         }
         return;
       }
 
       if (target.hasAttribute("data-demo-mark")) {
         ensureTimer();
-        demoState.marked[demoState.index] = !demoState.marked[demoState.index];
-        renderDemo();
+        var markIndex = demoState.view === "review" ? demoState.reviewIndex : demoState.index;
+        demoState.marked[markIndex] = !demoState.marked[markIndex];
+        render();
         return;
       }
 
       if (target.hasAttribute("data-demo-submit")) {
-        ensureTimer();
         submitDemo();
         return;
       }
@@ -1368,17 +1531,50 @@
       if (target.hasAttribute("data-demo-review")) {
         demoState.reviewIndex = parseInt(target.getAttribute("data-demo-review"), 10) || 0;
         demoState.view = "review";
-        renderDemo();
+        render();
         return;
       }
 
       if (target.hasAttribute("data-demo-view")) {
-        setDemoView(target.getAttribute("data-demo-view"));
+        demoState.view = target.getAttribute("data-demo-view");
+        render();
         return;
       }
 
       if (target.hasAttribute("data-demo-reset")) {
         resetDemo();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-exit")) {
+        showToast(DEMO.ui.toastExit);
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-notebook")) {
+        showToast(DEMO.ui.toastNotebook);
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-export")) {
+        showToast(DEMO.ui.toastExport);
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-tool")) {
+        chooseTool(target.getAttribute("data-demo-side"), target.getAttribute("data-demo-tool"));
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-analysis-mode")) {
+        demoState.analysisMode = target.getAttribute("data-demo-analysis-mode");
+        render();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-ai")) {
+        demoState.aiShown[demoState.reviewIndex] = true;
+        render();
         return;
       }
 
@@ -1389,43 +1585,72 @@
 
     demoRoot.addEventListener("input", function (event) {
       var input = event.target;
-      if (!input.hasAttribute || !input.hasAttribute("data-demo-blank")) return;
-      ensureTimer();
-      demoState.answers[demoState.index] = input.value;
+      if (!input.hasAttribute) return;
 
-      var goto = demoRoot.querySelector(
-        '[data-demo-goto="' + demoState.index + '"]'
-      );
-      if (goto) goto.classList.toggle("is-answered", input.value.trim() !== "");
-
-      var note = demoRoot.querySelector("[data-demo-submit] small");
-      if (note) note.textContent = DEMO.ui.submitNote(unansweredCount());
-
-      var hint = demoRoot.querySelector(".demo-hint");
-      if (hint) {
-        var left = unansweredCount();
-        hint.textContent = left ? DEMO.ui.unanswered(left) : DEMO.ui.ready;
+      if (input.hasAttribute("data-demo-blank")) {
+        ensureTimer();
+        demoState.answers[demoState.index] = input.value;
+        var goto = demoRoot.querySelector('[data-demo-goto="' + demoState.index + '"]');
+        if (goto) goto.classList.toggle("is-answered", input.value.trim() !== "");
+        paintTimer();
+        return;
       }
-      updateFoot();
+
+      if (input.hasAttribute("data-demo-analysis")) {
+        demoState.drafts[demoState.reviewIndex] = input.value;
+      }
     });
 
     demoRoot.addEventListener("keydown", function (event) {
-      if (event.key !== "Enter") return;
-      if (!event.target.hasAttribute || !event.target.hasAttribute("data-demo-blank")) return;
-      event.preventDefault();
-      if (demoState.index < DEMO.questions.length - 1) {
-        demoState.index += 1;
-        renderDemo();
-      } else {
+      var tag = event.target.tagName;
+      var typing = tag === "INPUT" || tag === "TEXTAREA";
+
+      if (demoState.view !== "practice") return;
+
+      if (event.key === "Enter" && event.target.hasAttribute && event.target.hasAttribute("data-demo-blank")) {
+        event.preventDefault();
+        if (demoState.index < DEMO.questions.length - 1) {
+          demoState.index += 1;
+          render();
+        } else {
+          submitDemo();
+        }
+        return;
+      }
+
+      if (typing) return;
+
+      if (event.key === "ArrowLeft" && demoState.index > 0) {
         ensureTimer();
-        submitDemo();
+        demoState.index -= 1;
+        render();
+        return;
+      }
+
+      if (event.key === "ArrowRight" && demoState.index < DEMO.questions.length - 1) {
+        ensureTimer();
+        demoState.index += 1;
+        render();
+        return;
+      }
+
+      if (/^[a-dA-D]$/.test(event.key)) {
+        var question = DEMO.questions[demoState.index];
+        if (question.kind === "blank") return;
+        var letter = event.key.toUpperCase();
+        var exists = question.options.some(function (option) {
+          return option.key === letter;
+        });
+        if (!exists) return;
+        ensureTimer();
+        demoState.answers[demoState.index] = letter;
+        render();
       }
     });
 
     window.setInterval(function () {
       if (!demoState.running || !demoState.startedAt) return;
-      demoState.elapsed = Math.floor((Date.now() - demoState.startedAt) / 1000);
-      if (demoTimer) demoTimer.textContent = formatTime(demoState.elapsed);
+      paintTimer();
     }, 500);
 
     if ("IntersectionObserver" in window) {
@@ -1440,7 +1665,7 @@
       demoObserver.observe(demoRoot);
     }
 
-    renderDemo();
+    render();
   }
 
   /* ------------------------------------------------------------------ init */

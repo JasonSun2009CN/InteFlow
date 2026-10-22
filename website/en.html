@@ -428,34 +428,42 @@
                 word list and analysis on your own machine.
               </p>
 
-              <ol class="demo-points">
-                <li>
-                  <span>01</span>
-                  <div>
-                    <strong>Actually clickable</strong>
-                    <p>Multiple choice, fill-in, the question grid and mark-for-review all work.</p>
-                  </div>
-                </li>
-                <li>
-                  <span>02</span>
-                  <div>
-                    <strong>Graded on submit</strong>
-                    <p>Four sample questions, graded in your browser. 0 tokens.</p>
-                  </div>
-                </li>
-                <li>
-                  <span>03</span>
-                  <div>
-                    <strong>A taste of review</strong>
-                    <p>Correct answers, sample analysis and words you can keep. The full app also edits and exports them.</p>
-                  </div>
-                </li>
-              </ol>
+              <p class="demo-try-label mono">Try</p>
+              <ul class="demo-try">
+                <li>Multiple choice</li>
+                <li>Fill-in</li>
+                <li>Star for review</li>
+                <li>Submit</li>
+                <li>2-of-4 review</li>
+                <li>Word bank</li>
+              </ul>
 
-              <p class="demo-note">
-                The demo covers only the essentials. The full app adds import / OCR, AI Tutor, word exams,
-                themes and exports — all local-first.
-              </p>
+              <div class="demo-disclaimer">
+                <p class="mono">DEMO ≠ FULL APP</p>
+                <h3>This is a trimmed demo, not the app.</h3>
+                <ul>
+                  <li>
+                    <strong>Four fixed questions</strong>
+                    <span>You cannot import PDF / DOCX; the full app handles import, OCR and answer entry.</span>
+                  </li>
+                  <li>
+                    <strong>No backend</strong>
+                    <span>Grading and timing run in the browser. Answers are not saved; only words live in localStorage.</span>
+                  </li>
+                  <li>
+                    <strong>AI Tutor is canned</strong>
+                    <span>No model is called. The full app sends only this question's context, and only when you click.</span>
+                  </li>
+                  <li>
+                    <strong>Simplified review</strong>
+                    <span>Tools switch, but there is no drag-to-resize, autosave, Notebook or export.</span>
+                  </li>
+                  <li>
+                    <strong>Default theme only</strong>
+                    <span>The visuals mimic Clear Blue; the full app ships 5 themes and settings.</span>
+                  </li>
+                </ul>
+              </div>
 
               <div class="demo-copy-actions">
                 <a class="btn btn-ink" href="#quickstart">Install the full app <span aria-hidden="true">→</span></a>
@@ -471,50 +479,10 @@
             <div class="demo-shell reveal" data-demo style="--delay: 100ms">
               <div class="demo-chrome">
                 <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="demo-chrome-path">localhost:5173 <span>/ practice</span></span>
+                <span class="demo-chrome-path">localhost:5173 <span>/ doc / demo / practice</span></span>
                 <span class="demo-chrome-badge"
-                  ><span class="live-dot" aria-hidden="true"></span> browser only</span
+                  ><span class="live-dot" aria-hidden="true"></span> simplified demo</span
                 >
-              </div>
-
-              <div class="demo-topbar">
-                <div class="demo-brand">
-                  <img src="assets/favicon.svg" alt="" width="22" height="22" />
-                  <strong>InteFlow</strong>
-                  <span>demo</span>
-                </div>
-                <div class="demo-steps" role="tablist" aria-label="Demo steps">
-                  <button
-                    class="demo-step is-active"
-                    type="button"
-                    role="tab"
-                    aria-selected="true"
-                    data-demo-step="practice"
-                  >
-                    <span>01</span>Practice
-                  </button>
-                  <button
-                    class="demo-step"
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-demo-step="result"
-                    disabled
-                  >
-                    <span>02</span>Result
-                  </button>
-                  <button
-                    class="demo-step"
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-demo-step="review"
-                    disabled
-                  >
-                    <span>03</span>Review
-                  </button>
-                </div>
-                <span class="demo-timer"><span>TIME</span><strong data-demo-timer>00:00</strong></span>
               </div>
 
               <div class="demo-body" data-demo-body>
@@ -525,10 +493,7 @@
                 </noscript>
               </div>
 
-              <div class="demo-foot">
-                <span class="mono" data-demo-status aria-live="polite">4 sample questions · local grading</span>
-                <button class="demo-reset" type="button" data-demo-reset>Start over</button>
-              </div>
+              <div class="demo-toast" data-demo-toast hidden></div>
             </div>
           </div>
         </div>

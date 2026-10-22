@@ -413,33 +413,42 @@
                 下面是一个跑在浏览器里的精简版：选答案、交卷、看判分和复盘。真正的应用用同一套流程，但把题库、词表和解析都留在你的电脑里。
               </p>
 
-              <ol class="demo-points">
-                <li>
-                  <span>01</span>
-                  <div>
-                    <strong>真的能点</strong>
-                    <p>选择题、填空题、题号面板、标记待看，都是可交互的。</p>
-                  </div>
-                </li>
-                <li>
-                  <span>02</span>
-                  <div>
-                    <strong>交卷即判分</strong>
-                    <p>四道示例题，判分在浏览器里完成，0 token。</p>
-                  </div>
-                </li>
-                <li>
-                  <span>03</span>
-                  <div>
-                    <strong>看一眼复盘</strong>
-                    <p>正确答案、示例解析、可收藏的生词。完整应用里还能继续编辑与导出。</p>
-                  </div>
-                </li>
-              </ol>
+              <p class="demo-try-label mono">可以试</p>
+              <ul class="demo-try">
+                <li>选择题</li>
+                <li>填空</li>
+                <li>标记待看</li>
+                <li>交卷判分</li>
+                <li>2-of-4 复盘</li>
+                <li>生词收藏</li>
+              </ul>
 
-              <p class="demo-note">
-                演示只覆盖必要的一小段。完整应用另有导入 / OCR、AI Tutor、单词考试、主题与导出，全部本地优先。
-              </p>
+              <div class="demo-disclaimer">
+                <p class="mono">DEMO ≠ FULL APP</p>
+                <h3>这是精简演示，不是完整应用。</h3>
+                <ul>
+                  <li>
+                    <strong>固定 4 道示例题</strong>
+                    <span>不能导入 PDF / DOCX；完整应用才走导入、OCR 与答案录入。</span>
+                  </li>
+                  <li>
+                    <strong>没有后端</strong>
+                    <span>判分与计时都在浏览器里，作答不会保存；只有生词记在 localStorage。</span>
+                  </li>
+                  <li>
+                    <strong>AI Tutor 是预置文案</strong>
+                    <span>不会调用模型；完整应用只在你点击时发送当前题目上下文。</span>
+                  </li>
+                  <li>
+                    <strong>复盘是简化版</strong>
+                    <span>工具可以切换，但没有拖拽改比例、自动保存、Notebook 与导出。</span>
+                  </li>
+                  <li>
+                    <strong>只用默认主题</strong>
+                    <span>视觉模拟 Clear Blue；完整应用另有 4 套主题和设置。</span>
+                  </li>
+                </ul>
+              </div>
 
               <div class="demo-copy-actions">
                 <a class="btn btn-ink" href="#quickstart">安装完整应用 <span aria-hidden="true">→</span></a>
@@ -455,50 +464,10 @@
             <div class="demo-shell reveal" data-demo style="--delay: 100ms">
               <div class="demo-chrome">
                 <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="demo-chrome-path">localhost:5173 <span>/ practice</span></span>
+                <span class="demo-chrome-path">localhost:5173 <span>/ doc / demo / practice</span></span>
                 <span class="demo-chrome-badge"
-                  ><span class="live-dot" aria-hidden="true"></span> browser only</span
+                  ><span class="live-dot" aria-hidden="true"></span> 精简演示</span
                 >
-              </div>
-
-              <div class="demo-topbar">
-                <div class="demo-brand">
-                  <img src="assets/favicon.svg" alt="" width="22" height="22" />
-                  <strong>InteFlow</strong>
-                  <span>demo</span>
-                </div>
-                <div class="demo-steps" role="tablist" aria-label="演示步骤">
-                  <button
-                    class="demo-step is-active"
-                    type="button"
-                    role="tab"
-                    aria-selected="true"
-                    data-demo-step="practice"
-                  >
-                    <span>01</span>练习
-                  </button>
-                  <button
-                    class="demo-step"
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-demo-step="result"
-                    disabled
-                  >
-                    <span>02</span>成绩
-                  </button>
-                  <button
-                    class="demo-step"
-                    type="button"
-                    role="tab"
-                    aria-selected="false"
-                    data-demo-step="review"
-                    disabled
-                  >
-                    <span>03</span>复盘
-                  </button>
-                </div>
-                <span class="demo-timer"><span>TIME</span><strong data-demo-timer>00:00</strong></span>
               </div>
 
               <div class="demo-body" data-demo-body>
@@ -509,10 +478,7 @@
                 </noscript>
               </div>
 
-              <div class="demo-foot">
-                <span class="mono" data-demo-status aria-live="polite">4 道示例题 · 本地判分</span>
-                <button class="demo-reset" type="button" data-demo-reset>重新开始</button>
-              </div>
+              <div class="demo-toast" data-demo-toast hidden></div>
             </div>
           </div>
         </div>

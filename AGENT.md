@@ -14,7 +14,7 @@
 
 - 技术栈：FastAPI + React（Vite / TypeScript / Tailwind 4）+ SQLite 单文件；PyMuPDF 转换；
   WeasyPrint（PDF）/ python-docx（DOCX 导入 + 导出）；OCR = 系统 `tesseract`（可选）或 macOS Vision（可选）。
-- 前身：`SATeacher`（叫 **SATeacher**，一个 SAT 刷题工具）。
+- 前身：**SATeacher**（一个 SAT 刷题工具）。
   本项目在其基础上**全量迁移 + 改名 + 逐步泛化/打磨**。前身的历史规划文档保留在
   [`docs/legacy/`](docs/legacy)（**仅作参考**，不要当成 InteFlow 的当前规格）。
 
@@ -102,10 +102,13 @@
 > 解析由 `backend/tests/test_demo_math_ifmd.py` 守护。0 token。
 >
 > 2026-10-22：**官网在线演示 + 下载 ZIP**。中英双语落地页新增 `#demo` 区块：4 道示例题（态度 / 词义 /
-> 代数 / 填空），可选题号、标记待看、计时与交卷；成绩页可进入复盘（正确答案、示例解析、可收藏生词）。
-> 判分、计时与生词收藏都在浏览器内完成（生词存 `localStorage` 键 `inteflow.website.demo.vocab`），0 token。
-> 题目与双语文案在 `website/assets/site.js` 的 `DEMO` 对象，样式在 `site.css`。Hero、Demo 与 Quick start
-> 都加了 **Download ZIP**，指向 GitHub 的 `archive/refs/heads/main.zip`（压缩包不随网站入库）。
+> 代数 / 填空），可选题号、标记待看、计时与交卷；成绩页可进入复盘。界面按真实应用还原：练习页是
+> 文章 + 题目双卡、蓝色选项、题号底栏；复盘页是 **2-of-4 工作台**（题目 / 分析 / AI Tutor / 生词本，
+> 两侧工具可切换、可交换）。左侧明确列出与完整应用的差异（固定 4 题、无后端、AI 为预置文案、
+> 复盘无拖拽 / 自动保存 / Notebook / 导出、仅模拟默认主题）。判分、计时与生词收藏都在浏览器内完成
+> （生词存 `localStorage` 键 `inteflow.website.demo.vocab`），0 token。题目与双语文案在
+> `website/assets/site.js` 的 `DEMO` 对象，样式在 `site.css`。Hero、Demo 与 Quick start 都加了
+> **Download ZIP**，指向 GitHub 的 `archive/refs/heads/main.zip`（压缩包不随网站入库）。
 >
 > 2026-10-21：**复盘工作台工具切换器改为图标按钮行**。原来每个 pane 头部是一个 “Switch…” 下拉菜单，
 > 现在改为横向排列的**四个图标 + 小字标签**按钮（Question / Analysis / AI Tutor / Vocabulary，Lucide 图标），

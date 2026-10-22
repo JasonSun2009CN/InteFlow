@@ -49,14 +49,23 @@ the brand links back to the landing page.
 
 Between the workflow and the feature index, both landing pages embed a small
 interactive practice demo. It is intentionally a *taste* of the app, not a
-second implementation:
+second implementation, but it is laid out like the real product:
 
+- a practice screen modelled on the app: document header, passage + question
+  cards, star-for-review, count-up clock, blue option cards, question palette
+  and previous/next footer;
 - four sample questions: attitude, words in context, algebra and fill-in-blank;
-- question grid, previous/next, mark-for-review, a running timer and submit;
 - a result screen with a score, per-question answers and links into review;
-- a review screen with the correct answer, a sample analysis and a small word
-  bank. Saved words are stored in `localStorage` under
+- a review screen modelled on the 2-of-4 workspace: two panes, the same four
+  tool tabs (Question / Analysis / AI Tutor / Vocabulary), a switchable right
+  pane, an editable sample analysis, canned AI text and a small word bank.
+  Saved words are stored in `localStorage` under
   `inteflow.website.demo.vocab`; nothing is uploaded and no API is called.
+
+The copy column next to the demo states the differences explicitly: four fixed
+questions, no backend or saved attempts, canned AI, simplified review
+(no drag-to-resize, autosave, Notebook or export) and only the default Clear
+Blue theme. Notebook and Export buttons in the demo only show a short note.
 
 All demo copy and questions live in the `DEMO` object in `assets/site.js`
 (English and Chinese variants). The section shell is in `index.html` /
@@ -99,10 +108,12 @@ processing. All URLs are relative, so the site works both at a project path
   theme notes, copy feedback, demo UI) are picked from `assets/site.js` based on
   `<html lang>`.
 - **The interactive demo** is the `DEMO` object in `assets/site.js`. Each
-  language has its own `ui` labels and `questions` array; keep the answer keys
-  (`answer`, `accept`) and the two arrays in sync. Sample analysis and word
-  entries are plain text (paragraphs separated by a blank line); the word bank
-  persists term names only.
+  language has its own `ui` labels and `questions` array (including the canned
+  `ai` hint); keep the answer keys (`answer`, `accept`) and the two arrays in
+  sync. The render functions live below the config: practice, result and the
+  two-pane review workspace. Sample analysis and word entries are plain text
+  (paragraphs separated by a blank line); the word bank persists term names
+  only, while analysis edits stay in memory.
 - **Theme metadata** for the interactive lab is the `THEMES` object near the
   top of `assets/site.js`. The five preview pages themselves keep their own copy
   of `THEMES` in `themes/assets/mock.js` for the in-preview switcher.
