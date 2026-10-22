@@ -2,6 +2,7 @@
 
 > 面向后续会话 / AI agent / 贡献者。**项目状态变化后请同步更新本文件。**
 > 配套文档：[`README.md`](README.md)（英文）、[`README-cn.md`](README-cn.md)（中文）、
+> [`docs/OVERVIEW.md`](docs/OVERVIEW.md)（作品说明）、
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)、[`docs/IFMD.md`](docs/IFMD.md)、
 > [`docs/IDEAS.md`](docs/IDEAS.md)（修改想法记录）、[`ROADMAP.md`](ROADMAP.md)。
 

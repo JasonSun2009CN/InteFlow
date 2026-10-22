@@ -376,6 +376,7 @@ InteFlow/
 - [`README.md`](README.md) — 英文 README
 - [`website/`](website/) — 项目官网（静态站点，GitHub Pages；本地预览 `python3 -m http.server 4173 --directory website`）
 - [`AGENT.md`](AGENT.md) — 项目交接 / 给 AI agent 与贡献者的工作说明（中文）
+- [`docs/OVERVIEW.md`](docs/OVERVIEW.md) — 作品说明：定位、功能、设计取舍与完成度
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — 系统架构、数据模型、API 面
 - [`docs/IFMD.md`](docs/IFMD.md) — InteFlow-MD 题目格式规范
 - [`docs/IDEAS.md`](docs/IDEAS.md) — 修改想法记录

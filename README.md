@@ -411,6 +411,7 @@ InteFlow/
 - [`README-cn.md`](README-cn.md) — Chinese README
 - [`website/`](website/) — static project website (GitHub Pages; `python3 -m http.server 4173 --directory website`)
 - [`AGENT.md`](AGENT.md) — project handoff / working notes for AI agents and contributors (Chinese)
+- [`docs/OVERVIEW.md`](docs/OVERVIEW.md) — project overview: positioning, features, design trade-offs, status (Chinese)
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — architecture, data model, API surface
 - [`docs/IFMD.md`](docs/IFMD.md) — the InteFlow-MD question format
 - [`docs/IDEAS.md`](docs/IDEAS.md) — a running list of modification ideas
