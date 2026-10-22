@@ -29,7 +29,7 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **309 passed, 1 skipped** |
+| 后端测试 | `pytest` **310 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
 | 前端组件测试 | `npm test` **145 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
@@ -95,6 +95,11 @@
 > 键 `inteflow.language`）；侧栏、页面、弹窗、按钮、提示等全部前端文案走
 > `frontend/src/lib/i18n.tsx` 的 `t()`，默认英文、缺失翻译回退英文；考试原文、用户输入/分析、后端报错
 > 不翻译。`<html lang>` 同步切换。
+>
+> 2026-10-22：**简单数学示例卷**。`docs/examples/simple-math.ifmd.md` 是 10 题（算术 / 代数 / 分数 /
+> 百分比 / 几何 / 平均数 / 指数 / 应用题 / 多选 / 填空）的可直接导入 demo，覆盖 `@material`、`multi=1`、
+> `kind=blank` 与 `$...$` 公式，答案与解析全部内联（`answers: inline`）。已按普通导入路径加入本机 Library；
+> 解析由 `backend/tests/test_demo_math_ifmd.py` 守护。0 token。
 >
 > 2026-10-22：**官网在线演示 + 下载 ZIP**。中英双语落地页新增 `#demo` 区块：4 道示例题（态度 / 词义 /
 > 代数 / 填空），可选题号、标记待看、计时与交卷；成绩页可进入复盘（正确答案、示例解析、可收藏生词）。
@@ -190,7 +195,7 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 309 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 310 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
@@ -234,6 +239,7 @@ cd frontend && npm test         # 145 passed, 5 skipped
 | `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` 中文 + `en.html` 英文，页头切换；`assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页；`#demo` 是浏览器内可交互练习演示，`site.js` 的 `DEMO` 保存中英题目与文案） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
+| `docs/examples/simple-math.ifmd.md` | 可直接导入的 10 题简单数学 demo（单选 / 多选 / 填空 / 材料题 / 公式） |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |
 
 ## 9. 工作约定

@@ -162,6 +162,12 @@ Which TWO of the following are renewable energy sources?
 :::
 ```
 
+### 6.5 完整可直接导入示例
+
+仓库内附带一份 10 题的简单数学演示卷：[`examples/simple-math.ifmd.md`](examples/simple-math.ifmd.md)。
+它覆盖单选、多选（`multi=1`）、填空（`kind=blank`，多个可接受答案）、`@material` / `@stem` 与 `$...$` 公式，
+可直接在 Library 页上传，也可以复制内容作为自己出题的起点。
+
 ## 7. 设计决议（已确认）
 
 1. 材料内标题不做独立字段，由转换器写成材料首行（如 `**Title — Source**`）。

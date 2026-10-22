@@ -15,6 +15,14 @@
 
 <!-- 从这里开始往下写 -->
 
+### ✅ 简单数学题示例卷（2026-10-22）
+
+- 要有一套简单数学题放进 Library，并附带可直接使用的 `.ifmd.md` demo。
+- **已实现（2026-10-22）**：新增 [`examples/simple-math.ifmd.md`](examples/simple-math.ifmd.md)，10 题
+  （算术 / 代数 / 分数 / 百分比 / 几何 / 平均数 / 指数 / 应用题 / 多选 / 填空），全部内联答案与解析，
+  覆盖 `@material`、`multi=1`、`kind=blank` 与 `$...$` 公式；已通过 Library 导入到本机题库。
+  0 token，解析测试见 `backend/tests/test_demo_math_ifmd.py`。
+
 ### ✅ 考试倒计时 / 正计时（2026-10-22）
 
 - 开始考试前选择正计时或倒计时；倒计时填写分:秒。
