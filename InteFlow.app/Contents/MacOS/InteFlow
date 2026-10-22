@@ -1,0 +1,22 @@
+#!/bin/bash
+# InteFlow.app — macOS 双击启动入口。
+#
+# 这个 app 只做三件事：
+#   1. 找到项目根目录（InteFlow.app 的上一级）
+#   2. 修复从压缩包解压后常见的两个问题：缺少执行权限、带 quarantine 隔离标记
+#   3. 在「终端」里打开 InteFlow.command，日志和 Ctrl-C 都跟手动运行一致
+set -u
+
+APP="$(cd "$(dirname "$0")/../.." && pwd)"   # .../InteFlow.app
+ROOT="$(cd "$APP/.." && pwd)"                 # 项目根目录
+
+if [ ! -f "$ROOT/InteFlow.command" ]; then
+  osascript -e 'display alert "InteFlow" message "找不到 InteFlow.command。请把 InteFlow.app 放回 InteFlow 项目根目录后再打开。" as critical'
+  exit 1
+fi
+
+# 压缩包（zip）分发时常常丢失可执行位，并给文件打上隔离标记。
+chmod +x "$ROOT/start.sh" "$ROOT/InteFlow.command" 2>/dev/null || true
+xattr -d com.apple.quarantine "$ROOT/start.sh" "$ROOT/InteFlow.command" 2>/dev/null || true
+
+open -a Terminal "$ROOT/InteFlow.command"

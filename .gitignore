@@ -22,5 +22,5 @@ data/
 .vscode/
 .DS_Store
 
-# Local macOS launcher bundle (generated, not shared)
-InteFlow.app/
+# Local macOS launcher bundle (generated, not shared) deleted from here
+
