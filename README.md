@@ -135,6 +135,15 @@ to stop both.
   (Windows: `$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`).
 - Missing Python/Node or an occupied port fails fast with a clear message.
 
+### Desktop app (recommended for non-developers)
+
+Download the latest installer — no Python or Node required:
+
+- **macOS (Apple Silicon / Intel) and Windows**: <https://github.com/JasonSun2009CN/InteFlow/releases/latest>
+
+The builds are unsigned for now. On macOS, right-click → **Open** the first time;
+on Windows, choose **More info → Run anyway**.
+
 - Backend API: <http://localhost:8000> (health check <http://localhost:8000/api/health>)
 - Frontend page: <http://localhost:5173> ← **open this in your browser**
 
@@ -388,6 +397,7 @@ InteFlow/
 ├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)
 ├── InteFlow.command           macOS double-click start
 ├── start.bat                  Windows double-click start
+├── desktop/                   Electron shell · PyInstaller spec · PDF bridge · build scripts
 ├── scripts/dev.sh             one-command dev environment (no preflight checks)
 ├── data/                      runtime data (git-ignored)
 ├── website/                   static project website (GitHub Pages)

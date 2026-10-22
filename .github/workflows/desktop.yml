@@ -1,0 +1,150 @@
+name: Build desktop apps
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            platform: mac
+            arch: arm64
+          - os: macos-15-intel
+            platform: mac
+            arch: x64
+          - os: windows-2025
+            platform: win
+            arch: x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/app/export/mathjax/package-lock.json
+            desktop/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          cd desktop
+          npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Install MathJax bridge
+        run: cd backend/app/export/mathjax && npm ci --omit=dev
+
+      - name: Install backend build dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r desktop/requirements-desktop.txt
+
+      - name: Build frozen backend
+        run: python desktop/build_backend.py
+
+      - name: Stage web assets and MathJax
+        run: python desktop/prepare_resources.py
+
+      - name: Bundle Tesseract (Windows)
+        if: matrix.platform == 'win'
+        shell: bash
+        run: |
+          choco install tesseract --no-progress -y
+          mkdir -p desktop/build/tesseract/tessdata
+          cp "/c/Program Files/Tesseract-OCR/tesseract.exe" desktop/build/tesseract/
+          cp "/c/Program Files/Tesseract-OCR/"*.dll desktop/build/tesseract/ 2>/dev/null || true
+          cp "/c/Program Files/Tesseract-OCR/tessdata/eng.traineddata" desktop/build/tesseract/tessdata/
+
+      - name: Install Electron tooling
+        run: cd desktop && npm ci
+
+      - name: Build macOS app
+        if: matrix.platform == 'mac'
+        run: cd desktop && npx electron-builder --mac --${{ matrix.arch }} --publish never
+
+      - name: Build Windows app
+        if: matrix.platform == 'win'
+        run: cd desktop && npx electron-builder --win --x64 --publish never
+
+      - name: Smoke test packaged app (macOS)
+        if: matrix.platform == 'mac'
+        continue-on-error: true
+        shell: bash
+        run: |
+          APP=$(ls -d desktop/release/mac*/InteFlow.app | head -1)
+          INTEFLOW_SMOKE=1 "$APP/Contents/MacOS/InteFlow" > /tmp/inteflow-smoke.log 2>&1 &
+          pid=$!
+          for i in $(seq 1 120); do
+            grep -q "INTEFLOW_SMOKE" /tmp/inteflow-smoke.log && break
+            sleep 1
+          done
+          cat /tmp/inteflow-smoke.log
+          kill "$pid" 2>/dev/null || true
+          grep -q "INTEFLOW_SMOKE_OK" /tmp/inteflow-smoke.log
+
+      - name: Smoke test packaged app (Windows)
+        if: matrix.platform == 'win'
+        continue-on-error: true
+        shell: bash
+        run: |
+          INTEFLOW_SMOKE=1 "desktop/release/win-unpacked/InteFlow.exe" > smoke.log 2>&1 &
+          pid=$!
+          for i in $(seq 1 120); do
+            grep -q "INTEFLOW_SMOKE" smoke.log && break
+            sleep 1
+          done
+          cat smoke.log
+          taskkill //PID "$pid" //T //F || true
+          grep -q "INTEFLOW_SMOKE_OK" smoke.log
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: InteFlow-${{ matrix.platform }}-${{ matrix.arch }}
+          if-no-files-found: error
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.exe
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/*

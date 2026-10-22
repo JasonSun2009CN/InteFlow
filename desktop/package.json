@@ -1,0 +1,66 @@
+{
+  "name": "inteflow-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "InteFlow desktop shell (Electron + bundled FastAPI backend)",
+  "author": "InteFlow contributors",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "INTEFLOW_SMOKE=1 electron .",
+    "pack": "electron-builder --dir",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "app.inteflow.desktop",
+    "productName": "InteFlow",
+    "copyright": "Copyright © InteFlow contributors",
+    "directories": {
+      "output": "release"
+    },
+    "electronDist": "node_modules/electron/dist",
+    "afterPack": "./afterPack.cjs",
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "build/backend", "to": "backend" },
+      { "from": "build/web", "to": "web" },
+      { "from": "build/mathjax", "to": "mathjax", "filter": ["**/*"] },
+      { "from": "build/tesseract", "to": "tesseract" },
+      { "from": "print-pdf.cjs", "to": "print-pdf.cjs" }
+    ],
+    "mac": {
+      "icon": "icon.icns",
+      "category": "public.app-category.productivity",
+      "target": [{ "target": "dmg" }],
+      "artifactName": "InteFlow-${version}-${arch}.${ext}",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "InteFlow ${version}"
+    },
+    "win": {
+      "icon": "icon.ico",
+      "target": [{ "target": "nsis" }],
+      "artifactName": "InteFlow-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": null
+  }
+}

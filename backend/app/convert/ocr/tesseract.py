@@ -24,6 +24,10 @@ TIMEOUT = 120
 
 
 def binary() -> str | None:
+    configured = os.environ.get("INTEFLOW_TESSERACT")
+    if configured:
+        path = Path(configured).expanduser()
+        return str(path) if path.is_file() else None
     return shutil.which("tesseract")
 
 

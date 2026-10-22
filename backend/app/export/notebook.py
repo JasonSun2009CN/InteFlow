@@ -298,9 +298,8 @@ img { max-width: 100%; margin: 2mm 0; }
 """
 
 
-def render_notebook_pdf(notebook: Notebook) -> bytes:
-    from weasyprint import HTML
-
+def render_notebook_html(notebook: Notebook) -> str:
+    """The complete, self-contained HTML source of the notebook export."""
     parts: list[str] = [
         "<!doctype html><html><head><meta charset='utf-8'>",
         f"<style>{_CSS}</style></head><body>",
@@ -356,7 +355,13 @@ def render_notebook_pdf(notebook: Notebook) -> bytes:
         parts.append("</section>")
 
     parts.append("</body></html>")
-    return HTML(string="".join(parts)).write_pdf()
+    return "".join(parts)
+
+
+def render_notebook_pdf(notebook: Notebook) -> bytes:
+    from app.export.pdf_helper import html_to_pdf
+
+    return html_to_pdf(render_notebook_html(notebook))
 
 
 # --------------------------------------------------------------------------

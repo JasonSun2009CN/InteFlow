@@ -24,12 +24,23 @@ def _svg_size(svg: str) -> tuple[float, float]:
 
 
 def _svg_to_png(svg: str) -> tuple[bytes | None, float]:
+    png = None
     try:
         import cairosvg
 
         png = cairosvg.svg2png(bytestring=svg.encode("utf-8"), scale=3)
     except Exception:
-        return (None, 0.0)
+        png = None
+    if png is None:
+        # Desktop builds do not ship Cairo; PyMuPDF renders the same SVG.
+        try:
+            import pymupdf
+
+            doc = pymupdf.open(stream=svg.encode("utf-8"), filetype="svg")
+            pix = doc[0].get_pixmap(matrix=pymupdf.Matrix(3, 3), alpha=False)
+            png = pix.tobytes("png")
+        except Exception:
+            return (None, 0.0)
     width_ex, _ = _svg_size(svg)
     width_pt = min(width_ex * _PT_PER_EX, _MAX_PT) if width_ex else 40.0
     return (png, max(width_pt, 6.0))

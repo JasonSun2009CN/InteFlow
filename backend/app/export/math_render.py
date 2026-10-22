@@ -8,15 +8,21 @@ process, so repeated exports of the same formulas only shell out once.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
 import threading
 from pathlib import Path
 
-_BRIDGE_DIR = Path(__file__).resolve().parent / "mathjax"
+# Desktop builds bundle MathJax and point these at the app resources. On the
+# web/CLI build both fall back to the repository checkout + PATH.
+_BRIDGE_DIR = Path(
+    os.environ.get("INTEFLOW_MATHJAX_DIR")
+    or (Path(__file__).resolve().parent / "mathjax")
+)
 _BRIDGE = _BRIDGE_DIR / "render.mjs"
-_NODE = shutil.which("node")
+_NODE = os.environ.get("INTEFLOW_NODE") or shutil.which("node")
 
 _CACHE: dict[tuple[str, bool], str | None] = {}
 _LOCK = threading.Lock()
@@ -32,8 +38,11 @@ _MATH_RE = re.compile(
 
 
 def available() -> bool:
-    """True when Node + the installed MathJax bridge can render."""
-    return bool(_NODE) and _BRIDGE.is_file() and (_BRIDGE_DIR / "node_modules").is_dir()
+    """True when Node + the MathJax bridge can render."""
+    has_mathjax = (_BRIDGE_DIR / "node_modules" / "mathjax-full").is_dir() or (
+        _BRIDGE_DIR / "vendor" / "mathjax-full"
+    ).is_dir()
+    return bool(_NODE) and _BRIDGE.is_file() and has_mathjax
 
 
 def split_math(text: str):
@@ -69,6 +78,11 @@ def collect_math(texts) -> list[tuple[str, bool]]:
 
 def _render_batch(items: list[tuple[str, bool]]) -> list[str | None]:
     payload = json.dumps([{"tex": tex, "display": disp} for tex, disp in items])
+    env = dict(os.environ)
+    vendor = _BRIDGE_DIR / "vendor"
+    if vendor.is_dir():
+        # MathJax's CJS internals require() sibling packages (mhchemparser...).
+        env["NODE_PATH"] = str(vendor)
     try:
         proc = subprocess.run(
             [_NODE, str(_BRIDGE)],
@@ -77,6 +91,7 @@ def _render_batch(items: list[tuple[str, bool]]) -> list[str | None]:
             text=True,
             timeout=60,
             cwd=str(_BRIDGE_DIR),
+            env=env,
         )
     except (OSError, subprocess.SubprocessError):
         return [None] * len(items)

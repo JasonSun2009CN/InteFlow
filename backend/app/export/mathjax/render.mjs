@@ -6,13 +6,26 @@
 //
 // This is optional: the Python exporter degrades to plain text when Node or
 // this bridge is unavailable (see app/export/math_render.py).
+//
+// Two layouts are supported:
+//   * development: mathjax-full installed in ./node_modules (npm install)
+//   * packaged:    mathjax-full copied to ./vendor (Electron builders ignore
+//                  node_modules inside extraResources)
 
-import { mathjax } from "mathjax-full/js/mathjax.js";
-import { TeX } from "mathjax-full/js/input/tex.js";
-import { SVG } from "mathjax-full/js/output/svg.js";
-import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
-import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
-import { AllPackages } from "mathjax-full/js/input/tex/AllPackages.js";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const vendorBase = new URL("./vendor/mathjax-full/js/", import.meta.url);
+const base = existsSync(fileURLToPath(vendorBase))
+  ? vendorBase.href
+  : "mathjax-full/js/";
+
+const { mathjax } = await import(`${base}mathjax.js`);
+const { TeX } = await import(`${base}input/tex.js`);
+const { SVG } = await import(`${base}output/svg.js`);
+const { liteAdaptor } = await import(`${base}adaptors/liteAdaptor.js`);
+const { RegisterHTMLHandler } = await import(`${base}handlers/html.js`);
+const { AllPackages } = await import(`${base}input/tex/AllPackages.js`);
 
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);

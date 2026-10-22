@@ -130,6 +130,14 @@ cd InteFlow
   （Windows：`$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`）。
 - 端口被占用、缺 Python/Node、依赖异常时会给出明确提示并退出。
 
+### 桌面版（推荐给非开发者）
+
+直接下载安装包，不需要安装 Python / Node：
+
+- **macOS（Apple Silicon / Intel）与 Windows**：<https://github.com/JasonSun2009CN/InteFlow/releases/latest>
+
+目前暂未签名：macOS 首次打开请右键 →「打开」；Windows 选择「更多信息」→「仍要运行」。
+
 - 后端 API：<http://localhost:8000>（健康检查 <http://localhost:8000/api/health>）
 - 前端页面：<http://localhost:5173> ← **浏览器打开这个**
 
@@ -353,6 +361,7 @@ InteFlow/
 ├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）
 ├── InteFlow.command           macOS 双击启动
 ├── start.bat                  Windows 双击启动
+├── desktop/                   Electron 外壳 · PyInstaller 配置 · PDF 桥 · 构建脚本
 ├── scripts/dev.sh             一键起前后端（不做前置检查）
 ├── data/                      运行期数据（gitignore）
 ├── website/                   项目官网（GitHub Pages）

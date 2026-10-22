@@ -1,0 +1,10 @@
+fastapi>=0.115
+uvicorn>=0.34
+pymupdf>=1.26
+python-multipart>=0.0.20
+httpx>=0.28
+openpyxl
+python-docx>=1.1
+pyinstaller>=6.10
+pyobjc-framework-Vision>=10.0; sys_platform == "darwin"
+pyobjc-framework-Quartz>=10.0; sys_platform == "darwin"

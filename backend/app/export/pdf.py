@@ -1,4 +1,8 @@
-"""PDF export via WeasyPrint (deterministic, 0 token)."""
+"""PDF export (deterministic, 0 token).
+
+The HTML is shared by both engines: WeasyPrint on the web/CLI build, and the
+bundled Electron/Chromium renderer on desktop (see ``pdf_helper``).
+"""
 
 from __future__ import annotations
 
@@ -8,6 +12,7 @@ from pathlib import Path
 
 from app.export import math_render
 from app.export.model import ExportDoc, section_label
+from app.export.pdf_helper import html_to_pdf
 
 _MIME = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".svg": "image/svg+xml"}
 
@@ -146,8 +151,11 @@ def _all_text(doc: ExportDoc) -> list[str]:
     return texts
 
 
-def render_pdf(doc: ExportDoc) -> bytes:
-    from weasyprint import HTML
-
+def render_pdf_html(doc: ExportDoc) -> str:
+    """The complete, self-contained HTML source of the export."""
     svgs = math_render.render(math_render.collect_math(_all_text(doc)))
-    return HTML(string=_html(doc, svgs)).write_pdf()
+    return _html(doc, svgs)
+
+
+def render_pdf(doc: ExportDoc) -> bytes:
+    return html_to_pdf(render_pdf_html(doc))
