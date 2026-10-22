@@ -13,6 +13,9 @@ for p in /opt/homebrew/bin /opt/homebrew/sbin /usr/local/bin /usr/bin /bin; do
 done
 export PATH
 
+# 从 zip 解压时 start.sh 可能丢失可执行位，这里补一下。
+chmod +x ./start.sh 2>/dev/null || true
+
 ./start.sh
 code=$?
 

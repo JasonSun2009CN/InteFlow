@@ -127,7 +127,9 @@ frontend deps (only what's missing); later runs just start. It brings up **backe
 **frontend :5173**, waits for the backend health check, and **opens your browser**. Press `Ctrl-C`
 to stop both.
 
-- **macOS double-click**: open **`InteFlow.command`** in Finder.
+- **macOS double-click**: open **`InteFlow.app`** in Finder (or **`InteFlow.command`**).
+  If macOS says it can't be opened / permission denied after unzipping, run this once in the project folder:
+  `chmod +x start.sh InteFlow.command && xattr -dr com.apple.quarantine .`
 - **Windows double-click**: double-click **`start.bat`**.
 - Change ports: `INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
   (Windows: `$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`).

@@ -122,7 +122,9 @@ cd InteFlow
 `start.sh` / `start.ps1` **幂等**：首次运行自动建 `.venv`、装前后端依赖（缺才装），之后再运行直接启动。
 它会同时拉起**后端 :8000** 与**前端 :5173**，等后端健康后**自动打开浏览器**，按 `Ctrl-C` 同时停止两端。
 
-- **macOS 双击启动**：在 Finder 里双击 **`InteFlow.command`**。
+- **macOS 双击启动**：在 Finder 里双击 **`InteFlow.app`**（或 `InteFlow.command`）。
+  从 zip 解压后首次运行若提示「无法打开/权限不足」，在项目目录执行一次：
+  `chmod +x start.sh InteFlow.command && xattr -dr com.apple.quarantine .`
 - **Windows 双击启动**：双击 **`start.bat`**。
 - 换端口：`INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
   （Windows：`$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`）。
