@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { api, ApiError, type SessionDetail, type SubmitResult } from "../api/client";
 import Workspace from "../components/workspace/Workspace";
+import { useI18n } from "../lib/i18n";
 
 /** Loads the session then hands off to the two-pane review workspace. */
 export default function ResultPage() {
   const { sid } = useParams();
   const sessionId = Number(sid);
+  const { t: translate } = useI18n();
   const [searchParams] = useSearchParams();
   const t = Number(searchParams.get("t")) || 0;
   const [detail, setDetail] = useState<SessionDetail | null>(null);
@@ -37,13 +39,17 @@ export default function ResultPage() {
           {error}
         </div>
         <Link to="/" className="mt-4 inline-block text-blue-700 underline">
-          Back to exams
+          {translate("Back to exams")}
         </Link>
       </div>
     );
   }
   if (!detail || !result) {
-    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">Loading…</div>;
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">
+        {translate("Loading…")}
+      </div>
+    );
   }
 
   return (

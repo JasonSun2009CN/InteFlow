@@ -49,6 +49,7 @@
         <nav class="site-nav" id="site-nav" aria-label="Main navigation">
           <a href="#position">Overview</a>
           <a href="#workflow">Workflow</a>
+          <a href="#demo">Demo</a>
           <a href="#features">Features</a>
           <a href="#themes">Themes</a>
           <a href="#architecture">Stack</a>
@@ -101,13 +102,19 @@
             </p>
 
             <div class="hero-actions">
-              <a class="btn btn-ink" href="#workflow">See how it works <span aria-hidden="true">→</span></a>
+              <a class="btn btn-ink" href="#demo">Try the demo <span aria-hidden="true">→</span></a>
               <a
                 class="btn btn-outline"
                 href="https://github.com/JasonSun2009CN/InteFlow"
                 target="_blank"
                 rel="noreferrer"
                 >GitHub repository <span aria-hidden="true">↗</span></a
+              >
+              <a
+                class="btn btn-outline"
+                href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                title="Download the source ZIP (local data/ and dictionary files are not included)"
+                >Download ZIP <span aria-hidden="true">↓</span></a
               >
             </div>
 
@@ -408,11 +415,130 @@
         </div>
       </section>
 
+      <!-- ================================================================= demo -->
+      <section class="section demo-section" id="demo">
+        <div class="wrap">
+          <div class="demo-grid">
+            <div class="demo-copy reveal">
+              <p class="section-index">03 / LIVE DEMO</p>
+              <h2>Try a few questions.<br />Then decide.</h2>
+              <p class="section-lede">
+                A trimmed-down version that runs right here in your browser: pick answers, submit, see the
+                score and a review page. The real app runs the same flow, but keeps every question bank,
+                word list and analysis on your own machine.
+              </p>
+
+              <ol class="demo-points">
+                <li>
+                  <span>01</span>
+                  <div>
+                    <strong>Actually clickable</strong>
+                    <p>Multiple choice, fill-in, the question grid and mark-for-review all work.</p>
+                  </div>
+                </li>
+                <li>
+                  <span>02</span>
+                  <div>
+                    <strong>Graded on submit</strong>
+                    <p>Four sample questions, graded in your browser. 0 tokens.</p>
+                  </div>
+                </li>
+                <li>
+                  <span>03</span>
+                  <div>
+                    <strong>A taste of review</strong>
+                    <p>Correct answers, sample analysis and words you can keep. The full app also edits and exports them.</p>
+                  </div>
+                </li>
+              </ol>
+
+              <p class="demo-note">
+                The demo covers only the essentials. The full app adds import / OCR, AI Tutor, word exams,
+                themes and exports — all local-first.
+              </p>
+
+              <div class="demo-copy-actions">
+                <a class="btn btn-ink" href="#quickstart">Install the full app <span aria-hidden="true">→</span></a>
+                <a
+                  class="btn btn-outline"
+                  href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                  title="Download the source ZIP (local data/ and dictionary files are not included)"
+                  >Download ZIP <span aria-hidden="true">↓</span></a
+                >
+              </div>
+            </div>
+
+            <div class="demo-shell reveal" data-demo style="--delay: 100ms">
+              <div class="demo-chrome">
+                <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="demo-chrome-path">localhost:5173 <span>/ practice</span></span>
+                <span class="demo-chrome-badge"
+                  ><span class="live-dot" aria-hidden="true"></span> browser only</span
+                >
+              </div>
+
+              <div class="demo-topbar">
+                <div class="demo-brand">
+                  <img src="assets/favicon.svg" alt="" width="22" height="22" />
+                  <strong>InteFlow</strong>
+                  <span>demo</span>
+                </div>
+                <div class="demo-steps" role="tablist" aria-label="Demo steps">
+                  <button
+                    class="demo-step is-active"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    data-demo-step="practice"
+                  >
+                    <span>01</span>Practice
+                  </button>
+                  <button
+                    class="demo-step"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-demo-step="result"
+                    disabled
+                  >
+                    <span>02</span>Result
+                  </button>
+                  <button
+                    class="demo-step"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-demo-step="review"
+                    disabled
+                  >
+                    <span>03</span>Review
+                  </button>
+                </div>
+                <span class="demo-timer"><span>TIME</span><strong data-demo-timer>00:00</strong></span>
+              </div>
+
+              <div class="demo-body" data-demo-body>
+                <noscript>
+                  <p class="demo-noscript">
+                    This demo needs JavaScript. The full app runs locally and does not depend on this page.
+                  </p>
+                </noscript>
+              </div>
+
+              <div class="demo-foot">
+                <span class="mono" data-demo-status aria-live="polite">4 sample questions · local grading</span>
+                <button class="demo-reset" type="button" data-demo-reset>Start over</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============================================================= features -->
       <section class="section" id="features">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">03 / FEATURE INDEX</p>
+            <p class="section-index">04 / FEATURE INDEX</p>
             <h2>Everything that belongs here, is here.</h2>
             <p class="section-lede">
               22 shipped capabilities covering import, practice, review, vocabulary and output. Filter by stage
@@ -695,7 +821,7 @@
       <section class="section themes-section" id="themes">
         <div class="wrap">
           <div class="section-head section-head-dark reveal">
-            <p class="section-index">04 / APPEARANCE</p>
+            <p class="section-index">05 / APPEARANCE</p>
             <h2>Five themes, one workflow.</h2>
             <p class="section-lede">
               Colors, fonts, radii and shadows all run through one semantic token layer. Switching themes doesn't
@@ -838,7 +964,7 @@
       <section class="section" id="architecture">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">05 / FORMAT &amp; STACK</p>
+            <p class="section-index">06 / FORMAT &amp; STACK</p>
             <h2>A definite format, a definite path.</h2>
             <p class="section-lede">
               Every import first becomes InteFlow-MD, then goes through a deterministic state machine. No hidden
@@ -959,7 +1085,7 @@ cd InteFlow
       <section class="section section-alt" id="faq">
         <div class="wrap faq-grid">
           <div class="faq-intro reveal">
-            <p class="section-index">06 / QUESTIONS</p>
+            <p class="section-index">07 / QUESTIONS</p>
             <h2>Still have questions?</h2>
             <p>
               Here are the answers to the things people trip over first. More detailed specs, the data model and
@@ -1079,6 +1205,12 @@ cd InteFlow
               >
               <a
                 class="btn btn-outline"
+                href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                title="Download the source ZIP (local data/ and dictionary files are not included)"
+                >Download ZIP <span aria-hidden="true">↓</span></a
+              >
+              <a
+                class="btn btn-outline"
                 href="https://github.com/JasonSun2009CN/InteFlow/blob/main/README-cn.md"
                 target="_blank"
                 rel="noreferrer"
@@ -1124,6 +1256,7 @@ cd InteFlow
         <nav class="footer-col" aria-label="Product">
           <h3>Product</h3>
           <a href="#workflow">Workflow</a>
+          <a href="#demo">Live demo</a>
           <a href="#features">Feature index</a>
           <a href="#themes">Themes</a>
           <a href="#quickstart">Quick start</a>

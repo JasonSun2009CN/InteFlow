@@ -5,6 +5,7 @@ import { api, ApiError, type DocumentSummary, type Subject } from "../api/client
 import { buttonClasses } from "../components/ui";
 import { SubjectBadge, SubjectFilterBar } from "../components/SubjectControls";
 import { useCountUp } from "../lib/useCountUp";
+import { useI18n } from "../lib/i18n";
 import type { SubjectFilterValue } from "../lib/subjects";
 
 function errText(err: unknown): string {
@@ -17,13 +18,13 @@ function pad(n: number): string {
 }
 
 /** SQLite stores `datetime('now')` as "YYYY-MM-DD HH:MM:SS" in UTC. */
-function formatAdded(value: string): string | null {
+function formatAdded(value: string, locale: string): string | null {
   const iso = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
     ? `${value.replace(" ", "T")}Z`
     : value;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -67,6 +68,7 @@ function Stat({
  * numbered rows instead of cards.
  */
 export default function ExamHomePage() {
+  const { t, locale } = useI18n();
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilterValue>("all");
@@ -131,30 +133,27 @@ export default function ExamHomePage() {
         <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-ink-400">
-              Local practice workspace
+              {t("Local practice workspace")}
             </p>
             <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
-              Select an exam
+              {t("Select an exam")}
             </h1>
             <p className="mt-4 max-w-md text-sm leading-6 text-ink-500">
-              Answers are graded when you submit. The timer starts when you begin
-              — and everything stays on this machine.
+              {t(
+                "Answers are graded when you submit. The timer starts when you begin — and everything stays on this machine.",
+              )}
             </p>
           </div>
 
           <dl className="flex gap-8 border-t border-paper-200 pt-6 md:border-t-0 md:pt-0 md:text-right">
+            <Stat label={t("Exams")} value={docs ? examCount : null} format={pad} />
             <Stat
-              label="Exams"
-              value={docs ? examCount : null}
-              format={pad}
-            />
-            <Stat
-              label="Questions"
+              label={t("Questions")}
               value={docs ? questionCount : null}
-              format={(n) => n.toLocaleString("en-US")}
+              format={(n) => n.toLocaleString(locale)}
             />
             <Stat
-              label="Needs keys"
+              label={t("Needs keys")}
               value={docs ? needsKeys : null}
               format={pad}
               tone={needsKeys > 0 ? "seal" : "ink"}
@@ -181,21 +180,21 @@ export default function ExamHomePage() {
             id="exam-list-heading"
             className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-500"
           >
-            Exams
+            {t("Exams")}
           </h2>
-          <p className="text-[11px] text-ink-400">Answers are graded when you submit</p>
+          <p className="text-[11px] text-ink-400">{t("Answers are graded when you submit")}</p>
         </div>
 
         {error && (
           <div role="alert" className="my-8 border-l-2 border-seal-500 bg-seal-50 px-5 py-4">
-            <p className="font-medium text-seal-700">Couldn&apos;t load your exams.</p>
+            <p className="font-medium text-seal-700">{t("Couldn't load your exams.")}</p>
             <p className="mt-1 text-sm leading-6 text-ink-500">{error}</p>
             <button
               type="button"
               onClick={load}
               className="mt-3 border-b border-ink-300 pb-0.5 text-xs font-medium text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900"
             >
-              Try again
+              {t("Try again")}
             </button>
           </div>
         )}
@@ -218,23 +217,24 @@ export default function ExamHomePage() {
               ))}
             </ul>
             <p role="status" className="sr-only">
-              Loading exams…
+              {t("Loading exams…")}
             </p>
           </>
         )}
 
         {docs?.length === 0 && (
           <div className="border-b border-paper-200 py-14 text-center">
-            <p className="font-display text-3xl tracking-tight text-ink-900">No exams yet.</p>
+            <p className="font-display text-3xl tracking-tight text-ink-900">{t("No exams yet.")}</p>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink-500">
-              Import a PDF, DOCX or InteFlow-MD file, or add a ready-made set from the
-              built-in library.
+              {t(
+                "Import a PDF, DOCX or InteFlow-MD file, or add a ready-made set from the built-in library.",
+              )}
             </p>
             <Link
               to="/library"
               className={buttonClasses({ className: "mt-6 whitespace-nowrap" })}
             >
-              Open library
+              {t("Open library")}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -243,14 +243,14 @@ export default function ExamHomePage() {
         {docs && docs.length > 0 && visibleDocs.length === 0 && (
           <div className="border-b border-paper-200 py-12 text-center">
             <p className="font-display text-2xl tracking-tight text-ink-900">
-              No exams in this subject.
+              {t("No exams in this subject.")}
             </p>
             <button
               type="button"
               onClick={() => setSubjectFilter("all")}
               className="mt-3 text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 hover:text-ink-900"
             >
-              Show all exams
+              {t("Show all exams")}
             </button>
           </div>
         )}
@@ -260,7 +260,7 @@ export default function ExamHomePage() {
             {visibleDocs.map((doc, index) => {
               const needsKey =
                 doc.needs_answers && doc.answered_count < doc.question_count;
-              const added = formatAdded(doc.created_at);
+              const added = formatAdded(doc.created_at, locale);
 
               return (
                 <li
@@ -288,19 +288,24 @@ export default function ExamHomePage() {
                         </>
                       )}
                       <span className="tabular-nums">
-                        {doc.question_count.toLocaleString("en-US")} questions
+                        {t("{count} questions", {
+                          count: doc.question_count.toLocaleString(locale),
+                        })}
                       </span>
                       {added && (
                         <>
                           <span aria-hidden="true">·</span>
-                          <span>Added {added}</span>
+                          <span>{t("Added {date}", { date: added })}</span>
                         </>
                       )}
                       {needsKey && (
                         <>
                           <span aria-hidden="true">·</span>
                           <span className="font-medium tabular-nums text-seal-600">
-                            Answer key {doc.answered_count}/{doc.question_count}
+                            {t("Answer key {answered}/{total}", {
+                              answered: doc.answered_count,
+                              total: doc.question_count,
+                            })}
                           </span>
                         </>
                       )}
@@ -313,7 +318,7 @@ export default function ExamHomePage() {
                         to={`/doc/${doc.id}/answers`}
                         className="text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 transition-colors hover:text-ink-900"
                       >
-                        Enter answers
+                        {t("Enter answers")}
                       </Link>
                     ) : (
                       <span />
@@ -322,7 +327,7 @@ export default function ExamHomePage() {
                       to={`/doc/${doc.id}/practice`}
                       className={buttonClasses({ className: "whitespace-nowrap" })}
                     >
-                      Start
+                      {t("Start")}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </div>

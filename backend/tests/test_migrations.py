@@ -140,6 +140,31 @@ def test_migrate_renames_legacy_deepseek_provider() -> None:
     conn.close()
 
 
+def test_migrate_adds_session_timer_columns() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        "CREATE TABLE sessions ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " document_id INTEGER NOT NULL,"
+        " started_at TEXT NOT NULL DEFAULT (datetime('now')),"
+        " finished_at TEXT,"
+        " mode TEXT NOT NULL DEFAULT 'all'"
+        ")"
+    )
+    conn.execute("INSERT INTO sessions (document_id) VALUES (7)")
+
+    _migrate(conn)
+    _migrate(conn)                                    # idempotent
+
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(sessions)")}
+    assert {"timer_mode", "timer_seconds"} <= cols
+    row = conn.execute("SELECT timer_mode, timer_seconds FROM sessions").fetchone()
+    assert row["timer_mode"] == "countup"             # legacy attempts count up
+    assert row["timer_seconds"] is None
+    conn.close()
+
+
 def test_migrate_is_idempotent() -> None:
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row

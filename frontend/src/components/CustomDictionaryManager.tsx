@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { api, ApiError, type CustomDictionaryEntry } from "../api/client";
+import { useI18n } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -11,6 +12,7 @@ interface Props {
 
 /** Add / import / delete entries in the user's own dictionary. */
 export default function CustomDictionaryManager({ onClose }: Props) {
+  const { t } = useI18n();
   const [entries, setEntries] = useState<CustomDictionaryEntry[] | null>(null);
   const [count, setCount] = useState(0);
   const [query, setQuery] = useState("");
@@ -71,7 +73,10 @@ export default function CustomDictionaryManager({ onClose }: Props) {
 
   async function remove(entry: CustomDictionaryEntry) {
     if (busy) return;
-    if (!window.confirm(`Delete “${entry.word}” from your dictionary?`)) return;
+    if (
+      !window.confirm(t("Delete “{word}” from your dictionary?", { word: entry.word }))
+    )
+      return;
     setBusy(true);
     setError(null);
     setMessage(null);
@@ -94,8 +99,19 @@ export default function CustomDictionaryManager({ onClose }: Props) {
     try {
       const result = await api.importCustomDictionary(file);
       setMessage(
-        `Imported ${result.added} new and ${result.updated} updated words` +
-          (result.skipped ? `, skipped ${result.skipped}.` : "."),
+        result.skipped
+          ? t(
+              "Imported {added} new, updated {updated}, skipped {skipped}.",
+              {
+                added: result.added,
+                updated: result.updated,
+                skipped: result.skipped,
+              },
+            )
+          : t("Imported {added} new, updated {updated}.", {
+              added: result.added,
+              updated: result.updated,
+            }),
       );
       await load(query);
     } catch (err) {
@@ -123,11 +139,12 @@ export default function CustomDictionaryManager({ onClose }: Props) {
               id="custom-dictionary-title"
               className="font-display text-xl tracking-tight text-slate-900"
             >
-              My dictionary
+              {t("My dictionary")}
             </h2>
             <p className="mt-0.5 text-xs leading-5 text-slate-500">
-              {count.toLocaleString()} {count === 1 ? "word" : "words"}. Custom entries are
-              checked before Merriam-Webster.
+              {t("{count} words. Custom entries are checked before Merriam-Webster.", {
+                count: count.toLocaleString(),
+              })}
             </p>
           </div>
           <button
@@ -135,7 +152,7 @@ export default function CustomDictionaryManager({ onClose }: Props) {
             onClick={onClose}
             className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-slate-50"
           >
-            Close
+            {t("Close")}
           </button>
         </header>
 
@@ -159,39 +176,39 @@ export default function CustomDictionaryManager({ onClose }: Props) {
                 disabled={busy}
                 className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
               >
-                Import file
+                {t("Import file")}
               </button>
               <span className="text-[11px] text-slate-500">
-                CSV / TSV / JSON / TXT · columns: <code>word, definition, pos</code>
+                {t("CSV / TSV / JSON / TXT · columns: word, definition, pos")}
               </span>
             </div>
           </div>
 
           <form onSubmit={(event) => void add(event)} className="mt-3 rounded-xl border p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Add a word
+              {t("Add a word")}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
               <input
                 value={form.word}
                 onChange={(event) => setForm({ ...form, word: event.target.value })}
-                placeholder="Word"
-                aria-label="Custom dictionary word"
+                placeholder={t("Word")}
+                aria-label={t("Custom dictionary word")}
                 className="min-w-0 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
               <input
                 value={form.pos}
                 onChange={(event) => setForm({ ...form, pos: event.target.value })}
-                placeholder="POS (optional)"
-                aria-label="Custom dictionary part of speech"
+                placeholder={t("POS (optional)")}
+                aria-label={t("Custom dictionary part of speech")}
                 className="min-w-0 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
             </div>
             <textarea
               value={form.definition}
               onChange={(event) => setForm({ ...form, definition: event.target.value })}
-              placeholder="Definition / meaning"
-              aria-label="Custom dictionary definition"
+              placeholder={t("Definition / meaning")}
+              aria-label={t("Custom dictionary definition")}
               rows={2}
               className="mt-2 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
             />
@@ -200,7 +217,7 @@ export default function CustomDictionaryManager({ onClose }: Props) {
               disabled={busy || !form.word.trim() || !form.definition.trim()}
               className="mt-2 rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
             >
-              {busy ? "Saving…" : "Add word"}
+              {busy ? t("Saving…") : t("Add word")}
             </button>
           </form>
 
@@ -226,24 +243,24 @@ export default function CustomDictionaryManager({ onClose }: Props) {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter my dictionary…"
-              aria-label="Filter my dictionary"
+              placeholder={t("Filter my dictionary…")}
+              aria-label={t("Filter my dictionary")}
               className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
             />
             <button
               type="submit"
               className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
             >
-              Search
+              {t("Search")}
             </button>
           </form>
 
           {entries === null && !error && (
-            <p className="mt-4 text-sm text-slate-500">Loading…</p>
+            <p className="mt-4 text-sm text-slate-500">{t("Loading…")}</p>
           )}
           {entries?.length === 0 && (
             <p className="mt-4 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
-              No words yet. Import a file above, or add one word at a time.
+              {t("No words yet. Import a file above, or add one word at a time.")}
             </p>
           )}
           {entries && entries.length > 0 && (
@@ -267,10 +284,10 @@ export default function CustomDictionaryManager({ onClose }: Props) {
                     type="button"
                     onClick={() => void remove(entry)}
                     disabled={busy}
-                    aria-label={`Delete ${entry.word}`}
+                    aria-label={t("Delete {word}", { word: entry.word })}
                     className="shrink-0 rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
                   >
-                    Delete
+                    {t("Delete")}
                   </button>
                 </li>
               ))}

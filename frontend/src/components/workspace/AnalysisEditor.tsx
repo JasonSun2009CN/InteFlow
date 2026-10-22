@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError, type ResultItem } from "../../api/client";
 import RichText from "../RichText";
 import { sectionLabel } from "../../lib/sections";
+import { useI18n } from "../../lib/i18n";
 
 interface Props {
   docId: number;
@@ -38,6 +39,7 @@ function answerText(item: ResultItem, values: string[]): string {
  * Markdown analysis page that autosaves to the local database.
  */
 export default function AnalysisEditor({ docId, item, content, onSaved, loaded = true }: Props) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(content);
   const [saved, setSaved] = useState(content);
   /** The user's global template, fetched once from Settings. */
@@ -136,7 +138,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
         setSaved(text);
         setTemplateDraft(false);
         onSaved(questionId, text);
-        setFlash("Saved");
+        setFlash(t("Saved"));
         window.setTimeout(() => setFlash(null), 1500);
       } catch (err) {
         setError(errText(err));
@@ -144,7 +146,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
         setSaving(false);
       }
     },
-    [docId, questionId, onSaved],
+    [docId, questionId, onSaved, t],
   );
 
   // Autosave: debounce after the last keystroke. A pristine template is skipped.
@@ -169,7 +171,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
   if (!item) {
     return (
       <div className="grid h-full place-items-center p-8 text-center text-sm text-slate-500">
-        Pick a question to open its analysis page.
+        {t("Pick a question to open its analysis page.")}
       </div>
     );
   }
@@ -195,21 +197,21 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
             {item.is_correct === true ? "✓" : item.is_correct === false ? "✗" : "–"}
           </span>
           <h2 className="font-display text-lg tracking-tight text-slate-900">
-            Question {item.no}
+            {t("Question {number}", { number: item.no })}
           </h2>
           <span className="text-xs text-slate-500">
-            {sectionLabel(item.sec)}
+            {t(sectionLabel(item.sec))}
             {item.source ? ` · ${item.source}` : ""}
           </span>
           <span className="ml-auto text-xs text-slate-400">
             {saving
-              ? "Saving…"
+              ? t("Saving…")
               : flash
                 ? `${flash} ✓`
                 : templateDraft
-                  ? "template"
+                  ? t("template")
                   : dirty
-                    ? "unsaved changes"
+                    ? t("unsaved changes")
                     : ""}
           </span>
         </div>
@@ -219,11 +221,11 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
           {item.kind === "blank" ? (
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs">
               <span>
-                <span className="text-slate-500">Correct: </span>
+                <span className="text-slate-500">{t("Correct:")} </span>
                 <span className="font-semibold text-emerald-700">{correct}</span>
               </span>
               <span>
-                <span className="text-slate-500">Yours: </span>
+                <span className="text-slate-500">{t("Yours:")} </span>
                 <span
                   className={
                     "font-semibold " +
@@ -256,8 +258,12 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
                     <span className="min-w-0 flex-1">
                       {option.replace(/^[A-Z][.)]\s*/, "")}
                     </span>
-                    {isCorrect && <span className="shrink-0 font-medium">correct</span>}
-                    {isChosen && !isCorrect && <span className="shrink-0 font-medium">yours</span>}
+                    {isCorrect && (
+                      <span className="shrink-0 font-medium">{t("correct")}</span>
+                    )}
+                    {isChosen && !isCorrect && (
+                      <span className="shrink-0 font-medium">{t("yours")}</span>
+                    )}
                   </li>
                 );
               })}
@@ -269,7 +275,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
       {/* body: Markdown write / preview */}
       <div className="flex shrink-0 items-center gap-1 border-b border-slate-200 px-3 py-1.5">
         <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-          Analysis
+          {t("Analysis")}
         </span>
         {(["write", "preview"] as const).map((m) => (
           <button
@@ -281,7 +287,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
               mode === m ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            {m}
+            {t(m)}
           </button>
         ))}
         <button
@@ -290,7 +296,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
           disabled={!dirty || saving}
           className="ml-auto rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
         >
-          {saving ? "Saving…" : "Save"}
+          {saving ? t("Saving…") : t("Save")}
         </button>
       </div>
 
@@ -302,11 +308,10 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
               setDraft(event.target.value);
               if (templateDraft) setTemplateDraft(false);
             }}
-            placeholder={
-              "Why is the correct answer right — and why did you pick yours?\n\n" +
-              "Markdown works here: **bold**, lists, $x^2$ formulas, ![figure](assets/name.png)."
-            }
-            aria-label="Analysis"
+            placeholder={t(
+              "Why is the correct answer right — and why did you pick yours?\n\nMarkdown works here: **bold**, lists, $x^2$ formulas, ![figure](assets/name.png).",
+            )}
+            aria-label={t("Analysis")}
             className="h-full min-h-[18rem] w-full resize-none border-0 px-5 py-4 font-mono text-[13px] leading-6 text-slate-800 focus:outline-none"
           />
         ) : (
@@ -314,7 +319,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
             {draft.trim() ? (
               <RichText text={draft} docId={docId} breaks />
             ) : (
-              <p className="text-sm italic text-slate-400">No analysis yet.</p>
+              <p className="text-sm italic text-slate-400">{t("No analysis yet.")}</p>
             )}
           </div>
         )}

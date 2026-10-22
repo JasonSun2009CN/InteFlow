@@ -161,6 +161,8 @@ erDiagram
     text started_at
     text finished_at
     text mode "all|range"
+    text timer_mode "countup|countdown"
+    int timer_seconds "countdown length; null for countup"
   }
   session_items {
     int session_id FK
@@ -234,7 +236,7 @@ components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/
              SubjectControls（学科徽章 / 筛选条 / 行内选择 + 现场创建 / 管理弹窗） ·
              ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · CustomDictionaryManager（Settings 导入/增删） · ui/（设计系统原语；Review 用 SlidingTabs 滑块切换）
 lib/         sections.ts（板块标签，与后端 sections.py 对齐）· wordExamQr.ts（紧凑分享 JSON + 多段 QR 分块）
-             subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）
+             subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）· i18n.tsx（中英文案表 + I18nProvider / useI18n / useT）
 api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 ```
 
@@ -351,6 +353,8 @@ file ─► app.imports.validate_upload（大小/空/类型）
 POST /api/sessions             -> 建会话，返回 questions（answer 被剥离）
 （前端全屏作答；选择题 multi=1 可多选；填空题输入文本；键盘 选项字母 / ←→）
 GET  /api/sessions             -> 作答历史列表（仅 "已提交" 的作答，时间倒序，供 Sessions 页）
+GET  /api/sessions/timer-preference?document_id= -> 预选计时（本卷上次 → 全局最近一次 → none）
+PATCH /api/sessions/{id}/timer -> 记录 countup/countdown 与倒计时秒数（开始考试时调用）
 POST /api/sessions/{id}/submit -> 按当前答案键判分（多选全对；填空 NFKC 归一化），写 session_items，返回 items
 POST /api/sessions/{id}/regrade-> 补录答案键后按已存 chosen 重判（未提交 409）
 DELETE /api/sessions/{id}      -> 删除一次作答
@@ -484,7 +488,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 
 ---
 
-## 7. 当前 API 面（65 条）
+## 7. 当前 API 面（67 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -533,7 +537,9 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | POST | `/api/builtin/{bank}/add-all` | 一键加整库 |
 | POST | `/api/sessions` | 开始练习 |
 | GET | `/api/sessions` | 作答历史列表（仅已提交的作答） |
+| GET | `/api/sessions/timer-preference?document_id=` | 该卷上次计时方式（无记录回退全局最近一次） |
 | GET | `/api/sessions/{id}` | 会话详情（不含答案） |
+| PATCH | `/api/sessions/{id}/timer` | 记录本次计时模式与倒计时秒数 |
 | POST | `/api/sessions/{id}/submit` | 提交判分 |
 | POST | `/api/sessions/{id}/regrade` | 补键重判 |
 | DELETE | `/api/sessions/{id}` | 删除一次作答 |

@@ -103,11 +103,13 @@ CREATE TABLE IF NOT EXISTS question_stars (
 CREATE INDEX IF NOT EXISTS idx_question_stars_document ON question_stars(document_id);
 
 CREATE TABLE IF NOT EXISTS sessions (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-  started_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  finished_at TEXT,
-  mode        TEXT NOT NULL DEFAULT 'all'   -- all|range
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id   INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  started_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  finished_at   TEXT,
+  mode          TEXT NOT NULL DEFAULT 'all',        -- all|range
+  timer_mode    TEXT NOT NULL DEFAULT 'countup',   -- countup|countdown
+  timer_seconds INTEGER                            -- countdown length, null for countup
 );
 
 CREATE TABLE IF NOT EXISTS session_items (
@@ -376,6 +378,20 @@ def _migrate(conn: sqlite3.Connection) -> None:
             "UPDATE session_items SET chosen_json = json_array(chosen)"
             " WHERE (chosen_json IS NULL OR chosen_json = '[]') AND chosen IS NOT NULL"
         )
+
+    # sessions (2026-10-22): remember which timing method an attempt used so the
+    # next start screen can default to it (per paper, falling back to the last
+    # attempt across all papers).
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sessions'"
+    ).fetchone():
+        session_cols = {row["name"] for row in conn.execute("PRAGMA table_info(sessions)")}
+        for name, ddl in (
+            ("timer_mode", "TEXT NOT NULL DEFAULT 'countup'"),
+            ("timer_seconds", "INTEGER"),
+        ):
+            if name not in session_cols:
+                conn.execute(f"ALTER TABLE sessions ADD COLUMN {name} {ddl}")
 
     # settings (2026-10-19): DeepSeek became two protocol presets, so the old
     # `deepseek` provider id is rewritten to `deepseek-openai`

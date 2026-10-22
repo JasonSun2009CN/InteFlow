@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError, type BuiltinBank, type BuiltinUnit } from "../api/client";
+import { useI18n } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -25,6 +26,7 @@ function splitTitle(title: string): { date: string; variant: string } {
  * modules with single Add buttons and an "Add all" batch action.
  */
 export default function BuiltinBankCard({ bank, onChanged }: Props) {
+  const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   const [busyUnit, setBusyUnit] = useState<string | null>(null);
   const [busyAll, setBusyAll] = useState(false);
@@ -67,8 +69,8 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
       const res = await api.addBuiltinAll(bank.id);
       setFlash(
         res.added > 0
-          ? `${res.added} modules added`
-          : "Everything is already in your library",
+          ? t("{count} modules added", { count: res.added })
+          : t("Everything is already in your library"),
       );
       onChanged();
     } catch (err) {
@@ -90,17 +92,22 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
           <h2 className="text-lg font-semibold">
             {bank.title}
             <span className="ml-2 align-middle rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
-              built-in
+              {t("built-in")}
             </span>
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            {bank.units.length} modules · {totalQuestions} questions · answers
-            included · offline (0 tokens)
+            {t("{modules} modules · {questions} questions · answers included · offline (0 tokens)", {
+              modules: bank.units.length,
+              questions: totalQuestions.toLocaleString(locale),
+            })}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <span className="text-sm text-slate-600">
-            {addedCount}/{bank.units.length} in library
+            {t("{added}/{total} in library", {
+              added: addedCount,
+              total: bank.units.length,
+            })}
           </span>
           <span className="text-slate-400" aria-hidden>
             {open ? "▾" : "▸"}
@@ -117,10 +124,10 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
               className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {busyAll
-                ? "Adding…"
+                ? t("Adding…")
                 : allAdded
-                  ? "All in library"
-                  : "Add all"}
+                  ? t("All in library")
+                  : t("Add all")}
             </button>
             {flash && <span className="text-sm text-emerald-600">{flash}</span>}
             {error && <span className="text-sm text-red-600">{error}</span>}
@@ -146,17 +153,20 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                             {variant || unit.title}
                           </div>
                           <div className="text-xs text-slate-500">
-                            {unit.questions} questions
-                            {unit.module !== null && ` · Module ${unit.module}`}
+                            {t("{count} questions", {
+                              count: unit.questions,
+                            })}
+                            {unit.module !== null &&
+                              ` · ${t("Module {number}", { number: unit.module })}`}
                           </div>
                         </div>
                         {unit.added && unit.document_id !== null ? (
                           <Link
                             to={`/doc/${unit.document_id}/practice`}
-                            title="Open in library"
+                            title={t("Open in library")}
                             className="shrink-0 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
                           >
-                            ✓ In library
+                            ✓ {t("In library")}
                           </Link>
                         ) : (
                           <button
@@ -165,7 +175,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                             data-add-unit={unit.id}
                             className="btn btn-primary shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                           >
-                            {busyUnit === unit.id ? "Adding…" : "Add"}
+                            {busyUnit === unit.id ? t("Adding…") : t("Add")}
                           </button>
                         )}
                       </li>

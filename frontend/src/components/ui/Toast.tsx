@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
 import { Button } from "./Button";
+import { useT } from "../../lib/i18n";
 
 type ToastVariant = "info" | "success" | "warning" | "danger";
 
@@ -77,6 +78,7 @@ function ToastItem({
   variantStyles: Record<ToastVariant, string>;
   onDismiss: (id: string) => void;
 }) {
+  const t = useT();
   useEffect(() => {
     if (toast.duration === 0) return;
     const timer = setTimeout(() => onDismiss(toast.id), toast.duration ?? 5000);
@@ -108,7 +110,7 @@ function ToastItem({
       <button
         onClick={() => onDismiss(toast.id)}
         className="text-white/70 hover:text-white transition-opacity"
-        aria-label="Dismiss"
+        aria-label={t("Dismiss")}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M18 6L6 18M6 6l12 12" />

@@ -113,8 +113,21 @@ export interface SessionDetail {
   document_id: number;
   started_at: string;
   finished_at: string | null;
+  timer_mode?: TimerMode;
+  timer_seconds?: number | null;
   document: DocumentSummary;
   questions: QuizQuestion[];
+}
+
+/** How the practice clock runs: up from zero, or down to zero. */
+export type TimerMode = "countup" | "countdown";
+
+export interface TimerPreference {
+  mode: TimerMode;
+  /** Countdown length in seconds; null for count-up. */
+  seconds: number | null;
+  /** Where the default came from: this paper, another paper, or no record. */
+  source: "document" | "global" | "none";
 }
 
 export interface ResultItem {
@@ -626,6 +639,19 @@ export const api = {
       method: "POST",
       ...json({ document_id: documentId }),
     }),
+
+  /** Default timer for this paper, taken from its last submitted attempt. */
+  getTimerPreference: (documentId: number) =>
+    request<TimerPreference>(
+      `/api/sessions/timer-preference?document_id=${documentId}`,
+    ),
+
+  /** Record the timer choice; it becomes the default for the next attempt. */
+  setSessionTimer: (sessionId: number, mode: TimerMode, seconds: number | null) =>
+    request<{ session_id: number; timer_mode: TimerMode; timer_seconds: number | null }>(
+      `/api/sessions/${sessionId}/timer`,
+      { method: "PATCH", ...json({ mode, seconds }) },
+    ),
 
   submit: (sessionId: number, answers: Record<string, string | string[] | null>) =>
     request<SubmitResult>(`/api/sessions/${sessionId}/submit`, {

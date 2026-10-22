@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -13,6 +15,11 @@ router = APIRouter(prefix="/api/sessions", tags=["sessions"])
 
 class StartPayload(BaseModel):
     document_id: int
+
+
+class TimerPayload(BaseModel):
+    mode: Literal["countup", "countdown"]
+    seconds: int | None = None
 
 
 class SubmitPayload(BaseModel):
@@ -48,6 +55,14 @@ def list_sessions() -> list[dict]:
     return session_repo.list_sessions()
 
 
+@router.get("/timer-preference")
+def get_timer_preference(document_id: int) -> dict:
+    """Preselect the timer for a paper from its last submitted attempt."""
+    if doc_repo.get_document(document_id) is None:
+        _fail("document not found", 404)
+    return session_repo.timer_preference(document_id)
+
+
 @router.get("/{session_id}")
 def get_session(session_id: int) -> dict:
     session = session_repo.get_session(session_id)
@@ -56,6 +71,17 @@ def get_session(session_id: int) -> dict:
         raise                                          # pragma: no cover
     doc = doc_repo.get_document(session["document_id"])
     return {**session, "document": doc, "questions": session_repo.quiz_questions(session["document_id"])}
+
+
+@router.patch("/{session_id}/timer")
+def set_session_timer(session_id: int, payload: TimerPayload) -> dict:
+    if session_repo.get_session(session_id) is None:
+        _fail("session not found", 404)
+    try:
+        return session_repo.set_timer(session_id, payload.mode, payload.seconds)
+    except ValueError as exc:
+        _fail(str(exc), 400)
+        raise                                          # pragma: no cover
 
 
 @router.post("/{session_id}/submit")

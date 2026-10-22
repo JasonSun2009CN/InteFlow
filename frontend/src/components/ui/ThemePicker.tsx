@@ -1,4 +1,5 @@
 import { THEMES, useTheme } from "../../theme";
+import { useI18n } from "../../lib/i18n";
 
 /**
  * Appearance section for Settings: pick one of the built-in themes.
@@ -9,20 +10,22 @@ import { THEMES, useTheme } from "../../theme";
  */
 export function ThemePicker() {
   const [theme, setTheme] = useTheme();
+  const { t } = useI18n();
 
   return (
     <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <div>
-        <h2 className="text-sm font-semibold text-slate-800">Appearance</h2>
+        <h2 className="text-sm font-semibold text-slate-800">{t("Appearance")}</h2>
         <p className="mt-1 text-xs leading-5 text-slate-500">
-          Applies to the whole workspace — the practice screen keeps its own
-          high-contrast look. Saved locally on this machine.
+          {t(
+            "Applies to the whole workspace — the practice screen keeps its own high-contrast look. Saved locally on this machine.",
+          )}
         </p>
       </div>
 
       <div
         role="radiogroup"
-        aria-label="Theme"
+        aria-label={t("Theme")}
         className="grid gap-2 sm:grid-cols-2"
       >
         {THEMES.map((option) => {
@@ -60,12 +63,12 @@ export function ThemePicker() {
                   </span>
                   {active && (
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-primary-700">
-                      Active
+                      {t("Active")}
                     </span>
                   )}
                 </span>
                 <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-                  {option.blurb}
+                  {t(option.blurb)}
                 </span>
               </span>
             </button>

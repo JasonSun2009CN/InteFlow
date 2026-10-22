@@ -6,6 +6,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import type { VocabColumn, WordGrid } from "../../api/client";
+import { useT } from "../../lib/i18n";
 
 interface Props {
   grid: WordGrid;
@@ -43,6 +44,7 @@ function hasActiveView(grid: WordGrid): boolean {
  * (no new dependency). Pure presentation over a controlled {@link WordGrid}.
  */
 export default function VocabGrid({ grid, onChange }: Props) {
+  const t = useT();
   const refs = useRef(new Map<string, HTMLInputElement>());
   const cellKey = (rowId: string, colId: string) => `${rowId}::${colId}`;
 
@@ -253,7 +255,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
           disabled={grid.rows.length >= MAX_ROWS}
           className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
         >
-          + Row
+          {t("+ Row")}
         </button>
         <button
           type="button"
@@ -261,7 +263,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
           disabled={grid.columns.length >= MAX_COLUMNS}
           className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
         >
-          + Column
+          {t("+ Column")}
         </button>
         {(sort || activeFilters > 0) && (
           <button
@@ -269,12 +271,14 @@ export default function VocabGrid({ grid, onChange }: Props) {
             onClick={resetView}
             className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
           >
-            Reset view
+            {t("Reset view")}
           </button>
         )}
         <span className="ml-auto text-xs text-slate-400" data-testid="vocab-count">
-          {grid.rows.length} {grid.rows.length === 1 ? "word" : "words"}
-          {visible.length !== grid.rows.length ? ` · ${visible.length} shown` : ""}
+          {t("{count} words", { count: grid.rows.length })}
+          {visible.length !== grid.rows.length
+            ? ` · ${t("{count} shown", { count: visible.length })}`
+            : ""}
         </span>
       </div>
 
@@ -297,14 +301,14 @@ export default function VocabGrid({ grid, onChange }: Props) {
                     <input
                       value={col.name}
                       onChange={(e) => updateColumn(col.id, { name: e.target.value })}
-                      aria-label={`Column name`}
+                      aria-label={t("Column name")}
                       className="w-full min-w-0 rounded border border-transparent bg-transparent px-1 py-0.5 text-xs font-semibold hover:border-slate-300 focus:border-blue-400 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => toggleSort(col.id)}
-                      title="Sort column"
-                      aria-label={`Sort by ${col.name}`}
+                      title={t("Sort column")}
+                      aria-label={t("Sort by {column}", { column: col.name })}
                       className="shrink-0 rounded px-1 text-xs text-slate-500 hover:bg-slate-200"
                     >
                       {sortGlyph(col.id)}
@@ -313,8 +317,8 @@ export default function VocabGrid({ grid, onChange }: Props) {
                       type="button"
                       onClick={() => deleteColumn(col.id)}
                       disabled={grid.columns.length <= 1}
-                      title="Delete column"
-                      aria-label={`Delete ${col.name}`}
+                      title={t("Delete column")}
+                      aria-label={t("Delete {column}", { column: col.name })}
                       className="shrink-0 rounded px-1 text-xs text-slate-400 hover:bg-red-100 hover:text-red-600 disabled:opacity-30"
                     >
                       ✕
@@ -323,14 +327,14 @@ export default function VocabGrid({ grid, onChange }: Props) {
                   <input
                     value={grid.view.filter[col.id] ?? ""}
                     onChange={(e) => setFilter(col.id, e.target.value)}
-                    placeholder="Filter…"
-                    aria-label={`Filter ${col.name}`}
+                    placeholder={t("Filter…")}
+                    aria-label={t("Filter {column}", { column: col.name })}
                     className="mt-0.5 w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-600 focus:border-blue-400 focus:outline-none"
                   />
                   <div
                     role="separator"
                     aria-orientation="vertical"
-                    aria-label={`Resize ${col.name}`}
+                    aria-label={t("Resize {column}", { column: col.name })}
                     onPointerDown={(e) => startResize(e, col)}
                     className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none hover:bg-blue-400/40"
                   />
@@ -341,7 +345,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
                   type="button"
                   onClick={addColumn}
                   disabled={grid.columns.length >= MAX_COLUMNS}
-                  title="Add column"
+                  title={t("Add column")}
                   className="rounded px-1.5 text-slate-500 hover:bg-slate-200 disabled:opacity-30"
                 >
                   +
@@ -363,7 +367,10 @@ export default function VocabGrid({ grid, onChange }: Props) {
                       onChange={(e) => setCell(row.id, col.id, e.target.value)}
                       onKeyDown={(e) => onCellKeyDown(e, r, c)}
                       onPaste={(e) => onPaste(e, r, c)}
-                      aria-label={`${col.name} row ${r + 1}`}
+                      aria-label={t("{column} row {row}", {
+                        column: col.name,
+                        row: r + 1,
+                      })}
                       className="w-full rounded-none border-0 bg-transparent px-2 py-1 text-xs focus:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-blue-400"
                     />
                   </td>
@@ -372,8 +379,8 @@ export default function VocabGrid({ grid, onChange }: Props) {
                   <button
                     type="button"
                     onClick={() => deleteRow(row.id)}
-                    title="Delete row"
-                    aria-label={`Delete row ${r + 1}`}
+                    title={t("Delete row")}
+                    aria-label={t("Delete row {row}", { row: r + 1 })}
                     className="w-full px-1 text-xs text-slate-300 hover:bg-red-100 hover:text-red-600 group-hover:text-slate-400"
                   >
                     ✕
@@ -388,8 +395,8 @@ export default function VocabGrid({ grid, onChange }: Props) {
                   className="px-2 py-4 text-center text-xs text-slate-400"
                 >
                   {grid.rows.length === 0
-                    ? "No words yet — add your first row."
-                    : "No rows match the filter."}
+                    ? t("No words yet — add your first row.")
+                    : t("No rows match the filter.")}
                 </td>
               </tr>
             )}

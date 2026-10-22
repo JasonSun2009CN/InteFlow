@@ -12,6 +12,7 @@ import {
   Settings as SettingsIcon,
   X,
 } from "lucide-react";
+import { useI18n } from "../../lib/i18n";
 
 /** Desktop sidebar compact mode (icons only). Mobile always uses the drawer. */
 export const SIDEBAR_COMPACT_KEY = "inteflow.sidebar.compact";
@@ -71,6 +72,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
  */
 export function AppSidebar() {
   const { pathname } = useLocation();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(() => {
     try {
@@ -107,7 +109,7 @@ export function AppSidebar() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Open menu"
+          aria-label={t("Open menu")}
           aria-expanded={open}
           aria-controls="app-sidebar"
           className="-ml-1 rounded-md p-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
@@ -127,7 +129,7 @@ export function AppSidebar() {
 
       <nav
         id="app-sidebar"
-        aria-label="Main"
+        aria-label={t("Main")}
         data-compact={compact ? "true" : "false"}
         className={`fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] -translate-x-full flex-col gap-6 overflow-y-auto border-r border-slate-200 bg-white px-5 py-6 transition-all duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-w-none lg:translate-x-0 ${
           compact ? "lg:w-20 lg:px-2" : "lg:w-64"
@@ -142,8 +144,8 @@ export function AppSidebar() {
           <button
             type="button"
             onClick={() => setCompact((value) => !value)}
-            aria-label={compact ? "Expand sidebar" : "Collapse sidebar"}
-            title={compact ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={compact ? t("Expand sidebar") : t("Collapse sidebar")}
+            title={compact ? t("Expand sidebar") : t("Collapse sidebar")}
             aria-controls="app-sidebar"
             aria-expanded={!compact}
             className="hidden rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 lg:inline-flex"
@@ -157,7 +159,7 @@ export function AppSidebar() {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            aria-label="Close menu"
+            aria-label={t("Close menu")}
             className="rounded-md p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 lg:hidden"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -172,9 +174,9 @@ export function AppSidebar() {
               <li key={item.to}>
                 <Link
                   to={item.to}
-                  aria-label={item.label}
+                  aria-label={t(item.label)}
                   aria-current={active ? "page" : undefined}
-                  title={compact ? item.label : undefined}
+                  title={compact ? t(item.label) : undefined}
                   className={`nav-item relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
                     compact ? "lg:justify-center lg:px-0" : ""
                   } ${
@@ -190,7 +192,7 @@ export function AppSidebar() {
                     />
                   )}
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className={compact ? "lg:hidden" : ""}>{item.label}</span>
+                  <span className={compact ? "lg:hidden" : ""}>{t(item.label)}</span>
                 </Link>
               </li>
             );
@@ -202,8 +204,8 @@ export function AppSidebar() {
             compact ? "lg:hidden" : ""
           }`}
         >
-          <p className="font-medium text-slate-700">Local-first</p>
-          <p>Everything stays on this machine.</p>
+          <p className="font-medium text-slate-700">{t("Local-first")}</p>
+          <p>{t("Everything stays on this machine.")}</p>
         </div>
       </nav>
     </>

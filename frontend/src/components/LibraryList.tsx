@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { DocumentSummary, Subject, SubjectRef } from "../api/client";
 import { SubjectPicker } from "./SubjectControls";
+import { useI18n } from "../lib/i18n";
 
 interface Props {
   docs: DocumentSummary[];
@@ -11,9 +12,15 @@ interface Props {
   onSubjectsChanged: () => void;
 }
 
-function answerProgress(doc: DocumentSummary): string {
-  if (doc.question_count === 0) return "no questions";
-  return `${doc.answered_count}/${doc.question_count} answers`;
+function answerProgress(
+  doc: DocumentSummary,
+  t: (source: string, vars?: Record<string, string | number>) => string,
+): string {
+  if (doc.question_count === 0) return t("no questions");
+  return t("{answered}/{total} answers", {
+    answered: doc.answered_count,
+    total: doc.question_count,
+  });
 }
 
 export default function LibraryList({
@@ -24,6 +31,7 @@ export default function LibraryList({
   onSubjectChanged,
   onSubjectsChanged,
 }: Props) {
+  const { t, locale } = useI18n();
   return (
     <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border bg-white shadow-sm">
       {docs.map((doc) => (
@@ -39,17 +47,21 @@ export default function LibraryList({
               <span className="truncate font-medium text-slate-800">{doc.title}</span>
               {doc.id === importedId && (
                 <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs text-emerald-800">
-                  just imported
+                  {t("just imported")}
                 </span>
               )}
               {doc.needs_answers && (
                 <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
-                  needs answers
+                  {t("needs answers")}
                 </span>
               )}
             </div>
             <p className="truncate text-sm text-slate-500">
-              {doc.source_filename} · {doc.question_count} questions · {answerProgress(doc)}
+              {doc.source_filename} ·{" "}
+              {t("{count} questions", {
+                count: doc.question_count.toLocaleString(locale),
+              })}{" "}
+              · {answerProgress(doc, t)}
             </p>
             <SubjectPicker
               docId={doc.id}
@@ -66,19 +78,19 @@ export default function LibraryList({
               to={`/doc/${doc.id}/practice`}
               className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 font-medium text-white hover:bg-blue-700"
             >
-              Practice
+              {t("Practice")}
             </Link>
             <Link
               to={`/doc/${doc.id}/answers`}
               className="rounded-lg border px-3 py-1.5 font-medium hover:bg-slate-50"
             >
-              Answers
+              {t("Answers")}
             </Link>
             <button
               onClick={() => onDelete(doc)}
               className="rounded-lg border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:bg-red-50"
             >
-              Delete
+              {t("Delete")}
             </button>
           </div>
         </li>

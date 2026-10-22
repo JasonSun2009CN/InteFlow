@@ -16,6 +16,63 @@ def create_session(doc_id: int) -> int:
     return execute("INSERT INTO sessions (document_id) VALUES (?)", (doc_id,))
 
 
+TIMER_MODES = ("countup", "countdown")
+MAX_COUNTDOWN_SECONDS = 24 * 60 * 60
+
+
+def set_timer(session_id: int, mode: str, seconds: int | None = None) -> dict:
+    """Record the timing method chosen for an attempt.
+
+    Only graded attempts feed the default for the next start screen, so a
+    provisional session that is later abandoned cannot change anyone's habit.
+    """
+    if mode not in TIMER_MODES:
+        raise ValueError(f"timer mode must be one of {', '.join(TIMER_MODES)}")
+    length: int | None = None
+    if mode == "countdown":
+        if seconds is None or seconds <= 0:
+            raise ValueError("countdown needs a positive number of seconds")
+        if seconds > MAX_COUNTDOWN_SECONDS:
+            raise ValueError("countdown is limited to 24 hours")
+        length = int(seconds)
+    from app.db import execute
+
+    execute(
+        "UPDATE sessions SET timer_mode = ?, timer_seconds = ? WHERE id = ?",
+        (mode, length, session_id),
+    )
+    return {"session_id": session_id, "timer_mode": mode, "timer_seconds": length}
+
+
+def timer_preference(doc_id: int) -> dict:
+    """The timer to preselect for a paper: its own last attempt, then global.
+
+    Unfinished sessions are ignored — only a submitted attempt counts as an
+    exam record. `source` tells the client whether the default came from this
+    paper, from another paper, or from no record at all.
+    """
+    row = one(
+        "SELECT timer_mode, timer_seconds FROM sessions"
+        " WHERE document_id = ? AND finished_at IS NOT NULL"
+        " ORDER BY id DESC LIMIT 1",
+        (doc_id,),
+    )
+    source = "document"
+    if row is None:
+        row = one(
+            "SELECT timer_mode, timer_seconds FROM sessions"
+            " WHERE finished_at IS NOT NULL ORDER BY id DESC LIMIT 1"
+        )
+        source = "global"
+    if row is None:
+        return {"mode": "countup", "seconds": None, "source": "none"}
+    return {
+        "mode": row["timer_mode"] or "countup",
+        "seconds": row["timer_seconds"],
+        "source": source,
+    }
+
+
 def get_session(session_id: int) -> dict | None:
     row = one("SELECT * FROM sessions WHERE id = ?", (session_id,))
     if row is None:
@@ -25,6 +82,8 @@ def get_session(session_id: int) -> dict | None:
         "document_id": row["document_id"],
         "started_at": row["started_at"],
         "finished_at": row["finished_at"],
+        "timer_mode": row["timer_mode"] or "countup",
+        "timer_seconds": row["timer_seconds"],
     }
 
 

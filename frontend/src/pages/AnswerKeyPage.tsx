@@ -10,6 +10,7 @@ import {
 } from "../api/client";
 import { SubjectPicker } from "../components/SubjectControls";
 import RichText from "../components/RichText";
+import { useI18n } from "../lib/i18n";
 
 /** Letters of a question's options, in order ("A", "B", …). Falls back to a
  *  standard four-letter grid if the options are not labelled. */
@@ -47,6 +48,7 @@ export function parseBulk(text: string): Record<number, string[]> {
 }
 
 export default function AnswerKeyPage() {
+  const { t } = useI18n();
   const { id } = useParams();
   const docId = Number(id);
   const navigate = useNavigate();
@@ -165,12 +167,12 @@ export default function AnswerKeyPage() {
       }
     });
     if (applied === 0) {
-      setError("Nothing recognized — expected something like 1-A 2-C 3-D, or ACBD…");
+      setError(t("Nothing recognized — expected something like 1-A 2-C 3-D, or ACBD…"));
       return;
     }
     setError(null);
     setAnswers(next);
-    setMessage(`Parsed ${applied} answer(s) from the pasted text.`);
+    setMessage(t("Parsed {count} answer(s) from the pasted text.", { count: applied }));
   }
 
   async function save() {
@@ -189,7 +191,12 @@ export default function AnswerKeyPage() {
         navigate(`/session/${pendingSession}/result`);
         return;
       }
-      setMessage(`Saved ${updated.answered_count}/${updated.question_count} answers.`);
+      setMessage(
+        t("Saved {answered}/{total} answers.", {
+          answered: updated.answered_count,
+          total: updated.question_count,
+        }),
+      );
     } catch (err) {
       setError(err instanceof ApiError ? err.message : String(err));
     } finally {
@@ -209,7 +216,7 @@ export default function AnswerKeyPage() {
 
   if (!doc || !questions) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-6 py-10 text-slate-500">Loading…</div>
+      <div className="mx-auto w-full max-w-3xl px-6 py-10 text-slate-500">{t("Loading…")}</div>
     );
   }
 
@@ -221,12 +228,17 @@ export default function AnswerKeyPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-            Answer key
+            {t("Answer key")}
           </p>
           <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{doc.title}</h1>
           <p className="mt-1 text-sm text-slate-600">
-            {total} questions · {filled}/{total} filled
-            {doc.answers_status !== "none" && ` · source had: ${doc.answers_status} answers`}
+            {t("{count} questions · {filled}/{total} filled", {
+              count: total,
+              filled,
+              total,
+            })}
+            {doc.answers_status !== "none" &&
+              t(" · source had: {status} answers", { status: t(doc.answers_status) })}
           </p>
           <SubjectPicker
             docId={doc.id}
@@ -244,21 +256,26 @@ export default function AnswerKeyPage() {
             disabled={saving || filled === 0}
             className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? "Saving…" : pendingSession ? "Save & view results" : "Save answers"}
+            {saving
+              ? t("Saving…")
+              : pendingSession
+                ? t("Save & view results")
+                : t("Save answers")}
           </button>
           <Link
             to={`/doc/${doc.id}/practice`}
             className="rounded-lg border px-4 py-2 font-medium hover:bg-slate-50"
           >
-            Practice
+            {t("Practice")}
           </Link>
         </div>
       </div>
 
       {pendingSession && (
         <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          You just submitted an attempt — enter the answer key to grade it, then
-          you'll see the results.
+          {t(
+            "You just submitted an attempt — enter the answer key to grade it, then you'll see the results.",
+          )}
         </div>
       )}
       {message && (
@@ -274,12 +291,11 @@ export default function AnswerKeyPage() {
 
       {choiceQuestions.length > 0 && (
         <section className="mt-6 rounded-xl border bg-white p-4">
-          <h2 className="font-semibold">Bulk entry</h2>
+          <h2 className="font-semibold">{t("Bulk entry")}</h2>
           <p className="text-sm text-slate-600">
-            Paste <code className="rounded bg-slate-100 px-1">1-A 2-C 3-D</code>,{" "}
-            <code className="rounded bg-slate-100 px-1">1. A</code>,{" "}
-            <code className="rounded bg-slate-100 px-1">ACBDA</code>, or{" "}
-            <code className="rounded bg-slate-100 px-1">3-AC</code> for multiple answers.
+            {t(
+              "Paste 1-A 2-C 3-D, 1. A, ACBDA, or 3-AC for multiple answers.",
+            )}
           </p>
           <textarea
             value={bulk}
@@ -292,7 +308,7 @@ export default function AnswerKeyPage() {
             onClick={applyBulk}
             className="mt-2 rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
           >
-            Apply to grid
+            {t("Apply to grid")}
           </button>
         </section>
       )}
@@ -317,7 +333,7 @@ export default function AnswerKeyPage() {
                 </span>
                 {q.multi && (
                   <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
-                    multi
+                    {t("multi")}
                   </span>
                 )}
                 <div className="flex shrink-0 gap-1">
@@ -345,7 +361,7 @@ export default function AnswerKeyPage() {
       {blankQuestions.length > 0 && (
         <section className="mt-6 space-y-2">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Fill in the blank · list every acceptable answer
+            {t("Fill in the blank · list every acceptable answer")}
           </h2>
           {blankQuestions.map((q) => {
             const no = q.no ?? questions.indexOf(q) + 1;
@@ -363,15 +379,25 @@ export default function AnswerKeyPage() {
                         type="text"
                         value={value}
                         onChange={(event) => setBlankValue(q.ext_id, index, event.target.value)}
-                        placeholder={index === 0 ? "Correct answer" : "Another acceptable answer"}
-                        aria-label={`Accepted answer ${index + 1} for question ${no}`}
+                        placeholder={
+                          index === 0
+                            ? t("Correct answer")
+                            : t("Another acceptable answer")
+                        }
+                        aria-label={t("Accepted answer {number} for question {question}", {
+                          number: index + 1,
+                          question: no,
+                        })}
                         className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
                       />
                       {values.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeBlankValue(q.ext_id, index)}
-                          aria-label={`Remove answer ${index + 1} for question ${no}`}
+                          aria-label={t("Remove answer {number} for question {question}", {
+                            number: index + 1,
+                            question: no,
+                          })}
                           className="rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-red-300 hover:text-red-600"
                         >
                           <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -385,7 +411,7 @@ export default function AnswerKeyPage() {
                     className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
                   >
                     <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                    Add acceptable answer
+                    {t("Add acceptable answer")}
                   </button>
                 </div>
               </div>
@@ -395,8 +421,10 @@ export default function AnswerKeyPage() {
       )}
 
       <section className="mt-6 rounded-xl border bg-white p-4">
-        <h2 className="font-semibold">Preview</h2>
-        <p className="text-sm text-slate-600">First question as the practice UI will render it.</p>
+        <h2 className="font-semibold">{t("Preview")}</h2>
+        <p className="text-sm text-slate-600">
+          {t("First question as the practice UI will render it.")}
+        </p>
         <div className="mt-2 rounded-lg border bg-slate-50 p-3 text-sm">
           <RichText text={questions[0]?.stem ?? ""} docId={docId} />
         </div>
@@ -408,14 +436,18 @@ export default function AnswerKeyPage() {
           disabled={saving || filled === 0}
           className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? "Saving…" : pendingSession ? "Save & view results" : "Save answers"}
+          {saving
+            ? t("Saving…")
+            : pendingSession
+              ? t("Save & view results")
+              : t("Save answers")}
         </button>
         {filled === total && total > 0 && (
           <Link
             to={`/doc/${doc.id}/practice`}
             className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700"
           >
-            All set — start practice
+            {t("All set — start practice")}
           </Link>
         )}
       </div>

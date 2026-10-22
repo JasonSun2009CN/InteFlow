@@ -7,6 +7,7 @@ export { EmptyState } from "./EmptyState";
 export { Banner } from "./Banner";
 export { ToastProvider, useToast } from "./Toast";
 export { ThemePicker } from "./ThemePicker";
+export { LanguagePicker } from "./LanguagePicker";
 export { Icon } from "./Icon";
 export { AppShell } from "./AppShell";
 export { AppSidebar } from "./AppSidebar";

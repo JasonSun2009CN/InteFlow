@@ -7,6 +7,7 @@ import {
   type WordGrid,
 } from "../../api/client";
 import VocabGrid from "./VocabGrid";
+import { useI18n } from "../../lib/i18n";
 
 interface Props {
   docId: number;
@@ -45,6 +46,7 @@ function contextOf(item: ResultItem | null): string {
  * sense is used and a warning is shown — the drop never dead-ends.
  */
 export default function VocabularyPane({ docId, item }: Props) {
+  const { t } = useI18n();
   const [grid, setGrid] = useState<WordGrid | null>(null);
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -84,7 +86,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       const saved = await api.putWords(docId, grid);
       setGrid(saved);
       setDirty(false);
-      setMsg("Saved ✓");
+      setMsg(t("Saved ✓"));
       return true;
     } catch (error) {
       setErr(errText(error));
@@ -99,8 +101,15 @@ export default function VocabularyPane({ docId, item }: Props) {
     setDirty(false);
     setMsg(
       result.definition
-        ? `Added “${result.word}”${result.pos ? ` · ${result.pos}` : ""} — ${result.definition}`
-        : `Added “${result.word}”. Add a meaning below or in the Vocabulary page.`,
+        ? t("Added “{word}”{pos} — {definition}", {
+            word: result.word,
+            pos: result.pos ? ` · ${result.pos}` : "",
+            definition: result.definition,
+          })
+        : t(
+            "Added “{word}”. Add a meaning below or in the Vocabulary page.",
+            { word: result.word },
+          ),
     );
     setWarning(result.warning || null);
   }
@@ -131,7 +140,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       event.dataTransfer.getData(WORD_MIME) || event.dataTransfer.getData("text/plain"),
     );
     if (!text) {
-      setErr("Drag a word (select it in the question first).");
+      setErr(t("Drag a word (select it in the question first)."));
       return;
     }
     setMsg(null);
@@ -168,7 +177,7 @@ export default function VocabularyPane({ docId, item }: Props) {
   return (
     <section
       data-testid="vocabulary-pane"
-      aria-label="Vocabulary pane"
+      aria-label={t("Vocabulary pane")}
       className={
         "relative flex h-full min-h-0 flex-col bg-white transition-shadow " +
         (dropActive ? "ring-2 ring-inset ring-blue-400" : "")
@@ -187,10 +196,12 @@ export default function VocabularyPane({ docId, item }: Props) {
     >
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-slate-50 px-3 py-1.5">
         <span className="text-xs text-slate-500">
-          {count} {count === 1 ? "word" : "words"}
+          {t("{count} words", { count })}
         </span>
-        {dirty && !busy && <span className="text-xs text-amber-600">unsaved</span>}
-        {busy && <span className="text-xs text-slate-400">Saving…</span>}
+        {dirty && !busy && (
+          <span className="text-xs text-amber-600">{t("unsaved")}</span>
+        )}
+        {busy && <span className="text-xs text-slate-400">{t("Saving…")}</span>}
         <div className="ml-auto flex items-center gap-1.5">
           <button
             type="button"
@@ -198,14 +209,14 @@ export default function VocabularyPane({ docId, item }: Props) {
             disabled={!dirty || busy}
             className="rounded-md border px-2.5 py-1 text-xs font-medium hover:bg-white disabled:opacity-40"
           >
-            Save
+            {t("Save")}
           </button>
           <button
             type="button"
             onClick={() => void exportXlsx()}
             className="rounded-md border px-2.5 py-1 text-xs font-medium hover:bg-white"
           >
-            Export .xlsx
+            {t("Export .xlsx")}
           </button>
         </div>
       </div>
@@ -214,8 +225,8 @@ export default function VocabularyPane({ docId, item }: Props) {
         <input
           value={word}
           onChange={(event) => setWord(event.target.value)}
-          placeholder="Add a word manually…"
-          aria-label="Add a word manually"
+          placeholder={t("Add a word manually…")}
+          aria-label={t("Add a word manually")}
           className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
         />
         <button
@@ -223,13 +234,13 @@ export default function VocabularyPane({ docId, item }: Props) {
           disabled={!word.trim() || busy || dropping}
           className="rounded-md border bg-white px-2.5 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
         >
-          Add
+          {t("Add")}
         </button>
       </form>
 
       <div className="min-h-0 flex-1 p-2.5">
         {loading ? (
-          <p className="p-3 text-sm text-slate-400">Loading vocabulary…</p>
+          <p className="p-3 text-sm text-slate-400">{t("Loading vocabulary…")}</p>
         ) : grid ? (
           <VocabGrid
             grid={grid}
@@ -242,7 +253,9 @@ export default function VocabularyPane({ docId, item }: Props) {
             }}
           />
         ) : (
-          <p className="p-3 text-sm text-red-600">{err ?? "Could not load vocabulary."}</p>
+          <p className="p-3 text-sm text-red-600">
+            {err ?? t("Could not load vocabulary.")}
+          </p>
         )}
       </div>
 
@@ -257,7 +270,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       {dropActive && (
         <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-blue-50/80">
           <p className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
-            Drop to add · Merriam-Webster sense for this sentence
+            {t("Drop to add · Merriam-Webster sense for this sentence")}
           </p>
         </div>
       )}
@@ -265,7 +278,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       {dropping && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-white/80">
           <p className="rounded-lg border bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
-            Looking up the word…
+            {t("Looking up the word…")}
           </p>
         </div>
       )}

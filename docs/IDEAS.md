@@ -15,6 +15,22 @@
 
 <!-- 从这里开始往下写 -->
 
+### ✅ 考试倒计时 / 正计时（2026-10-22）
+
+- 开始考试前选择正计时或倒计时；倒计时填写分:秒。
+- 默认值按试卷读取上次提交的计时方式；该卷没有记录时回退最近一次任意考试，再回退 localStorage。
+- 倒计时到 `00:00` **自动交卷**（已与用户确认）。
+- **已实现（2026-10-22）**：`sessions.timer_mode` / `timer_seconds`；`GET /api/sessions/timer-preference`
+  与 `PATCH /api/sessions/{id}/timer`；前端 PracticePage 开始屏与 `PracticePage.test.tsx` 覆盖。
+  0 token。
+
+### ✅ 中文界面模式（2026-10-22）
+
+- 整个前端界面支持中英文切换，入口在 Settings。
+- **已实现（2026-10-22）**：Settings → **Language**；`frontend/src/lib/i18n.tsx` 提供
+  `I18nProvider` / `useI18n` / `useT` 与英文原文键的中文表，缺失时回退英文；状态存
+  `localStorage` 键 `inteflow.language`，并同步 `<html lang>`。考试原文、用户内容与后端报错不翻译。
+
 ### ✅ 加入单词考试功能（2026-10-20）
 
 - purpose: 用于测试单词背诵效果

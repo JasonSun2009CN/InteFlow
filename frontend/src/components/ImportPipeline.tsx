@@ -1,4 +1,5 @@
 import type { ImportJob, ImportPageReport } from "../api/client";
+import { useI18n } from "../lib/i18n";
 
 const STAGES = [
   { key: "detect", label: "Detect" },
@@ -16,6 +17,15 @@ const PAGE_LABELS: Record<string, string> = {
   empty: "no text",
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  detecting: "detecting",
+  converting: "converting",
+  review: "review",
+  done: "done",
+  failed: "failed",
+  cancelled: "cancelled",
+};
+
 const AI_FALLBACK_STATUSES = ["ocr_unavailable", "ocr_failed", "low_confidence", "empty"];
 
 function pageTone(status: string): string {
@@ -30,8 +40,11 @@ function pageTone(status: string): string {
   }
 }
 
-function pageLabel(page: ImportPageReport): string {
-  const label = PAGE_LABELS[page.status] ?? page.status;
+function pageLabel(
+  page: ImportPageReport,
+  t: (source: string, vars?: Record<string, string | number>) => string,
+): string {
+  const label = t(PAGE_LABELS[page.status] ?? page.status);
   if (page.source && page.status !== "text") return `${label} (${page.source})`;
   return label;
 }
@@ -51,6 +64,7 @@ export default function ImportPipeline({
   onCancel,
   onAiFallback,
 }: Props) {
+  const { t } = useI18n();
   const activeIndex = Math.max(
     0,
     STAGES.findIndex((s) => s.key === job.stage),
@@ -63,16 +77,20 @@ export default function ImportPipeline({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
-            {failed ? "Import failed" : cancelled ? "Import cancelled" : "Import pipeline"}
+            {failed
+              ? t("Import failed")
+              : cancelled
+                ? t("Import cancelled")
+                : t("Import pipeline")}
           </h2>
           <p className="text-sm text-slate-500">
             {job.filename}
             {job.kind && ` · ${job.kind}`}
-            {job.import_source && ` · source: ${job.import_source}`}
+            {job.import_source && ` · ${t("source: {source}", { source: job.import_source })}`}
           </p>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-          {job.status}
+          {t(STATUS_LABELS[job.status] ?? job.status)}
         </span>
       </div>
 
@@ -97,7 +115,7 @@ export default function ImportPipeline({
                 {done ? "✓" : i + 1}
               </span>
               <span className={done || isActive ? "text-slate-900" : "text-slate-400"}>
-                {stage.label}
+                {t(stage.label)}
               </span>
               {i < STAGES.length - 1 && <span className="text-slate-300">→</span>}
             </li>
@@ -116,18 +134,21 @@ export default function ImportPipeline({
           <div className="flex items-center justify-between text-sm text-slate-600">
             <span className="flex items-center gap-2">
               <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
-              Converting…
+              {t("Converting…")}
             </span>
             <span className="tabular-nums">
               {job.pages_total > 0
-                ? `${job.pages_done}/${job.pages_total} pages`
-                : "counting pages"}
+                ? t("{done}/{total} pages", {
+                    done: job.pages_done,
+                    total: job.pages_total,
+                  })
+                : t("counting pages")}
             </span>
           </div>
           <div
             className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100"
             role="progressbar"
-            aria-label="Conversion progress"
+            aria-label={t("Conversion progress")}
             aria-valuemin={0}
             aria-valuemax={job.pages_total || undefined}
             aria-valuenow={job.pages_total ? job.pages_done : undefined}
@@ -154,7 +175,7 @@ export default function ImportPipeline({
             disabled={busy}
             className="mt-3 rounded-lg border px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {t("Cancel")}
           </button>
         </div>
       )}
@@ -162,12 +183,15 @@ export default function ImportPipeline({
       {job.pages.length > 0 && (
         <div className="mt-5">
           <h3 className="text-sm font-semibold text-slate-700">
-            Pages ({job.pages_done}/{job.pages_total})
+            {t("Pages ({done}/{total})", {
+              done: job.pages_done,
+              total: job.pages_total,
+            })}
           </h3>
           <ul className="mt-2 divide-y divide-slate-100 rounded-lg border">
             {job.pages.map((page) => (
               <li key={page.no} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-                <span className="text-slate-600">Page {page.no}</span>
+                <span className="text-slate-600">{t("Page {number}", { number: page.no })}</span>
                 <span className="flex items-center gap-2">
                   {page.confidence !== null && (
                     <span className="text-xs text-slate-400">
@@ -175,7 +199,7 @@ export default function ImportPipeline({
                     </span>
                   )}
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${pageTone(page.status)}`}>
-                    {pageLabel(page)}
+                    {pageLabel(page, t)}
                   </span>
                 </span>
               </li>
@@ -186,9 +210,12 @@ export default function ImportPipeline({
 
       {job.status === "review" && (
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <Stat label="Questions" value={String(job.question_count)} />
-          <Stat label="Answers" value={job.kind === "ifmd" ? "from file" : "external key"} />
-          <Stat label="AI used" value={job.used_ai ? "yes" : "no (0 token)"} />
+          <Stat label={t("Questions")} value={String(job.question_count)} />
+          <Stat
+            label={t("Answers")}
+            value={job.kind === "ifmd" ? t("from file") : t("external key")}
+          />
+          <Stat label={t("AI used")} value={job.used_ai ? t("yes") : t("no (0 token)")} />
         </div>
       )}
 
@@ -207,11 +234,17 @@ export default function ImportPipeline({
             disabled={busy}
             className="rounded-lg bg-violet-600 px-4 py-2 font-medium text-white hover:bg-violet-700 disabled:opacity-50 flex items-center gap-2"
           >
-            {busy ? "Running AI fallback…" : "Run AI fallback on unreadable pages"}
+            {busy ? t("Running AI fallback…") : t("Run AI fallback on unreadable pages")}
           </button>
           <p className="mt-1 text-xs text-slate-500">
-            Uses the configured LLM to extract questions from pages with OCR issues
-            ({job.pages.filter((p) => AI_FALLBACK_STATUSES.includes(p.status)).length} page{job.pages.filter((p) => AI_FALLBACK_STATUSES.includes(p.status)).length > 1 ? "s" : ""}).
+            {t(
+              "Uses the configured LLM to extract questions from pages with OCR issues ({count} pages).",
+              {
+                count: job.pages.filter((p) =>
+                  AI_FALLBACK_STATUSES.includes(p.status),
+                ).length,
+              },
+            )}
           </p>
         </div>
       )}
@@ -223,18 +256,18 @@ export default function ImportPipeline({
             disabled={busy}
             className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {job.needs_review ? "Looks good — import" : "Import"}
+            {job.needs_review ? t("Looks good — import") : t("Import")}
           </button>
           <button
             onClick={onCancel}
             disabled={busy}
             className="rounded-lg border px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {t("Cancel")}
           </button>
           {job.needs_review && (
             <span className="self-center text-sm text-amber-700">
-              Review the pages above before importing.
+              {t("Review the pages above before importing.")}
             </span>
           )}
         </div>
@@ -242,7 +275,7 @@ export default function ImportPipeline({
 
       {job.status === "done" && (
         <p className="mt-5 text-sm font-medium text-emerald-700">
-          Imported {job.question_count} questions.
+          {t("Imported {count} questions.", { count: job.question_count })}
         </p>
       )}
     </section>

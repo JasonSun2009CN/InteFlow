@@ -11,6 +11,7 @@ import {
   subjectTone,
   type SubjectFilterValue,
 } from "../lib/subjects";
+import { useT } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -45,9 +46,10 @@ export function SubjectBadge({
   showEmpty?: boolean;
   className?: string;
 }) {
+  const t = useT();
   if (!subject) {
     return showEmpty ? (
-      <span className={`text-[11px] text-slate-400 ${className}`}>No subject</span>
+      <span className={`text-[11px] text-slate-400 ${className}`}>{t("No subject")}</span>
     ) : null;
   }
   return (
@@ -69,15 +71,16 @@ function ColorSwatches({
   onChange: (color: SubjectColor) => void;
   disabled?: boolean;
 }) {
+  const t = useT();
   return (
-    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Subject color">
+    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("Subject color")}>
       {SUBJECT_COLORS.map((option) => {
         const active = option.id === value;
         return (
           <button
             key={option.id}
             type="button"
-            aria-label={`Color ${option.label}`}
+            aria-label={t("Color {name}", { name: option.label })}
             aria-pressed={active}
             disabled={disabled}
             onClick={() => onChange(option.id)}
@@ -115,6 +118,7 @@ export function SubjectPicker({
   onSubjectsChanged,
   className = "",
 }: SubjectPickerProps) {
+  const t = useT();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState<SubjectColor>(() => nextColor(subjects));
@@ -180,16 +184,18 @@ export function SubjectPicker({
           value={value?.id ?? ""}
           onChange={(event) => onSelect(event.target.value)}
           disabled={busy}
-          aria-label={title ? `Subject for ${title}` : "Subject"}
+          aria-label={
+            title ? t("Subject for {title}", { title }) : t("Subject")
+          }
           className="min-w-0 max-w-[15rem] truncate rounded-md border border-transparent bg-transparent py-0.5 pl-0.5 pr-1 text-xs text-slate-600 hover:border-slate-300 focus:border-blue-400 focus:outline-none disabled:opacity-50"
         >
-          <option value="">No subject</option>
+          <option value="">{t("No subject")}</option>
           {subjects.map((subject) => (
             <option key={subject.id} value={subject.id}>
               {subject.name}
             </option>
           ))}
-          <option value="__new__">+ New subject…</option>
+          <option value="__new__">{t("+ New subject…")}</option>
         </select>
       </div>
 
@@ -202,8 +208,8 @@ export function SubjectPicker({
             autoFocus
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="e.g. SAT Math"
-            aria-label="New subject name"
+            placeholder={t("e.g. SAT Math")}
+            aria-label={t("New subject name")}
             maxLength={40}
             className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
           />
@@ -213,7 +219,7 @@ export function SubjectPicker({
             disabled={busy || !name.trim()}
             className="rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium text-white hover:bg-slate-800 disabled:opacity-40"
           >
-            {busy ? "Adding…" : "Add"}
+            {busy ? t("Adding…") : t("Add")}
           </button>
           <button
             type="button"
@@ -223,7 +229,7 @@ export function SubjectPicker({
             }}
             className="rounded-md border bg-white px-2 py-1 text-[11px] font-medium hover:bg-slate-100"
           >
-            Cancel
+            {t("Cancel")}
           </button>
         </form>
       )}
@@ -248,11 +254,12 @@ export function SubjectFilterBar({
   uncategorized: number;
   onManage?: () => void;
 }) {
+  const t = useT();
   const base =
     "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by subject">
+    <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("Filter by subject")}>
       <button
         type="button"
         aria-pressed={value === "all"}
@@ -263,7 +270,7 @@ export function SubjectFilterBar({
             : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
         }`}
       >
-        All
+        {t("All")}
         <span className="tabular-nums opacity-70">{total}</span>
       </button>
 
@@ -300,7 +307,7 @@ export function SubjectFilterBar({
               : "border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50"
           }`}
         >
-          Uncategorized
+          {t("Uncategorized")}
           <span className="tabular-nums opacity-70">{uncategorized}</span>
         </button>
       )}
@@ -311,7 +318,7 @@ export function SubjectFilterBar({
           onClick={onManage}
           className="ml-auto text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
         >
-          Manage subjects
+          {t("Manage subjects")}
         </button>
       )}
     </div>
@@ -326,6 +333,7 @@ interface SubjectManagerProps {
 
 /** Create / rename / recolor / delete subject groups. */
 export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerProps) {
+  const t = useT();
   const [drafts, setDrafts] = useState<
     Record<number, { name: string; color: SubjectColor }>
   >({});
@@ -379,7 +387,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
     if (draft.color !== subject.color) patch.color = draft.color;
     if (Object.keys(patch).length === 0) return;
     if (!draft.name.trim()) {
-      setError("Subject name must not be empty.");
+      setError(t("Subject name must not be empty."));
       return;
     }
     setBusy(`save-${subject.id}`);
@@ -398,11 +406,12 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
     if (busy) return;
     const extra =
       subject.document_count > 0
-        ? ` Its ${subject.document_count} ${
-            subject.document_count === 1 ? "paper" : "papers"
-          } will become uncategorized.`
+        ? t(" Its {count} papers will become uncategorized.", {
+            count: subject.document_count,
+          })
         : "";
-    if (!window.confirm(`Delete "${subject.name}"?${extra}`)) return;
+    if (!window.confirm(t("Delete “{name}”?{extra}", { name: subject.name, extra })))
+      return;
     setBusy(`delete-${subject.id}`);
     setError(null);
     try {
@@ -433,34 +442,35 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
               id="subject-manager-title"
               className="font-display text-xl tracking-tight text-slate-900"
             >
-              Subjects
+              {t("Subjects")}
             </h2>
             <p className="mt-0.5 text-xs leading-5 text-slate-500">
-              Group papers by subject. Renaming updates every paper; deleting moves its
-              papers to Uncategorized.
+              {t(
+                "Group papers by subject. Renaming updates every paper; deleting moves its papers to Uncategorized.",
+              )}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close subjects"
+            aria-label={t("Close subjects")}
             className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-slate-50"
           >
-            Close
+            {t("Close")}
           </button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <form onSubmit={(event) => void add(event)} className="rounded-xl border bg-slate-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Add subject
+              {t("Add subject")}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <input
                 value={addName}
                 onChange={(event) => setAddName(event.target.value)}
-                placeholder="e.g. SAT Math"
-                aria-label="New subject name"
+                placeholder={t("e.g. SAT Math")}
+                aria-label={t("New subject name")}
                 maxLength={40}
                 className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
@@ -470,7 +480,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                 disabled={busy !== null || !addName.trim()}
                 className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
               >
-                {busy === "add" ? "Adding…" : "Add subject"}
+                {busy === "add" ? t("Adding…") : t("Add subject")}
               </button>
             </div>
           </form>
@@ -484,7 +494,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
           <ul className="mt-3 space-y-2">
             {subjects.length === 0 && (
               <li className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-slate-400">
-                No subjects yet. Add your first one above.
+                {t("No subjects yet. Add your first one above.")}
               </li>
             )}
             {subjects.map((subject) => {
@@ -505,7 +515,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                           [subject.id]: { ...draft, name: event.target.value },
                         }))
                       }
-                      aria-label={`Name for ${subject.name}`}
+                      aria-label={t("Name for {name}", { name: subject.name })}
                       maxLength={40}
                       className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
                     />
@@ -515,7 +525,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       disabled={!dirty || busy !== null}
                       className="rounded-lg border px-2.5 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
                     >
-                      {busy === `save-${subject.id}` ? "Saving…" : "Save"}
+                      {busy === `save-${subject.id}` ? t("Saving…") : t("Save")}
                     </button>
                     <button
                       type="button"
@@ -523,7 +533,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       disabled={busy !== null}
                       className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
                     >
-                      {busy === `delete-${subject.id}` ? "Deleting…" : "Delete"}
+                      {busy === `delete-${subject.id}` ? t("Deleting…") : t("Delete")}
                     </button>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -538,8 +548,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       disabled={busy !== null}
                     />
                     <span className="text-[11px] text-slate-400">
-                      {subject.document_count}{" "}
-                      {subject.document_count === 1 ? "paper" : "papers"}
+                      {t("{count} papers", { count: subject.document_count })}
                     </span>
                   </div>
                 </li>

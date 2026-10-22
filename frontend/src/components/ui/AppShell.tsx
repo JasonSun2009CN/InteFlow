@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { useTheme } from "../../theme";
+import { useI18n } from "../../lib/i18n";
 
 interface Props {
   children?: ReactNode;
@@ -34,6 +35,7 @@ const FOOTER_ROUTES = [
 export function AppShell({ children }: Props) {
   const { pathname } = useLocation();
   const [theme] = useTheme();
+  const { t } = useI18n();
 
   if (WORKSPACE_ROUTES.some((re) => re.test(pathname))) {
     return (
@@ -76,8 +78,8 @@ export function AppShell({ children }: Props) {
           {showFooter && (
             <footer className="border-t border-slate-200">
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5 px-6 py-6 text-[11px] leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <p>InteFlow — local-first practice, review &amp; vocabulary.</p>
-                <p>No accounts. No cloud. Everything stays on this machine.</p>
+                <p>{t("InteFlow — local-first practice, review & vocabulary.")}</p>
+                <p>{t("No accounts. No cloud. Everything stays on this machine.")}</p>
               </div>
             </footer>
           )}

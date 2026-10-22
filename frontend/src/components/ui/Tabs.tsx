@@ -12,9 +12,18 @@ interface Props {
   onChange: (key: string) => void;
   className?: string;
   variant?: "line" | "enclosed" | "soft";
+  /** Accessible name for the tab list. */
+  ariaLabel?: string;
 }
 
-export function Tabs({ tabs, activeKey, onChange, className = "", variant = "line" }: Props) {
+export function Tabs({
+  tabs,
+  activeKey,
+  onChange,
+  className = "",
+  variant = "line",
+  ariaLabel = "Tabs",
+}: Props) {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -54,7 +63,7 @@ export function Tabs({ tabs, activeKey, onChange, className = "", variant = "lin
   };
 
   return (
-    <div className={`flex gap-1 ${className}`} role="tablist" aria-label="Tabs">
+    <div className={`flex gap-1 ${className}`} role="tablist" aria-label={ariaLabel}>
       {tabs.map((tab, index) => (
         <button
           ref={(el) => { tabRefs.current[index] = el; }}

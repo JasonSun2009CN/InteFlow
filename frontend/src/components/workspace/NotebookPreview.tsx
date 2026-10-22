@@ -3,6 +3,7 @@ import { api, ApiError, type ResultItem } from "../../api/client";
 import RichText from "../RichText";
 import { sectionLabel } from "../../lib/sections";
 import { CloseIcon } from "./icons";
+import { useI18n } from "../../lib/i18n";
 
 interface Props {
   docId: number;
@@ -28,6 +29,7 @@ function errText(err: unknown): string {
  * here writes the same selection — questions without analysis are skipped.
  */
 export default function NotebookPreview({ docId, title, items, pages, sessionId, onClose }: Props) {
+  const { t } = useI18n();
   const [exporting, setExporting] = useState<"md" | "docx" | "pdf" | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [exportErr, setExportErr] = useState<string | null>(null);
@@ -48,7 +50,11 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
     setExportErr(null);
     try {
       const { path } = await api.exportAnalysis(docId, fmt, sessionId, true);
-      setExportMsg(path ? `Downloaded — a copy was saved to ${path}` : "Downloaded.");
+      setExportMsg(
+        path
+          ? t("Downloaded — a copy was saved to {path}", { path })
+          : t("Downloaded."),
+      );
     } catch (err) {
       setExportErr(errText(err));
     } finally {
@@ -61,23 +67,25 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
       className="fixed inset-0 z-50 flex flex-col bg-white"
       role="dialog"
       aria-modal="true"
-      aria-label="Analysis notebook"
+      aria-label={t("Analysis notebook")}
     >
       <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-2.5">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Analysis notebook
+            {t("Analysis notebook")}
           </p>
           <h2 className="truncate font-display text-lg tracking-tight text-slate-900">{title}</h2>
         </div>
 
         <span className="hidden text-xs text-slate-500 sm:block">
-          {analysed.length} {analysed.length === 1 ? "question" : "questions"} analysed
+          {analysed.length === 1
+            ? t("1 question analysed")
+            : t("{count} questions analysed", { count: analysed.length })}
         </span>
 
         <div className="flex items-center gap-1.5">
           <span className="hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 sm:block">
-            Export
+            {t("Export")}
           </span>
           {(["pdf", "docx", "md"] as const).map((fmt) => (
             <button
@@ -87,13 +95,13 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
               disabled={exporting !== null || analysed.length === 0}
               className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
             >
-              {exporting === fmt ? "Exporting…" : `.${fmt}`}
+              {exporting === fmt ? t("Exporting…") : `.${fmt}`}
             </button>
           ))}
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close notebook"
+            aria-label={t("Close notebook")}
             className="ml-1 rounded-md border border-slate-300 p-1.5 text-slate-500 hover:bg-slate-100"
           >
             <CloseIcon size={16} />
@@ -116,19 +124,21 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
         <article className="mx-auto w-full max-w-3xl px-6 py-12 sm:px-8">
           <header className="border-b border-slate-200 pb-10 text-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-              Analysis notebook
+              {t("Analysis notebook")}
             </p>
             <h1 className="mt-3 font-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
               {title}
             </h1>
             <p className="mt-3 text-sm text-slate-500">
-              {analysed.length} {analysed.length === 1 ? "question" : "questions"} with analysis
+              {analysed.length === 1
+                ? t("1 question with analysis")
+                : t("{count} questions with analysis", { count: analysed.length })}
             </p>
           </header>
 
           {analysed.length === 0 && (
             <p className="py-16 text-center text-sm italic text-slate-400">
-              No analysis yet — write an analysis page and it will appear here.
+              {t("No analysis yet — write an analysis page and it will appear here.")}
             </p>
           )}
 
@@ -148,10 +158,10 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
                   {item.is_correct === true ? "✓" : item.is_correct === false ? "✗" : "–"}
                 </span>
                 <h2 className="font-display text-xl tracking-tight text-slate-900">
-                  Question {item.no}
+                  {t("Question {number}", { number: item.no })}
                 </h2>
                 <span className="text-xs text-slate-500">
-                  {sectionLabel(item.sec)}
+                  {t(sectionLabel(item.sec))}
                   {item.source ? ` · ${item.source}` : ""}
                 </span>
               </div>
@@ -188,7 +198,7 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
 
               <div className="mt-6 border-t border-slate-200 pt-4">
                 <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Analysis
+                  {t("Analysis")}
                 </h3>
                 <div className="mt-2 text-[15px]">
                   <RichText text={pages[item.question_id] ?? ""} docId={docId} breaks />

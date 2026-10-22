@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, ApiError, type ResultItem } from "../../api/client";
+import { useT } from "../../lib/i18n";
 
 interface Props {
   docId: number;
@@ -17,6 +18,7 @@ function errText(err: unknown): string {
  * answer and the student's choice — never the hand-written analysis.
  */
 export default function AiTutorPane({ docId, item, sessionId }: Props) {
+  const t = useT();
   const [text, setText] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export default function AiTutorPane({ docId, item, sessionId }: Props) {
   if (!item) {
     return (
       <p className="grid h-full place-items-center p-6 text-center text-sm text-slate-500">
-        Pick a question to ask the AI tutor.
+        {t("Pick a question to ask the AI tutor.")}
       </p>
     );
   }
@@ -52,16 +54,19 @@ export default function AiTutorPane({ docId, item, sessionId }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <p className="text-sm font-medium text-slate-800">Question {item.no}</p>
+        <p className="text-sm font-medium text-slate-800">
+          {t("Question {number}", { number: item.no })}
+        </p>
         <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{item.stem}</p>
         <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
-          The tutor sees this question, its correct answer and your choice — not your
-          analysis notes. Explicit call: this may use tokens from your configured model.
+          {t(
+            "The tutor sees this question, its correct answer and your choice — not your analysis notes. Explicit call: this may use tokens from your configured model.",
+          )}
         </p>
 
         {item.answers.length === 0 ? (
           <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-            No answer key for this question — fill it in on the answer page first.
+            {t("No answer key for this question — fill it in on the answer page first.")}
           </p>
         ) : (
           <button
@@ -70,7 +75,7 @@ export default function AiTutorPane({ docId, item, sessionId }: Props) {
             disabled={busy}
             className="mt-3 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
-            {busy ? "Thinking…" : text ? "Regenerate" : "Explain with AI"}
+            {busy ? t("Thinking…") : text ? t("Regenerate") : t("Explain with AI")}
           </button>
         )}
 

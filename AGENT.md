@@ -22,17 +22,17 @@
 1. **LLM 不在主链路**：导入/解析/判分/导出全部确定性本地计算，**0 token**；只有用户显式点击
    （AI 讲解 / 连通性测试 / 在设置里开启 AI 评分后的单词考试提交）才调用外部 API。
 2. **本地优先**：所有数据在 `data/`（SQLite + 每篇文档的 `doc.ifmd.md` 与图片），不上传云端。
-3. 界面全英文；与维护者交流用中文；**有疑问必须先用 `question` 工具问，不许自己猜**。
+3. 界面默认英文，可在 **Settings → Language** 切换为中文（全前端 i18n，0 token；考试原文、用户内容与后端报错保持原样）；与维护者交流用中文；**有疑问必须先用 `question` 工具问，不许自己猜**。
 
 ## 3. 当前状态（2026-10-21）
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **305 passed, 1 skipped** |
+| 后端测试 | `pytest` **309 passed, 1 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **142 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **145 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
-| API 面 | 65 条（见 `docs/ARCHITECTURE.md`） |
+| API 面 | 67 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
@@ -85,6 +85,22 @@
 > 自动把模板填为草稿（有分析绝不覆盖，notebook 加载完成后才填）。模板未改动不会自动保存，避免空白题被算作
 > “已分析”而进入导出；用户开始输入后才走原有自动保存。0 token。
 >
+> 2026-10-22：**考试计时可选正计时 / 倒计时**。开始屏先选模式；倒计时填写分:秒，到 `00:00` **自动交卷**。
+> 选择会按试卷记忆（`sessions.timer_mode` / `timer_seconds`），没有该卷记录时回退最近一次任意考试；
+> `GET /api/sessions/timer-preference` 返回默认值，`PATCH /api/sessions/{id}/timer` 在开始考试时落库。
+> 前端另有 localStorage 兜底（`inteflow.practice.timer[.<docId>]`）。0 token。
+>
+> 2026-10-22：**中文界面模式**。Settings → Language 可在 English / 中文之间即时切换（`localStorage`
+> 键 `inteflow.language`）；侧栏、页面、弹窗、按钮、提示等全部前端文案走
+> `frontend/src/lib/i18n.tsx` 的 `t()`，默认英文、缺失翻译回退英文；考试原文、用户输入/分析、后端报错
+> 不翻译。`<html lang>` 同步切换。
+>
+> 2026-10-22：**官网在线演示 + 下载 ZIP**。中英双语落地页新增 `#demo` 区块：4 道示例题（态度 / 词义 /
+> 代数 / 填空），可选题号、标记待看、计时与交卷；成绩页可进入复盘（正确答案、示例解析、可收藏生词）。
+> 判分、计时与生词收藏都在浏览器内完成（生词存 `localStorage` 键 `inteflow.website.demo.vocab`），0 token。
+> 题目与双语文案在 `website/assets/site.js` 的 `DEMO` 对象，样式在 `site.css`。Hero、Demo 与 Quick start
+> 都加了 **Download ZIP**，指向 GitHub 的 `archive/refs/heads/main.zip`（压缩包不随网站入库）。
+>
 > 2026-10-21：**复盘工作台工具切换器改为图标按钮行**。原来每个 pane 头部是一个 “Switch…” 下拉菜单，
 > 现在改为横向排列的**四个图标 + 小字标签**按钮（Question / Analysis / AI Tutor / Vocabulary，Lucide 图标），
 > 当前工具高亮（`aria-pressed`），另一侧的工具略淡并提示 “click to swap”；点另一个 pane 已有的工具仍按原逻辑
@@ -121,7 +137,7 @@
 | 改名 | **全部改名**（见 §4 映射），不只是 UI 文案 |
 | 题目模型 | 把 `sec` **泛化为自由板块标签**（去掉 `CHECK (sec IN ('rw','math'))`），SAT 卷仍填 `rw`/`math` |
 | 内置题库 | **保留**（开箱即用的示例题库） |
-| 计时 | 正计时 + 倒计时两种；倒计时**开始屏手输 + 记住上次**（存本地） |
+| 计时 | 正计时 + 倒计时两种；开始屏手输倒计时，默认值按试卷读取上次提交的计时方式（无记录回退最近一次任意考试，再回退 localStorage）；倒计时到 0 **自动交卷** |
 | 主界面信息架构 | **左侧栏 6 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Sessions（作答历史）/ Review（错题集 + 精选题集）/ Vocabulary（生词本）/ Settings。**练习页与复盘页全屏无侧栏**；答案录入在侧栏布局内。窄屏侧栏变抽屉；桌面端可 **Compact** 为 80px 图标栏（存 `inteflow.sidebar.compact`，移动端不生效） |
 | 复盘（分析模式，2026-10-19） | 进入复盘**隐藏左侧栏**；题号导航默认缩到左上角、点击旋转展开为**悬浮**面板（All / Wrong / Correct），点击某题即选中并收起；**2-of-4 分屏**：题目 / 分析 / AI Tutor / 生词本，每侧可切换到另外三者；选择已在另一侧的工具则左右互换；默认左题目右分析；分隔条可拖拽/方向键。导出与 Notebook 放顶栏（不占用分屏）。**2026-10-21**：每侧头部的工具切换由下拉菜单改为**四个图标 + 标签的横向按钮行**（当前项高亮，另一侧的工具点按即交换）。 |
 | 分析存储与导出 | 一套试卷 = 一套分析（`analysis_pages` 一题一页，按题序）；旧 `questions.explain` 首次读取时映射迁入（`id` 为 null）。复盘页顶部 **Notebook** 全屏预览：试卷标题 → 所有已写解析的题目（题干/图表/解析）+ 导出按钮。导出 md / docx / pdf **只含已写解析的题**：浏览器下载 + 在 `data/exports/` 存一份，响应头 `X-Export-Path` 显示路径；封面页含设置里的用户名 |
@@ -142,13 +158,13 @@
 | 查词 / 错题分析导出 | 查词已实现（本地词典）；**错题分析导出已实现**（一套试卷一套笔记本，md/docx/pdf 存 `data/exports/`） |
 | LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
+| 界面语言（2026-10-22） | 默认英文；Settings → Language 即时切换中文（`localStorage` 键 `inteflow.language`）。所有前端 UI 文案经 `frontend/src/lib/i18n.tsx` 的 `t()`；考试原文、用户内容与后端报错不翻译 |
 
 ## 6. 待办 / 已知缺口
 
 ### 本次迁移之后要做的
-1. **计时方案**：`PracticePage` 目前只有**正计时**（`useState` + `setInterval`）。
-   需要加"倒计时"模式：开始屏选择 + 手输 `mm:ss` + 记住上次（`localStorage`）。
-   倒计时到 0 时的行为（自动交卷 / 只提示）**还没定，做之前先问用户**。
+1. ~~**计时方案**~~ **已实现（2026-10-22）**：开始屏可选正计时/倒计时；倒计时手输分:秒，到 0 自动交卷；
+   默认值按试卷读取上次提交的计时方式（无记录回退全局最近一次）。详见 §5。
 2. ~~**查词（占位）**~~ **已实现（2026-10-19/20）**：本地 Merriam-Webster（Eudic `.eudb`）索引 + 查词接口 + Vocabulary 页 + 复盘拖词选义；词条内 Definition for English Learners 栏目可优先使用；用户自定义词典可在 Settings 导入/维护并优先查词。
 3. ~~**错题分析导出（占位）**~~ **已实现（2026-10-19）**：一套试卷一套分析笔记本，可导出 md/docx/pdf 并留副本到 `data/exports/`；复盘页 Notebook 可先预览整套解析，导出只包含已写解析的题。单词表导出仍是 xlsx。
 4. **UI/UX 打磨**（用户逐页审查）：已完成——左侧栏 6 tab 工作区（窄屏抽屉）+ 纸墨风同步 + 复盘页全屏重构
@@ -173,11 +189,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 305 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 309 passed, 1 skipped
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 142 passed, 5 skipped
+cd frontend && npm test         # 145 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -211,9 +227,10 @@ cd frontend && npm test         # 142 passed, 5 skipped
 | `frontend/src/theme.ts` | 主题注册表（id / 名称 / 说明 / 色板）+ `localStorage` 持久化 + `useTheme()`；`components/ui/ThemePicker.tsx` 是 Settings 里的选择器 |
 | `frontend/src/components/workspace/` | 复盘工作台（Workspace 2-of-4 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / ExportDrawer / NotebookPreview / VocabGrid / **WordExamPanel / WordExamResultView** / Splitter / usePersistentLayout） |
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
+| `frontend/src/lib/i18n.tsx` · `components/ui/LanguagePicker.tsx` | 前端中英文案表 / `I18nProvider` / `useI18n` / `useT` + Settings 里的语言切换（`inteflow.language`） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
-| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` 中文 + `en.html` 英文，页头切换；`assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页） |
+| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` 中文 + `en.html` 英文，页头切换；`assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页；`#demo` 是浏览器内可交互练习演示，`site.js` 的 `DEMO` 保存中英题目与文案） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |

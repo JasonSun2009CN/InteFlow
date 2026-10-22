@@ -26,7 +26,7 @@ website/
 ├── 404.html
 ├── assets/
 │   ├── site.css             # all layout, components, responsive rules
-│   ├── site.js              # nav, filters, theme lab, code tabs, copy
+│   ├── site.js              # nav, filters, theme lab, code tabs, copy, demo
 │   └── favicon.svg
 └── themes/                  # five live theme previews
     ├── clear-blue.html
@@ -44,6 +44,33 @@ The theme previews are adapted from `/theme-examples` so the gallery shows the
 real CSS tokens and component layout, not screenshots. Each preview is a
 standalone page: the theme picker inside it switches to the other previews, and
 the brand links back to the landing page.
+
+## Live demo (`#demo`)
+
+Between the workflow and the feature index, both landing pages embed a small
+interactive practice demo. It is intentionally a *taste* of the app, not a
+second implementation:
+
+- four sample questions: attitude, words in context, algebra and fill-in-blank;
+- question grid, previous/next, mark-for-review, a running timer and submit;
+- a result screen with a score, per-question answers and links into review;
+- a review screen with the correct answer, a sample analysis and a small word
+  bank. Saved words are stored in `localStorage` under
+  `inteflow.website.demo.vocab`; nothing is uploaded and no API is called.
+
+All demo copy and questions live in the `DEMO` object in `assets/site.js`
+(English and Chinese variants). The section shell is in `index.html` /
+`en.html`; the JS fills `[data-demo-body]`. With JavaScript disabled, a note
+inside the shell explains that the full app runs locally.
+
+## Download ZIP
+
+The hero, demo section and quick-start CTA link to GitHub's source archive
+(`https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip`).
+There is no ZIP checked into this directory, so the site stays small and the
+download always matches the `main` branch. The archive does **not** include the
+gitignored `data/` directory or dictionary files, which is what a fresh install
+expects.
 
 ## GitHub Pages
 
@@ -69,8 +96,13 @@ processing. All URLs are relative, so the site works both at a project path
   counts in the filter bar and the `data-filter-count` default if you add or
   remove cards. Keep both language pages in sync: same sections, cards, ids and
   links, only the human-visible copy differs. Dynamic labels (filter counts,
-  theme notes, copy feedback) are picked from `assets/site.js` based on
+  theme notes, copy feedback, demo UI) are picked from `assets/site.js` based on
   `<html lang>`.
+- **The interactive demo** is the `DEMO` object in `assets/site.js`. Each
+  language has its own `ui` labels and `questions` array; keep the answer keys
+  (`answer`, `accept`) and the two arrays in sync. Sample analysis and word
+  entries are plain text (paragraphs separated by a blank line); the word bank
+  persists term names only.
 - **Theme metadata** for the interactive lab is the `THEMES` object near the
   top of `assets/site.js`. The five preview pages themselves keep their own copy
   of `THEMES` in `themes/assets/mock.js` for the in-preview switcher.
@@ -83,7 +115,12 @@ processing. All URLs are relative, so the site works both at a project path
 ## Accessibility notes
 
 - The page is usable without JavaScript: all feature cards show, the FAQ uses
-  native `<details>`, and the first theme preview still renders.
+  native `<details>`, and the first theme preview still renders. The demo is the
+  only part that needs JS; its shell shows a short no-script note instead.
+- The demo uses real buttons with `aria-pressed` / `aria-selected`, a visible
+  focus ring, and text labels alongside every colour cue. Review questions can
+  be reached with the keyboard; Enter in the fill-in field moves to the next
+  question (or submits on the last one).
 - Theme buttons use `role="tab"` and support arrow keys.
 - The preview iframes are decorative (`pointer-events: none`, `tabindex="-1"`);
   each has an **Open full page** link for real interaction.

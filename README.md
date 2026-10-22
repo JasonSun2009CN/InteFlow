@@ -58,13 +58,13 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
 | **Subjects** | User-defined subject groups (e.g. SAT Math, Physics) with a color; assign each paper inline from Library or the answer-key header, create a subject on the spot, manage/rename/recolor/delete it, filter Library and Exams by subject. Deleting a group only moves its papers to Uncategorized |
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
-| **Practice** | Exam-style fullscreen, **count-up or countdown timer**, single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
+| **Practice** | Exam-style fullscreen, **count-up or countdown timer** (chosen on the start screen; countdown auto-submits at `00:00` and defaults to the last timer used for that paper), single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
 | **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
 | **Workspace** | **2-of-4 pane split** (Question · Analysis · AI Tutor · Vocabulary) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, export drawer |
 | **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
 | **Review** | **Mistakes** (every wrong answer, one row per question using the latest attempt; corrected later = removed) and **Starred** (questions you star while practising or reviewing). Search papers/stems/options, filter by exam, sort newest/oldest, and read or edit the shared analysis; extra legacy analyses are shown read-only |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **analysis template**, **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **analysis template**, **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests**, **English / 中文 interface language** |
 
 > **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
 > Put the file in `dictionary/`; the index is built automatically on first lookup (0 token). Some entries carry
@@ -163,7 +163,7 @@ npm run dev
 
 ## Usage
 
-> The interface is in English; the button/page names below match the UI.
+> The interface is English by default and can be switched to Chinese in **Settings → Language**; the button/page names below match the English UI.
 
 ### 1. Import a question bank
 
@@ -216,7 +216,8 @@ From **Select an exam**, click **Start** to reach the start screen:
 
 1. The start screen shows *Ready to begin* + the question count. Choose a **timer mode**:
    - **Count-up** — just track elapsed time;
-   - **Countdown** — enter `mm:ss`; the app remembers your last value.
+   - **Countdown** — enter `mm:ss`; **when it reaches `00:00` your answers are submitted automatically**.
+   The mode and countdown length default to the last timer used for this paper (falling back to your most recent attempt on any paper).
 2. Click **Begin — enter fullscreen**; **the timer starts now**. (You can also *Enter answers first*.)
 3. Answer with the mouse or the keyboard **`A` `B` `C` `D`** (choice questions); **multi** questions toggle several
    options and **fill-in-the-blank** questions take typed text; use **`←` `→`** to move; the bottom palette jumps
@@ -295,6 +296,8 @@ Both tabs share the same toolbar and right-hand editor:
 ### 8. Settings (name / analysis template / LLM / fallback / vocabulary / word tests)
 
 **Not required for anything except AI explain / word-test AI grading.** Open **Settings** (`/settings`) from the sidebar:
+
+**Language** — switch the whole interface between English and 中文 (default English; exam content and your own notes are never translated).
 
 1. **Your name** — used on the review notebook cover;
 2. **Analysis template** — Markdown pre-filled into every empty analysis page (never overwrites an existing

@@ -12,6 +12,7 @@ import RichText from "../components/RichText";
 import { SubjectBadge } from "../components/SubjectControls";
 import { SlidingTabs } from "../components/ui";
 import { sectionLabel } from "../lib/sections";
+import { useI18n } from "../lib/i18n";
 
 type Collection = "mistakes" | "starred";
 type SortOrder = "newest" | "oldest";
@@ -23,14 +24,14 @@ function errText(err: unknown): string {
 }
 
 /** SQLite stores `datetime('now')` as "YYYY-MM-DD HH:MM:SS" in UTC. */
-function formatWhen(value: string | null): string {
+function formatWhen(value: string | null, locale: string): string {
   if (!value) return "";
   const iso = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)
     ? `${value.replace(" ", "T")}Z`
     : value;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -86,7 +87,8 @@ function ReviewRow({
   onSelect: () => void;
   onToggleStar: () => void;
 }) {
-  const date = formatWhen(itemDate(item));
+  const { t, locale } = useI18n();
+  const date = formatWhen(itemDate(item), locale);
   const status =
     item.is_correct === false
       ? "bg-red-500"
@@ -110,10 +112,10 @@ function ReviewRow({
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-sm font-semibold text-slate-800">
-              Question {item.no}
+              {t("Question {number}", { number: item.no })}
             </span>
             <span className="text-[11px] text-slate-400">
-              {sectionLabel(item.sec)}
+              {t(sectionLabel(item.sec))}
               {item.source ? ` · ${item.source}` : ""}
             </span>
             {item.subject && <SubjectBadge subject={item.subject} />}
@@ -126,9 +128,9 @@ function ReviewRow({
             {item.stem}
           </span>
           <span className="mt-1 block text-[11px] text-slate-400">
-            Correct: {answerText(item, item.answers)}
+            {t("Correct: {answer}", { answer: answerText(item, item.answers) })}
             {item.chosen_answers.length > 0 && (
-              <> · Yours: {answerText(item, item.chosen_answers)}</>
+              <> · {t("Yours: {answer}", { answer: answerText(item, item.chosen_answers) })}</>
             )}
           </span>
         </span>
@@ -136,9 +138,13 @@ function ReviewRow({
       <button
         type="button"
         onClick={onToggleStar}
-        aria-label={`${item.starred ? "Unstar" : "Star"} question ${item.no}`}
+        aria-label={
+          item.starred
+            ? t("Unstar question {number}", { number: item.no })
+            : t("Star question {number}", { number: item.no })
+        }
         aria-pressed={item.starred}
-        title={item.starred ? "Remove from Starred" : "Add to Starred"}
+        title={item.starred ? t("Remove from Starred") : t("Add to Starred")}
         className={`h-8 shrink-0 self-start rounded-md border px-2 text-sm ${
           item.starred
             ? "border-amber-300 bg-amber-100 text-amber-800"
@@ -153,6 +159,7 @@ function ReviewRow({
 
 /** Mistakes + starred questions, with the shared analysis editor on the right. */
 export default function MistakesPage() {
+  const { t, locale } = useI18n();
   const [tab, setTab] = useState<Collection>("mistakes");
   const [data, setData] = useState<Record<Collection, ReviewItem[] | null>>({
     mistakes: null,
@@ -284,35 +291,35 @@ export default function MistakesPage() {
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-            Review
+            {t("Review")}
           </p>
           <h1 className="mt-2 font-display text-3xl tracking-tight sm:text-4xl">
-            Review sets
+            {t("Review sets")}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Your latest wrong answers and the questions you starred, across every
-            attempt. Read or write the analysis here — it is the same notebook as the
-            review workspace.
+            {t(
+              "Your latest wrong answers and the questions you starred, across every attempt. Read or write the analysis here — it is the same notebook as the review workspace.",
+            )}
           </p>
         </div>
         <Link to="/" className="text-sm text-blue-700 underline underline-offset-4">
-          Pick an exam
+          {t("Pick an exam")}
         </Link>
       </header>
 
       <div className="mt-4">
         <SlidingTabs
-          ariaLabel="Review sets"
+          ariaLabel={t("Review sets")}
           tabs={[
             {
               key: "mistakes",
-              label: `Mistakes${
+              label: `${t("Mistakes")}${
                 data.mistakes ? ` (${data.mistakes.length})` : ""
               }`,
             },
             {
               key: "starred",
-              label: `Starred${data.starred ? ` (${data.starred.length})` : ""}`,
+              label: `${t("Starred")}${data.starred ? ` (${data.starred.length})` : ""}`,
             },
           ]}
           activeKey={tab}
@@ -325,17 +332,17 @@ export default function MistakesPage() {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search papers, stems and options…"
-          aria-label="Search review sets"
+          placeholder={t("Search papers, stems and options…")}
+          aria-label={t("Search review sets")}
           className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none sm:max-w-sm"
         />
         <select
           value={exam}
           onChange={(event) => setExam(event.target.value)}
-          aria-label="Filter by exam"
+          aria-label={t("Filter by exam")}
           className="max-w-[16rem] rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm focus:border-blue-400 focus:outline-none"
         >
-          <option value="all">All exams</option>
+          <option value="all">{t("All exams")}</option>
           {exams.map(([id, title]) => (
             <option key={id} value={id}>
               {title}
@@ -347,7 +354,7 @@ export default function MistakesPage() {
           onClick={() => setSort((current) => (current === "newest" ? "oldest" : "newest"))}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
         >
-          {sort === "newest" ? "Newest first" : "Oldest first"}
+          {sort === "newest" ? t("Newest first") : t("Oldest first")}
         </button>
       </div>
 
@@ -365,16 +372,22 @@ export default function MistakesPage() {
             }}
             className="rounded-md border border-red-300 px-2.5 py-1 text-xs font-medium hover:bg-red-100"
           >
-            Try again
+            {t("Try again")}
           </button>
         </div>
       )}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <section aria-label={tab === "mistakes" ? "Mistakes" : "Starred questions"}>
+        <section
+          aria-label={
+            tab === "mistakes" ? t("Mistakes") : t("Starred questions")
+          }
+        >
           {loading && data[tab] === null && !error && (
             <p className="rounded-xl border bg-white px-4 py-8 text-center text-sm text-slate-500">
-              Loading {tab === "mistakes" ? "mistakes" : "starred questions"}…
+              {tab === "mistakes"
+                ? t("Loading mistakes…")
+                : t("Loading starred questions…")}
             </p>
           )}
 
@@ -383,16 +396,20 @@ export default function MistakesPage() {
               <p className="font-display text-2xl tracking-tight text-slate-700">
                 {items.length === 0
                   ? tab === "mistakes"
-                    ? "No mistakes yet."
-                    : "No starred questions yet."
-                  : "No questions match."}
+                    ? t("No mistakes yet.")
+                    : t("No starred questions yet.")
+                  : t("No questions match.")}
               </p>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
                 {items.length === 0
                   ? tab === "mistakes"
-                    ? "Submit an attempt and every wrong answer will collect here."
-                    : "Tap ☆ Star while practising or reviewing to build this set."
-                  : "Try a different search or exam filter."}
+                    ? t(
+                        "Submit an attempt and every wrong answer will collect here.",
+                      )
+                    : t(
+                        "Tap ☆ Star while practising or reviewing to build this set.",
+                      )
+                  : t("Try a different search or exam filter.")}
               </p>
             </div>
           )}
@@ -425,14 +442,14 @@ export default function MistakesPage() {
                     to={`/session/${selected.session_id}/result`}
                     className="text-xs text-blue-700 underline underline-offset-4"
                   >
-                    Open attempt
+                    {t("Open attempt")}
                   </Link>
                 )}
                 <Link
                   to={`/doc/${selected.document_id}/practice`}
                   className="text-xs text-slate-500 underline underline-offset-4"
                 >
-                  Practice
+                  {t("Practice")}
                 </Link>
               </div>
 
@@ -454,7 +471,7 @@ export default function MistakesPage() {
               {others.length > 0 && (
                 <div className="max-h-52 overflow-y-auto border-t border-slate-200 bg-slate-50 px-4 py-3">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    Earlier analyses
+                    {t("Earlier analyses")}
                   </p>
                   <div className="mt-2 space-y-2">
                     {others.map((entry, index) => (
@@ -463,8 +480,12 @@ export default function MistakesPage() {
                         className="rounded-lg border bg-white px-3 py-2 text-sm"
                       >
                         <p className="text-[10px] uppercase tracking-wide text-slate-400">
-                          {entry.source === "legacy" ? "Legacy analysis" : "Saved analysis"}
-                          {entry.updated_at ? ` · ${formatWhen(entry.updated_at)}` : ""}
+                          {entry.source === "legacy"
+                            ? t("Legacy analysis")
+                            : t("Saved analysis")}
+                          {entry.updated_at
+                            ? ` · ${formatWhen(entry.updated_at, locale)}`
+                            : ""}
                         </p>
                         <div className="mt-1">
                           <RichText text={entry.content} docId={selected.document_id} breaks />
@@ -479,10 +500,10 @@ export default function MistakesPage() {
             <div className="grid min-h-[24rem] place-items-center rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 text-center">
               <div>
                 <p className="font-display text-xl tracking-tight text-slate-600">
-                  Pick a question
+                  {t("Pick a question")}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">
-                  Its question, answers and analysis will open here.
+                  {t("Its question, answers and analysis will open here.")}
                 </p>
               </div>
             </div>

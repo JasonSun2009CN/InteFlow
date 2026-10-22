@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BookOpen, FileQuestion, NotebookPen, Sparkles, type LucideIcon } from "lucide-react";
 import type { WorkspaceTool } from "./usePersistentLayout";
+import { useT } from "../../lib/i18n";
 
 export const TOOLS: { id: WorkspaceTool; label: string; Icon: LucideIcon }[] = [
   { id: "question", label: "Question", Icon: FileQuestion },
@@ -9,8 +10,12 @@ export const TOOLS: { id: WorkspaceTool; label: string; Icon: LucideIcon }[] = [
   { id: "vocabulary", label: "Vocabulary", Icon: BookOpen },
 ];
 
-export function toolLabel(tool: WorkspaceTool): string {
-  return TOOLS.find((entry) => entry.id === tool)?.label ?? tool;
+export function toolLabel(
+  tool: WorkspaceTool,
+  t: (source: string, vars?: Record<string, string | number>) => string = (source) =>
+    source,
+): string {
+  return t(TOOLS.find((entry) => entry.id === tool)?.label ?? tool);
 }
 
 interface Props {
@@ -29,16 +34,19 @@ interface Props {
  * swaps the two sides.
  */
 export default function WorkspacePane({ side, tool, otherTool, onChoose, children }: Props) {
+  const t = useT();
   return (
     <section
       data-testid={`${side}-pane`}
       data-tool={tool}
-      aria-label={`${toolLabel(tool)} pane`}
+      aria-label={t("{tool} pane", { tool: toolLabel(tool, t) })}
       className="flex h-full min-h-0 min-w-0 flex-col bg-white"
     >
       <div
         role="group"
-        aria-label={`Switch ${side} pane`}
+        aria-label={t("Switch {side} pane", {
+          side: side === "left" ? t("left") : t("right"),
+        })}
         className="flex shrink-0 items-center gap-1 border-b border-slate-200 bg-slate-50 px-1.5 py-1"
       >
         {TOOLS.map(({ id, label, Icon }) => {
@@ -52,8 +60,10 @@ export default function WorkspacePane({ side, tool, otherTool, onChoose, childre
               aria-pressed={active}
               title={
                 elsewhere
-                  ? `${label} is on the other side — click to swap panes`
-                  : label
+                  ? t("{tool} is on the other side — click to swap panes", {
+                      tool: t(label),
+                    })
+                  : t(label)
               }
               className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors ${
                 active
@@ -64,7 +74,7 @@ export default function WorkspacePane({ side, tool, otherTool, onChoose, childre
               }`}
             >
               <Icon size={14} aria-hidden="true" focusable="false" className="shrink-0" />
-              <span className="truncate">{label}</span>
+              <span className="truncate">{t(label)}</span>
             </button>
           );
         })}

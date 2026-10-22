@@ -15,12 +15,14 @@ import LibraryList from "../components/LibraryList";
 import IfmdTemplate from "../components/IfmdTemplate";
 import { SubjectFilterBar, SubjectManager } from "../components/SubjectControls";
 import type { SubjectFilterValue } from "../lib/subjects";
+import { useI18n } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
 }
 
 export default function ImportPage() {
+  const { t } = useI18n();
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [banks, setBanks] = useState<BuiltinBank[] | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -110,7 +112,7 @@ export default function ImportPage() {
       ) {
         if (++polls > 2000) {
           // 10 minutes — the job keeps running server-side; tell the user.
-          throw new Error("Conversion is taking too long — reload the page to check its status.");
+          throw new Error(t("Conversion is taking too long — reload the page to check its status."));
         }
         await new Promise((resolve) => setTimeout(resolve, 300));
         current = await api.getImport(current.id);
@@ -199,7 +201,14 @@ export default function ImportPage() {
   }
 
   async function onDelete(doc: DocumentSummary) {
-    if (!window.confirm(`Delete "${doc.title}" and its ${doc.question_count} questions?`)) return;
+    if (
+      !window.confirm(
+        t("Delete “{title}” and all its questions, answers and analyses?", {
+          title: doc.title,
+        }),
+      )
+    )
+      return;
     try {
       await api.deleteDocument(doc.id);
       if (imported?.id === doc.id) setImported(null);
@@ -246,13 +255,13 @@ export default function ImportPage() {
     <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
       <header className="mb-8 max-w-3xl">
         <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-          Question bank
+          {t("Question bank")}
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Library</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t("Library")}</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Import a question bank (PDF, Word <code className="rounded bg-slate-200 px-1">.docx</code>, or{" "}
-          <code className="rounded bg-slate-200 px-1">.ifmd.md</code>), fill in the answers,
-          then practice in an exam-style UI.
+          {t(
+            "Import a question bank (PDF, Word .docx, or .ifmd.md), fill in the answers, then practice in an exam-style UI.",
+          )}
         </p>
       </header>
 
@@ -263,28 +272,30 @@ export default function ImportPage() {
       )}
 
       <section className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold">Import a document</h2>
+        <h2 className="text-lg font-semibold">{t("Import a document")}</h2>
         <p className="mt-1 text-sm text-slate-600">
-          PDFs and Word <code className="rounded bg-slate-200 px-1">.docx</code> files are converted
-          locally to InteFlow-MD — no tokens, no cloud. Questions must be numbered
-          ({"1."}, {"2."}, …) with two or more labelled options each.
+          {t(
+            "PDFs and Word .docx files are converted locally to InteFlow-MD — no tokens, no cloud. Questions must be numbered (1., 2., …) with two or more labelled options each.",
+          )}
         </p>
         {ocr !== null &&
           (ocr.length > 0 ? (
             <p className="mt-2 text-sm text-slate-500">
-              Scanned PDFs are read locally with OCR ({ocr.join(", ")}).
+              {t("Scanned PDFs are read locally with OCR ({engines}).", {
+                engines: ocr.join(", "),
+              })}
             </p>
           ) : (
             <p className="mt-2 text-sm text-amber-700">
-              Scanned (image-only) PDFs need OCR: install{" "}
-              <code className="rounded bg-amber-100 px-1">tesseract</code> on any OS, or{" "}
-              <code className="rounded bg-amber-100 px-1">pyobjc-framework-Vision</code> on macOS.
+              {t(
+                "Scanned (image-only) PDFs need OCR: install tesseract on any OS, or pyobjc-framework-Vision on macOS.",
+              )}
             </p>
           ))}
 
         <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
           <label className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-slate-600">
-            <span>Subject for this import</span>
+            <span>{t("Subject for this import")}</span>
             <select
               value={importSubjectId}
               onChange={(event) =>
@@ -294,7 +305,7 @@ export default function ImportPage() {
               }
               className="max-w-[16rem] rounded-md border border-slate-300 bg-white px-2 py-1 text-sm focus:border-blue-400 focus:outline-none"
             >
-              <option value="">No subject</option>
+              <option value="">{t("No subject")}</option>
               {subjects.map((subject) => (
                 <option key={subject.id} value={subject.id}>
                   {subject.name}
@@ -307,7 +318,7 @@ export default function ImportPage() {
             onClick={() => setManagerOpen(true)}
             className="text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
           >
-            Manage subjects
+            {t("Manage subjects")}
           </button>
         </div>
 
@@ -324,14 +335,14 @@ export default function ImportPage() {
           }
         >
           <p className="text-sm text-slate-600">
-            Drag a file here, or{" "}
+            {t("Drag a file here, or")}{" "}
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
               className="font-medium text-blue-700 underline hover:text-blue-800 disabled:opacity-50"
             >
-              choose a file
+              {t("choose a file")}
             </button>
             .
           </p>
@@ -344,7 +355,7 @@ export default function ImportPage() {
             disabled={busy}
             onChange={onFile}
           />
-          {busy && <p className="mt-3 text-sm text-slate-500">Converting…</p>}
+          {busy && <p className="mt-3 text-sm text-slate-500">{t("Converting…")}</p>}
         </div>
 
         <IfmdTemplate />
@@ -366,9 +377,16 @@ export default function ImportPage() {
             <div>
               <h2 className="text-lg font-semibold text-emerald-900">{imported.title}</h2>
               <p className="text-sm text-emerald-800">
-                {imported.question_count} questions imported from {imported.source_filename} ·
-                answers: {imported.answers_status}
-                {imported.needs_answers && ` · ${imported.answered_count}/${imported.question_count} filled`}
+                {t("{count} questions imported from {file} · answers: {status}", {
+                  count: imported.question_count,
+                  file: imported.source_filename,
+                  status: t(imported.answers_status),
+                })}
+                {imported.needs_answers &&
+                  t(" · {answered}/{total} filled", {
+                    answered: imported.answered_count,
+                    total: imported.question_count,
+                  })}
               </p>
             </div>
             <div className="flex gap-2">
@@ -377,14 +395,14 @@ export default function ImportPage() {
                   to={`/doc/${imported.id}/answers`}
                   className="rounded-lg bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600"
                 >
-                  Enter answers
+                  {t("Enter answers")}
                 </Link>
               )}
               <Link
                 to={`/doc/${imported.id}/practice`}
                 className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
               >
-                Start practice
+                {t("Start practice")}
               </Link>
             </div>
           </div>
@@ -400,7 +418,7 @@ export default function ImportPage() {
       )}
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold">Your exams</h2>
+        <h2 className="text-lg font-semibold">{t("Your exams")}</h2>
 
         {docs && docs.length > 0 && (
           <div className="mt-3">
@@ -415,13 +433,13 @@ export default function ImportPage() {
           </div>
         )}
 
-        {docs === null && <p className="mt-3 text-sm text-slate-500">Loading…</p>}
+        {docs === null && <p className="mt-3 text-sm text-slate-500">{t("Loading…")}</p>}
         {docs?.length === 0 && (
-          <p className="mt-3 text-sm text-slate-500">Nothing imported yet.</p>
+          <p className="mt-3 text-sm text-slate-500">{t("Nothing imported yet.")}</p>
         )}
         {docs && docs.length > 0 && filteredDocs.length === 0 && (
           <p className="mt-3 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
-            No exams in this subject yet.
+            {t("No exams in this subject yet.")}
           </p>
         )}
         <div className="mt-3">

@@ -6,14 +6,16 @@ import {
   type ProbeResult,
   type ProviderInfo,
 } from "../api/client";
-import { Button, ThemePicker } from "../components/ui";
+import { Button, LanguagePicker, ThemePicker } from "../components/ui";
 import CustomDictionaryManager from "../components/CustomDictionaryManager";
+import { useI18n } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
 }
 
 export default function SettingsPage() {
+  const { t } = useI18n();
   const [provider, setProvider] = useState("orcarouter");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -92,7 +94,7 @@ export default function SettingsPage() {
       });
       setStored(saved);
       setApiKey("");
-      setMessage({ kind: "ok", text: "Settings saved." });
+      setMessage({ kind: "ok", text: t("Settings saved.") });
     } catch (err) {
       setMessage({ kind: "err", text: errText(err) });
     } finally {
@@ -127,7 +129,7 @@ export default function SettingsPage() {
       const saved = await api.saveSettings({ clear_key: true });
       setStored(saved);
       setApiKey("");
-      setMessage({ kind: "ok", text: "API key removed." });
+      setMessage({ kind: "ok", text: t("API key removed.") });
     } catch (err) {
       setMessage({ kind: "err", text: errText(err) });
     } finally {
@@ -143,13 +145,13 @@ export default function SettingsPage() {
     <div className="mx-auto w-full max-w-2xl px-6 py-10 sm:py-14">
       <header className="mb-6">
         <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-          Workspace
+          {t("Workspace")}
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Settings</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t("Settings")}</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Configure the LLM API used for on-demand explanations and import fallback.
-          Everything is stored locally; the key never leaves this machine except to call
-          the provider you name below.
+          {t(
+            "Configure the LLM API used for on-demand explanations and import fallback. Everything is stored locally; the key never leaves this machine except to call the provider you name below.",
+          )}
         </p>
       </header>
 
@@ -169,49 +171,50 @@ export default function SettingsPage() {
         <ThemePicker />
       </div>
 
+      <div className="mb-5">
+        <LanguagePicker />
+      </div>
+
       <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div>
           <label className={label} htmlFor="user-name">
-            Your name
+            {t("Your name")}
           </label>
           <input
             id="user-name"
             className={input}
             value={userName}
-            placeholder="Printed on page 1 of every exported notebook"
+            placeholder={t("Printed on page 1 of every exported notebook")}
             onChange={(e) => setUserName(e.target.value)}
           />
           <p className="mt-1 text-xs text-slate-500">
-            Used as the cover-page name when you export an analysis notebook.
+            {t("Used as the cover-page name when you export an analysis notebook.")}
           </p>
         </div>
 
         <div>
           <label className={label} htmlFor="analysis-template">
-            Analysis template
+            {t("Analysis template")}
           </label>
           <textarea
             id="analysis-template"
             className={input + " min-h-[10rem] resize-y font-mono text-[13px] leading-6"}
             value={analysisTemplate}
-            placeholder={
-              "**Why the correct answer works**\n\n" +
-              "**Why I picked mine**\n\n" +
-              "**Takeaway**\n"
-            }
+            placeholder={t(
+              "**Why the correct answer works**\n\n**Why I picked mine**\n\n**Takeaway**\n",
+            )}
             onChange={(e) => setAnalysisTemplate(e.target.value)}
           />
           <p className="mt-1 text-xs text-slate-500">
-            Pre-filled into every empty analysis page (wrong answers, starred questions
-            and the review workspace). Markdown is supported. An existing analysis is
-            never overwritten, and the template itself is only saved once you start
-            editing the page.
+            {t(
+              "Pre-filled into every empty analysis page (wrong answers, starred questions and the review workspace). Markdown is supported. An existing analysis is never overwritten, and the template itself is only saved once you start editing the page.",
+            )}
           </p>
         </div>
 
         <div>
           <label className={label} htmlFor="provider">
-            Provider
+            {t("Provider")}
           </label>
           <select
             id="provider"
@@ -219,7 +222,7 @@ export default function SettingsPage() {
             value={provider}
             onChange={(e) => onProviderChange(e.target.value)}
           >
-            {!providersLoaded && <option value={provider}>Loading providers…</option>}
+            {!providersLoaded && <option value={provider}>{t("Loading providers…")}</option>}
             {providers.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -229,15 +232,19 @@ export default function SettingsPage() {
           {currentPreset && (
             <p className="mt-1 text-xs text-slate-500">
               {currentPreset.protocol === "anthropic"
-                ? "A provider is the service; this one speaks the Anthropic Messages protocol (x-api-key auth)."
-                : "A provider is the service; this one speaks the OpenAI-compatible protocol (chat/completions, Bearer auth)."}
+                ? t(
+                    "A provider is the service; this one speaks the Anthropic Messages protocol (x-api-key auth).",
+                  )
+                : t(
+                    "A provider is the service; this one speaks the OpenAI-compatible protocol (chat/completions, Bearer auth).",
+                  )}
             </p>
           )}
         </div>
 
         <div>
           <label className={label} htmlFor="base-url">
-            Base URL
+            {t("Base URL")}
           </label>
           <input
             id="base-url"
@@ -250,15 +257,14 @@ export default function SettingsPage() {
             <p className="mt-1 text-xs text-slate-500">{currentPreset.note}</p>
           ) : (
             <p className="mt-1 text-xs text-slate-500">
-              OpenAI-compatible proxies work too — point this at any{" "}
-              <code className="rounded bg-slate-100 px-1">…/v1</code> endpoint.
+              {t("OpenAI-compatible proxies work too — point this at any …/v1 endpoint.")}
             </p>
           )}
         </div>
 
         <div>
           <label className={label} htmlFor="api-key">
-            API Key
+            {t("API Key")}
           </label>
           <div className="flex gap-2">
             <input
@@ -269,7 +275,9 @@ export default function SettingsPage() {
               value={apiKey}
               placeholder={
                 stored?.api_key_set
-                  ? `Stored: ${stored.api_key_masked} — leave blank to keep`
+                  ? t("Stored: {masked} — leave blank to keep", {
+                      masked: stored.api_key_masked,
+                    })
                   : "sk-…"
               }
               onChange={(e) => setApiKey(e.target.value)}
@@ -281,18 +289,18 @@ export default function SettingsPage() {
                 disabled={busy !== null}
                 className="btn shrink-0 rounded-md border border-red-300 px-3 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
               >
-                Remove
+                {t("Remove")}
               </button>
             )}
           </div>
           <p className="mt-1 text-xs text-slate-500">
-            Saved keys are shown masked and are never sent back to the browser.
+            {t("Saved keys are shown masked and are never sent back to the browser.")}
           </p>
         </div>
 
         <div>
           <label className={label} htmlFor="model">
-            Model
+            {t("Model")}
           </label>
           <input
             id="model"
@@ -320,21 +328,19 @@ export default function SettingsPage() {
             />
             <span>
               <span className="block text-sm font-medium text-slate-800">
-                AI recognition fallback
+                {t("AI recognition fallback")}
               </span>
               <span className="mt-1 block text-xs leading-5 text-slate-600">
-                When a PDF or DOCX cannot be parsed by the built-in layout rules, let the
-                configured model label the questions instead. It only reads text that was
-                already extracted, never rewrites it, and costs tokens — turn it off to keep
-                imports fully offline. When the source prints no choices, the question is
-                imported as a fill-in-the-blank instead.
+                {t(
+                  "When a PDF or DOCX cannot be parsed by the built-in layout rules, let the configured model label the questions instead. It only reads text that was already extracted, never rewrites it, and costs tokens — turn it off to keep imports fully offline. When the source prints no choices, the question is imported as a fill-in-the-blank instead.",
+                )}
               </span>
             </span>
           </label>
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-800">Vocabulary</p>
+          <p className="text-sm font-medium text-slate-800">{t("Vocabulary")}</p>
           <div className="mt-3 space-y-3">
             <label className="flex items-start gap-3" htmlFor="vocab-ai-sense">
               <input
@@ -346,12 +352,12 @@ export default function SettingsPage() {
               />
               <span>
                 <span className="block text-sm font-medium text-slate-800">
-                  AI sense matching
+                  {t("AI sense matching")}
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-slate-600">
-                  When you drag a word into the Vocabulary pane, ask the configured model
-                  to choose the Merriam-Webster sense that fits the sentence. Turn this
-                  off to use the first sense every time with no token cost.
+                  {t(
+                    "When you drag a word into the Vocabulary pane, ask the configured model to choose the Merriam-Webster sense that fits the sentence. Turn this off to use the first sense every time with no token cost.",
+                  )}
                 </span>
               </span>
             </label>
@@ -366,14 +372,12 @@ export default function SettingsPage() {
               />
               <span>
                 <span className="block text-sm font-medium text-slate-800">
-                  Definition for English Learners
+                  {t("Definition for English Learners")}
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-slate-600">
-                  When the local Merriam-Webster entry includes its{" "}
-                  <em>Definition for English Learners</em> section (usually harder
-                  words), use that simpler definition first. Entries without the section
-                  fall back to the ordinary definition. This is part of the same
-                  dictionary — no extra file and no tokens.
+                  {t(
+                    "When the local Merriam-Webster entry includes its Definition for English Learners section (usually harder words), use that simpler definition first. Entries without the section fall back to the ordinary definition. This is part of the same dictionary — no extra file and no tokens.",
+                  )}
                 </span>
               </span>
             </label>
@@ -382,7 +386,7 @@ export default function SettingsPage() {
               <input
                 id="custom-dictionary"
                 type="checkbox"
-                aria-label="Use my dictionary first"
+                aria-label={t("Use my dictionary first")}
                 checked={customDictionary}
                 onChange={(e) => setCustomDictionary(e.target.checked)}
                 className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
@@ -392,19 +396,19 @@ export default function SettingsPage() {
                   htmlFor="custom-dictionary"
                   className="block text-sm font-medium text-slate-800"
                 >
-                  Use my dictionary first
+                  {t("Use my dictionary first")}
                 </label>
                 <span className="mt-1 block text-xs leading-5 text-slate-600">
-                  Check your own words before Merriam-Webster. If a word is missing,
-                  lookup falls back to the local MW dictionary. Import CSV / TSV / JSON /
-                  TXT, or add words by hand.
+                  {t(
+                    "Check your own words before Merriam-Webster. If a word is missing, lookup falls back to the local MW dictionary. Import CSV / TSV / JSON / TXT, or add words by hand.",
+                  )}
                 </span>
                 <button
                   type="button"
                   onClick={() => setCustomOpen(true)}
                   className="mt-2 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-slate-50"
                 >
-                  Manage my dictionary
+                  {t("Manage my dictionary")}
                 </button>
               </span>
             </div>
@@ -419,14 +423,12 @@ export default function SettingsPage() {
               />
               <span>
                 <span className="block text-sm font-medium text-slate-800">
-                  AI grading for word tests
+                  {t("AI grading for word tests")}
                 </span>
                 <span className="mt-1 block text-xs leading-5 text-slate-600">
-                  When you submit a word test, ask the configured model to grade both
-                  directions. It receives the word-list meaning and Merriam-Webster
-                  references and is instructed to be strict. Turn this off to grade
-                  locally with no token cost. A failed or missing model falls back to
-                  local grading automatically.
+                  {t(
+                    "When you submit a word test, ask the configured model to grade both directions. It receives the word-list meaning and Merriam-Webster references and is instructed to be strict. Turn this off to grade locally with no token cost. A failed or missing model falls back to local grading automatically.",
+                  )}
                 </span>
               </span>
             </label>
@@ -435,7 +437,7 @@ export default function SettingsPage() {
 
         <div className="flex gap-3 pt-1">
           <Button type="button" onClick={() => void onSave()} disabled={busy !== null}>
-            {busy === "save" ? "Saving…" : "Save settings"}
+            {busy === "save" ? t("Saving…") : t("Save settings")}
           </Button>
           <Button
             type="button"
@@ -443,7 +445,7 @@ export default function SettingsPage() {
             onClick={() => void onTest()}
             disabled={busy !== null}
           >
-            {busy === "test" ? "Testing…" : "Test connection"}
+            {busy === "test" ? t("Testing…") : t("Test connection")}
           </Button>
         </div>
 

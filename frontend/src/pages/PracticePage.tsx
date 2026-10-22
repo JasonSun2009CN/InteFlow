@@ -1,8 +1,62 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, ApiError, type QuizQuestion, type StartResponse } from "../api/client";
+import {
+  api,
+  ApiError,
+  type QuizQuestion,
+  type StartResponse,
+  type TimerMode,
+  type TimerPreference,
+} from "../api/client";
 import RichText from "../components/RichText";
 import { sectionLabel } from "../lib/sections";
+import { useI18n } from "../lib/i18n";
+
+/** Last timer choice, remembered per paper and globally for docs without a record. */
+const TIMER_STORAGE_KEY = "inteflow.practice.timer";
+
+interface StoredTimer {
+  mode: TimerMode;
+  seconds: number | null;
+}
+
+function readStoredTimer(docId: number): StoredTimer | null {
+  try {
+    const raw =
+      window.localStorage.getItem(`${TIMER_STORAGE_KEY}.${docId}`) ??
+      window.localStorage.getItem(TIMER_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredTimer>;
+    if (parsed.mode !== "countup" && parsed.mode !== "countdown") return null;
+    return {
+      mode: parsed.mode,
+      seconds:
+        typeof parsed.seconds === "number" && parsed.seconds > 0
+          ? parsed.seconds
+          : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredTimer(docId: number, timer: StoredTimer): void {
+  try {
+    // Keep the last countdown length even when this attempt counts up, so a
+    // later switch back to countdown starts from the familiar value.
+    const previous = readStoredTimer(docId);
+    const raw = JSON.stringify({
+      mode: timer.mode,
+      seconds: timer.seconds ?? previous?.seconds ?? null,
+    } satisfies StoredTimer);
+    window.localStorage.setItem(`${TIMER_STORAGE_KEY}.${docId}`, raw);
+    window.localStorage.setItem(TIMER_STORAGE_KEY, raw);
+  } catch {
+    /* private mode / disabled storage: the backend still remembers the choice */
+  }
+}
+
+const MAX_COUNTDOWN_MINUTES = 24 * 60;
 
 function optionParts(option: string): { letter: string; text: string } {
   const m = /^([A-Z])[.)]\s*([\s\S]*)$/.exec(option.trim());
@@ -28,6 +82,7 @@ export default function PracticePage() {
   const { id } = useParams();
   const docId = Number(id);
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [session, setSession] = useState<StartResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
@@ -35,9 +90,21 @@ export default function PracticePage() {
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [marked, setMarked] = useState<Set<number>>(new Set());
   const [seconds, setSeconds] = useState(0);
+  const [timerMode, setTimerMode] = useState<TimerMode>("countup");
+  const [countdownMin, setCountdownMin] = useState(30);
+  const [countdownSec, setCountdownSec] = useState(0);
+  const [timerPref, setTimerPref] = useState<TimerPreference | null>(null);
+  const [timeUp, setTimeUp] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const answersRef = useRef<Record<number, string[]>>({});
+  answersRef.current = answers;
+  const submittingRef = useRef(false);
+  const autoSubmittedRef = useRef(false);
+  const enteredRef = useRef(false);
+  const timerTouchedRef = useRef(false);
 
   // React 18 StrictMode double-invokes effects in dev (setup -> cleanup ->
   // setup). The backend session is a real side effect that cleanup cannot
@@ -59,6 +126,11 @@ export default function PracticePage() {
     setAnswers({});
     setMarked(new Set());
     setSeconds(0);
+    setTimeUp(false);
+    autoSubmittedRef.current = false;
+    submittingRef.current = false;
+    enteredRef.current = false;
+    timerTouchedRef.current = false;
     setError(null);
     if (startedFor.current === docId) return undefined; // strict-mode re-run
 
@@ -106,6 +178,50 @@ export default function PracticePage() {
     };
   }, [docId]);
 
+  // Preselect the clock from this paper's last submitted attempt, then from
+  // the last attempt anywhere. localStorage is the offline fallback.
+  useEffect(() => {
+    let cancelled = false;
+
+    function apply(timer: StoredTimer) {
+      if (timerTouchedRef.current) return;
+      setTimerMode(timer.mode);
+      if (timer.seconds && timer.seconds > 0) {
+        const total = Math.min(
+          Math.floor(timer.seconds),
+          MAX_COUNTDOWN_MINUTES * 60,
+        );
+        setCountdownMin(Math.floor(total / 60));
+        setCountdownSec(total % 60);
+      }
+    }
+
+    api
+      .getTimerPreference(docId)
+      .then((preference) => {
+        if (cancelled || enteredRef.current) return;
+        setTimerPref(preference);
+        const stored = readStoredTimer(docId);
+        if (preference.source !== "none") {
+          apply({
+            mode: preference.mode,
+            seconds: preference.seconds ?? stored?.seconds ?? null,
+          });
+        } else if (stored) {
+          apply(stored);
+        }
+      })
+      .catch(() => {
+        if (cancelled || enteredRef.current) return;
+        const stored = readStoredTimer(docId);
+        if (stored) apply(stored);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [docId]);
+
   // leave fullscreen when the exam ends or the page unmounts
   useEffect(
     () => () => {
@@ -124,6 +240,8 @@ export default function PracticePage() {
   const current: QuizQuestion | undefined = questions[idx];
   const answered = Object.keys(answers).length;
   const last = idx === questions.length - 1;
+  const countdownTotal =
+    timerMode === "countdown" ? countdownMin * 60 + countdownSec : null;
 
   /** Choice: single-select replaces, multi-select toggles. */
   function choose(q: QuizQuestion, letter: string) {
@@ -169,14 +287,15 @@ export default function PracticePage() {
   }
 
   async function doSubmit() {
-    if (!session) return;
+    if (!session || submittingRef.current) return;
+    submittingRef.current = true;
     setSubmitting(true);
     setError(null);
     try {
       const res = await api.submit(
         session.session_id,
         Object.fromEntries(
-          Object.entries(answers).filter(([, v]) => v.length > 0),
+          Object.entries(answersRef.current).filter(([, v]) => v.length > 0),
         ),
       );
       submittedRef.current = true;
@@ -192,8 +311,20 @@ export default function PracticePage() {
       setError(errText(err));
       setConfirming(false);
       setSubmitting(false);
+      submittingRef.current = false;
     }
   }
+
+  // Countdown expiry: grade whatever is on the paper and leave the exam.
+  useEffect(() => {
+    if (!session || !entered || countdownTotal === null) return;
+    if (seconds < countdownTotal || autoSubmittedRef.current) return;
+    autoSubmittedRef.current = true;
+    setTimeUp(true);
+    void doSubmit();
+    // doSubmit reads the live answers ref, so it is safe to bind once per tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seconds, session, entered, countdownTotal]);
 
   /** Leave mid-exam: the session is abandoned and never listed as an attempt. */
   function leaveExam() {
@@ -202,6 +333,25 @@ export default function PracticePage() {
   }
 
   async function enter() {
+    if (timerMode === "countdown" && (!countdownTotal || countdownTotal <= 0)) {
+      return;
+    }
+    writeStoredTimer(docId, {
+      mode: timerMode,
+      seconds: timerMode === "countdown" ? countdownTotal : null,
+    });
+    enteredRef.current = true;
+    if (session) {
+      void api
+        .setSessionTimer(
+          session.session_id,
+          timerMode,
+          timerMode === "countdown" ? countdownTotal : null,
+        )
+        .catch(() => {
+          /* the local clock still works if saving the preference fails */
+        });
+    }
     try {
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
@@ -240,41 +390,161 @@ export default function PracticePage() {
           {error}
         </div>
         <Link to="/" className="mt-4 inline-block text-blue-700 underline">
-          Back to exams
+          {t("Back to exams")}
         </Link>
       </div>
     );
   }
 
   if (!session) {
-    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">Loading…</div>;
+    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">{t("Loading…")}</div>;
   }
 
   if (!entered) {
+    const countdownInvalid = timerMode === "countdown" && (!countdownTotal || countdownTotal <= 0);
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-100 px-4">
-        <div className="w-full max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Ready to begin
+      <div className="grid min-h-screen place-items-center bg-slate-100 px-4 py-10">
+        <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
+          <div className="text-center">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("Ready to begin")}
+            </div>
+            <h1 className="mt-2 text-2xl font-bold">{session.document.title}</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              {t("{count} questions · choose how the clock runs", {
+                count: session.questions.length,
+              })}
+            </p>
           </div>
-          <h1 className="mt-2 text-2xl font-bold">{session.document.title}</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            {session.questions.length} questions · the timer starts when you enter
-          </p>
+
+          <div className="mt-6">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("Timer")}
+            </div>
+            <div
+              role="group"
+              aria-label={t("Timer mode")}
+              className="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1"
+            >
+              <button
+                type="button"
+                aria-pressed={timerMode === "countup"}
+                onClick={() => {
+                  timerTouchedRef.current = true;
+                  setTimerMode("countup");
+                }}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                  timerMode === "countup"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {t("Count up")}
+              </button>
+              <button
+                type="button"
+                aria-pressed={timerMode === "countdown"}
+                onClick={() => {
+                  timerTouchedRef.current = true;
+                  setTimerMode("countdown");
+                }}
+                className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                  timerMode === "countdown"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {t("Count down")}
+              </button>
+            </div>
+
+            {timerMode === "countdown" && (
+              <div className="mt-3 flex items-end gap-3">
+                <label className="flex-1 text-xs font-medium text-slate-600">
+                  {t("Minutes")}
+                  <input
+                    type="number"
+                    min={0}
+                    max={MAX_COUNTDOWN_MINUTES}
+                    value={countdownMin}
+                    onChange={(event) =>
+                      setCountdownMin(
+                        Math.floor(
+                          Math.max(
+                            0,
+                            Math.min(
+                              MAX_COUNTDOWN_MINUTES,
+                              Number(event.target.value) || 0,
+                            ),
+                          ),
+                        ),
+                      )
+                    }
+                    onFocus={() => {
+                      timerTouchedRef.current = true;
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tabular-nums focus:border-blue-600 focus:outline-none"
+                  />
+                </label>
+                <span className="pb-2 text-lg font-semibold text-slate-400">:</span>
+                <label className="flex-1 text-xs font-medium text-slate-600">
+                  {t("Seconds")}
+                  <input
+                    type="number"
+                    min={0}
+                    max={59}
+                    value={countdownSec}
+                    onChange={(event) =>
+                      setCountdownSec(
+                        Math.floor(
+                          Math.max(0, Math.min(59, Number(event.target.value) || 0)),
+                        ),
+                      )
+                    }
+                    onFocus={() => {
+                      timerTouchedRef.current = true;
+                    }}
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tabular-nums focus:border-blue-600 focus:outline-none"
+                  />
+                </label>
+              </div>
+            )}
+
+            <p className="mt-2 text-xs text-slate-500">
+              {timerMode === "countdown"
+                ? t("When the clock reaches 00:00, your answers are submitted automatically.")
+                : t("The clock counts up from zero; submit whenever you are ready.")}
+            </p>
+            {timerPref?.source === "document" && (
+              <p className="mt-1 text-xs text-slate-500">
+                {t("Default carried over from this paper's last attempt.")}
+              </p>
+            )}
+            {timerPref?.source === "global" && (
+              <p className="mt-1 text-xs text-slate-500">
+                {t("No attempt on this paper yet — defaulted to your last timer.")}
+              </p>
+            )}
+          </div>
+
           <button
-            onClick={enter}
-            className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700"
+            onClick={() => void enter()}
+            disabled={countdownInvalid}
+            className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            Begin — enter fullscreen
+            {t("Begin — enter fullscreen")}
           </button>
           <Link
             to={`/doc/${docId}/answers`}
-            className="mt-4 inline-block text-sm text-blue-700 underline"
+            className="mt-4 block text-center text-sm text-blue-700 underline"
           >
-            Enter answers first (optional)
+            {t("Enter answers first (optional)")}
           </Link>
-          <Link to="/" className="mt-2 block text-sm text-slate-500 underline">
-            Back to exams
+          <Link
+            to="/"
+            className="mt-2 block text-center text-sm text-slate-500 underline"
+          >
+            {t("Back to exams")}
           </Link>
         </div>
       </div>
@@ -282,11 +552,15 @@ export default function PracticePage() {
   }
 
   if (!current) {
-    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">Loading…</div>;
+    return <div className="mx-auto max-w-3xl px-4 py-10 text-slate-500">{t("Loading…")}</div>;
   }
 
   const unanswered = questions.length - answered;
   const material = current.material;
+  const clockValue =
+    timerMode === "countdown" && countdownTotal !== null
+      ? Math.max(0, countdownTotal - seconds)
+      : seconds;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-100">
@@ -295,28 +569,37 @@ export default function PracticePage() {
           <div className="min-w-0">
             <div className="truncate font-semibold">{session.document.title}</div>
             <div className="text-xs text-slate-500">
-              {sectionLabel(current.sec)}
+              {t(sectionLabel(current.sec))}
             </div>
           </div>
           <div className="text-sm text-slate-600">
-            Question <span className="font-semibold text-slate-900">{idx + 1}</span> of{" "}
-            {questions.length}
+            {t("Question {current} of {total}", {
+              current: idx + 1,
+              total: questions.length,
+            })}
           </div>
           <div className="flex items-center gap-3">
-            <span className="rounded-md bg-slate-100 px-2.5 py-1 font-mono text-sm tabular-nums">
-              {clock(seconds)}
+            <span
+              className={`rounded-md px-2.5 py-1 font-mono text-sm tabular-nums ${
+                timerMode === "countdown" && clockValue <= 60
+                  ? "bg-red-50 text-red-700 ring-1 ring-red-200"
+                  : "bg-slate-100"
+              }`}
+              title={timerMode === "countdown" ? t("Time remaining") : t("Time elapsed")}
+            >
+              {clock(clockValue)}
             </span>
             <button
               onClick={() => setLeaving(true)}
               className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
             >
-              Exit
+              {t("Exit")}
             </button>
             <button
               onClick={() => setConfirming(true)}
               className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
             >
-              Submit
+              {t("Submit")}
             </button>
           </div>
         </div>
@@ -328,12 +611,18 @@ export default function PracticePage() {
         </div>
       )}
 
+      {timeUp && (
+        <div className="mx-auto mt-3 max-w-6xl rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+          {t("Time's up — submitting your answers…")}
+        </div>
+      )}
+
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         <div className={material ? "grid gap-4 lg:grid-cols-2" : "mx-auto max-w-3xl"}>
           {material && (
             <aside className="max-h-[70vh] overflow-y-auto rounded-xl border bg-white p-5">
               <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Passage
+                {t("Passage")}
               </div>
               <div className="text-[15px]">
                 <RichText text={material} docId={docId} />
@@ -344,7 +633,7 @@ export default function PracticePage() {
           <section className={`rounded-xl border bg-white p-5 ${material ? "" : "p-6"}`}>
             <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-500">
               <span>
-                Question {current.no ?? idx + 1}
+                {t("Question {number}", { number: current.no ?? idx + 1 })}
                 {current.source ? ` · ${current.source}` : ""}
               </span>
               <button
@@ -355,7 +644,7 @@ export default function PracticePage() {
                     : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                {marked.has(current.id) ? "★ Starred" : "☆ Star for review"}
+                {marked.has(current.id) ? `★ ${t("Starred")}` : `☆ ${t("Star for review")}`}
               </button>
             </div>
 
@@ -367,14 +656,14 @@ export default function PracticePage() {
               {current.kind === "blank" ? (
                 <label className="block">
                   <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Your answer
+                    {t("Your answer")}
                   </span>
                   <input
                     type="text"
                     autoComplete="off"
                     value={answers[current.id]?.[0] ?? ""}
                     onChange={(event) => setBlank(current.id, event.target.value)}
-                    aria-label="Your answer"
+                    aria-label={t("Your answer")}
                     className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-[15px] focus:border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                   />
                 </label>
@@ -412,7 +701,7 @@ export default function PracticePage() {
                 })
               )}
               {current.multi && (
-                <p className="text-xs text-slate-500">Select every correct answer.</p>
+                <p className="text-xs text-slate-500">{t("Select every correct answer.")}</p>
               )}
             </div>
           </section>
@@ -426,10 +715,10 @@ export default function PracticePage() {
             disabled={idx === 0}
             className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
           >
-            Previous
+            {t("Previous")}
           </button>
 
-          <nav className="flex flex-1 flex-wrap justify-center gap-1.5" aria-label="Question palette">
+          <nav className="flex flex-1 flex-wrap justify-center gap-1.5" aria-label={t("Question palette")}>
             {questions.map((q, i) => {
               const isAnswered = (answers[q.id] ?? []).length > 0;
               const isMarked = marked.has(q.id);
@@ -443,7 +732,11 @@ export default function PracticePage() {
                 <button
                   key={q.id}
                   onClick={() => setIdx(i)}
-                  title={`Question ${q.no ?? i + 1}${isMarked ? " (starred)" : ""}`}
+                  title={
+                    isMarked
+                      ? t("Question {number} (starred)", { number: q.no ?? i + 1 })
+                      : t("Question {number}", { number: q.no ?? i + 1 })
+                  }
                   className={`grid h-8 w-8 place-items-center rounded-md border text-xs font-semibold transition ${tone} ${
                     isCurrent ? "ring-2 ring-slate-900 ring-offset-1" : ""
                   }`}
@@ -459,7 +752,7 @@ export default function PracticePage() {
             disabled={last}
             className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
           >
-            Next
+            {t("Next")}
           </button>
         </div>
       </footer>
@@ -467,25 +760,29 @@ export default function PracticePage() {
       {confirming && (
         <div className="fixed inset-0 z-30 grid place-items-center bg-slate-900/40 px-4">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold">Submit your answers?</h2>
+            <h2 className="text-lg font-semibold">{t("Submit your answers?")}</h2>
             <p className="mt-2 text-sm text-slate-600">
-              {answered} of {questions.length} answered
-              {unanswered > 0 && `, ${unanswered} still blank`}. You can review every question
-              afterwards.
+              {t("{answered} of {total} answered", {
+                answered,
+                total: questions.length,
+              })}
+              {unanswered > 0 &&
+                t(", {count} still blank", { count: unanswered })}
+              {t(". You can review every question afterwards.")}
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setConfirming(false)}
                 className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50"
               >
-                Keep working
+                {t("Keep working")}
               </button>
               <button
-                onClick={doSubmit}
+                onClick={() => void doSubmit()}
                 disabled={submitting}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitting ? "Grading…" : "Submit"}
+                {submitting ? t("Grading…") : t("Submit")}
               </button>
             </div>
           </div>
@@ -494,23 +791,24 @@ export default function PracticePage() {
       {leaving && (
         <div className="fixed inset-0 z-30 grid place-items-center bg-slate-900/40 px-4">
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold">Leave the exam?</h2>
+            <h2 className="text-lg font-semibold">{t("Leave the exam?")}</h2>
             <p className="mt-2 text-sm text-slate-600">
-              This attempt will be left unfinished — your answers so far are not submitted and
-              will not be graded. You can start a new attempt any time.
+              {t(
+                "This attempt will be left unfinished — your answers so far are not submitted and will not be graded. You can start a new attempt any time.",
+              )}
             </p>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setLeaving(false)}
                 className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50"
               >
-                Keep working
+                {t("Keep working")}
               </button>
               <button
                 onClick={leaveExam}
                 className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
               >
-                Leave exam
+                {t("Leave exam")}
               </button>
             </div>
           </div>

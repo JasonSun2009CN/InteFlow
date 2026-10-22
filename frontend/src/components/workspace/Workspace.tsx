@@ -22,6 +22,7 @@ import { MenuIcon } from "./icons";
 import { useMediaQuery } from "./useMediaQuery";
 import { useWorkspaceLayout, type WorkspaceTool } from "./usePersistentLayout";
 import { sectionLabel } from "../../lib/sections";
+import { useI18n } from "../../lib/i18n";
 
 const PANE_MIN = 22;
 const PANE_MAX = 78;
@@ -72,7 +73,8 @@ interface Props {
  * list stays a floating overlay, and exports live in the top bar so they never
  * compete with the reading surface.
  */
-export default function Workspace({ detail, result, t, sessionId }: Props) {
+export default function Workspace({ detail, result, t: elapsedSeconds, sessionId }: Props) {
+  const { t } = useI18n();
   const docId = detail.document_id;
   const [layout, setLayout] = useWorkspaceLayout(docId);
   const [filter, setFilter] = useState<Filter>("all");
@@ -229,7 +231,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
   const wrong = result.items.filter((i) => i.is_correct === false).length;
   const correct = result.items.filter((i) => i.is_correct === true).length;
   const pct = result.graded ? Math.round((correct / result.graded) * 100) : 0;
-  const secs = elapsed(detail, t);
+  const secs = elapsed(detail, elapsedSeconds);
 
   const counts: Record<Filter, number> = { all: result.items.length, correct, wrong };
 
@@ -252,9 +254,11 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
         >
           {selected.is_correct === true ? "✓" : selected.is_correct === false ? "✗" : "–"}
         </span>
-        <span className="font-semibold">Question {selected.no}</span>
+        <span className="font-semibold">
+          {t("Question {number}", { number: selected.no })}
+        </span>
         <span className="text-sm text-slate-500">
-          {sectionLabel(selected.sec)}
+          {t(sectionLabel(selected.sec))}
           {selected.source ? ` · ${selected.source}` : ""}
         </span>
         <div className="ml-auto flex items-center gap-2">
@@ -268,12 +272,14 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
                 : "border-slate-300 text-slate-600 hover:bg-slate-50"
             }`}
           >
-            {starred.has(selected.question_id) ? "★ Starred" : "☆ Star"}
+            {starred.has(selected.question_id)
+              ? `★ ${t("Starred")}`
+              : `☆ ${t("Star")}`}
           </button>
           <button
             onClick={() => prevQ && setSelectedId(prevQ.question_id)}
             disabled={!prevQ}
-            aria-label="Previous question"
+            aria-label={t("Previous question")}
             className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-50 disabled:opacity-40"
           >
             ←
@@ -284,7 +290,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           <button
             onClick={() => nextQ && setSelectedId(nextQ.question_id)}
             disabled={!nextQ}
-            aria-label="Next question"
+            aria-label={t("Next question")}
             className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-50 disabled:opacity-40"
           >
             →
@@ -304,13 +310,13 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
       {selected.kind === "blank" ? (
         <dl className="mt-4 space-y-1.5 rounded-lg border border-slate-200 p-3 text-sm">
           <div className="flex gap-2">
-            <dt className="w-24 shrink-0 text-slate-500">Correct</dt>
+            <dt className="w-24 shrink-0 text-slate-500">{t("Correct")}</dt>
             <dd className="font-medium text-emerald-700">
               {answerText(selected, selected.answers)}
             </dd>
           </div>
           <div className="flex gap-2">
-            <dt className="w-24 shrink-0 text-slate-500">Your answer</dt>
+            <dt className="w-24 shrink-0 text-slate-500">{t("Your answer")}</dt>
             <dd
               className={
                 "font-medium " +
@@ -347,12 +353,12 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
                       isAnswer ? "bg-emerald-600 text-white" : "bg-red-500 text-white"
                     }`}
                   >
-                    your answer
+                    {t("your answer")}
                   </span>
                 )}
                 {isAnswer && !isChosen && (
                   <span className="shrink-0 rounded bg-emerald-600 px-1.5 py-0.5 text-xs font-medium text-white">
-                    correct
+                    {t("correct")}
                   </span>
                 )}
               </li>
@@ -363,9 +369,9 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
 
       {selected.answers.length === 0 && (
         <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          No answer key for this question — fill it in on the{" "}
+          {t("No answer key for this question — fill it in on the")}{" "}
           <Link to={`/doc/${docId}/answers`} className="underline">
-            answer page
+            {t("answer page")}
           </Link>
           .
         </p>
@@ -373,7 +379,9 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
     </article>
   ) : (
     <p className="rounded-xl border bg-white p-6 text-center text-sm text-slate-500">
-      {filter === "wrong" ? "Nothing wrong here — nice work." : "No questions to show."}
+      {filter === "wrong"
+        ? t("Nothing wrong here — nice work.")
+        : t("No questions to show.")}
     </p>
   );
 
@@ -394,12 +402,13 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           <div
             className="h-full min-h-0 overflow-y-auto p-4"
             onDragStart={startWordDrag}
-            title="Select a word, then drag it onto the Vocabulary pane"
+            title={t("Select a word, then drag it onto the Vocabulary pane")}
           >
             {(leftTool === "vocabulary" || rightTool === "vocabulary") && (
               <p className="mb-3 rounded-lg border border-dashed border-blue-300 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
-                Select a word here, then drag it onto the Vocabulary pane — the
-                Merriam-Webster sense that fits the sentence is added.
+                {t(
+                  "Select a word here, then drag it onto the Vocabulary pane — the Merriam-Webster sense that fits the sentence is added.",
+                )}
               </p>
             )}
             {questionPane}
@@ -435,7 +444,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
         ) : (
           <button
             onClick={() => setNavOpen(true)}
-            aria-label="Open question list"
+            aria-label={t("Open question list")}
             className="rounded-lg border p-1.5 text-slate-600 hover:bg-slate-100"
           >
             <MenuIcon />
@@ -446,7 +455,10 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           <h1 className="truncate text-base font-bold">{detail.document.title}</h1>
           <p className="truncate text-xs text-slate-500">
             {secs !== null && `${clock(secs)} · `}
-            {result.total} questions · {result.graded} graded
+            {t("{total} questions · {graded} graded", {
+              total: result.total,
+              graded: result.graded,
+            })}
           </p>
         </div>
 
@@ -455,7 +467,8 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             {correct} <span className="text-slate-400">/ {result.graded}</span>
           </div>
           <div className="text-xs text-slate-500">
-            {result.graded ? `${pct}%` : "not graded"} · {wrong} wrong
+            {result.graded ? `${pct}%` : t("not graded")} ·{" "}
+            {t("{count} wrong", { count: wrong })}
           </div>
         </div>
 
@@ -464,13 +477,13 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
             onClick={() => setNotebookOpen(true)}
             className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
           >
-            Notebook
+            {t("Notebook")}
           </button>
           <button
             onClick={() => setExportOpen(true)}
             className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
           >
-            Export
+            {t("Export")}
           </button>
           <Link
             to={`/doc/${docId}/practice`}
@@ -479,25 +492,25 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
               className: "hidden sm:inline-flex",
             })}
           >
-            Practice again
+            {t("Practice again")}
           </Link>
           <Link
             to="/sessions"
             className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
           >
-            Back
+            {t("Back")}
           </Link>
         </div>
       </header>
 
       {loadError && (
         <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
-          Could not load the analysis notebook: {loadError}
+          {t("Could not load the analysis notebook: {error}", { error: loadError })}
         </p>
       )}
       {starError && (
         <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
-          Could not update the star: {starError}
+          {t("Could not update the star: {error}", { error: starError })}
         </p>
       )}
 
@@ -516,7 +529,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
           </div>
           <Splitter
             orientation="vertical"
-            label="Resize workspace panes"
+            label={t("Resize workspace panes")}
             onResize={(delta) =>
               setLayout((l) => ({
                 ...l,
@@ -554,7 +567,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                {toolLabel(tool)}
+                {toolLabel(tool, t)}
               </button>
             ))}
           </div>
@@ -574,7 +587,7 @@ export default function Workspace({ detail, result, t, sessionId }: Props) {
       {!isDesktop && navOpen && (
         <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
           <button
-            aria-label="Close"
+            aria-label={t("Close")}
             onClick={() => setNavOpen(false)}
             className="absolute inset-0 scrim"
           />

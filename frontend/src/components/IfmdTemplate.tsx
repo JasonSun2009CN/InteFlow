@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useI18n } from "../lib/i18n";
 
 /** Minimal, valid InteFlow-MD the user can copy or download and fill in by hand. */
 export const SAT_MD_TEMPLATE = `---
@@ -32,6 +33,7 @@ What is the value of $x$ if $x + 2 = 5$?
 `;
 
 export default function IfmdTemplate() {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -49,27 +51,26 @@ export default function IfmdTemplate() {
   return (
     <details className="mt-4 rounded-lg border bg-slate-50 p-4">
       <summary className="cursor-pointer text-sm font-medium text-slate-700">
-        Or start from the <code className="rounded bg-slate-200 px-1">.ifmd.md</code> template
+        {t("Or start from the .ifmd.md template")}
       </summary>
       <p className="mt-3 text-sm text-slate-600">
-        A plain-text format you can write or edit by hand — imported with zero tokens and no
-        cloud. Questions use a <code className="rounded bg-slate-200 px-1">{":::q"}</code> block
-        with <code className="rounded bg-slate-200 px-1">A–E</code> or more labelled options
-        (no options at all makes it a fill-in-the-blank).
+        {t(
+          "A plain-text format you can write or edit by hand — imported with zero tokens and no cloud. Questions use a :::q block with A–E or more labelled options (no options at all makes it a fill-in-the-blank).",
+        )}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           onClick={copy}
           className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
         >
-          {copied ? "Copied ✓" : "Copy template"}
+          {copied ? t("Copied ✓") : t("Copy template")}
         </button>
         <a
           href={downloadUrl}
           download="template.ifmd.md"
           className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
         >
-          Download .ifmd.md
+          {t("Download .ifmd.md")}
         </a>
       </div>
       <pre className="mt-3 max-h-72 overflow-auto rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100">

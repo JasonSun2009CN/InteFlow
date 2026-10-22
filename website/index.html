@@ -49,6 +49,7 @@
         <nav class="site-nav" id="site-nav" aria-label="主要导航">
           <a href="#position">概览</a>
           <a href="#workflow">工作流</a>
+          <a href="#demo">试用</a>
           <a href="#features">功能</a>
           <a href="#themes">主题</a>
           <a href="#architecture">技术</a>
@@ -100,13 +101,19 @@
             </p>
 
             <div class="hero-actions">
-              <a class="btn btn-ink" href="#workflow">看看怎么用 <span aria-hidden="true">→</span></a>
+              <a class="btn btn-ink" href="#demo">在线试用 <span aria-hidden="true">→</span></a>
               <a
                 class="btn btn-outline"
                 href="https://github.com/JasonSun2009CN/InteFlow"
                 target="_blank"
                 rel="noreferrer"
                 >GitHub 仓库 <span aria-hidden="true">↗</span></a
+              >
+              <a
+                class="btn btn-outline"
+                href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                title="下载源码 ZIP（不含本地 data/ 与词典文件）"
+                >下载 ZIP <span aria-hidden="true">↓</span></a
               >
             </div>
 
@@ -395,11 +402,127 @@
         </div>
       </section>
 
+      <!-- ================================================================= demo -->
+      <section class="section demo-section" id="demo">
+        <div class="wrap">
+          <div class="demo-grid">
+            <div class="demo-copy reveal">
+              <p class="section-index">03 / LIVE DEMO</p>
+              <h2>先做几道题，<br />再决定装不装。</h2>
+              <p class="section-lede">
+                下面是一个跑在浏览器里的精简版：选答案、交卷、看判分和复盘。真正的应用用同一套流程，但把题库、词表和解析都留在你的电脑里。
+              </p>
+
+              <ol class="demo-points">
+                <li>
+                  <span>01</span>
+                  <div>
+                    <strong>真的能点</strong>
+                    <p>选择题、填空题、题号面板、标记待看，都是可交互的。</p>
+                  </div>
+                </li>
+                <li>
+                  <span>02</span>
+                  <div>
+                    <strong>交卷即判分</strong>
+                    <p>四道示例题，判分在浏览器里完成，0 token。</p>
+                  </div>
+                </li>
+                <li>
+                  <span>03</span>
+                  <div>
+                    <strong>看一眼复盘</strong>
+                    <p>正确答案、示例解析、可收藏的生词。完整应用里还能继续编辑与导出。</p>
+                  </div>
+                </li>
+              </ol>
+
+              <p class="demo-note">
+                演示只覆盖必要的一小段。完整应用另有导入 / OCR、AI Tutor、单词考试、主题与导出，全部本地优先。
+              </p>
+
+              <div class="demo-copy-actions">
+                <a class="btn btn-ink" href="#quickstart">安装完整应用 <span aria-hidden="true">→</span></a>
+                <a
+                  class="btn btn-outline"
+                  href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                  title="下载源码 ZIP（不含本地 data/ 与词典文件）"
+                  >下载 ZIP <span aria-hidden="true">↓</span></a
+                >
+              </div>
+            </div>
+
+            <div class="demo-shell reveal" data-demo style="--delay: 100ms">
+              <div class="demo-chrome">
+                <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="demo-chrome-path">localhost:5173 <span>/ practice</span></span>
+                <span class="demo-chrome-badge"
+                  ><span class="live-dot" aria-hidden="true"></span> browser only</span
+                >
+              </div>
+
+              <div class="demo-topbar">
+                <div class="demo-brand">
+                  <img src="assets/favicon.svg" alt="" width="22" height="22" />
+                  <strong>InteFlow</strong>
+                  <span>demo</span>
+                </div>
+                <div class="demo-steps" role="tablist" aria-label="演示步骤">
+                  <button
+                    class="demo-step is-active"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    data-demo-step="practice"
+                  >
+                    <span>01</span>练习
+                  </button>
+                  <button
+                    class="demo-step"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-demo-step="result"
+                    disabled
+                  >
+                    <span>02</span>成绩
+                  </button>
+                  <button
+                    class="demo-step"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-demo-step="review"
+                    disabled
+                  >
+                    <span>03</span>复盘
+                  </button>
+                </div>
+                <span class="demo-timer"><span>TIME</span><strong data-demo-timer>00:00</strong></span>
+              </div>
+
+              <div class="demo-body" data-demo-body>
+                <noscript>
+                  <p class="demo-noscript">
+                    这个演示需要 JavaScript。完整应用在本地运行，不依赖这个网页。
+                  </p>
+                </noscript>
+              </div>
+
+              <div class="demo-foot">
+                <span class="mono" data-demo-status aria-live="polite">4 道示例题 · 本地判分</span>
+                <button class="demo-reset" type="button" data-demo-reset>重新开始</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ============================================================= features -->
       <section class="section" id="features">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">03 / FEATURE INDEX</p>
+            <p class="section-index">04 / FEATURE INDEX</p>
             <h2>该有的，都在这里。</h2>
             <p class="section-lede">
               22 项已经落地的能力，覆盖导入、练习、复盘、词汇与输出。按阶段筛选，快速找到你需要的那一块。
@@ -656,7 +779,7 @@
       <section class="section themes-section" id="themes">
         <div class="wrap">
           <div class="section-head section-head-dark reveal">
-            <p class="section-index">04 / APPEARANCE</p>
+            <p class="section-index">05 / APPEARANCE</p>
             <h2>五套主题，一个工作流。</h2>
             <p class="section-lede">
               颜色、字体、圆角、阴影全部走一层语义 token。切换主题不改变信息结构，只改变你面对它的感觉。
@@ -797,7 +920,7 @@
       <section class="section" id="architecture">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">05 / FORMAT &amp; STACK</p>
+            <p class="section-index">06 / FORMAT &amp; STACK</p>
             <h2>确定的格式，确定的链路。</h2>
             <p class="section-lede">
               每次导入都先变成 InteFlow-MD，再由确定性状态机解析。没有隐藏的二次整理，也没有“看起来像”的猜测。
@@ -917,7 +1040,7 @@ cd InteFlow
       <section class="section section-alt" id="faq">
         <div class="wrap faq-grid">
           <div class="faq-intro reveal">
-            <p class="section-index">06 / QUESTIONS</p>
+            <p class="section-index">07 / QUESTIONS</p>
             <h2>还有疑问？</h2>
             <p>
               这里先回答最容易卡住的几件事。更细的规格、数据模型与格式说明都在仓库文档里。
@@ -1036,6 +1159,12 @@ cd InteFlow
               >
               <a
                 class="btn btn-outline"
+                href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
+                title="下载源码 ZIP（不含本地 data/ 与词典文件）"
+                >下载 ZIP <span aria-hidden="true">↓</span></a
+              >
+              <a
+                class="btn btn-outline"
                 href="https://github.com/JasonSun2009CN/InteFlow/blob/main/README-cn.md"
                 target="_blank"
                 rel="noreferrer"
@@ -1081,6 +1210,7 @@ cd InteFlow
         <nav class="footer-col" aria-label="产品">
           <h3>产品</h3>
           <a href="#workflow">工作流</a>
+          <a href="#demo">在线试用</a>
           <a href="#features">功能索引</a>
           <a href="#themes">主题</a>
           <a href="#quickstart">快速开始</a>

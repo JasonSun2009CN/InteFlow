@@ -10,6 +10,7 @@ import {
   type WordExamResult,
 } from "../../api/client";
 import WordExamResultView from "./WordExamResultView";
+import { useI18n } from "../../lib/i18n";
 
 interface Props {
   doc: VocabularyDocument;
@@ -41,6 +42,7 @@ function initialCount(wordCount: number): number {
 
 /** Word-test tab: pick a mode + size, answer, then grade and share. */
 export default function WordExamPanel({ doc, onBack }: Props) {
+  const { t } = useI18n();
   const [stage, setStage] = useState<Stage>("setup");
   const [mode, setMode] = useState<WordExamMode>("en-zh");
   const [count, setCount] = useState(() => initialCount(doc.word_count));
@@ -156,10 +158,13 @@ export default function WordExamPanel({ doc, onBack }: Props) {
         <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
           <div className="flex items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Question {index + 1} of {exam.questions.length}
+              {t("Question {current} of {total}", {
+                current: index + 1,
+                total: exam.questions.length,
+              })}
             </p>
             <p className="ml-auto text-xs text-slate-500">
-              {answered} answered
+              {t("{count} answered", { count: answered })}
             </p>
           </div>
           <div
@@ -182,7 +187,9 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             className="mt-4 rounded-xl border bg-white p-4"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              {exam.mode === "en-zh" ? "Write its meaning" : "Spell the English word"}
+              {exam.mode === "en-zh"
+                ? t("Write its meaning")
+                : t("Spell the English word")}
             </p>
             <p className="mt-2 whitespace-pre-wrap font-display text-xl leading-8 text-slate-900">
               {question.prompt}
@@ -194,7 +201,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             )}
 
             <label className="mt-4 block">
-              <span className="sr-only">Your answer</span>
+              <span className="sr-only">{t("Your answer")}</span>
               <input
                 autoFocus
                 value={answers[question.row_id] ?? ""}
@@ -205,9 +212,9 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                   }))
                 }
                 placeholder={
-                  exam.mode === "en-zh" ? "Type the meaning…" : "Type the word…"
+                  exam.mode === "en-zh" ? t("Type the meaning…") : t("Type the word…")
                 }
-                aria-label="Your answer"
+                aria-label={t("Your answer")}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
               />
             </label>
@@ -219,14 +226,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 disabled={index === 0}
                 className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
               >
-                Previous
+                {t("Previous")}
               </button>
               {index < exam.questions.length - 1 ? (
                 <button
                   type="submit"
                   className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
                 >
-                  Next
+                  {t("Next")}
                 </button>
               ) : (
                 <button
@@ -234,7 +241,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                   disabled={busy}
                   className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-40"
                 >
-                  {busy ? "Grading…" : "Submit test"}
+                  {busy ? t("Grading…") : t("Submit test")}
                 </button>
               )}
               <button
@@ -243,7 +250,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 disabled={busy}
                 className="ml-auto rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
               >
-                {busy ? "Grading…" : "Submit now"}
+                {busy ? t("Grading…") : t("Submit now")}
               </button>
             </div>
           </form>
@@ -254,7 +261,10 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             </p>
           )}
 
-          <div className="mt-4 flex flex-wrap gap-1.5" aria-label="Question navigation">
+          <div
+            className="mt-4 flex flex-wrap gap-1.5"
+            aria-label={t("Question navigation")}
+          >
             {exam.questions.map((item, itemIndex) => {
               const isAnswered = (answers[item.row_id] ?? "").trim() !== "";
               return (
@@ -262,7 +272,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                   key={item.row_id}
                   type="button"
                   onClick={() => setIndex(itemIndex)}
-                  aria-label={`Question ${itemIndex + 1}`}
+                  aria-label={t("Question {number}", { number: itemIndex + 1 })}
                   aria-current={itemIndex === index ? "true" : undefined}
                   className={`h-7 min-w-7 rounded-md px-1.5 text-xs font-medium transition-colors ${
                     itemIndex === index
@@ -287,39 +297,42 @@ export default function WordExamPanel({ doc, onBack }: Props) {
       <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
         <header>
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-            Vocabulary
+            {t("Vocabulary")}
           </p>
           <h2 className="mt-1 font-display text-2xl tracking-tight text-slate-900">
-            Word test
+            {t("Word test")}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Test how well “{doc.title}” stuck — {doc.word_count}{" "}
-            {doc.word_count === 1 ? "word" : "words"} in this list.
+            {t("Test how well “{title}” stuck — {count} words in this list.", {
+              title: doc.title,
+              count: doc.word_count,
+            })}
           </p>
         </header>
 
         {!hasWords ? (
           <div className="mt-5 rounded-xl border bg-white p-6 text-center">
             <p className="font-display text-lg tracking-tight text-slate-700">
-              This list is empty
+              {t("This list is empty")}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-              Drag words into the Vocabulary pane while reviewing, or add them in
-              the word list, then come back to take a test.
+              {t(
+                "Drag words into the Vocabulary pane while reviewing, or add them in the word list, then come back to take a test.",
+              )}
             </p>
             <button
               type="button"
               onClick={onBack}
               className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Back to word list
+              {t("Back to word list")}
             </button>
           </div>
         ) : (
           <>
             <fieldset className="mt-5">
               <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Mode
+                {t("Mode")}
               </legend>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 {MODES.map((option) => {
@@ -337,10 +350,10 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                       }`}
                     >
                       <span className="block text-sm font-medium text-slate-800">
-                        {option.label}
+                        {t(option.label)}
                       </span>
                       <span className="mt-0.5 block text-xs text-slate-500">
-                        {option.hint}
+                        {t(option.hint)}
                       </span>
                     </button>
                   );
@@ -350,16 +363,16 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 settings !== null &&
                 !settings.vocab_exam_ai_grading && (
                   <p className="mt-2 text-[11px] leading-5 text-slate-400">
-                    Local grading compares text, so an English definition from the
-                    list works best. Enable AI grading in Settings to accept a
-                    Chinese paraphrase.
+                    {t(
+                      "Local grading compares text, so an English definition from the list works best. Enable AI grading in Settings to accept a Chinese paraphrase.",
+                    )}
                   </p>
                 )}
             </fieldset>
 
             <fieldset className="mt-4">
               <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                How many words
+                {t("How many words")}
               </legend>
               <div className="mt-2 flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3">
                 <input
@@ -372,7 +385,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                     const next = Number(event.target.value);
                     if (Number.isFinite(next)) setCount(Math.max(1, Math.round(next)));
                   }}
-                  aria-label="Number of words"
+                  aria-label={t("Number of words")}
                   className="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                 />
                 <label className="flex items-center gap-2 text-sm text-slate-700">
@@ -382,24 +395,28 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                     onChange={(event) => setAll(event.target.checked)}
                     className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
-                  All {doc.word_count} words
+                  {t("All {count} words", { count: doc.word_count })}
                 </label>
                 <span className="text-xs text-slate-400">
-                  Random selection from the list.
+                  {t("Random selection from the list.")}
                 </span>
               </div>
             </fieldset>
 
             <p className="mt-4 rounded-lg bg-white px-3 py-2 text-xs leading-5 text-slate-500 ring-1 ring-inset ring-slate-200">
               {settings === null
-                ? "Checking how this test will be graded…"
+                ? t("Checking how this test will be graded…")
                 : settings.vocab_exam_ai_grading
                   ? settings.api_key_set
-                    ? "AI grading is on — your model checks both directions against the word list and Merriam-Webster."
-                    : "AI grading is on, but no model is configured yet, so grading stays local."
-                  : "AI grading is off — grading is local and free."}{" "}
+                    ? t(
+                        "AI grading is on — your model checks both directions against the word list and Merriam-Webster.",
+                      )
+                    : t(
+                        "AI grading is on, but no model is configured yet, so grading stays local.",
+                      )
+                  : t("AI grading is off — grading is local and free.")}{" "}
               <Link to="/settings" className="font-medium text-blue-600 hover:underline">
-                Settings
+                {t("Settings")}
               </Link>
             </p>
 
@@ -410,14 +427,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 disabled={busy}
                 className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
               >
-                {busy ? "Building test…" : "Start test"}
+                {busy ? t("Building test…") : t("Start test")}
               </button>
               <button
                 type="button"
                 onClick={onBack}
                 className="rounded-lg border bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100"
               >
-                Back to word list
+                {t("Back to word list")}
               </button>
             </div>
           </>

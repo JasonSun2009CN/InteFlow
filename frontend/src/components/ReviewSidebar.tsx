@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, ApiError, type ResultItem, type WordGrid } from "../api/client";
 import { sectionLabel } from "../lib/sections";
 import VocabGrid from "./workspace/VocabGrid";
+import { useI18n } from "../lib/i18n";
 
 type Section = "explain" | "words" | "ai" | "export";
 
@@ -46,6 +47,7 @@ function SectionToggle({
  * `VocabGrid` so this fallback keeps type-checking against the new API.
  */
 export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: Props) {
+  const { t } = useI18n();
   const [open, setOpen] = useState<Section | null>("explain");
 
   // ---- explanations -------------------------------------------------------
@@ -121,7 +123,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
       const saved = await api.putWords(docId, grid);
       setGrid(saved);
       setGridDirty(false);
-      setGridMsg("Saved ✓");
+      setGridMsg(t("Saved ✓"));
       window.setTimeout(() => setGridMsg(null), 2000);
       return true;
     } catch (err) {
@@ -160,15 +162,20 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
         <header className="flex items-center justify-between border-b bg-white px-3 py-2">
           <div className="min-w-0">
             <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Workspace
+              {t("Workspace")}
             </div>
             <div className="truncate text-sm font-semibold">
-              {item ? `Question ${item.no} · ${sectionLabel(item.sec)}` : "Select a question"}
+              {item
+                ? t("Question {number} · {section}", {
+                    number: item.no,
+                    section: t(sectionLabel(item.sec)),
+                  })
+                : t("Select a question")}
             </div>
           </div>
           <button
             onClick={onClose}
-            title="Hide panel"
+            title={t("Hide panel")}
             className="rounded-md border px-2 py-1 text-sm text-slate-500 hover:bg-slate-100"
           >
             «
@@ -179,14 +186,14 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           {/* ---- hand-written explanation ---- */}
           <section className="rounded-md">
             <SectionToggle
-              label="Explanation"
+              label={t("Explanation")}
               open={open === "explain"}
               onClick={() => void toggle("explain")}
             />
             {open === "explain" && (
               <div className="mt-2">
                 {!item ? (
-                  <p className="text-sm text-slate-500">Select a question in the list.</p>
+                  <p className="text-sm text-slate-500">{t("Select a question in the list.")}</p>
                 ) : (
                   <>
                     <textarea
@@ -197,7 +204,9 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                         setExplainErr(null);
                       }}
                       rows={7}
-                      placeholder="Why is the correct answer right? Write it in your own words…"
+                      placeholder={t(
+                        "Why is the correct answer right? Write it in your own words…",
+                      )}
                       className="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <div className="mt-2 flex items-center gap-2">
@@ -206,11 +215,15 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                         disabled={!dirty || saving}
                         className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
                       >
-                        {saving ? "Saving…" : "Save"}
+                        {saving ? t("Saving…") : t("Save")}
                       </button>
-                      {savedFlash && <span className="text-sm text-emerald-600">Saved ✓</span>}
+                      {savedFlash && (
+                        <span className="text-sm text-emerald-600">{t("Saved ✓")}</span>
+                      )}
                       {dirty && !saving && (
-                        <span className="text-xs text-amber-600">unsaved changes</span>
+                        <span className="text-xs text-amber-600">
+                          {t("unsaved changes")}
+                        </span>
                       )}
                     </div>
                     {explainErr && (
@@ -227,7 +240,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           {/* ---- vocabulary table ---- */}
           <section className="rounded-md">
             <SectionToggle
-              label="Vocabulary"
+              label={t("Vocabulary")}
               open={open === "words"}
               onClick={() => void toggle("words")}
             />
@@ -242,22 +255,26 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                         disabled={!gridDirty || gridBusy}
                         className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
                       >
-                        {gridBusy ? "Saving…" : "Save"}
+                        {gridBusy ? t("Saving…") : t("Save")}
                       </button>
                       <button
                         onClick={() => void exportXlsx()}
                         className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
                       >
-                        Export .xlsx
+                        {t("Export .xlsx")}
                       </button>
                       {gridMsg && <span className="text-xs text-emerald-600">{gridMsg}</span>}
                       {gridDirty && !gridBusy && (
-                        <span className="text-xs text-amber-600">unsaved changes</span>
+                        <span className="text-xs text-amber-600">
+                          {t("unsaved changes")}
+                        </span>
                       )}
                     </div>
                   </>
                 ) : (
-                  !gridErr && <p className="text-sm text-slate-400">Loading vocabulary…</p>
+                  !gridErr && (
+                    <p className="text-sm text-slate-400">{t("Loading vocabulary…")}</p>
+                  )
                 )}
                 {gridErr && (
                   <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">{gridErr}</p>
@@ -269,29 +286,33 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           {/* ---- AI answer ---- */}
           <section className="rounded-md">
             <SectionToggle
-              label="AI Answer"
+              label={t("AI Answer")}
               open={open === "ai"}
               onClick={() => void toggle("ai")}
             />
             {open === "ai" && (
               <div className="mt-2">
                 {!item ? (
-                  <p className="text-sm text-slate-500">Select a question in the list.</p>
+                  <p className="text-sm text-slate-500">{t("Select a question in the list.")}</p>
                 ) : item.answer === null ? (
                   <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                    No answer key for this question — enter the answers first.
+                    {t("No answer key for this question — enter the answers first.")}
                   </p>
                 ) : (
                   <>
                     <p className="mb-2 text-xs text-slate-500">
-                      Context: this question + its correct answer only.
+                      {t("Context: this question + its correct answer only.")}
                     </p>
                     <button
                       onClick={() => void askAI()}
                       disabled={aiBusy}
                       className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                     >
-                      {aiBusy ? "Thinking…" : aiText ? "Regenerate" : "Explain with AI"}
+                      {aiBusy
+                        ? t("Thinking…")
+                        : aiText
+                          ? t("Regenerate")
+                          : t("Explain with AI")}
                     </button>
                     {aiErr && (
                       <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">
@@ -312,14 +333,14 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           {/* ---- export ---- */}
           <section className="rounded-md">
             <SectionToggle
-              label="Export"
+              label={t("Export")}
               open={open === "export"}
               onClick={() => void toggle("export")}
             />
             {open === "export" && (
               <div className="mt-2">
                 <p className="text-xs text-slate-500">
-                  Questions, answers and explanations as a document (no AI involved).
+                  {t("Questions, answers and explanations as a document (no AI involved).")}
                 </p>
                 <div className="mt-2 flex gap-2">
                   {(["pdf", "docx"] as const).map((fmt) => (
@@ -329,13 +350,13 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       download
                       className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
                     >
-                      Export .{fmt}
+                      {t("Export .{format}", { format: fmt })}
                     </a>
                   ))}
                 </div>
                 {dirty && (
                   <p className="mt-2 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-                    Save the explanation first — unsaved changes are not included.
+                    {t("Save the explanation first — unsaved changes are not included.")}
                   </p>
                 )}
               </div>

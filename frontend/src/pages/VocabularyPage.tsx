@@ -13,6 +13,7 @@ import {
 import VocabGrid from "../components/workspace/VocabGrid";
 import WordExamPanel from "../components/workspace/WordExamPanel";
 import { Tabs } from "../components/ui";
+import { useI18n } from "../lib/i18n";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -34,6 +35,7 @@ function ExamIndex({
   selectedId: number | null;
   onSelect: (id: number) => void;
 }) {
+  const { t, locale } = useI18n();
   const [query, setQuery] = useState("");
   const filtered = documents.filter((doc) =>
     doc.title.toLowerCase().includes(query.trim().toLowerCase()),
@@ -43,27 +45,31 @@ function ExamIndex({
     <aside className="flex max-h-[42dvh] min-h-0 w-full shrink-0 flex-col border-b border-slate-200 bg-white lg:max-h-none lg:w-80 lg:border-b-0 lg:border-r">
       <div className="shrink-0 border-b border-slate-200 px-4 py-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-          Reference
+          {t("Reference")}
         </p>
         <h1 className="mt-1 font-display text-2xl tracking-tight text-slate-900">
-          Vocabulary
+          {t("Vocabulary")}
         </h1>
         <p className="mt-1 text-xs text-slate-500">
-          {documents.length} {documents.length === 1 ? "exam" : "exams"} ·{" "}
-          {documents.reduce((sum, doc) => sum + doc.word_count, 0)} words
+          {t("{exams} exams · {words} words", {
+            exams: documents.length,
+            words: documents
+              .reduce((sum, doc) => sum + doc.word_count, 0)
+              .toLocaleString(locale),
+          })}
         </p>
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Filter exams…"
-          aria-label="Filter exams"
+          placeholder={t("Filter exams…")}
+          aria-label={t("Filter exams")}
           className="mt-3 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
         />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {filtered.length === 0 ? (
           <p className="px-3 py-6 text-sm text-slate-400">
-            {documents.length === 0 ? "No exams yet." : "No exam matches that filter."}
+            {documents.length === 0 ? t("No exams yet.") : t("No exam matches that filter.")}
           </p>
         ) : (
           <ul className="space-y-1">
@@ -98,7 +104,7 @@ function ExamIndex({
                     <span className="mt-0.5 block truncate text-xs text-slate-400">
                       {doc.preview.length > 0
                         ? doc.preview.join(" · ")
-                        : "No words yet — add from the workspace"}
+                        : t("No words yet — add from the workspace")}
                     </span>
                   </button>
                 </li>
@@ -119,6 +125,7 @@ function VocabularyDetail({
   doc: VocabularyDocument;
   onChanged: () => void;
 }) {
+  const { t, locale } = useI18n();
   const docId = doc.document_id;
   const [grid, setGrid] = useState<WordGrid | null>(null);
   const [loading, setLoading] = useState(true);
@@ -178,7 +185,7 @@ function VocabularyDetail({
       const saved = await api.putWords(docId, grid);
       setGrid(saved);
       setDirty(false);
-      setMsg("Saved ✓");
+      setMsg(t("Saved ✓"));
       onChanged();
       return true;
     } catch (error) {
@@ -205,7 +212,11 @@ function VocabularyDetail({
       });
       setGrid(result.grid);
       setDirty(false);
-      setMsg(result.created ? `Added “${result.word}”.` : `Updated “${result.word}”.`);
+      setMsg(
+        result.created
+          ? t("Added “{word}”.", { word: result.word })
+          : t("Updated “{word}”.", { word: result.word }),
+      );
       setForm({ word: "", pos: "", meaning: "", notes: "" });
       onChanged();
     } catch (error) {
@@ -245,8 +256,12 @@ function VocabularyDetail({
       setDirty(false);
       setMsg(
         result.definition
-          ? `Added “${result.word}”${result.pos ? ` · ${result.pos}` : ""} — ${result.definition}`
-          : `Added “${result.word}”.`,
+          ? t("Added “{word}”{pos} — {definition}", {
+              word: result.word,
+              pos: result.pos ? ` · ${result.pos}` : "",
+              definition: result.definition,
+            })
+          : t("Added “{word}”.", { word: result.word }),
       );
       onChanged();
     } catch (error) {
@@ -275,8 +290,8 @@ function VocabularyDetail({
               {doc.title}
             </h2>
             <p className="text-xs text-slate-500">
-              {count} {count === 1 ? "word" : "words"}
-              {dirty ? " · unsaved changes" : ""}
+              {t("{count} words", { count })}
+              {dirty ? ` · ${t("unsaved changes")}` : ""}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -286,20 +301,20 @@ function VocabularyDetail({
               disabled={!dirty || busy}
               className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
             >
-              {busy ? "Saving…" : "Save"}
+              {busy ? t("Saving…") : t("Save")}
             </button>
             <button
               type="button"
               onClick={() => void exportXlsx()}
               className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
             >
-              Export .xlsx
+              {t("Export .xlsx")}
             </button>
             <Link
               to={`/doc/${docId}/practice`}
               className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
             >
-              Practice
+              {t("Practice")}
             </Link>
           </div>
         </header>
@@ -323,35 +338,35 @@ function VocabularyDetail({
             <form
               onSubmit={(event) => void addManual(event)}
               className="grid gap-2 rounded-xl border bg-white p-3 sm:grid-cols-2 xl:grid-cols-4"
-              aria-label="Add a word"
+              aria-label={t("Add a word")}
             >
               <input
                 value={form.word}
                 onChange={(event) => setForm({ ...form, word: event.target.value })}
-                placeholder="Word"
-                aria-label="Word"
+                placeholder={t("Word")}
+                aria-label={t("Word")}
                 required
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
               <input
                 value={form.pos}
                 onChange={(event) => setForm({ ...form, pos: event.target.value })}
-                placeholder="POS (e.g. adj.)"
-                aria-label="Part of speech"
+                placeholder={t("POS (e.g. adj.)")}
+                aria-label={t("Part of speech")}
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
               <input
                 value={form.meaning}
                 onChange={(event) => setForm({ ...form, meaning: event.target.value })}
-                placeholder="Meaning"
-                aria-label="Meaning"
+                placeholder={t("Meaning")}
+                aria-label={t("Meaning")}
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
               <input
                 value={form.notes}
                 onChange={(event) => setForm({ ...form, notes: event.target.value })}
-                placeholder="Notes (optional)"
-                aria-label="Notes"
+                placeholder={t("Notes (optional)")}
+                aria-label={t("Notes")}
                 className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
               />
               <button
@@ -359,14 +374,14 @@ function VocabularyDetail({
                 disabled={!form.word.trim() || busy}
                 className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40 sm:col-span-2 xl:col-span-4"
               >
-                Add word
+                {t("Add word")}
               </button>
             </form>
 
             <div className="mt-4 h-[30rem] min-h-[20rem]">
               {loading ? (
                 <p className="rounded-xl border bg-white p-6 text-sm text-slate-400">
-                  Loading words…
+                  {t("Loading words…")}
                 </p>
               ) : grid ? (
                 <VocabGrid
@@ -381,7 +396,7 @@ function VocabularyDetail({
                 />
               ) : (
                 <p className="rounded-xl border bg-white p-6 text-sm text-red-600">
-                  {err ?? "Could not load this word list."}
+                  {err ?? t("Could not load this word list.")}
                 </p>
               )}
             </div>
@@ -391,17 +406,17 @@ function VocabularyDetail({
             <form
               onSubmit={(event) => void runLookup(event)}
               className="rounded-xl border bg-white p-3"
-              aria-label="Dictionary lookup"
+              aria-label={t("Dictionary lookup")}
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Dictionary
+                {t("Dictionary")}
               </p>
               <div className="mt-2 flex gap-1.5">
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Look up a word…"
-                  aria-label="Look up a word"
+                  placeholder={t("Look up a word…")}
+                  aria-label={t("Look up a word")}
                   className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
                 />
                 <button
@@ -409,35 +424,48 @@ function VocabularyDetail({
                   disabled={!query.trim() || lookupBusy}
                   className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
                 >
-                  {lookupBusy ? "…" : "Look up"}
+                  {lookupBusy ? "…" : t("Look up")}
                 </button>
               </div>
 
               {status && !status.available && (
                 <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs leading-5 text-amber-800">
-                  Merriam-Webster is not installed. Put the Eudic <code>.eudb</code> file in
-                  the <code>dictionary/</code> folder, then reload.
+                  {t(
+                    "Merriam-Webster is not installed. Put the Eudic .eudb file in the",
+                  )}{" "}
+                  <code>dictionary/</code> {t("folder, then reload.")}
                 </p>
               )}
               {status?.available && !status.indexed && (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  The local index is built automatically on first lookup (about 10
-                  seconds). Only English-English definitions are shown.
+                  {t(
+                    "The local index is built automatically on first lookup (about 10 seconds). Only English-English definitions are shown.",
+                  )}
                 </p>
               )}
               {status?.indexed && (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  {dictionaryTitle} · {status.entry_count.toLocaleString()} entries
+                  {t("{title} · {count} entries", {
+                    title: dictionaryTitle,
+                    count: status.entry_count.toLocaleString(locale),
+                  })}
                   {status.learner_enabled && status.learner_count > 0
-                    ? ` · ${status.learner_count.toLocaleString()} with English-learner definitions`
+                    ? t(" · {count} with English-learner definitions", {
+                        count: status.learner_count.toLocaleString(locale),
+                      })
                     : ""}{" "}
-                  · local, no tokens.
+                  · {t("local, no tokens.")}
                 </p>
               )}
               {status && status.custom_dictionary.count > 0 && (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  My dictionary: {status.custom_dictionary.count.toLocaleString()} words
-                  {status.custom_dictionary.enabled ? " · checked first" : " · off in Settings"}.
+                  {t("My dictionary: {count} words", {
+                    count: status.custom_dictionary.count.toLocaleString(locale),
+                  })}
+                  {status.custom_dictionary.enabled
+                    ? t(" · checked first")
+                    : t(" · off in Settings")}
+                  .
                 </p>
               )}
               {lookupErr && (
@@ -455,7 +483,7 @@ function VocabularyDetail({
                 <div className="mt-3 space-y-2">
                   {lookup.exact.length === 0 && (
                     <p className="text-xs text-slate-500">
-                      No exact entry. Pick a suggestion below.
+                      {t("No exact entry. Pick a suggestion below.")}
                     </p>
                   )}
                   {lookup.exact.map((entry) => {
@@ -466,10 +494,10 @@ function VocabularyDetail({
                     const definition = learner ?? entry.definition;
                     const label =
                       entry.source === "custom"
-                        ? "My dictionary"
+                        ? t("My dictionary")
                         : learner
-                          ? "Definition for English Learners"
-                          : "Collegiate definition";
+                          ? t("Definition for English Learners")
+                          : t("Collegiate definition");
                     return (
                       <div key={`${entry.source}-${entry.id}`} className="rounded-lg border bg-slate-50 p-2">
                         <div className="flex items-center gap-2">
@@ -480,7 +508,7 @@ function VocabularyDetail({
                             disabled={busy}
                             className="ml-auto rounded border bg-white px-2 py-0.5 text-xs font-medium hover:bg-slate-100 disabled:opacity-40"
                           >
-                            Add
+                            {t("Add")}
                           </button>
                         </div>
                         <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
@@ -495,7 +523,7 @@ function VocabularyDetail({
                   {lookup.matches.length > 0 && (
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                        Suggestions
+                        {t("Suggestions")}
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {lookup.matches.map((entry) => (
@@ -517,12 +545,11 @@ function VocabularyDetail({
             </form>
 
             <div className="rounded-xl border bg-white p-3 text-xs leading-5 text-slate-500">
-              <p className="font-medium text-slate-700">How words get here</p>
+              <p className="font-medium text-slate-700">{t("How words get here")}</p>
               <p className="mt-1">
-                Drag a word from a question or option onto the Vocabulary pane in the review
-                workspace — the dictionary sense that fits the sentence is added. AI sense
-                matching, English-learner definitions, and My dictionary can be toggled in
-                Settings. You can also add words here or edit any cell above.
+                {t(
+                  "Drag a word from a question or option onto the Vocabulary pane in the review workspace — the dictionary sense that fits the sentence is added. AI sense matching, English-learner definitions, and My dictionary can be toggled in Settings. You can also add words here or edit any cell above.",
+                )}
               </p>
             </div>
           </aside>
@@ -533,6 +560,7 @@ function VocabularyDetail({
 }
 
 export default function VocabularyPage() {
+  const { t } = useI18n();
   const [overview, setOverview] = useState<VocabularyOverview | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [view, setView] = useState<"list" | "test">("list");
@@ -581,15 +609,18 @@ export default function VocabularyPage() {
 
       {overview === null ? (
         <div className="grid min-h-0 flex-1 place-items-center p-8 text-sm text-slate-500">
-          {err ? `Could not load vocabulary: ${err}` : "Loading vocabulary…"}
+          {err
+            ? t("Could not load vocabulary: {error}", { error: err })
+            : t("Loading vocabulary…")}
         </div>
       ) : selected ? (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="shrink-0 border-b border-slate-200 bg-white px-3 pt-1">
             <Tabs
+              ariaLabel={t("Vocabulary views")}
               tabs={[
-                { key: "list", label: "Word list" },
-                { key: "test", label: "Word test" },
+                { key: "list", label: t("Word list") },
+                { key: "test", label: t("Word test") },
               ]}
               activeKey={view}
               onChange={(key) => {
@@ -631,17 +662,18 @@ export default function VocabularyPage() {
         <div className="grid min-h-0 flex-1 place-items-center p-8 text-center">
           <div>
             <p className="font-display text-2xl tracking-tight text-slate-700">
-              No exams yet
+              {t("No exams yet")}
             </p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-              Import an exam, then drag words from the review workspace into its vocabulary
-              list. Every exam keeps its own list, and re-practising edits the same one.
+              {t(
+                "Import an exam, then drag words from the review workspace into its vocabulary list. Every exam keeps its own list, and re-practising edits the same one.",
+              )}
             </p>
             <Link
               to="/library"
               className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
             >
-              Go to Library
+              {t("Go to Library")}
             </Link>
           </div>
         </div>
