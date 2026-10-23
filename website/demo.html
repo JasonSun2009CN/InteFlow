@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>做题界面 — InteFlow Demo</title>
+    <meta name="description" content="在浏览器里做 4 道示例题：选择、填空、标记待看、计时与交卷。无需安装，0 token。" />
+    <meta name="theme-color" content="#f4f1e8" />
+    <meta property="og:title" content="做题界面 — InteFlow Demo" />
+    <meta property="og:description" content="在浏览器里做 4 道示例题：选择、填空、标记待看、计时与交卷。无需安装，0 token。" />
+    <meta property="og:type" content="website" />
+    <link rel="canonical" href="https://jasonsun2009cn.github.io/InteFlow/demo.html" />
+    <link rel="alternate" hreflang="zh-CN" href="https://jasonsun2009cn.github.io/InteFlow/demo.html" />
+    <link rel="alternate" hreflang="en" href="https://jasonsun2009cn.github.io/InteFlow/demo-en.html" />
+    <link rel="alternate" hreflang="x-default" href="https://jasonsun2009cn.github.io/InteFlow/demo.html" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <script>
+      document.documentElement.classList.add("js");
+      window.setTimeout(function () {
+        if (!window.__inteflowSiteReady) {
+          document.documentElement.classList.remove("js");
+        }
+      }, 2200);
+      window.addEventListener("error", function () {
+        document.documentElement.classList.remove("js");
+      });
+    </script>
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <div class="scroll-progress" aria-hidden="true"><span data-progress></span></div>
+    <header class="site-header" data-header>
+      <div class="wrap header-inner">
+        <a class="brand" href="./" aria-label="InteFlow 首页">
+          <img class="brand-mark" src="assets/favicon.svg" alt="" width="30" height="30" />
+          <span class="brand-text">
+            <strong>InteFlow</strong>
+            <small>local-first study workflow</small>
+          </span>
+        </a>
+
+        <nav class="site-nav" id="site-nav" aria-label="主要导航">
+          <a href="download.html">下载</a>
+          <a href="features.html">功能</a>
+          <a href="demo.html" aria-current="page">在线试用</a>
+          <a href="themes.html">主题</a>
+          <a href="features.html#architecture">技术</a>
+          <a href="features.html#faq">问答</a>
+          <a class="nav-github" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
+        </nav>
+
+        <div class="header-actions">
+          <a class="lang-switch" href="demo-en.html" hreflang="en" lang="en" aria-label="Switch to English">EN</a>
+          <a class="ghost-link" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">
+            GitHub <span aria-hidden="true">↗</span>
+          </a>
+          <a class="btn btn-small btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
+          <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="site-nav" aria-label="打开导航">
+            <span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <section class="demo-hub">
+        <div class="wrap">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> LIVE DEMO · 01 / PRACTICE</p>
+          <div class="demo-hub-grid">
+            <div class="reveal">
+              <h1>做题界面</h1>
+              <p class="section-lede">四道示例题，完整走一遍选题、标记、计时与交卷。交卷后会进入成绩页，再进入工作区。</p>
+            </div>
+            <div class="demo-hub-meta reveal" style="--delay: 80ms"><div><strong>4</strong><span>示例题</span></div><div><strong>0</strong><span>token</span></div><div><strong>2-of-4</strong><span>工作区</span></div></div>
+          </div>
+          <nav class="demo-tabs" aria-label="演示功能">
+          <a href="demo.html" aria-current="page"><span>01</span>做题</a>
+          <a href="demo-workspace.html"><span>02</span>工作区</a>
+          <a href="demo-mistakes.html"><span>03</span>错题集</a>
+          <a href="demo-vocabulary.html"><span>04</span>生词集</a>
+          </nav>
+        </div>
+      </section>
+
+      <section class="demo-stage">
+        <div class="wrap">
+          <div class="demo-shell reveal" data-demo data-demo-start="practice" style="--delay: 100ms">
+            <div class="demo-chrome">
+              <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="demo-chrome-path">localhost:5173 <span>/ doc / demo / practice</span></span>
+              <span class="demo-chrome-badge"><span class="live-dot" aria-hidden="true"></span> 精简演示</span>
+            </div>
+            <div class="demo-body" data-demo-body>
+              <noscript><p class="demo-noscript">这个演示需要 JavaScript。完整应用在本地运行，不依赖这个网页。</p></noscript>
+            </div>
+            <div class="demo-toast" data-demo-toast hidden></div>
+          </div>
+          <p class="demo-stage-note">这是精简演示：固定 4 道题，判分在浏览器里完成；作答只留在本次标签页，用于打开工作区。完整应用支持导入、自动保存、Notebook 与导出。 <a href="features.html">看完整功能 →</a></p>
+        <details class="demo-fineprint reveal">
+          <summary>DEMO ≠ FULL APP · 和完整应用的区别</summary>
+          <ul><li><strong>固定 4 道示例题</strong> 不能导入 PDF / DOCX；完整应用才走导入、OCR 与答案录入。</li><li><strong>没有后端</strong> 判分、计时与错题/生词状态都在浏览器里；作答只留在本次标签页。</li><li><strong>AI Tutor 是预置文案</strong> 不会调用模型；完整应用只在你点击时发送当前题目上下文。</li><li><strong>工作区是简化版</strong> 工具可切换，但没有拖拽改比例、自动保存、Notebook 与导出。</li><li><strong>只用默认主题</strong> 视觉模拟 Clear Blue；完整应用另有 4 套主题和设置。</li></ul>
+        </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="./" aria-label="InteFlow 首页">
+            <img class="brand-mark" src="assets/favicon.svg" alt="" width="30" height="30" />
+            <span class="brand-text"><strong>InteFlow</strong><small>local-first study workflow</small></span>
+          </a>
+          <p>导入、练习、复盘、词汇、导出。一个跑在自己电脑上的学习工作流。</p>
+          <p class="mono">MIT · v1.0 · 2026</p>
+        </div>
+
+        <nav class="footer-col" aria-label="产品">
+          <h3>产品</h3>
+          <a href="features.html">工作流与功能</a>
+          <a href="demo.html">在线试用</a>
+          <a href="themes.html">主题</a>
+          <a href="download.html">下载桌面版</a>
+          <a href="download.html#install">安装说明</a>
+          <a href="download.html#source">从源码运行</a>
+        </nav>
+
+        <nav class="footer-col" aria-label="文档">
+          <h3>文档</h3>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/README.md" target="_blank" rel="noreferrer">README (EN)</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/README-cn.md" target="_blank" rel="noreferrer">README（中文）</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noreferrer">Architecture</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/docs/IFMD.md" target="_blank" rel="noreferrer">InteFlow-MD</a>
+        </nav>
+
+        <nav class="footer-col" aria-label="项目">
+          <h3>项目</h3>
+          <a href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/issues" target="_blank" rel="noreferrer">Issues</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
+          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/AGENT.md" target="_blank" rel="noreferrer">Agent notes</a>
+        </nav>
+      </div>
+
+      <div class="wrap footer-bottom">
+        <p>SAT® is a trademark of College Board, which is not affiliated with InteFlow.</p>
+        <p>Built local-first. No accounts, no tracking.</p>
+      </div>
+    </footer>
+    <script src="assets/site.js" defer></script>
+    <script src="assets/downloads.js" defer></script>
+  </body>
+</html>

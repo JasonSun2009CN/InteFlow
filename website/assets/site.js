@@ -43,6 +43,38 @@
     return href + (href.indexOf("?") === -1 ? "?" : "&") + "lang=en";
   }
 
+  /* ------------------------------------------------------- legacy anchors */
+  /* The site used to be one page. Keep old #section bookmarks working after
+     content moved to features.html / demo.html / themes.html / download.html. */
+
+  var LEGACY_HASH = isEnglish
+    ? {
+        position: "features-en.html#position",
+        workflow: "features-en.html#workflow",
+        features: "features-en.html#features",
+        architecture: "features-en.html#architecture",
+        faq: "features-en.html#faq",
+        demo: "demo-en.html",
+        themes: "themes-en.html",
+        quickstart: "download-en.html"
+      }
+    : {
+        position: "features.html#position",
+        workflow: "features.html#workflow",
+        features: "features.html#features",
+        architecture: "features.html#architecture",
+        faq: "features.html#faq",
+        demo: "demo.html",
+        themes: "themes.html",
+        quickstart: "download.html"
+      };
+
+  var legacyHash = (window.location.hash || "").replace(/^#/, "");
+  if (legacyHash && doc.getElementById("top") && LEGACY_HASH[legacyHash]) {
+    window.location.replace(LEGACY_HASH[legacyHash]);
+    return;
+  }
+
   /* ------------------------------------------------------------ header + bar */
 
   function closeMenu() {
@@ -800,11 +832,352 @@
           ]
         };
 
+    DEMO.hub = isEnglish
+      ? {
+          practiceHref: "demo-en.html",
+          workspaceHref: "demo-workspace-en.html",
+          mistakesHref: "demo-mistakes-en.html",
+          vocabularyHref: "demo-vocabulary-en.html",
+          backToPractice: "Back to practice",
+          openWorkspace: "Open in workspace",
+          redo: "Try again",
+          mistakesTitle: "Mistakes",
+          mistakesSubtitle: function (pending, total) {
+            return pending + " to review · " + total + " saved";
+          },
+          pendingShort: "to review",
+          markAll: "Mark all mastered",
+          unmarkAll: "Reset mastery",
+          searchMistakes: "Search stem or type…",
+          filterAll: "All",
+          filterReading: "Reading",
+          filterMath: "Math",
+          filterWriting: "Writing",
+          filterPending: "To review",
+          filterMastered: "Mastered",
+          noMistakes: "No mistakes match this filter.",
+          markMastered: "Mark mastered",
+          unmarkMastered: "Mark unmastered",
+          masteredTag: "Mastered",
+          pendingTag: "To review",
+          sourceLabel: "Source",
+          analysisLabel: "ANALYSIS",
+          vocabTitle: "Vocabulary",
+          vocabSubtitle: function (total, mastered) {
+            return total + " words · " + mastered + " mastered";
+          },
+          searchWords: "Search a word or meaning…",
+          filterLearning: "Learning",
+          filterCollected: "Collected",
+          noWords: "No words match this filter.",
+          markKnown: "Mark known",
+          unmarkKnown: "Mark learning",
+          knownTag: "Known",
+          learningTag: "Learning",
+          collectedTag: "Collected",
+          collect: "Save word",
+          uncollect: "Remove",
+          wordSource: "From",
+          wordExample: "Example",
+          vocabNote:
+            "Demo library: words from this sample paper. The full app collects saved words from every review here.",
+          savedCount: function (n) {
+            return n + " saved";
+          }
+        }
+      : {
+          practiceHref: "demo.html",
+          workspaceHref: "demo-workspace.html",
+          mistakesHref: "demo-mistakes.html",
+          vocabularyHref: "demo-vocabulary.html",
+          backToPractice: "返回做题",
+          openWorkspace: "在工作区打开",
+          redo: "再做一次",
+          mistakesTitle: "错题集",
+          mistakesSubtitle: function (pending, total) {
+            return pending + " 道待复习 · " + total + " 道错题";
+          },
+          pendingShort: "待复习",
+          markAll: "全部标记已掌握",
+          unmarkAll: "全部标记待复习",
+          searchMistakes: "搜索题干 / 题型…",
+          filterAll: "全部",
+          filterReading: "阅读",
+          filterMath: "数学",
+          filterWriting: "写作",
+          filterPending: "待复习",
+          filterMastered: "已掌握",
+          noMistakes: "没有匹配的错题。",
+          markMastered: "标记已掌握",
+          unmarkMastered: "标记待复习",
+          masteredTag: "已掌握",
+          pendingTag: "待复习",
+          sourceLabel: "来源",
+          analysisLabel: "解析",
+          vocabTitle: "生词集",
+          vocabSubtitle: function (total, mastered) {
+            return total + " 个词 · " + mastered + " 个已掌握";
+          },
+          searchWords: "搜索单词 / 释义…",
+          filterLearning: "待学习",
+          filterCollected: "已收藏",
+          noWords: "没有匹配的词。",
+          markKnown: "标记已掌握",
+          unmarkKnown: "标记待学习",
+          knownTag: "已掌握",
+          learningTag: "待学习",
+          collectedTag: "已收藏",
+          collect: "收藏",
+          uncollect: "取消收藏",
+          wordSource: "来自",
+          wordExample: "例句",
+          vocabNote:
+            "演示词库来自这套示例卷；完整应用会把每套复盘中收藏的词汇总到这里。",
+          savedCount: function (n) {
+            return "已收藏 " + n;
+          }
+        };
+
+    DEMO.mistakes = isEnglish
+      ? [
+          {
+            id: "m1",
+            section: "READING",
+            kindLabel: "Attitude",
+            stem: "The author's attitude toward the new policy is best described as",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "A · undisguised contempt",
+            correct: "B · cautious approval",
+            analysis:
+              "Find the turn. “Not unreasonable” concedes that the concerns are fair; “Still” then states the author's position. The policy passed unchanged and did better than predicted, so the attitude is qualified approval, not contempt or hostility.",
+            source: "Demo · Mixed Practice / Q01",
+            date: "2026-10-22",
+            workspaceIndex: 0
+          },
+          {
+            id: "m2",
+            section: "READING",
+            kindLabel: "Words in context",
+            stem: "As used in the sentence, “reservations” most nearly means",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "A · bookings",
+            correct: "B · doubts",
+            analysis:
+              "The sentence contrasts reservations with a smooth first month. A reservation here is a doubt held back, not a booking. The next clause, “those reservations were not unreasonable”, confirms that these are concerns.",
+            source: "Demo · Mixed Practice / Q02",
+            date: "2026-10-22",
+            workspaceIndex: 1
+          },
+          {
+            id: "m3",
+            section: "READING",
+            kindLabel: "Main purpose",
+            stem: "The main purpose of the passage is to",
+            material:
+              "When the town replaced its old library with a shared study space, critics predicted the end of quiet reading. A year later, attendance had doubled, evening classes were full, and the same critics were asking for longer hours.",
+            your: "A · describe a controversy",
+            correct: "C · explain why a change succeeded",
+            analysis:
+              "Most of the passage reports what happened after the change: attendance doubled, classes filled, critics changed their minds. The controversy is only the setup; the purpose is to explain the successful outcome.",
+            source: "Demo · Extra reading set / Q07",
+            date: "2026-10-21",
+            workspaceIndex: null
+          },
+          {
+            id: "m4",
+            section: "MATH",
+            kindLabel: "Algebra",
+            stem: "If 2x − 5 = 11, what is the value of x?",
+            your: "A · 3",
+            correct: "B · 8",
+            analysis:
+              "Add 5 to both sides: 2x = 16. Divide by 2: x = 8. Check: 2(8) − 5 = 11. The trap is subtracting instead of adding, which gives 3.",
+            source: "Demo · Math set / Q03",
+            date: "2026-10-21",
+            workspaceIndex: null
+          },
+          {
+            id: "m5",
+            section: "WRITING",
+            kindLabel: "Fill-in",
+            stem: "The report, ______ by three reviewers, was unusually thorough.",
+            your: "reviewing",
+            correct: "reviewed",
+            analysis:
+              "The noun is the report, and the report receives the review. Use the past participle “reviewed” to modify it. “Reviewing” would mean the report is doing the reviewing.",
+            source: "Demo · Writing set / Q11",
+            date: "2026-10-20",
+            workspaceIndex: null
+          },
+          {
+            id: "m6",
+            section: "READING",
+            kindLabel: "Inference",
+            stem: "It can most reasonably be inferred from the passage that the committee",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "D · rejected the policy outright",
+            correct: "A · accepted it with some doubt",
+            analysis:
+              "The committee had concerns, but the policy was adopted without amendment. That supports acceptance with doubt. Outright rejection contradicts the sentence that says it was adopted.",
+            source: "Demo · Mixed Practice / Q01",
+            date: "2026-10-20",
+            workspaceIndex: 0
+          }
+        ]
+      : [
+          {
+            id: "m1",
+            section: "READING",
+            kindLabel: "态度题",
+            stem: "The author's attitude toward the new policy is best described as",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "A · undisguised contempt",
+            correct: "B · cautious approval",
+            analysis:
+              "先找转折。“not unreasonable” 先承认顾虑是合理的，“Still” 才给出作者立场。政策原样通过，而且表现好于预期，所以是有保留的赞同，不是轻蔑或敌意。",
+            source: "Demo · Mixed Practice / Q01",
+            date: "2026-10-22",
+            workspaceIndex: 0
+          },
+          {
+            id: "m2",
+            section: "READING",
+            kindLabel: "词义题",
+            stem: "As used in the sentence, “reservations” most nearly means",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "A · bookings",
+            correct: "B · doubts",
+            analysis:
+              "句子把 reservations 与政策头一个月的顺利表现作对比。这里的 reservation 是保留在心里的疑虑，不是预订；后一句 “those reservations were not unreasonable” 也确认它指的是顾虑。",
+            source: "Demo · Mixed Practice / Q02",
+            date: "2026-10-22",
+            workspaceIndex: 1
+          },
+          {
+            id: "m3",
+            section: "READING",
+            kindLabel: "主旨题",
+            stem: "The main purpose of the passage is to",
+            material:
+              "When the town replaced its old library with a shared study space, critics predicted the end of quiet reading. A year later, attendance had doubled, evening classes were full, and the same critics were asking for longer hours.",
+            your: "A · describe a controversy",
+            correct: "C · explain why a change succeeded",
+            analysis:
+              "文章大部分篇幅都在讲改变之后发生了什么：人数翻倍、课程满员、批评者改口。争议只是引子，主旨是解释这次改变为什么成功。",
+            source: "Demo · Extra reading set / Q07",
+            date: "2026-10-21",
+            workspaceIndex: null
+          },
+          {
+            id: "m4",
+            section: "MATH",
+            kindLabel: "代数",
+            stem: "If 2x − 5 = 11, what is the value of x?",
+            your: "A · 3",
+            correct: "B · 8",
+            analysis:
+              "两边同时加 5：2x = 16；再除以 2：x = 8。代回检验：2(8) − 5 = 11。常见错误是减 5 而不是加 5，会得到 3。",
+            source: "Demo · Math set / Q03",
+            date: "2026-10-21",
+            workspaceIndex: null
+          },
+          {
+            id: "m5",
+            section: "WRITING",
+            kindLabel: "填空",
+            stem: "The report, ______ by three reviewers, was unusually thorough.",
+            your: "reviewing",
+            correct: "reviewed",
+            analysis:
+              "主语是 report，报告是被审阅的一方，所以用过去分词 reviewed 修饰。reviewing 会变成“报告在审阅别人”，逻辑不通。",
+            source: "Demo · Writing set / Q11",
+            date: "2026-10-20",
+            workspaceIndex: null
+          },
+          {
+            id: "m6",
+            section: "READING",
+            kindLabel: "推断题",
+            stem: "It can most reasonably be inferred from the passage that the committee",
+            material:
+              "The committee had reservations about the new policy, and those reservations were not unreasonable. Still, the policy was adopted without amendment, and its first month has gone better than critics predicted.",
+            your: "D · rejected the policy outright",
+            correct: "A · accepted it with some doubt",
+            analysis:
+              "委员会有顾虑，但政策仍然原样通过。这说明它是有保留地接受，而不是彻底否决；“彻底否决”与 adopted 矛盾。",
+            source: "Demo · Mixed Practice / Q01",
+            date: "2026-10-20",
+            workspaceIndex: 0
+          }
+        ];
+
+    DEMO.vocabulary = isEnglish
+      ? [
+          { term: "reservations", pos: "n.", def: "doubts or concerns held back", example: "The committee had reservations about the new policy.", source: "Demo · Q01" },
+          { term: "amendment", pos: "n.", def: "a formal change to a text", example: "The policy was adopted without amendment.", source: "Demo · Q01" },
+          { term: "contempt", pos: "n.", def: "the feeling that someone is worthless", example: "The author treats the proposal with contempt.", source: "Demo · Q01" },
+          { term: "meticulous", pos: "adj.", def: "extremely careful about detail", example: "Her meticulous approach made the results reliable.", source: "Demo · Q04" },
+          { term: "hypothesis", pos: "n.", def: "a proposed explanation to be tested", example: "She tested every hypothesis twice.", source: "Demo · Q04" },
+          { term: "reliable", pos: "adj.", def: "consistently trustworthy", example: "The conclusions were unusually reliable.", source: "Demo · Q04" },
+          { term: "isolate", pos: "v.", def: "to get a variable alone on one side", example: "Isolate x before dividing.", source: "Demo · Q03" },
+          { term: "plausible", pos: "adj.", def: "seeming reasonable or believable", example: "The explanation sounded plausible but was wrong.", source: "Extra · Reading" },
+          { term: "concede", pos: "v.", def: "to admit a point, often before disagreeing", example: "The author concedes that the concerns are reasonable.", source: "Extra · Reading" },
+          { term: "scrutinize", pos: "v.", def: "to examine something very closely", example: "Reviewers scrutinized every claim in the report.", source: "Extra · Reading" }
+        ]
+      : [
+          { term: "reservations", pos: "n.", def: "疑虑；保留意见", example: "The committee had reservations about the new policy.", source: "Demo · Q01" },
+          { term: "amendment", pos: "n.", def: "修正；对文本的正式修改", example: "The policy was adopted without amendment.", source: "Demo · Q01" },
+          { term: "contempt", pos: "n.", def: "轻蔑；藐视", example: "The author treats the proposal with contempt.", source: "Demo · Q01" },
+          { term: "meticulous", pos: "adj.", def: "一丝不苟的；极其细致的", example: "Her meticulous approach made the results reliable.", source: "Demo · Q04" },
+          { term: "hypothesis", pos: "n.", def: "假设；待检验的解释", example: "She tested every hypothesis twice.", source: "Demo · Q04" },
+          { term: "reliable", pos: "adj.", def: "可靠的；稳定可信的", example: "The conclusions were unusually reliable.", source: "Demo · Q04" },
+          { term: "isolate", pos: "v.", def: "隔离；把变量单独留在一边", example: "Isolate x before dividing.", source: "Demo · Q03" },
+          { term: "plausible", pos: "adj.", def: "看似合理的；可信的", example: "The explanation sounded plausible but was wrong.", source: "Extra · Reading" },
+          { term: "concede", pos: "v.", def: "承认；让步", example: "The author concedes that the concerns are reasonable.", source: "Extra · Reading" },
+          { term: "scrutinize", pos: "v.", def: "仔细检查；细看", example: "Reviewers scrutinized every claim in the report.", source: "Extra · Reading" }
+        ];
+
     var demoBody = demoRoot.querySelector("[data-demo-body]");
     var demoToast = demoRoot.querySelector("[data-demo-toast]");
     var VOCAB_KEY = "inteflow.website.demo.vocab";
+    var ATTEMPT_KEY = "inteflow.website.demo.attempt";
+    var MASTERED_MISTAKES_KEY = "inteflow.website.demo.masteredMistakes";
+    var MASTERED_WORDS_KEY = "inteflow.website.demo.masteredWords";
     var savedWords = {};
     var toastTimer = null;
+
+    function readFlagMap(key) {
+      try {
+        var raw = window.localStorage.getItem(key);
+        if (!raw) return {};
+        var values = JSON.parse(raw);
+        var map = {};
+        if (Array.isArray(values)) {
+          values.forEach(function (value) {
+            map[String(value)] = true;
+          });
+        }
+        return map;
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function writeFlagMap(key, map) {
+      try {
+        window.localStorage.setItem(key, JSON.stringify(Object.keys(map)));
+      } catch (error) {
+        /* storage may be unavailable — the demo still works for this visit */
+      }
+    }
+
+    var masteredMistakes = readFlagMap(MASTERED_MISTAKES_KEY);
+    var masteredWords = readFlagMap(MASTERED_WORDS_KEY);
 
     try {
       var storedWords = window.localStorage.getItem(VOCAB_KEY);
@@ -817,7 +1190,9 @@
       savedWords = {};
     }
 
+    var startMode = demoRoot.getAttribute("data-demo-start") || "practice";
     var demoState = {
+      startMode: startMode,
       index: 0,
       answers: {},
       marked: {},
@@ -831,8 +1206,63 @@
       aiShown: {},
       startedAt: null,
       elapsed: 0,
-      running: false
+      running: false,
+      mistakeFilter: "all",
+      mistakeQuery: "",
+      mistakeOpen: "",
+      vocabFilter: "all",
+      vocabQuery: "",
+      vocabOpen: ""
     };
+
+    function readAttempt() {
+      try {
+        var raw = window.sessionStorage.getItem(ATTEMPT_KEY);
+        if (!raw) return null;
+        var parsed = JSON.parse(raw);
+        if (!parsed || !parsed.answers) return null;
+        return parsed;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    if (startMode === "workspace") {
+      var storedAttempt = readAttempt();
+      var seedAttempt = storedAttempt || {
+        answers: { 0: "A", 1: "A", 2: "B", 3: "careful" },
+        marked: {},
+        elapsed: 134
+      };
+      demoState.answers = seedAttempt.answers || {};
+      demoState.marked = seedAttempt.marked || {};
+      demoState.elapsed =
+        typeof seedAttempt.elapsed === "number" ? seedAttempt.elapsed : 134;
+      demoState.submitted = true;
+      demoState.view = "review";
+      demoState.reviewIndex = findFirstWrong();
+      try {
+        var requested = parseInt(
+          new URLSearchParams(window.location.search).get("q"),
+          10
+        );
+        if (
+          isFinite(requested) &&
+          requested >= 0 &&
+          requested < DEMO.questions.length
+        ) {
+          demoState.reviewIndex = requested;
+        }
+      } catch (error) {
+        /* keep the first wrong question */
+      }
+    } else if (startMode === "mistakes") {
+      demoState.view = "mistakes";
+      demoState.mistakeOpen = DEMO.mistakes[0].id;
+    } else if (startMode === "vocabulary") {
+      demoState.view = "vocabulary";
+      demoState.vocabOpen = DEMO.vocabulary[0].term;
+    }
 
     function esc(value) {
       return String(value == null ? "" : value)
@@ -901,6 +1331,7 @@
     }
 
     function ensureTimer() {
+      if (demoState.startMode !== "practice") return;
       if (demoState.startedAt || demoState.submitted) return;
       demoState.startedAt = Date.now();
       demoState.running = true;
@@ -1152,9 +1583,17 @@
       html += '<div class="demo-appbar-actions">';
       html += '<button class="demo-btn" type="button" data-demo-reset>' + esc(DEMO.ui.againBtn) + "</button>";
       html +=
-        '<button class="demo-btn demo-btn-primary" type="button" data-demo-view="review">' +
+        '<a class="demo-btn" href="' +
+        DEMO.hub.mistakesHref +
+        '">' +
+        esc(DEMO.hub.mistakesTitle) +
+        "</a>";
+      html +=
+        '<a class="demo-btn demo-btn-primary" href="' +
+        DEMO.hub.workspaceHref +
+        '">' +
         esc(DEMO.ui.reviewBtn) +
-        "</button>";
+        "</a>";
       html += "</div></header>";
 
       html += '<main class="demo-main demo-main--center"><section class="demo-summary">';
@@ -1187,11 +1626,13 @@
           (ok ? "is-correct" : "is-wrong") +
           '">' +
           (ok ? "✓" : "✕") +
-          '</span><button class="demo-row-btn" type="button" data-demo-review="' +
+          '</span><a class="demo-row-btn" href="' +
+          DEMO.hub.workspaceHref +
+          "?q=" +
           index +
           '">' +
           esc(DEMO.ui.review) +
-          "</button></li>";
+          "</a></li>";
       });
       html += "</ul></section></main></div>";
 
@@ -1379,10 +1820,19 @@
       html += '<div class="demo-appbar-actions">';
       html += '<button class="demo-btn" type="button" data-demo-notebook>' + esc(DEMO.ui.notebook) + "</button>";
       html += '<button class="demo-btn" type="button" data-demo-export>' + esc(DEMO.ui.export) + "</button>";
-      html +=
-        '<button class="demo-btn demo-btn-primary" type="button" data-demo-view="result">' +
-        esc(DEMO.ui.back) +
-        "</button>";
+      if (demoState.startMode === "workspace") {
+        html +=
+          '<a class="demo-btn demo-btn-primary" href="' +
+          DEMO.hub.practiceHref +
+          '">' +
+          esc(DEMO.hub.backToPractice) +
+          "</a>";
+      } else {
+        html +=
+          '<button class="demo-btn demo-btn-primary" type="button" data-demo-view="result">' +
+          esc(DEMO.ui.back) +
+          "</button>";
+      }
       html += "</div></header>";
 
       html += '<div class="demo-workspace">';
@@ -1395,7 +1845,516 @@
       demoBody.innerHTML = html;
     }
 
+    function mistakeMatches(item) {
+      var query = demoState.mistakeQuery.trim().toLowerCase();
+      var mastered = !!masteredMistakes[item.id];
+      if (demoState.mistakeFilter === "pending" && mastered) return false;
+      if (demoState.mistakeFilter === "mastered" && !mastered) return false;
+      if (
+        demoState.mistakeFilter !== "all" &&
+        demoState.mistakeFilter !== "pending" &&
+        demoState.mistakeFilter !== "mastered" &&
+        item.section !== demoState.mistakeFilter
+      ) {
+        return false;
+      }
+      if (!query) return true;
+      return (
+        item.stem +
+        " " +
+        item.kindLabel +
+        " " +
+        item.your +
+        " " +
+        item.correct +
+        " " +
+        item.source
+      )
+        .toLowerCase()
+        .indexOf(query) !== -1;
+    }
+
+    function visibleMistakes() {
+      return DEMO.mistakes.filter(mistakeMatches);
+    }
+
+    function ensureMistakeSelection() {
+      var list = visibleMistakes();
+      var current = list.some(function (item) {
+        return item.id === demoState.mistakeOpen;
+      });
+      if (!current) demoState.mistakeOpen = list.length ? list[0].id : "";
+      return list;
+    }
+
+    function renderMistakeList() {
+      var list = visibleMistakes();
+      if (!list.length) {
+        return '<p class="demo-empty">' + esc(DEMO.hub.noMistakes) + "</p>";
+      }
+      var html = "";
+      list.forEach(function (item) {
+        var mastered = !!masteredMistakes[item.id];
+        var active = item.id === demoState.mistakeOpen;
+        html +=
+          '<button class="demo-library-item' +
+          (active ? " is-active" : "") +
+          '" type="button" data-demo-mistake-open="' +
+          esc(item.id) +
+          '" aria-pressed="' +
+          active +
+          '"><span class="demo-item-top"><span class="demo-item-meta">' +
+          esc(item.section) +
+          " · " +
+          esc(item.kindLabel) +
+          '</span><span class="demo-badge ' +
+          (mastered ? "is-mastered" : "is-pending") +
+          '">' +
+          esc(mastered ? DEMO.hub.masteredTag : DEMO.hub.pendingTag) +
+          '</span></span><strong class="demo-item-title">' +
+          esc(item.stem) +
+          '</strong><span class="demo-item-sub">' +
+          esc(DEMO.ui.yourAnswer) +
+          ": " +
+          esc(item.your) +
+          " · " +
+          esc(DEMO.ui.correctAnswer) +
+          ": " +
+          esc(item.correct) +
+          "</span></button>";
+      });
+      return html;
+    }
+
+    function renderMistakeDetail() {
+      var item = null;
+      visibleMistakes().forEach(function (candidate) {
+        if (candidate.id === demoState.mistakeOpen) item = candidate;
+      });
+      if (!item) {
+        return '<p class="demo-empty">' + esc(DEMO.hub.noMistakes) + "</p>";
+      }
+      var mastered = !!masteredMistakes[item.id];
+      var analysis = item.analysis
+        .split("\n\n")
+        .map(function (paragraph) {
+          return "<p>" + esc(paragraph) + "</p>";
+        })
+        .join("");
+      var html = '<div class="demo-detail">';
+      html +=
+        '<div class="demo-detail-kicker">' +
+        esc(item.section) +
+        " · " +
+        esc(item.kindLabel) +
+        " · " +
+        esc(item.date) +
+        "</div>";
+      html += '<h3 class="demo-detail-title">' + esc(item.stem) + "</h3>";
+      if (item.material) {
+        html += '<p class="demo-detail-material">' + esc(item.material) + "</p>";
+      }
+      html +=
+        '<div class="demo-compare"><div><span>' +
+        esc(DEMO.ui.yourAnswer) +
+        "</span><strong>" +
+        esc(item.your) +
+        "</strong></div><div><span>" +
+        esc(DEMO.ui.correctAnswer) +
+        "</span><strong>" +
+        esc(item.correct) +
+        "</strong></div></div>";
+      html +=
+        '<div class="demo-detail-analysis"><span class="mono">' +
+        esc(DEMO.hub.analysisLabel) +
+        "</span>" +
+        analysis +
+        "</div>";
+      html +=
+        '<p class="demo-detail-source">' +
+        esc(DEMO.hub.sourceLabel) +
+        ": " +
+        esc(item.source) +
+        "</p>";
+      html += '<div class="demo-detail-actions">';
+      html +=
+        '<button class="demo-btn ' +
+        (mastered ? "" : "demo-btn-primary") +
+        '" type="button" data-demo-mistake-master="' +
+        esc(item.id) +
+        '">' +
+        esc(mastered ? DEMO.hub.unmarkMastered : DEMO.hub.markMastered) +
+        "</button>";
+      if (item.workspaceIndex != null) {
+        html +=
+          '<a class="demo-btn" href="' +
+          DEMO.hub.workspaceHref +
+          "?q=" +
+          item.workspaceIndex +
+          '">' +
+          esc(DEMO.hub.openWorkspace) +
+          "</a>";
+      }
+      html +=
+        '<a class="demo-btn" href="' +
+        DEMO.hub.practiceHref +
+        '">' +
+        esc(DEMO.hub.redo) +
+        "</a>";
+      html += "</div></div>";
+      return html;
+    }
+
+    function renderMistakesPage() {
+      ensureMistakeSelection();
+      var total = DEMO.mistakes.length;
+      var mastered = DEMO.mistakes.filter(function (item) {
+        return !!masteredMistakes[item.id];
+      }).length;
+      var pending = total - mastered;
+      var allMastered = mastered === total;
+      var filters = [
+        ["all", DEMO.hub.filterAll],
+        ["READING", DEMO.hub.filterReading],
+        ["MATH", DEMO.hub.filterMath],
+        ["WRITING", DEMO.hub.filterWriting],
+        ["pending", DEMO.hub.filterPending],
+        ["mastered", DEMO.hub.filterMastered]
+      ];
+      var chips = filters
+        .map(function (entry) {
+          var active = demoState.mistakeFilter === entry[0];
+          return (
+            '<button class="demo-chip' +
+            (active ? " is-active" : "") +
+            '" type="button" data-demo-mistake-filter="' +
+            entry[0] +
+            '" aria-pressed="' +
+            active +
+            '">' +
+            esc(entry[1]) +
+            "</button>"
+          );
+        })
+        .join("");
+      var html = '<div class="demo-app demo-app--library">';
+      html += '<header class="demo-appbar">';
+      html +=
+        '<div class="demo-title"><strong>' +
+        esc(DEMO.hub.mistakesTitle) +
+        "</strong><small>" +
+        esc(DEMO.hub.mistakesSubtitle(pending, total)) +
+        "</small></div>";
+      html +=
+        '<div class="demo-score-inline"><strong>' +
+        pending +
+        "</strong><span> / " +
+        total +
+        "</span><small>" +
+        mastered +
+        " " +
+        esc(DEMO.hub.masteredTag) +
+        "</small></div>";
+      html += '<div class="demo-appbar-actions">';
+      html +=
+        '<a class="demo-btn" href="' +
+        DEMO.hub.practiceHref +
+        '">' +
+        esc(DEMO.hub.redo) +
+        "</a>";
+      html +=
+        '<button class="demo-btn demo-btn-primary" type="button" data-demo-master-all>' +
+        esc(allMastered ? DEMO.hub.unmarkAll : DEMO.hub.markAll) +
+        "</button>";
+      html += "</div></header>";
+      html += '<div class="demo-library">';
+      html += '<aside class="demo-library-side"><div class="demo-library-toolbar">';
+      html +=
+        '<input class="demo-search" type="search" data-demo-mistake-search autocomplete="off" placeholder="' +
+        esc(DEMO.hub.searchMistakes) +
+        '" value="' +
+        esc(demoState.mistakeQuery) +
+        '">';
+      html += '<div class="demo-chips">' + chips + "</div></div>";
+      html +=
+        '<div class="demo-library-items" data-demo-mistake-list>' +
+        renderMistakeList() +
+        "</div></aside>";
+      html +=
+        '<section class="demo-library-detail" data-demo-mistake-detail>' +
+        renderMistakeDetail() +
+        "</section>";
+      html += "</div></div>";
+      demoBody.innerHTML = html;
+    }
+
+    function wordMatches(item) {
+      var query = demoState.vocabQuery.trim().toLowerCase();
+      var key = String(item.term).toLowerCase();
+      var known = !!masteredWords[key];
+      if (demoState.vocabFilter === "learning" && known) return false;
+      if (demoState.vocabFilter === "mastered" && !known) return false;
+      if (demoState.vocabFilter === "collected" && !savedWords[key]) return false;
+      if (!query) return true;
+      return (
+        item.term +
+        " " +
+        item.pos +
+        " " +
+        item.def +
+        " " +
+        item.example +
+        " " +
+        item.source
+      )
+        .toLowerCase()
+        .indexOf(query) !== -1;
+    }
+
+    function visibleWords() {
+      return DEMO.vocabulary.filter(wordMatches);
+    }
+
+    function ensureWordSelection() {
+      var list = visibleWords();
+      var current = list.some(function (item) {
+        return item.term === demoState.vocabOpen;
+      });
+      if (!current) demoState.vocabOpen = list.length ? list[0].term : "";
+      return list;
+    }
+
+    function renderWordList() {
+      var list = visibleWords();
+      if (!list.length) {
+        return '<p class="demo-empty">' + esc(DEMO.hub.noWords) + "</p>";
+      }
+      var html = "";
+      list.forEach(function (item) {
+        var key = String(item.term).toLowerCase();
+        var known = !!masteredWords[key];
+        var saved = !!savedWords[key];
+        var active = item.term === demoState.vocabOpen;
+        var badges = "";
+        if (saved) {
+          badges +=
+            '<span class="demo-badge is-saved">' +
+            esc(DEMO.hub.collectedTag) +
+            "</span>";
+        }
+        badges +=
+          '<span class="demo-badge ' +
+          (known ? "is-mastered" : "is-pending") +
+          '">' +
+          esc(known ? DEMO.hub.knownTag : DEMO.hub.learningTag) +
+          "</span>";
+        html +=
+          '<button class="demo-library-item' +
+          (active ? " is-active" : "") +
+          '" type="button" data-demo-word-open="' +
+          esc(item.term) +
+          '" aria-pressed="' +
+          active +
+          '"><span class="demo-item-top"><span class="demo-item-meta">' +
+          esc(item.pos) +
+          " · " +
+          esc(item.source) +
+          '</span><span class="demo-item-badges">' +
+          badges +
+          '</span></span><strong class="demo-word-term">' +
+          esc(item.term) +
+          '</strong><span class="demo-item-sub">' +
+          esc(item.def) +
+          "</span></button>";
+      });
+      return html;
+    }
+
+    function renderWordDetail() {
+      var item = null;
+      visibleWords().forEach(function (candidate) {
+        if (candidate.term === demoState.vocabOpen) item = candidate;
+      });
+      if (!item) {
+        return '<p class="demo-empty">' + esc(DEMO.hub.noWords) + "</p>";
+      }
+      var key = String(item.term).toLowerCase();
+      var saved = !!savedWords[key];
+      var known = !!masteredWords[key];
+      var html = '<div class="demo-detail demo-word-detail">';
+      html +=
+        '<div class="demo-detail-kicker">' +
+        esc(item.pos) +
+        " · " +
+        esc(item.source) +
+        "</div>";
+      html += '<h3 class="demo-word-title">' + esc(item.term) + "</h3>";
+      html += '<p class="demo-word-def">' + esc(item.def) + "</p>";
+      html +=
+        '<p class="demo-word-example"><span class="mono">' +
+        esc(DEMO.hub.wordExample) +
+        "</span>“" +
+        esc(item.example) +
+        "”</p>";
+      html +=
+        '<p class="demo-detail-source">' +
+        esc(DEMO.hub.wordSource) +
+        ": " +
+        esc(item.source) +
+        "</p>";
+      html += '<div class="demo-detail-actions">';
+      html +=
+        '<button class="demo-btn ' +
+        (saved ? "" : "demo-btn-primary") +
+        '" type="button" data-demo-word="' +
+        esc(item.term) +
+        '" aria-pressed="' +
+        saved +
+        '">' +
+        esc(saved ? DEMO.hub.uncollect : DEMO.hub.collect) +
+        "</button>";
+      html +=
+        '<button class="demo-btn" type="button" data-demo-word-master="' +
+        esc(item.term) +
+        '">' +
+        esc(known ? DEMO.hub.unmarkKnown : DEMO.hub.markKnown) +
+        "</button>";
+      html +=
+        '<a class="demo-btn" href="' +
+        DEMO.hub.workspaceHref +
+        '">' +
+        esc(DEMO.hub.openWorkspace) +
+        "</a>";
+      html += "</div></div>";
+      return html;
+    }
+
+    function renderVocabularyPage() {
+      ensureWordSelection();
+      var total = DEMO.vocabulary.length;
+      var known = DEMO.vocabulary.filter(function (item) {
+        return !!masteredWords[String(item.term).toLowerCase()];
+      }).length;
+      var collected = DEMO.vocabulary.filter(function (item) {
+        return !!savedWords[String(item.term).toLowerCase()];
+      }).length;
+      var filters = [
+        ["all", DEMO.hub.filterAll],
+        ["learning", DEMO.hub.filterLearning],
+        ["mastered", DEMO.hub.filterMastered],
+        ["collected", DEMO.hub.filterCollected]
+      ];
+      var chips = filters
+        .map(function (entry) {
+          var active = demoState.vocabFilter === entry[0];
+          return (
+            '<button class="demo-chip' +
+            (active ? " is-active" : "") +
+            '" type="button" data-demo-vocab-filter="' +
+            entry[0] +
+            '" aria-pressed="' +
+            active +
+            '">' +
+            esc(entry[1]) +
+            "</button>"
+          );
+        })
+        .join("");
+      var html = '<div class="demo-app demo-app--library">';
+      html += '<header class="demo-appbar">';
+      html +=
+        '<div class="demo-title"><strong>' +
+        esc(DEMO.hub.vocabTitle) +
+        "</strong><small>" +
+        esc(DEMO.hub.vocabSubtitle(total, known)) +
+        "</small></div>";
+      html +=
+        '<div class="demo-score-inline"><strong>' +
+        known +
+        "</strong><span> / " +
+        total +
+        "</span><small>" +
+        esc(DEMO.hub.savedCount(collected)) +
+        "</small></div>";
+      html += '<div class="demo-appbar-actions">';
+      html +=
+        '<a class="demo-btn" href="' +
+        DEMO.hub.workspaceHref +
+        '">' +
+        esc(DEMO.hub.openWorkspace) +
+        "</a>";
+      html += "</div></header>";
+      html += '<div class="demo-library">';
+      html += '<aside class="demo-library-side"><div class="demo-library-toolbar">';
+      html +=
+        '<input class="demo-search" type="search" data-demo-vocab-search autocomplete="off" placeholder="' +
+        esc(DEMO.hub.searchWords) +
+        '" value="' +
+        esc(demoState.vocabQuery) +
+        '">';
+      html += '<div class="demo-chips">' + chips + "</div>";
+      html += '<p class="demo-library-note">' + esc(DEMO.hub.vocabNote) + "</p>";
+      html += "</div>";
+      html +=
+        '<div class="demo-library-items" data-demo-word-list>' +
+        renderWordList() +
+        "</div></aside>";
+      html +=
+        '<section class="demo-library-detail" data-demo-word-detail>' +
+        renderWordDetail() +
+        "</section>";
+      html += "</div></div>";
+      demoBody.innerHTML = html;
+    }
+
+    function refreshMistakeView() {
+      ensureMistakeSelection();
+      var listEl = demoRoot.querySelector("[data-demo-mistake-list]");
+      var detailEl = demoRoot.querySelector("[data-demo-mistake-detail]");
+      if (listEl) listEl.innerHTML = renderMistakeList();
+      if (detailEl) detailEl.innerHTML = renderMistakeDetail();
+    }
+
+    function refreshWordView() {
+      ensureWordSelection();
+      var listEl = demoRoot.querySelector("[data-demo-word-list]");
+      var detailEl = demoRoot.querySelector("[data-demo-word-detail]");
+      if (listEl) listEl.innerHTML = renderWordList();
+      if (detailEl) detailEl.innerHTML = renderWordDetail();
+    }
+
+    function toggleMistakeMastery(id) {
+      if (masteredMistakes[id]) delete masteredMistakes[id];
+      else masteredMistakes[id] = true;
+      writeFlagMap(MASTERED_MISTAKES_KEY, masteredMistakes);
+      render();
+    }
+
+    function toggleAllMistakes() {
+      var allMastered = DEMO.mistakes.every(function (item) {
+        return !!masteredMistakes[item.id];
+      });
+      if (allMastered) masteredMistakes = {};
+      else {
+        DEMO.mistakes.forEach(function (item) {
+          masteredMistakes[item.id] = true;
+        });
+      }
+      writeFlagMap(MASTERED_MISTAKES_KEY, masteredMistakes);
+      render();
+    }
+
+    function toggleWordMastery(term) {
+      var key = String(term).toLowerCase();
+      if (masteredWords[key]) delete masteredWords[key];
+      else masteredWords[key] = true;
+      writeFlagMap(MASTERED_WORDS_KEY, masteredWords);
+      render();
+    }
+
     function render() {
+      if (demoState.startMode === "mistakes") return renderMistakesPage();
+      if (demoState.startMode === "vocabulary") return renderVocabularyPage();
       if (demoState.view === "result") renderResult();
       else if (demoState.view === "review") renderReview();
       else renderPractice();
@@ -1411,6 +2370,19 @@
       demoState.running = false;
       demoState.reviewIndex = findFirstWrong();
       demoState.view = "result";
+      try {
+        window.sessionStorage.setItem(
+          ATTEMPT_KEY,
+          JSON.stringify({
+            answers: demoState.answers,
+            marked: demoState.marked,
+            elapsed: demoState.elapsed,
+            submittedAt: Date.now()
+          })
+        );
+      } catch (error) {
+        /* session storage may be unavailable */
+      }
       render();
     }
 
@@ -1437,6 +2409,11 @@
       demoState.elapsed = 0;
       demoState.running = false;
       if (demoToast) demoToast.hidden = true;
+      try {
+        window.sessionStorage.removeItem(ATTEMPT_KEY);
+      } catch (error) {
+        /* ignore */
+      }
       render();
     }
 
@@ -1463,6 +2440,11 @@
         /* storage may be unavailable — the demo still works for this visit */
       }
 
+      if (demoState.startMode === "vocabulary") {
+        render();
+        return;
+      }
+
       var added = !!savedWords[key];
       Array.prototype.forEach.call(
         demoRoot.querySelectorAll("[data-demo-word]"),
@@ -1482,6 +2464,47 @@
     demoRoot.addEventListener("click", function (event) {
       var target = event.target.closest ? event.target.closest("button") : null;
       if (!target || !demoRoot.contains(target)) return;
+
+      if (target.hasAttribute("data-demo-mistake-open")) {
+        demoState.mistakeOpen = target.getAttribute("data-demo-mistake-open");
+        render();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-mistake-filter")) {
+        demoState.mistakeFilter = target.getAttribute("data-demo-mistake-filter");
+        ensureMistakeSelection();
+        render();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-mistake-master")) {
+        toggleMistakeMastery(target.getAttribute("data-demo-mistake-master"));
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-master-all")) {
+        toggleAllMistakes();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-word-open")) {
+        demoState.vocabOpen = target.getAttribute("data-demo-word-open");
+        render();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-vocab-filter")) {
+        demoState.vocabFilter = target.getAttribute("data-demo-vocab-filter");
+        ensureWordSelection();
+        render();
+        return;
+      }
+
+      if (target.hasAttribute("data-demo-word-master")) {
+        toggleWordMastery(target.getAttribute("data-demo-word-master"));
+        return;
+      }
 
       if (target.hasAttribute("data-demo-option")) {
         ensureTimer();
@@ -1587,6 +2610,18 @@
       var input = event.target;
       if (!input.hasAttribute) return;
 
+      if (input.hasAttribute("data-demo-mistake-search")) {
+        demoState.mistakeQuery = input.value;
+        refreshMistakeView();
+        return;
+      }
+
+      if (input.hasAttribute("data-demo-vocab-search")) {
+        demoState.vocabQuery = input.value;
+        refreshWordView();
+        return;
+      }
+
       if (input.hasAttribute("data-demo-blank")) {
         ensureTimer();
         demoState.answers[demoState.index] = input.value;
@@ -1653,7 +2688,7 @@
       paintTimer();
     }, 500);
 
-    if ("IntersectionObserver" in window) {
+    if (demoState.startMode === "practice" && "IntersectionObserver" in window) {
       var demoObserver = new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {

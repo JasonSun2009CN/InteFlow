@@ -139,7 +139,12 @@ to stop both.
 
 Download the latest installer — no Python or Node required:
 
-- **macOS (Apple Silicon / Intel) and Windows**: <https://github.com/JasonSun2009CN/InteFlow/releases/latest>
+- **Download page (macOS Apple Silicon / Intel and Windows)**: <https://jasonsun2009cn.github.io/InteFlow/download-en.html>
+- **GitHub Releases**: <https://github.com/JasonSun2009CN/InteFlow/releases>
+
+The site links the platform cards directly to the matching release asset when a
+release exists. If no build has been published yet, the page shows the
+source-run instructions instead.
 
 The builds are unsigned for now. On macOS, right-click → **Open** the first time;
 on Windows, choose **More info → Run anyway**.

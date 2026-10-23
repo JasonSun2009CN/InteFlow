@@ -8,7 +8,8 @@ need Python, Node, or the source checkout.
 
 Releases are published at:
 
-<https://github.com/JasonSun2009CN/InteFlow/releases/latest>
+- Website download page: <https://jasonsun2009cn.github.io/InteFlow/download-en.html>
+- GitHub Releases: <https://github.com/JasonSun2009CN/InteFlow/releases>
 
 | Platform | Artifact |
 | --- | --- |

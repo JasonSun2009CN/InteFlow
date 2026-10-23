@@ -134,7 +134,10 @@ cd InteFlow
 
 直接下载安装包，不需要安装 Python / Node：
 
-- **macOS（Apple Silicon / Intel）与 Windows**：<https://github.com/JasonSun2009CN/InteFlow/releases/latest>
+- **下载页（macOS Apple Silicon / Intel 与 Windows）**：<https://jasonsun2009cn.github.io/InteFlow/download.html>
+- **GitHub Releases**：<https://github.com/JasonSun2009CN/InteFlow/releases>
+
+有 release 时，下载页的 Mac / Windows 卡片会直接指向对应安装包；如果还没发布构建，页面会给出源码运行步骤。
 
 目前暂未签名：macOS 首次打开请右键 →「打开」；Windows 选择「更多信息」→「仍要运行」。
 

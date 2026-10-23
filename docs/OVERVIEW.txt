@@ -172,8 +172,10 @@ InteFlow 是一个本地优先（local-first）的学习工作流 Web 应用：
     为抽屉
 
 • 官网
-    website/ 纯静态中英双语落地页，含浏览器内可交互的 #demo（4 道示例题、计时、交卷、
-    复盘、生词收藏）与 Download ZIP；由 GitHub Pages 自动发布
+    website/ 纯静态多页中英双语站点：首页前段是平台下载区，download*.html 有
+    macOS / Windows 安装包与源码说明，features*.html 是功能与工作流，
+    demo*.html 是四个浏览器内演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），themes*.html 是主题预览；由 GitHub Pages
+    自动发布
 
 
 6. 设计上值得说的几个决定
@@ -309,8 +311,8 @@ diff、可回写；转换器和解析器各自可测试；链路里没有任何�
 • macOS 可在 Finder 里双击 InteFlow.command；Windows 用 start.ps1 或双击 start.bat。
 • 只想建环境：./scripts/setup.sh；已有环境直接启动：./scripts/dev.sh。
 • 打开 http://localhost:5173；后端健康检查 http://localhost:8000/api/health。
-• 不想本地安装也可以先看静态官网 website/index.html，其中的 #demo 可直接在浏览器里做
-  题、交卷、复盘。
+• 不想本地安装也可以先看静态官网 website/index.html，首页前段有平台下载；
+  website/demo.html 可直接在浏览器里做题、交卷、复盘。
 
 最短上手路径：Library → 展开内置题库卡片 → Add all → 回 Exams → Start → 交卷 → 复盘
 写解析 →Review 看错题 / Vocabulary 建词表 → Notebook 导出。

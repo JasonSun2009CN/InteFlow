@@ -4,20 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>InteFlow — 本地优先的学习工作流</title>
-    <meta
-      name="description"
-      content="InteFlow 是一个跑在自己电脑上的学习工作流：导入 PDF / DOCX / Markdown 题库，全屏刷题，逐题复盘，积累生词与解析，再导出成可带走的文件。主链路 0 token，数据不离开本机。"
-    />
+    <meta name="description" content="InteFlow 是一个跑在自己电脑上的学习工作流：导入 PDF / DOCX / Markdown 题库，全屏刷题，逐题复盘，积累生词与解析，再导出成可带走的文件。主链路 0 token，数据不离开本机。" />
     <meta name="theme-color" content="#f4f1e8" />
     <meta property="og:title" content="InteFlow — 本地优先的学习工作流" />
-    <meta
-      property="og:description"
-      content="导入题库 → 刷题 → 逐题复盘 → 写解析 / 查词 / 问 AI → 导出。主链路 0 token，数据留在自己的电脑上。"
-    />
+    <meta property="og:description" content="InteFlow 是一个跑在自己电脑上的学习工作流：导入 PDF / DOCX / Markdown 题库，全屏刷题，逐题复盘，积累生词与解析，再导出成可带走的文件。主链路 0 token，数据不离开本机。" />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://jasonsun2009cn.github.io/InteFlow/" />
     <link rel="alternate" hreflang="zh-CN" href="https://jasonsun2009cn.github.io/InteFlow/" />
     <link rel="alternate" hreflang="en" href="https://jasonsun2009cn.github.io/InteFlow/en.html" />
+    <link rel="alternate" hreflang="x-default" href="https://jasonsun2009cn.github.io/InteFlow/" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <script>
       document.documentElement.classList.add("js");
@@ -35,10 +30,9 @@
   <body>
     <a class="skip-link" href="#main">跳到主要内容</a>
     <div class="scroll-progress" aria-hidden="true"><span data-progress></span></div>
-
     <header class="site-header" data-header>
       <div class="wrap header-inner">
-        <a class="brand" href="#top" aria-label="InteFlow 首页">
+        <a class="brand" href="./" aria-label="InteFlow 首页">
           <img class="brand-mark" src="assets/favicon.svg" alt="" width="30" height="30" />
           <span class="brand-text">
             <strong>InteFlow</strong>
@@ -47,49 +41,29 @@
         </a>
 
         <nav class="site-nav" id="site-nav" aria-label="主要导航">
-          <a href="#position">概览</a>
-          <a href="#workflow">工作流</a>
-          <a href="#demo">试用</a>
-          <a href="#features">功能</a>
-          <a href="#themes">主题</a>
-          <a href="#architecture">技术</a>
-          <a href="#faq">问答</a>
-          <a
-            class="nav-github"
-            href="https://github.com/JasonSun2009CN/InteFlow"
-            target="_blank"
-            rel="noreferrer"
-            >GitHub ↗</a
-          >
+          <a href="download.html">下载</a>
+          <a href="features.html">功能</a>
+          <a href="demo.html">在线试用</a>
+          <a href="themes.html">主题</a>
+          <a href="features.html#architecture">技术</a>
+          <a href="features.html#faq">问答</a>
+          <a class="nav-github" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
         </nav>
 
         <div class="header-actions">
           <a class="lang-switch" href="en.html" hreflang="en" lang="en" aria-label="Switch to English">EN</a>
-          <a
-            class="ghost-link"
-            href="https://github.com/JasonSun2009CN/InteFlow"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a class="ghost-link" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">
             GitHub <span aria-hidden="true">↗</span>
           </a>
-          <a class="btn btn-small btn-accent" href="https://github.com/JasonSun2009CN/InteFlow/releases/latest" target="_blank" rel="noreferrer">下载桌面版 <span aria-hidden="true">↓</span></a>
-          <button
-            class="menu-btn"
-            type="button"
-            data-menu
-            aria-expanded="false"
-            aria-controls="site-nav"
-            aria-label="打开导航"
-          >
+          <a class="btn btn-small btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
+          <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="site-nav" aria-label="打开导航">
             <span></span><span></span>
           </button>
         </div>
       </div>
     </header>
-
     <main id="main">
-      <!-- ================================================================ hero -->
+<!-- ================================================================ hero -->
       <section class="hero" id="top">
         <div class="wrap hero-grid">
           <div class="hero-copy reveal">
@@ -103,12 +77,10 @@
             <div class="hero-actions">
               <a
                 class="btn btn-accent"
-                href="https://github.com/JasonSun2009CN/InteFlow/releases/latest"
-                target="_blank"
-                rel="noreferrer"
+                href="download.html"
                 >下载桌面版 <span aria-hidden="true">↓</span></a
               >
-              <a class="btn btn-outline" href="#demo">在线试用 <span aria-hidden="true">→</span></a>
+              <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
               <a
                 class="btn btn-outline"
                 href="https://github.com/JasonSun2009CN/InteFlow"
@@ -117,9 +89,11 @@
                 >GitHub 仓库 <span aria-hidden="true">↗</span></a
               >
             </div>
-            <p class="download-note">
-              macOS（Apple Silicon / Intel）· Windows ·
-              <a href="#quickstart">安装说明</a>
+                        <p class="download-note">
+              <a href="download.html#mac-arm64">macOS Apple Silicon</a> ·
+              <a href="download.html#mac-x64">macOS Intel</a> ·
+              <a href="download.html#windows">Windows</a> ·
+              <a href="download.html#install">安装说明</a>
             </p>
 
             <div class="hero-command">
@@ -211,983 +185,160 @@
         </div>
       </section>
 
-      <!-- ============================================================= position -->
-      <section class="section" id="position">
+      <section class="download-strip" id="download">
         <div class="wrap">
-          <div class="section-head reveal">
-            <p class="section-index">01 / POSITION</p>
-            <h2>先把边界说清楚。</h2>
-            <p class="section-lede">
-              InteFlow 不做“什么都能聊”的学习助手。它先把确定的事做对，再把可选的 AI
-              放在你明确按键之后。
-            </p>
-          </div>
-
-          <div class="rules-grid">
-            <article class="rule-card rule-dark reveal">
-              <div class="rule-top">
-                <span class="mono">RULE 01</span>
-                <span class="micro-badge micro-badge-light">0 TOKEN</span>
-              </div>
-              <h3>LLM 不在主链路。</h3>
-              <p>
-                导入、解析、判分、复盘、导出默认都是确定性的本地计算；AI 只作为显式操作或你开启的兜底出现。
-              </p>
-              <ul class="check-list">
-                <li>PDF / DOCX / Markdown 默认本地转换，0 token</li>
-                <li>AI 识别兜底：仅在你开启且确定性失败时尝试</li>
-                <li>AI 讲解 / 连通性测试 / 可选单词考试评分（显式）</li>
-                <li>关闭开关、无 key 或调用失败时回退本地并说明</li>
-              </ul>
-              <p class="rule-foot">一条链路跑通，不需要任何账号。</p>
-            </article>
-
-            <article class="rule-card rule-paper reveal" style="--delay: 80ms">
-              <div class="rule-top">
-                <span class="mono">RULE 02</span>
-                <span class="stamp">LOCAL FIRST</span>
-              </div>
-              <h3>数据默认留在这台电脑。</h3>
-              <p>
-                题库、作答、分析、生词表都存在仓库的 <code>data/</code> 下：一个 SQLite
-                文件，加上每套试卷的 <code>doc.ifmd.md</code> 与图片。默认不上传云端；使用 AI
-                时，只会把当前题目上下文发给你配置的服务商。
-              </p>
-              <ul class="check-list">
-                <li>没有账号，没有云端同步</li>
-                <li>备份 = 复制 <code>data/</code> 文件夹</li>
-                <li>删除 <code>data/</code> 即可从零开始</li>
-                <li>词典索引与导出文件也全部在本地</li>
-              </ul>
-              <p class="rule-foot">断网时，除了可选 AI，一切照常。</p>
-            </article>
-          </div>
-
-          <blockquote class="pull-quote reveal">
-            <p>“A study tool should still work on a plane.”</p>
-            <cite>断网也能导入、刷题、判分、复盘、导出。</cite>
-          </blockquote>
-        </div>
-      </section>
-
-      <!-- ============================================================= workflow -->
-      <section class="section section-alt" id="workflow">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <p class="section-index">02 / WORKFLOW</p>
-            <h2>五步，从文件到笔记。</h2>
-            <p class="section-lede">
-              没有隐藏的同步步骤，也没有必须在线的工作台。每一步都能单独停下来，改完再继续。
-            </p>
-          </div>
-
-          <ol class="steps">
-            <li class="step reveal">
-              <div class="step-marker">01</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>导入题库</h3>
-                  <span class="chip">CAPTURE</span>
-                </div>
-                <p>
-                  拖入 PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>。PyMuPDF
-                  负责双栏版面、题号、选项、答案表回填与图片抽取；扫描页自动走 OCR。可疑页面会在
-                  review 阶段停下，让你决定 Commit 还是 Cancel。
-                </p>
-                <ul class="step-tags">
-                  <li>≤ 60 MB</li>
-                  <li>逐页报告</li>
-                  <li>macOS Vision / Tesseract</li>
-                  <li>无选项 → 填空题</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>确定性转换</p>
-              </div>
-            </li>
-
-            <li class="step reveal">
-              <div class="step-marker">02</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>补齐答案</h3>
-                  <span class="chip">ANSWER KEY</span>
-                </div>
-                <p>
-                  缺答案的试卷进入答案录入页：逐题点字母、多选、填空题可添加多个可接受答案，或直接粘贴
-                  <code>1-A 2-C</code>、<code>ACBDA</code>、<code>3-AC</code>。保存前可预览，保存后回写源文件。
-                </p>
-                <ul class="step-tags">
-                  <li>字母网格</li>
-                  <li>批量粘贴</li>
-                  <li>多可接受答案</li>
-                  <li>校验 + 预览</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WRITE-BACK</span>
-                <p>同步 doc.ifmd.md</p>
-              </div>
-            </li>
-
-            <li class="step reveal">
-              <div class="step-marker">03</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>全屏刷题</h3>
-                  <span class="chip">PRACTICE</span>
-                </div>
-                <p>
-                  开始屏选择正计时或倒计时（记住上次的 <code>mm:ss</code>），进入考试式全屏界面。题号面板跳转、Mark
-                  for review 标记、<code>A–D</code> 与 <code>← →</code> 键盘操作，多选和填空都能作答。
-                </p>
-                <ul class="step-tags">
-                  <li>倒计时</li>
-                  <li>键盘操作</li>
-                  <li>题号面板</li>
-                  <li>交卷确认</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>答案提交前不出后端</p>
-              </div>
-            </li>
-
-            <li class="step reveal">
-              <div class="step-marker">04</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>逐题复盘</h3>
-                  <span class="chip chip-accent">CORE</span>
-                </div>
-                <p>
-                  全屏复盘工作台把题目、分析、AI Tutor、生词本放进 2-of-4
-                  分屏。左侧看题与正确答案，右侧用 Pages 式编辑器写解析，0.9 秒自动保存；拖一个词到生词本，直接从上下文里积累词汇。
-                </p>
-                <ul class="step-tags">
-                  <li>All / Wrong / Correct</li>
-                  <li>Markdown + KaTeX</li>
-                  <li>拖词入表</li>
-                  <li>Notebook 预览</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WORKSPACE</span>
-                <p>布局与比例会记住</p>
-              </div>
-            </li>
-
-            <li class="step reveal">
-              <div class="step-marker">05</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>沉淀与导出</h3>
-                  <span class="chip">OUTPUT</span>
-                </div>
-                <p>
-                  Mistakes 会自动汇总最近一次仍错的题，Starred 保存你手动标记的题；Sessions
-                  留下每次提交。一套试卷一套复盘笔记本，只导出已写解析的题；词表可导出 xlsx，也能生成单词考试结果二维码。
-                </p>
-                <ul class="step-tags">
-                  <li>Mistakes + Starred</li>
-                  <li>Sessions</li>
-                  <li>PDF / DOCX / MD</li>
-                  <li>xlsx · QR</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">PORTABLE</span>
-                <p>文件留在 data/exports/</p>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      <!-- ================================================================= demo -->
-      <section class="section demo-section" id="demo">
-        <div class="wrap">
-          <div class="demo-grid">
-            <div class="demo-copy reveal">
-              <p class="section-index">03 / LIVE DEMO</p>
-              <h2>先做几道题，<br />再决定装不装。</h2>
+          <div class="download-strip-head reveal">
+            <div>
+              <p class="section-index">DOWNLOAD / 桌面版</p>
+              <h2>先选平台，<br /><em>再开始。</em></h2>
               <p class="section-lede">
-                下面是一个跑在浏览器里的精简版：选答案、交卷、看判分和复盘。真正的应用用同一套流程，但把题库、词表和解析都留在你的电脑里。
+                桌面版把后端、前端、MathJax 与可选 OCR 打成一个安装包；不用装 Python / Node。
+                安装包由 GitHub Releases 发布，下面每个平台都会指向对应文件。
               </p>
-
-              <p class="demo-try-label mono">可以试</p>
-              <ul class="demo-try">
-                <li>选择题</li>
-                <li>填空</li>
-                <li>标记待看</li>
-                <li>交卷判分</li>
-                <li>2-of-4 复盘</li>
-                <li>生词收藏</li>
-              </ul>
-
-              <div class="demo-disclaimer">
-                <p class="mono">DEMO ≠ FULL APP</p>
-                <h3>这是精简演示，不是完整应用。</h3>
-                <ul>
-                  <li>
-                    <strong>固定 4 道示例题</strong>
-                    <span>不能导入 PDF / DOCX；完整应用才走导入、OCR 与答案录入。</span>
-                  </li>
-                  <li>
-                    <strong>没有后端</strong>
-                    <span>判分与计时都在浏览器里，作答不会保存；只有生词记在 localStorage。</span>
-                  </li>
-                  <li>
-                    <strong>AI Tutor 是预置文案</strong>
-                    <span>不会调用模型；完整应用只在你点击时发送当前题目上下文。</span>
-                  </li>
-                  <li>
-                    <strong>复盘是简化版</strong>
-                    <span>工具可以切换，但没有拖拽改比例、自动保存、Notebook 与导出。</span>
-                  </li>
-                  <li>
-                    <strong>只用默认主题</strong>
-                    <span>视觉模拟 Clear Blue；完整应用另有 4 套主题和设置。</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div class="demo-copy-actions">
-                <a
-                  class="btn btn-accent"
-                  href="https://github.com/JasonSun2009CN/InteFlow/releases/latest"
-                  target="_blank"
-                  rel="noreferrer"
-                  >下载桌面版 <span aria-hidden="true">↓</span></a
-                >
-                <a
-                  class="btn btn-outline"
-                  href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
-                  title="下载源码 ZIP（不含本地 data/ 与词典文件）"
-                  >源码 ZIP <span aria-hidden="true">↓</span></a
-                >
-              </div>
             </div>
-
-            <div class="demo-shell reveal" data-demo style="--delay: 100ms">
-              <div class="demo-chrome">
-                <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
-                <span class="demo-chrome-path">localhost:5173 <span>/ doc / demo / practice</span></span>
-                <span class="demo-chrome-badge"
-                  ><span class="live-dot" aria-hidden="true"></span> 精简演示</span
-                >
-              </div>
-
-              <div class="demo-body" data-demo-body>
-                <noscript>
-                  <p class="demo-noscript">
-                    这个演示需要 JavaScript。完整应用在本地运行，不依赖这个网页。
-                  </p>
-                </noscript>
-              </div>
-
-              <div class="demo-toast" data-demo-toast hidden></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================= features -->
-      <section class="section" id="features">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <p class="section-index">04 / FEATURE INDEX</p>
-            <h2>该有的，都在这里。</h2>
-            <p class="section-lede">
-              22 项已经落地的能力，覆盖导入、练习、复盘、词汇与输出。按阶段筛选，快速找到你需要的那一块。
-            </p>
+            <a class="btn btn-outline" href="download.html">安装说明 <span aria-hidden="true">→</span></a>
           </div>
 
-          <div class="filter-bar reveal" role="group" aria-label="按阶段筛选功能">
-            <button class="filter is-active" type="button" data-filter="all" aria-pressed="true">
-              全部 <span>22</span>
-            </button>
-            <button class="filter" type="button" data-filter="import" aria-pressed="false">
-              导入与整理 <span>7</span>
-            </button>
-            <button class="filter" type="button" data-filter="practice" aria-pressed="false">
-              练习与判分 <span>2</span>
-            </button>
-            <button class="filter" type="button" data-filter="review" aria-pressed="false">
-              复盘与收藏 <span>5</span>
-            </button>
-            <button class="filter" type="button" data-filter="vocab" aria-pressed="false">
-              词汇与词典 <span>4</span>
-            </button>
-            <button class="filter" type="button" data-filter="output" aria-pressed="false">
-              输出与系统 <span>4</span>
-            </button>
-            <p class="filter-count" data-filter-count aria-live="polite">显示 22 项</p>
+          <div class="platform-grid is-four reveal">
+        <a class="platform-card" href="download.html#mac-arm64" data-download-platform="mac-arm64">
+          <div class="platform-card-top">
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
+            <span class="platform-tag">.dmg · arm64</span>
+          </div>
+          <div class="platform-copy">
+            <strong>macOS · Apple Silicon</strong>
+            <p>M1 / M2 / M3 / M4 芯片</p>
+          </div>
+          <div class="platform-action">
+            <span data-download-label>查看下载</span>
+            <em aria-hidden="true">↓</em>
+          </div>
+        </a>
+        <a class="platform-card" href="download.html#mac-x64" data-download-platform="mac-x64">
+          <div class="platform-card-top">
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
+            <span class="platform-tag">.dmg · x64</span>
+          </div>
+          <div class="platform-copy">
+            <strong>macOS · Intel</strong>
+            <p>Intel 芯片的 Mac</p>
+          </div>
+          <div class="platform-action">
+            <span data-download-label>查看下载</span>
+            <em aria-hidden="true">↓</em>
+          </div>
+        </a>
+        <a class="platform-card" href="download.html#windows" data-download-platform="win-x64">
+          <div class="platform-card-top">
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></span>
+            <span class="platform-tag">.exe · x64</span>
+          </div>
+          <div class="platform-copy">
+            <strong>Windows</strong>
+            <p>Windows 10 / 11 · 64 位</p>
+          </div>
+          <div class="platform-action">
+            <span data-download-label>查看下载</span>
+            <em aria-hidden="true">↓</em>
+          </div>
+        </a>
+        <a class="platform-card platform-card--source" href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip">
+          <div class="platform-card-top">
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span>
+            <span class="platform-tag">.zip · source</span>
+          </div>
+          <div class="platform-copy">
+            <strong>源码运行</strong>
+            <p>任意平台 · Python 3.11+ / Node 18+</p>
+          </div>
+          <div class="platform-action">
+            <span data-download-label>下载源码</span>
+            <em aria-hidden="true">↓</em>
+          </div>
+        </a>
           </div>
 
-          <div class="feature-grid" data-feature-grid>
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">01</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>多格式导入</h3>
-              <p>
-                拖拽上传 PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>，60 MB
-                以内。导入流水线给出逐页报告，可疑页面可暂停复核。
-              </p>
-              <ul class="feature-tags"><li>PDF</li><li>DOCX</li><li>Markdown</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">02</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>PDF 结构识别</h3>
-              <p>
-                双栏版面、题号、选项、答案表回填与图片抽取。识别不到选项时按填空题处理，不猜测、不静默修补。
-              </p>
-              <ul class="feature-tags"><li>PyMuPDF</li><li>答案回填</li><li>图片抽取</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">03</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>扫描件 OCR</h3>
-              <p>
-                按页面文本密度判断扫描页。macOS 优先用 Vision，其他系统走 Tesseract；没有引擎时给出明确提示，不会崩溃。
-              </p>
-              <ul class="feature-tags"><li>Vision</li><li>Tesseract</li><li>可选安装</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">04</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>内置题库</h3>
-              <p>
-                随仓库附带《SAT 机考 25 年语文合集（下）》：44 个单元、1,186 道题，可按单元 Add 或一键 Add all。
-              </p>
-              <ul class="feature-tags"><li>44 units</li><li>1,186 题</li><li>离线 · 幂等</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">05</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Library 与学科</h3>
-              <p>
-                一览题数、已答数与答案状态。自定义学科名称和颜色，在列表里行内归类、现场新建，并按学科筛选试卷。
-              </p>
-              <ul class="feature-tags"><li>Subject 分组</li><li>调色板</li><li>筛选</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">06</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>答案录入</h3>
-              <p>
-                字母网格、多选、填空题多可接受答案；支持 <code>1-A 2-C</code>、<code>1. A</code>、<code>ACBDA</code>、<code>3-AC</code>
-                等批量粘贴，校验后回写源文件。
-              </p>
-              <ul class="feature-tags"><li>批量粘贴</li><li>多答案</li><li>Preview</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">07</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>InteFlow-MD</h3>
-              <p>
-                纯文本中间格式：front matter + <code>:::q</code> 题目块。公式、图片、多选、填空与多答案都有确定语法，可手写、可模板、可回写。
-              </p>
-              <ul class="feature-tags"><li>开放格式</li><li>round-trip</li><li>KaTeX</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">08</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>考试式全屏练习</h3>
-              <p>
-                正计时或倒计时（记住上次值）、题号面板、Mark for review、<code>A–D</code> 与箭头键、多选与填空、交卷确认。
-              </p>
-              <ul class="feature-tags"><li>全屏</li><li>键盘</li><li>计时</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">09</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>确定性判分</h3>
-              <p>
-                多选必须全对，填空在 NFKC 归一化后比较。正确答案在提交前不会下发；补录答案后可按已存作答重新判分。
-              </p>
-              <ul class="feature-tags"><li>0 token</li><li>regrade</li><li>答案不出后端</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">10</span><span class="feature-cat">REVIEW</span></div>
-              <h3>复盘工作台</h3>
-              <p>
-                题目 / 分析 / AI Tutor / 生词本四选二分屏。每侧可切换工具，选择已在另一侧的工具时自动交换；分隔条可拖拽或用方向键。
-              </p>
-              <ul class="feature-tags"><li>2-of-4</li><li>可拖拽</li><li>布局记忆</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">11</span><span class="feature-cat">REVIEW</span></div>
-              <h3>分析笔记本</h3>
-              <p>
-                每题一页 Pages 式编辑器，支持 Markdown、KaTeX 与图片；约 0.9 秒自动保存，⌘S 立即保存，离开再回来继续写。
-                空白的分析页会先用 Settings 里的错题分析模板填充，已有分析绝不覆盖。
-              </p>
-              <ul class="feature-tags"><li>autosave</li><li>Write / Preview</li><li>Notebook</li><li>template</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">12</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Mistakes + Starred</h3>
-              <p>
-                错题按题去重并保留最近一次作答，后来做对自动移出；Starred 保存手动标记。两栏都支持搜索、按考试过滤和时间排序。
-              </p>
-              <ul class="feature-tags"><li>latest attempt</li><li>star</li><li>search</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">13</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Sessions 作答历史</h3>
-              <p>
-                只有“已提交”的作答才会留下记录。按时间倒序，可搜索、可打开复盘、可删除；中途退出练习不会留下痕迹。
-              </p>
-              <ul class="feature-tags"><li>历史</li><li>搜索</li><li>删除</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">14</span><span class="feature-cat">REVIEW</span></div>
-              <h3>AI Tutor（显式）</h3>
-              <p>
-                只有点击 AI 讲解才调用模型。内置 19 家服务商目录，支持 OpenAI 与 Anthropic 两套协议、Base URL 覆盖与连通性测试。
-              </p>
-              <ul class="feature-tags"><li>19 providers</li><li>2 protocols</li><li>masked key</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">15</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>本地韦氏词典</h3>
-              <p>
-                用户自备 Eudic <code>.eudb</code>，首次查词自动构建 SQLite 索引，共 92,006 条。纯英英释义，可选词条内的
-                Definition for English Learners 栏目。
-              </p>
-              <ul class="feature-tags"><li>offline</li><li>92,006</li><li>0 token</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">16</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>我的自定义词典</h3>
-              <p>
-                全局自定义词表，可手动增删，或导入 CSV / TSV / JSON / TXT。查词时先查自定义词典，未命中再回退韦氏。
-              </p>
-              <ul class="feature-tags"><li>My dictionary</li><li>import</li><li>优先命中</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">17</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>生词本与拖词</h3>
-              <p>
-                一套试卷一份词表（Word · POS · Meaning · Notes）。从题目或选项选中单词拖进生词本，可选 AI
-                在真实韦氏候选里选义，也能手动增改与导出 xlsx。
-              </p>
-              <ul class="feature-tags"><li>drag-to-add</li><li>sense match</li><li>xlsx</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">18</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>单词考试</h3>
-              <p>
-                English → Chinese 或 Chinese → English，随机抽样或全测（≤500）。本地宽松判分，可选 AI
-                严格判分并自动回退；结果生成紧凑 JSON 二维码（大卷自动分片）和 JSON 下载。
-              </p>
-              <ul class="feature-tags"><li>EN↔ZH</li><li>QR</li><li>lenient grading</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">19</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>导出套件</h3>
-              <p>
-                复盘笔记本 md / docx / pdf 只含已写解析的题；整套试卷可导出 PDF / DOCX；词表导出 xlsx。数学公式经
-                MathJax 桥渲染，缺失时降级纯文本而不是失败。
-              </p>
-              <ul class="feature-tags"><li>WeasyPrint</li><li>python-docx</li><li>openpyxl</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">20</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>五套界面主题</h3>
-              <p>
-                Clear Blue、Paper &amp; Ink、Minimal Light、Midnight Navy、Warm Editorial。Settings →
-                Appearance 切换，localStorage 记忆；桌面侧栏还能收成 80px 图标栏。全屏练习页刻意保持中性。
-              </p>
-              <ul class="feature-tags"><li>5 themes</li><li>token layer</li><li>localStorage</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">21</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>设置与 AI 开关</h3>
-              <p>
-                用户名（导出封面）、错题分析模板、AI 识别兜底、AI 选义、Learner 释义、自定义词典、单词考试 AI
-                评分。所有开关都写清默认值与回退行为。
-              </p>
-              <ul class="feature-tags"><li>user name</li><li>analysis template</li><li>fallbacks</li><li>key masking</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">22</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>本地数据与可测试性</h3>
-              <p>
-                SQLite + 文件系统并存，65 条 API，305 个后端测试与 142 个前端组件测试。MIT
-                开源，随时可以自己改一条链路。
-              </p>
-              <ul class="feature-tags"><li>MIT</li><li>305 + 142 tests</li><li>65 endpoints</li></ul>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- =============================================================== numbers -->
-      <section class="numbers" aria-label="项目数据">
-        <div class="wrap numbers-grid">
-          <div class="number-item reveal"><strong>1,186</strong><span>内置题目</span></div>
-          <div class="number-item reveal"><strong>44</strong><span>内置单元</span></div>
-          <div class="number-item reveal"><strong>92,006</strong><span>词典条目</span></div>
-          <div class="number-item reveal"><strong>19</strong><span>LLM 服务商</span></div>
-          <div class="number-item reveal"><strong>65</strong><span>API 端点</span></div>
-          <div class="number-item reveal"><strong>447</strong><span>自动化测试</span></div>
-        </div>
-      </section>
-
-      <!-- ================================================================ themes -->
-      <section class="section themes-section" id="themes">
-        <div class="wrap">
-          <div class="section-head section-head-dark reveal">
-            <p class="section-index">05 / APPEARANCE</p>
-            <h2>五套主题，一个工作流。</h2>
-            <p class="section-lede">
-              颜色、字体、圆角、阴影全部走一层语义 token。切换主题不改变信息结构，只改变你面对它的感觉。
-              下面是真实 HTML/CSS 预览，不是截图。
-            </p>
-          </div>
-
-          <div class="theme-lab reveal">
-            <div class="theme-side">
-              <div class="theme-picker" role="tablist" aria-label="主题预览">
-              <button
-                class="theme-choice is-active"
-                type="button"
-                role="tab"
-                aria-selected="true"
-                aria-controls="theme-panel"
-                data-theme-id="clear-blue"
-              >
-                <span class="theme-dots" aria-hidden="true"><i style="--c: #f2f5f9"></i><i style="--c: #ffffff"></i><i style="--c: #0057b8"></i><i style="--c: #101c30"></i></span>
-                <span class="theme-choice-text"><strong>Clear Blue</strong><small>默认 · 蓝白考试感</small></span>
-                <span class="theme-choice-arrow" aria-hidden="true">↗</span>
-              </button>
-
-              <button
-                class="theme-choice"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-controls="theme-panel"
-                data-theme-id="paper-ink"
-              >
-                <span class="theme-dots" aria-hidden="true"><i style="--c: #faf8f3"></i><i style="--c: #fffdf8"></i><i style="--c: #9a402c"></i><i style="--c: #1c1916"></i></span>
-                <span class="theme-choice-text"><strong>Paper &amp; Ink</strong><small>暖纸 · 衬线 · 印章红</small></span>
-                <span class="theme-choice-arrow" aria-hidden="true">↗</span>
-              </button>
-
-              <button
-                class="theme-choice"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-controls="theme-panel"
-                data-theme-id="minimal-light"
-              >
-                <span class="theme-dots" aria-hidden="true"><i style="--c: #ffffff"></i><i style="--c: #fbfbfa"></i><i style="--c: #1f1f1f"></i><i style="--c: #191919"></i></span>
-                <span class="theme-choice-text"><strong>Minimal Light</strong><small>极简 · 高密度 · 安静</small></span>
-                <span class="theme-choice-arrow" aria-hidden="true">↗</span>
-              </button>
-
-              <button
-                class="theme-choice"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-controls="theme-panel"
-                data-theme-id="midnight-navy"
-              >
-                <span class="theme-dots" aria-hidden="true"><i style="--c: #0a1120"></i><i style="--c: #111a2c"></i><i style="--c: #7aa2f7"></i><i style="--c: #e8edf7"></i></span>
-                <span class="theme-choice-text"><strong>Midnight Navy</strong><small>暗色 · 深海军蓝 · 低眩光</small></span>
-                <span class="theme-choice-arrow" aria-hidden="true">↗</span>
-              </button>
-
-              <button
-                class="theme-choice"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-controls="theme-panel"
-                data-theme-id="warm-editorial"
-              >
-                <span class="theme-dots" aria-hidden="true"><i style="--c: #f7efe2"></i><i style="--c: #fffbf3"></i><i style="--c: #b4552b"></i><i style="--c: #241c15"></i></span>
-                <span class="theme-choice-text"><strong>Warm Editorial</strong><small>奶油 · 陶土 · 大字排版</small></span>
-                <span class="theme-choice-arrow" aria-hidden="true">↗</span>
-              </button>
-              </div>
-
-              <aside class="theme-aside">
-                <p class="mono">ONE TOKEN LAYER</p>
-                <p>五套主题共用同一套组件结构，只替换颜色、显示字体、圆角与阴影。</p>
-                <dl>
-                  <div><dt>THEMES</dt><dd>5</dd></div>
-                  <div><dt>LAYOUTS</dt><dd>1</dd></div>
-                  <div><dt>STORAGE</dt><dd>localStorage</dd></div>
-                </dl>
-              </aside>
-            </div>
-
-            <div class="theme-stage" id="theme-panel" role="tabpanel" aria-label="主题实时预览">
-              <div class="browser">
-                <div class="browser-bar">
-                  <span class="traffic traffic-light" aria-hidden="true"><i></i><i></i><i></i></span>
-                  <span class="browser-address">localhost:5173 <span>/ theme preview</span></span>
-                  <a
-                    class="browser-open"
-                    data-theme-open
-                    href="themes/clear-blue.html"
-                    target="_blank"
-                    rel="noreferrer"
-                    >整页打开 ↗</a
-                  >
-                </div>
-                <div class="browser-screen">
-                  <iframe
-                    id="theme-preview"
-                    src="themes/clear-blue.html"
-                    title="Clear Blue 主题预览"
-                    tabindex="-1"
-                  ></iframe>
-                  <span class="browser-loading" data-theme-loading>Loading preview…</span>
-                </div>
-              </div>
-
-              <div class="theme-caption">
-                <div class="theme-caption-text">
-                  <p class="mono">CURRENT THEME</p>
-                  <h3 data-theme-name>Clear Blue</h3>
-                  <p data-theme-note>蓝白主色、干净边界，最接近考试当天熟悉的界面。</p>
-                </div>
-                <div class="theme-palette" data-theme-palette aria-label="主题色板"></div>
-              </div>
-            </div>
-          </div>
-
-          <p class="theme-footnote reveal">
-            主题选择存在 <code>inteflow.theme</code>，刷新后仍在。全屏练习页不跟随主题，保持中性的
-            slate / blue；复盘页跟随。设计源文件保留在仓库的
-            <a
-              href="https://github.com/JasonSun2009CN/InteFlow/tree/main/theme-examples"
-              target="_blank"
-              rel="noreferrer"
-              ><code>theme-examples/</code></a
-            >。
+          <p class="download-strip-note">
+            未签名版本首次打开：macOS 右键 →「打开」；Windows「更多信息」→「仍要运行」。
+            <a href="download.html#install">安装说明</a> ·
+            <a href="https://github.com/JasonSun2009CN/InteFlow/releases">所有版本</a> ·
+            <a href="download.html#source">从源码运行</a>
           </p>
         </div>
       </section>
 
-      <!-- ========================================================== architecture -->
-      <section class="section" id="architecture">
+      <section class="section" id="why">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">06 / FORMAT &amp; STACK</p>
-            <h2>确定的格式，确定的链路。</h2>
+            <p class="section-index">01 / WHY</p>
+            <h2>一条链路，<br />三件事做扎实。</h2>
             <p class="section-lede">
-              每次导入都先变成 InteFlow-MD，再由确定性状态机解析。没有隐藏的二次整理，也没有“看起来像”的猜测。
+              不把“什么都能聊”当成学习工具。InteFlow 先把导入、复盘和带走做对，再把可选的 AI 放到你明确按键之后。
             </p>
           </div>
-
-          <div class="arch-grid">
-            <div class="code-panel reveal">
-              <div class="code-tabs" role="tablist" aria-label="代码示例">
-                <button class="code-tab is-active" type="button" role="tab" aria-selected="true" data-code-tab="ifmd">
-                  sample.ifmd.md
-                </button>
-                <button class="code-tab" type="button" role="tab" aria-selected="false" data-code-tab="start">
-                  start.sh
-                </button>
-                <button class="code-tab" type="button" role="tab" aria-selected="false" data-code-tab="data">
-                  data/
-                </button>
-                <button class="copy-btn code-copy" type="button" data-copy-panel>复制</button>
-              </div>
-
-              <div class="code-body">
-                <pre class="code-pane is-active" data-code-pane="ifmd"><code><span class="c">---
-ifmd: 1
-title: "2024 International School Final"
-answers: none
----</span>
-
-:::q {#Q001 sec=rw no=1 difficulty=m}
-@material
-Despite the committee's reservations, the new policy was adopted
-without amendment.
-
-@stem
-The author's attitude toward the committee is best described as
-
-- A. undisguised contempt
-- B. cautious approval
-- C. outright indifference
-- D. blunt hostility
-! answer: B
-:::</code></pre>
-
-                <pre class="code-pane" data-code-pane="start"><code><span class="c"># macOS / Linux</span>
-git clone https://github.com/JasonSun2009CN/InteFlow.git
-cd InteFlow
-./start.sh
-
-<span class="c"># Windows PowerShell</span>
-.\start.ps1
-
-<span class="c"># first run: create .venv, install deps, start both, open browser</span>
-<span class="c"># backend  → http://localhost:8000</span>
-<span class="c"># frontend → http://localhost:5173</span></code></pre>
-
-                <pre class="code-pane" data-code-pane="data"><code>data/
-├── app.db                 <span class="c">SQLite: documents, questions,</span>
-│                          <span class="c">sessions, analysis_pages, subjects</span>
-├── docs/&lt;id&gt;/
-│   ├── doc.ifmd.md        <span class="c">source of truth</span>
-│   └── assets/            <span class="c">extracted figures</span>
-├── dictionary/mw.db       <span class="c">rebuildable MW index</span>
-├── exports/               <span class="c">notebook + document exports</span>
-└── jobs/ · tmp/           <span class="c">import pipeline scratch</span></code></pre>
-              </div>
-
-              <div class="code-foot">
-                <span class="mono">DETERMINISTIC STATE MACHINE</span>
-                <span>format v1</span>
-              </div>
-            </div>
-
-            <div class="arch-side">
-              <div class="arch-diagram reveal">
-                <div class="arch-node">
-                  <span class="arch-kicker">BROWSER</span>
-                  <strong>React 19 SPA</strong>
-                  <small>Vite · TypeScript · Tailwind 4</small>
-                </div>
-                <div class="arch-link"><span>/api/*</span><i aria-hidden="true">↓</i></div>
-                <div class="arch-node arch-node-strong">
-                  <span class="arch-kicker">BACKEND</span>
-                  <strong>FastAPI</strong>
-                  <small>13 routers · 65 endpoints</small>
-                </div>
-                <div class="arch-link arch-link-split"><i aria-hidden="true">↓</i></div>
-                <div class="arch-row">
-                  <div class="arch-node arch-node-small">
-                    <strong>SQLite</strong>
-                    <small>app.db</small>
-                  </div>
-                  <div class="arch-node arch-node-small">
-                    <strong>Files</strong>
-                    <small>ifmd + assets</small>
-                  </div>
-                  <div class="arch-node arch-node-small arch-node-dashed">
-                    <strong>LLM</strong>
-                    <small>explicit only</small>
-                  </div>
-                </div>
-              </div>
-
-              <ul class="stack-list reveal">
-                <li><span>Backend</span><strong>FastAPI · Python 3.11+</strong></li>
-                <li><span>Frontend</span><strong>React 19 · Vite 7 · Tailwind 4</strong></li>
-                <li><span>Storage</span><strong>SQLite + local files</strong></li>
-                <li><span>Convert</span><strong>PyMuPDF · python-docx · OCR</strong></li>
-                <li><span>Export</span><strong>WeasyPrint · openpyxl · MathJax</strong></li>
-                <li><span>Tests</span><strong>pytest 305 · frontend 142</strong></li>
-              </ul>
-            </div>
+          <div class="home-highlights">
+            <article class="home-highlight reveal">
+              <span class="mono">CAPTURE</span>
+              <h3>题库进来</h3>
+              <p>PDF、DOCX、Markdown 或现成的 InteFlow-MD，导入时逐页报告；图片、答案表与双栏结构都留在本地。</p>
+              <a href="features.html#features">看导入能力 →</a>
+            </article>
+            <article class="home-highlight reveal" style="--delay: 70ms">
+              <span class="mono">REVIEW</span>
+              <h3>逐题复盘</h3>
+              <p>题目、分析、AI Tutor、生词本四块面板自由切换。写自己的解析，而不是只看标准答案。</p>
+              <a href="demo.html">进入在线试用 →</a>
+            </article>
+            <article class="home-highlight reveal" style="--delay: 140ms">
+              <span class="mono">PORTABLE</span>
+              <h3>把理解带走</h3>
+              <p>笔记本导出 md / docx / pdf，词表导出 xlsx；备份就是复制 data/ 文件夹，没有云端锁定。</p>
+              <a href="features.html#features">看输出能力 →</a>
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- =================================================================== faq -->
-      <section class="section section-alt" id="faq">
-        <div class="wrap faq-grid">
-          <div class="faq-intro reveal">
-            <p class="section-index">07 / QUESTIONS</p>
-            <h2>还有疑问？</h2>
-            <p>
-              这里先回答最容易卡住的几件事。更细的规格、数据模型与格式说明都在仓库文档里。
-            </p>
-            <a
-              class="btn btn-outline"
-              href="https://github.com/JasonSun2009CN/InteFlow/issues"
-              target="_blank"
-              rel="noreferrer"
-              >在 GitHub 提问 <span aria-hidden="true">↗</span></a
-            >
+      <section class="section section-alt" id="explore">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <p class="section-index">02 / EXPLORE</p>
+            <h2>别只看首页。</h2>
+            <p class="section-lede">下载、试用、功能与主题各自成页，按你现在的需要往下走。</p>
           </div>
-
-          <div class="faq-list reveal">
-            <details class="faq-item" open>
-              <summary><span class="faq-no">01</span>只支持 SAT 吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  不是。题目的 <code>sec</code> 是自由标签（<code>rw</code>、<code>math</code>、<code>physics</code>、<code>history</code>……），不是固定枚举。任何“题号 + 两个以上选项”的题库都能导入；没有识别到选项的题会按填空题处理。内置 SAT 题库只是开箱即用的示例。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">02</span>必须联网或配置 API Key 吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  不需要。导入、解析、判分、复盘、生词本、导出都不依赖网络。只有 AI 讲解、连通性测试、以及你主动开启的单词考试 AI 评分会调用外部模型，并把当前题目 / 答案上下文发送给你配置的服务商；无 key 或调用失败时会回退本地并提示。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">03</span>我的数据存在哪里？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  全部在仓库的 <code>data/</code>：<code>app.db</code> 存结构化数据，<code>docs/&lt;id&gt;/doc.ifmd.md</code> 存原始题目与答案，<code>assets/</code> 存图片，导出文件在 <code>exports/</code>。备份就复制整个目录，重置就删掉它（后端会重建）。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">04</span>需要装哪些系统依赖？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  基础运行只需要 Python 3.11+ 与 Node.js 18+；一键脚本会创建 <code>.venv</code> 并安装前后端依赖。PDF 导出额外需要 pango / cairo / gdk-pixbuf / harfbuzz；扫描件 OCR 可选安装系统 <code>tesseract</code>，macOS 也可用 Vision；数学公式导出可再装 MathJax 桥。缺哪一项，只有对应功能降级或提示，不会拖垮其他功能。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">05</span>能用我自己的词典吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  可以。Settings 里的 My dictionary 支持手动增删，也能导入 CSV / TSV / JSON / TXT，查词时优先于韦氏。若要英英韦氏释义，把 Eudic <code>.eudb</code> 放进 <code>dictionary/</code>，首次查词会自动建索引。版权词典文件不会随仓库分发。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">06</span>为什么练习页不跟随主题？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  这是刻意的。刷题时需要最低的视觉干扰和稳定的对比度，所以全屏练习页保持在 <code>.app-theme</code> 之外，使用中性的 slate / blue；复盘工作台则跟随你选择的主题。主题只改变视觉语言，不改变题目布局与交互。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">07</span>导出的笔记本包含什么？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  一套试卷对应一套复盘笔记本：封面带用户名与分数，正文按题序包含所有已写解析的题目（题干、图表、你的分析）。支持 Markdown / DOCX / PDF，浏览器直接下载，同时在 <code>data/exports/</code> 留一份副本。整套试卷的 PDF / DOCX 则从 Library 导出。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">08</span>应用界面是中文吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  应用界面是英文，按钮与页面名都和 README 一致；文档提供中文与英文两版。题库内容不受语言限制，中英混合的试卷都能导入与练习。这个官网用中文介绍，只是为了让第一次接触的人更快看懂完整链路。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">09</span>可以自定义错题分析的模板吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  可以。在 Settings → Analysis template 写一份 Markdown 模板，空的错题分析页会自动填入；已有分析绝不覆盖。
-                  模板只是初始草稿，未改动不会保存，开始写作后才走自动保存，所以不会把空白题误算成“已写解析”而进入导出。
-                </p>
-              </div>
-            </details>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================= quickstart -->
-      <section class="cta-section" id="quickstart">
-        <div class="wrap cta-grid">
-          <div class="cta-copy reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> READY WHEN YOU ARE</p>
-            <h2>把下一套题，<br />变成自己的知识流。</h2>
-            <p>
-              下载桌面版，双击即用：不用装 Python / Node，数据只存在你自己的电脑上。
-              也可以克隆仓库从源码运行。
-            </p>
-            <div class="cta-actions">
-              <a
-                class="btn btn-accent"
-                href="https://github.com/JasonSun2009CN/InteFlow/releases/latest"
-                target="_blank"
-                rel="noreferrer"
-                >下载桌面版 <span aria-hidden="true">↓</span></a
-              >
-              <a
-                class="btn btn-outline"
-                href="https://github.com/JasonSun2009CN/InteFlow"
-                target="_blank"
-                rel="noreferrer"
-                >前往 GitHub <span aria-hidden="true">↗</span></a
-              >
-              <a
-                class="btn btn-outline"
-                href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip"
-                title="下载源码 ZIP（不含本地 data/ 与词典文件）"
-                >源码 ZIP <span aria-hidden="true">↓</span></a
-              >
-              <a
-                class="btn btn-outline"
-                href="https://github.com/JasonSun2009CN/InteFlow/blob/main/README-cn.md"
-                target="_blank"
-                rel="noreferrer"
-                >阅读中文文档</a
-              >
-            </div>
-            <p class="download-note">
-              macOS（Apple Silicon / Intel）· Windows。未签名版本首次打开：macOS 右键 →「打开」；
-              Windows「更多信息」→「仍要运行」。
-            </p>
-          </div>
-
-          <div class="cta-panel reveal" style="--delay: 80ms">
-            <div class="cta-panel-head">
-              <span class="mono">OR FROM SOURCE</span>
-              <span class="micro-badge">5 MIN</span>
-            </div>
-            <div class="command-row">
-              <span class="prompt" aria-hidden="true">$</span>
-              <code>git clone https://github.com/JasonSun2009CN/InteFlow.git</code>
-              <button class="copy-btn" type="button" data-copy="git clone https://github.com/JasonSun2009CN/InteFlow.git">复制</button>
-            </div>
-            <div class="command-row">
-              <span class="prompt" aria-hidden="true">$</span>
-              <code>cd InteFlow &amp;&amp; ./start.sh</code>
-              <button class="copy-btn" type="button" data-copy="cd InteFlow && ./start.sh">复制</button>
-            </div>
-            <p class="cta-note">
-              Windows 用 <code>.\start.ps1</code>，也可以双击 <code>start.bat</code> / <code>InteFlow.command</code>。首次运行会自动建环境；之后直接启动。
-            </p>
+          <div class="explore-grid">
+            <a class="explore-card reveal" href="demo.html">
+              <span class="mono">LIVE DEMO</span>
+              <strong>在线试用</strong>
+              <span>做题、工作区、错题集、生词集，四个页面分开看。</span>
+              <em>开始做题 →</em>
+            </a>
+            <a class="explore-card reveal" href="features.html" style="--delay: 60ms">
+              <span class="mono">FEATURES</span>
+              <strong>完整功能</strong>
+              <span>22 项能力，从导入到导出的完整索引。</span>
+              <em>看功能 →</em>
+            </a>
+            <a class="explore-card reveal" href="themes.html" style="--delay: 120ms">
+              <span class="mono">THEMES</span>
+              <strong>五套主题</strong>
+              <span>真实 HTML/CSS 预览，不是截图。</span>
+              <em>看主题 →</em>
+            </a>
+            <a class="explore-card reveal" href="download.html" style="--delay: 180ms">
+              <span class="mono">DOWNLOAD</span>
+              <strong>下载与安装</strong>
+              <span>macOS / Windows / 源码，安装与更新说明。</span>
+              <em>去下载 →</em>
+            </a>
           </div>
         </div>
       </section>
     </main>
-
     <footer class="site-footer">
       <div class="wrap footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="#top" aria-label="InteFlow 首页">
+          <a class="brand" href="./" aria-label="InteFlow 首页">
             <img class="brand-mark" src="assets/favicon.svg" alt="" width="30" height="30" />
             <span class="brand-text"><strong>InteFlow</strong><small>local-first study workflow</small></span>
           </a>
@@ -1197,12 +348,12 @@ cd InteFlow
 
         <nav class="footer-col" aria-label="产品">
           <h3>产品</h3>
-          <a href="#workflow">工作流</a>
-          <a href="#demo">在线试用</a>
-          <a href="#features">功能索引</a>
-          <a href="#themes">主题</a>
-          <a href="https://github.com/JasonSun2009CN/InteFlow/releases/latest" target="_blank" rel="noreferrer">下载桌面版</a>
-          <a href="#quickstart">快速开始</a>
+          <a href="features.html">工作流与功能</a>
+          <a href="demo.html">在线试用</a>
+          <a href="themes.html">主题</a>
+          <a href="download.html">下载桌面版</a>
+          <a href="download.html#install">安装说明</a>
+          <a href="download.html#source">从源码运行</a>
         </nav>
 
         <nav class="footer-col" aria-label="文档">
@@ -1227,7 +378,7 @@ cd InteFlow
         <p>Built local-first. No accounts, no tracking.</p>
       </div>
     </footer>
-
     <script src="assets/site.js" defer></script>
+    <script src="assets/downloads.js" defer></script>
   </body>
 </html>

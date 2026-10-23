@@ -86,7 +86,7 @@ flowchart LR
 | **导出** | 复盘笔记本 md / docx / pdf（只含已写解析的题，封面含用户名，同时在 `data/exports/` 留副本）；整套试卷 PDF / DOCX；词表 `.xlsx` |
 | **设置** | 19 家 LLM 服务商目录（默认 OrcaRouter，OpenAI / Anthropic 两种协议）、Base URL、API Key（掩码）、模型、连通性测试；用户名；分析模板；AI 识别兜底；AI 选义；学习者释义；自定义词典；单词考试 AI 评分；**English / 中文** 界面切换 |
 | **外观** | 5 套主题（Clear Blue / Paper & Ink / Minimal Light / Midnight Navy / Warm Editorial），Settings → Appearance 即时切换；桌面侧栏可收成 80px 图标栏；移动端为抽屉 |
-| **官网** | `website/` 纯静态中英双语落地页，含浏览器内可交互的 `#demo`（4 道示例题、计时、交卷、复盘、生词收藏）与 Download ZIP；由 GitHub Pages 自动发布 |
+| **官网** | `website/` 纯静态多页中英双语站点：首页前段是平台下载区，`download*.html` 有 macOS / Windows 安装包与源码说明，`features*.html` 是完整功能与工作流，`demo*.html` 是四个浏览器内演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 是主题预览；由 GitHub Pages 自动发布 |
 
 ## 6. 设计上值得说的几个决定
 
@@ -208,7 +208,7 @@ cd InteFlow
 - macOS 可在 Finder 里双击 **`InteFlow.command`**；Windows 用 **`start.ps1`** 或双击 **`start.bat`**。
 - 只想建环境：`./scripts/setup.sh`；已有环境直接启动：`./scripts/dev.sh`。
 - 打开 <http://localhost:5173>；后端健康检查 <http://localhost:8000/api/health>。
-- 不想本地安装也可以先看静态官网 `website/index.html`，其中的 `#demo` 可直接在浏览器里做题、交卷、复盘。
+- 不想本地安装也可以先看静态官网 `website/index.html`，首页前段有平台下载；`website/demo.html` 可直接在浏览器里做题、交卷、复盘。
 
 **最短上手路径**：Library → 展开内置题库卡片 → **Add all** → 回 Exams → **Start** → 交卷 → 复盘写解析 →
 Review 看错题 / Vocabulary 建词表 → Notebook 导出。

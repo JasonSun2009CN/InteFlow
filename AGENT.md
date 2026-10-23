@@ -110,6 +110,18 @@
 > `website/assets/site.js` 的 `DEMO` 对象，样式在 `site.css`。Hero、Demo 与 Quick start 都加了
 > **Download ZIP**，指向 GitHub 的 `archive/refs/heads/main.zip`（压缩包不随网站入库）。
 >
+> 2026-10-23：**官网改为多页 + 平台下载前移**。首页 `index.html` / `en.html` 在 hero 下直接放
+> “先选平台”下载区（macOS Apple Silicon / macOS Intel / Windows x64 / 源码），header 与 hero 主按钮
+> 也改为进入 `download.html` / `download-en.html`。内容拆分为 `features*.html`（边界 / 工作流 / 22 项功能 /
+> 架构 / FAQ）、`demo*.html`（四个独立演示页：做题 / 2-of-4 工作区 / 错题集 / 生词集）、
+> `themes*.html`（主题预览）与 `download*.html`（平台安装包、首次打开说明、源码运行）。演示页共用
+> `data-demo-start` 与 `DEMO` 数据；交卷尝试存 sessionStorage，收藏 / 错题掌握 / 单词掌握分别存
+> localStorage。`demo-mistakes.html` 与 `demo-vocabulary.html` 提供筛选、搜索、列表-详情与掌握状态切换。所有页面共用 `assets/site.css` / `site.js`；新增 `assets/downloads.js`：读取
+> GitHub 最新 release，按 `arm64` / `x64` / `.dmg` / `.exe` 匹配并升级平台卡片为直接下载；无 release、
+> 404 或限流时保留“前往 Releases / 源码运行”的兜底，不写死版本号。内部链接全部使用相对路径，旧的
+> `/#demo`、`/#features`、`/#quickstart` 等锚点由 `site.js` 重定向到新页面；`sitemap.xml` 已列出 16 个
+> 中英页面。安装包仍由 `.github/workflows/desktop.yml` 在 `v*` tag 时生成，不把大文件提交进 Pages。
+>
 > 2026-10-21：**复盘工作台工具切换器改为图标按钮行**。原来每个 pane 头部是一个 “Switch…” 下拉菜单，
 > 现在改为横向排列的**四个图标 + 小字标签**按钮（Question / Analysis / AI Tutor / Vocabulary，Lucide 图标），
 > 当前工具高亮（`aria-pressed`），另一侧的工具略淡并提示 “click to swap”；点另一个 pane 已有的工具仍按原逻辑
@@ -239,7 +251,7 @@ cd frontend && npm test         # 145 passed, 5 skipped
 | `frontend/src/lib/i18n.tsx` · `components/ui/LanguagePicker.tsx` | 前端中英文案表 / `I18nProvider` / `useI18n` / `useT` + Settings 里的语言切换（`inteflow.language`） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
-| `website/` | 项目官网（静态 HTML/CSS/JS；`index.html` 中文 + `en.html` 英文，页头切换；`assets/site.css` + `assets/site.js`；`themes/` 是 5 套主题预览页；`#demo` 是浏览器内可交互练习演示，`site.js` 的 `DEMO` 保存中英题目与文案） |
+| `website/` | 项目官网（静态多页 HTML/CSS/JS：`index.html` / `en.html` 首页含下载区，`download*.html` 平台安装包，`features*.html` 功能与工作流，`demo*.html` 四个演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 主题预览；`assets/site.js` 的 `DEMO` 保存中英题目、错题与词库，`assets/downloads.js` 读取最新 GitHub Release 并升级平台直链） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `docs/examples/simple-math.ifmd.md` | 可直接导入的 10 题简单数学 demo（单选 / 多选 / 填空 / 材料题 / 公式） |
