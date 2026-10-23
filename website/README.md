@@ -65,9 +65,12 @@ website/
 
 ## Downloads and platform links
 
-The home page puts downloads immediately after the hero. The header, the hero
-and the four platform cards all lead into `download.html` / `download-en.html`.
-The download page repeats the cards with first-launch and source instructions.
+The home page puts downloads in the first screen: a compact macOS Apple
+Silicon / macOS Intel / Windows shortcut row sits directly under the hero
+buttons, followed by the full download strip. The shortcuts and cards fall
+back to `download.html` / `download-en.html` anchors, then `downloads.js`
+upgrades them to direct release assets. The download page repeats the cards
+with first-launch and source instructions.
 
 Platform cards use `data-download-platform` and start with a safe fallback:
 
