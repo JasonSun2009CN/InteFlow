@@ -96,11 +96,15 @@
     card.href = asset.browser_download_url;
     card.setAttribute("data-download-ready", "true");
     card.removeAttribute("aria-disabled");
+    if (asset.size) card.setAttribute("data-size", formatSize(asset.size));
 
     var label = card.querySelector("[data-download-label]");
-    if (label) {
+    if (label && !card.hasAttribute("data-download-static-label")) {
       label.textContent =
         MESSAGES.download + (asset.size ? " · " + formatSize(asset.size) : "");
+    }
+    if (card.hasAttribute("data-download-static-label")) {
+      card.title = MESSAGES.download + (asset.size ? " · " + formatSize(asset.size) : "");
     }
   }
 
@@ -121,12 +125,16 @@
 
       var assets = Array.isArray(release.assets) ? release.assets : [];
       var found = 0;
+      var seen = {};
 
       cards.forEach(function (card) {
         var platform = card.getAttribute("data-download-platform");
         var asset = matchAsset(assets, platform);
         if (!asset) return;
-        found += 1;
+        if (!seen[platform]) {
+          seen[platform] = true;
+          found += 1;
+        }
         markReady(card, asset);
       });
 
