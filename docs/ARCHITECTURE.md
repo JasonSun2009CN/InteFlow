@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **304 passed, 1 skipped**、`npm run build` 0 错误、`npm test` 138 passed, 5 skipped。
+> 基线：pytest **312 passed**、`npm run build` 0 错误、`npm test` 149 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -90,6 +90,10 @@ repo/
 环境变量：`INTEFLOW_DATA`（数据根，默认 `./data`）、`INTEFLOW_API`（Vite 代理目标，默认 `http://localhost:8000`）、
 `INTEFLOW_OCR_LANG`（Tesseract 语言，默认 `eng`）、`INTEFLOW_DEFAULT_SECTION`（无板块标题时的回退标签，默认 `rw`）、
 `INTEFLOW_DICTIONARY`（标准 `.eudb` 文件或目录，默认 `./dictionary`）、`INTEFLOW_DICTIONARY_INDEX`（索引路径，默认 `data/dictionary/mw.db`）。
+
+桌面端把 `INTEFLOW_DATA` 指到系统 app-data 目录（macOS `~/Library/Application Support/InteFlow/data`，
+Windows `%APPDATA%\InteFlow\data`）。安装包本身不含 `data/`；内置题库随包但由设置 `show_builtin_library`
+控制是否显示（默认关）。详见 [`DESKTOP.md`](DESKTOP.md)。
 
 ---
 
@@ -220,7 +224,7 @@ App.tsx (BrowserRouter)
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
     ├── "/mistakes"             MistakesPage      —— Review：Mistakes / Starred 两集合（搜索/过滤/排序/分析）
     ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
-    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 自定义词典 / 单词考试评分开关
+    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 自定义词典 / 单词考试评分开关 / 内置题库开关 / 桌面端清空数据
     ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览 + 学科归类（含侧栏）
     ├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时，无侧栏、保持 slate/blue）
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
@@ -307,7 +311,7 @@ app/
 │   ├── subjects.py         学科：list / create / update / delete / exists（名称大小写不敏感去重、调色板轮换）
 │   ├── review.py           错题（最近一次）与精选题查询、分析聚合、星标增删
 │   ├── custom_dictionary.py 自定义词典：CRUD / 查词 / CSV·TSV·JSON·TXT 导入
-│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本/自定义词典/单词考试开关）
+│   └── settings.py         settings 键值（user_name / llm_fallback / 生词本/自定义词典/单词考试开关 / show_builtin_library）
 ├── export/                  PDF/DOCX 导出（0 token）
 │   ├── model.py            ExportDoc/ExportQuestion（聚合题目 + 词汇表；section_label 来自 sections.py）
 │   ├── notebook.py         复盘笔记本渲染：Markdown / PDF / DOCX（含封面页）
@@ -547,7 +551,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | GET | `/api/review/starred` | 精选题集（含最近作答与分析） |
 | GET | `/api/review/starred/ids` | 某套试卷的星标 question_id 列表 |
 | POST/DELETE | `/api/review/starred/{question_id}` | 加星 / 取消星标（幂等） |
-| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions` / `vocab_exam_ai_grading`） |
+| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions` / `vocab_exam_ai_grading` / `show_builtin_library`） |
 | GET | `/api/settings/providers` | Provider 目录 |
 | POST | `/api/settings/test` | 连通性测试 |
 | POST | `/api/ai/answer` | AI 讲解（显式） |

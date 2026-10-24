@@ -35,10 +35,28 @@ Use **File → Open data folder / Open dictionary folder / Show backend log** in
 app menu. The `INTEFLOW_DATA` and `INTEFLOW_DICTIONARY` environment variables still
 override these paths for development.
 
+### A fresh install is empty
+
+The installer contains the application code and the bundled sample bank, but **no
+user data**: no `app.db`, imported documents, sessions, analyses, vocabulary,
+exports or dictionary index. Runtime state is created under the app-data folder
+on first launch. `desktop/verify_bundle.py` checks this in CI and fails the build
+if a database, `.eudb` file or `data/` tree leaks into the packaged resources.
+
+The bundled SAT sample bank is **hidden by default** (`show_builtin_library`
+is `false`), so Library opens with only the import card. Users who want the
+sample units can enable **Settings → Show built-in library**.
+
+**File → Reset local data…** (also in Settings → Desktop) stops the backend,
+clears the app-data folder, web storage and cache, and restarts into the same
+first-run state. Dictionary source files (`dictionary/*.eudb`) are kept; the
+derived index lives in `data/` and is rebuilt on demand.
+
 ## What is bundled
 
 - The FastAPI backend frozen with PyInstaller (`desktop/InteFlow.spec`).
 - The built React frontend (`frontend/dist`).
+- The bundled SAT sample bank (present but hidden until **Show built-in library** is enabled).
 - MathJax plus the TeX→SVG bridge. There is no separate Node install: the backend
   invokes the Electron binary with `ELECTRON_RUN_AS_NODE=1`.
 - macOS: the `pyobjc` Vision framework for OCR.
@@ -76,6 +94,11 @@ python3 -m venv .venv-build
 # 5. Electron package (use --x64 on an Intel Mac, --arm64 on Apple Silicon)
 cd desktop && npm ci && npx electron-builder --mac --arm64 --publish never
 # Windows: npx electron-builder --win --x64 --publish never
+
+# 6. fail if local user data leaked into the bundle
+APP=$(ls -d desktop/release/mac*/InteFlow.app | head -1)
+python desktop/verify_bundle.py "$APP/Contents/Resources"
+# Windows: python desktop/verify_bundle.py "desktop/release/win-unpacked/resources"
 ```
 
 Artifacts land in `desktop/release/`.
@@ -90,14 +113,17 @@ INTEFLOW_SMOKE=1 npx electron .
 
 ## CI and releases
 
-`.github/workflows/desktop.yml` builds three artifacts on every tag `v*`:
+`.github/workflows/desktop.yml` builds three artifacts on every push to `main`
+(artifact only) and on every tag `v*` (artifact + GitHub Release):
 
 - `macos-15` → arm64 DMG
 - `macos-15-intel` → x64 DMG
 - `windows-2025` → x64 NSIS installer
 
-All artifacts are attached to one GitHub Release by a final job. `workflow_dispatch`
-builds the same artifacts without publishing a release.
+Every build runs `desktop/verify_bundle.py` against the packaged resources so a
+bundle that contains local data fails instead of being published. All artifacts
+are attached to one GitHub Release by a final job. `workflow_dispatch` builds
+the same artifacts without publishing a release.
 
 ## Signing / notarization (later)
 

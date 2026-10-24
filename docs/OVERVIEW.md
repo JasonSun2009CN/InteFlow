@@ -184,7 +184,7 @@ data/
 | 指标 | 数值 |
 |---|---|
 | 后端测试 | `pytest` **309 passed, 1 skipped** |
-| 前端组件测试 | `npm test` **145 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **149 passed, 5 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
 | API 面 | **67 条** |
 | 内置题库 | **44 单元 / 1186 题** |
@@ -195,7 +195,8 @@ data/
 
 已完整落地的里程碑包括：从 SATeacher 全量迁移与改名、板块自由标签泛化、侧栏六区信息架构、
 五套主题、复盘工作台重构、多选与填空题、作答历史、生词本与本地词典、单词考试、学科分类、
-Review（错题 + 精选）、自定义词典、错题分析模板、正/倒计时、中英双语界面、项目官网与在线演示。
+Review（错题 + 精选）、自定义词典、错题分析模板、正/倒计时、中英双语界面、项目官网与在线演示、
+Electron 桌面安装包（macOS arm64/x64、Windows x64）与纯空安装 / 一键重置。
 
 ## 9. 怎么体验
 
@@ -205,12 +206,15 @@ cd InteFlow
 ./start.sh          # macOS / Linux：缺环境会自动 setup，起 :8000 与 :5173 并打开浏览器
 ```
 
-- macOS 可在 Finder 里双击 **`InteFlow.command`**；Windows 用 **`start.ps1`** 或双击 **`start.bat`**。
+- **普通用户**：直接从[下载页](https://jasonsun2009cn.github.io/InteFlow/download.html)安装桌面版，
+  不需要 Python / Node，也不会打开浏览器。
+- macOS / Linux 在终端运行 **`./start.sh`**；Windows 用 **`start.ps1`** 或双击 **`start.bat`**（这是源码运行，会打开浏览器）。
 - 只想建环境：`./scripts/setup.sh`；已有环境直接启动：`./scripts/dev.sh`。
 - 打开 <http://localhost:5173>；后端健康检查 <http://localhost:8000/api/health>。
 - 不想本地安装也可以先看静态官网 `website/index.html`，首页前段有平台下载；`website/demo.html` 可直接在浏览器里做题、交卷、复盘。
 
-**最短上手路径**：Library → 展开内置题库卡片 → **Add all** → 回 Exams → **Start** → 交卷 → 复盘写解析 →
+**最短上手路径**：Library → 导入题库（或先到 Settings 打开 **Show built-in library**，再展开内置题库卡片 →
+**Add all**）→ 回 Exams → **Start** → 交卷 → 复盘写解析 →
 Review 看错题 / Vocabulary 建词表 → Notebook 导出。
 
 ## 10. 适用人群与典型场景

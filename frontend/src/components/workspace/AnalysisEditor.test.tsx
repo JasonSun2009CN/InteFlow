@@ -32,6 +32,7 @@ const settings: AppSettings = {
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
+  show_builtin_library: false,
 };
 
 function item(no: number, kind: "choice" | "blank" = "choice"): ResultItem {

@@ -485,6 +485,7 @@ export interface AppSettings {
   vocab_learner_definitions: boolean;
   vocab_exam_ai_grading: boolean;
   custom_dictionary_enabled: boolean;
+  show_builtin_library: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -510,6 +511,7 @@ export interface SettingsInput {
   vocab_learner_definitions?: boolean;
   vocab_exam_ai_grading?: boolean;
   custom_dictionary_enabled?: boolean;
+  show_builtin_library?: boolean;
 }
 
 export class ApiError extends Error {

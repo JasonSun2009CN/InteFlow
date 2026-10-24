@@ -54,7 +54,7 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | Area | Capability |
 |---|---|
 | **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
-| **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent |
+| **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent (hidden by default; enable in Settings) |
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
 | **Subjects** | User-defined subject groups (e.g. SAT Math, Physics) with a color; assign each paper inline from Library or the answer-key header, create a subject on the spot, manage/rename/recolor/delete it, filter Library and Exams by subject. Deleting a group only moves its papers to Uncategorized |
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
@@ -107,7 +107,7 @@ Without them **only PDF export fails**; everything else keeps working.
 
 ## Quick start
 
-### One command (recommended)
+### One command (from source)
 
 ```bash
 git clone <your-repo-url> InteFlow
@@ -127,9 +127,9 @@ frontend deps (only what's missing); later runs just start. It brings up **backe
 **frontend :5173**, waits for the backend health check, and **opens your browser**. Press `Ctrl-C`
 to stop both.
 
-- **macOS double-click**: open **`InteFlow.app`** in Finder (or **`InteFlow.command`**).
-  If macOS says it can't be opened / permission denied after unzipping, run this once in the project folder:
-  `chmod +x start.sh InteFlow.command && xattr -dr com.apple.quarantine .`
+- **macOS / Linux**: run `./start.sh` in Terminal (this development launcher opens your browser).
+  If macOS blocks scripts after unzipping, run once in the project folder:
+  `chmod +x start.sh && xattr -dr com.apple.quarantine .`
 - **Windows double-click**: double-click **`start.bat`**.
 - Change ports: `INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
   (Windows: `$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`).
@@ -146,11 +146,17 @@ The site links the platform cards directly to the matching release asset when a
 release exists. If no build has been published yet, the page shows the
 source-run instructions instead.
 
+The desktop app runs in its own native window (it does not open your browser).
+A fresh download starts completely empty: no imported exams, sessions,
+analyses, vocabulary or settings are bundled. Use **File → Reset local data…**
+(or the same button in Settings) to return an already-used install to that
+first-run state; your own `.eudb` dictionary source files are kept.
+
 The builds are unsigned for now. On macOS, right-click → **Open** the first time;
 on Windows, choose **More info → Run anyway**.
 
-- Backend API: <http://localhost:8000> (health check <http://localhost:8000/api/health>)
-- Frontend page: <http://localhost:5173> ← **open this in your browser**
+- When running from source: backend API <http://localhost:8000> (health check <http://localhost:8000/api/health>);
+  frontend page <http://localhost:5173> ← **open this in your browser**. The desktop installer does not need either URL.
 
 <details>
 <summary><b>Step by step (setup + dev) and manual start</b></summary>
@@ -198,7 +204,7 @@ The mobile drawer always stays expanded.
 3. **Wait for the pipeline**: `detect → convert → review`, with a **per-page report** (text / OCR / low-confidence / no-engine).
    - Clean conversion → committed automatically;
    - Suspicious pages → it pauses at review so you can **Commit** or **Cancel** (0 token throughout).
-4. **(Optional) built-in bank**: expand the bank card on the Library page, grouped by date, and click **Add** per unit or **Add all**.
+4. **(Optional) built-in bank**: enable **Settings → Show built-in library** first (it is hidden by default so a new install starts empty), then expand the bank card on the Library page, grouped by date, and click **Add** per unit or **Add all**.
 5. **Back home to practice**: return to **Select an exam** and click **Start**.
 
 **Group papers by subject (optional).** In **Library**, each paper's row has a **Subject** dropdown — pick an
@@ -357,7 +363,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 304 passed, 1 skipped; uses a temp data dir)
+# backend tests (baseline 312 passed; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -400,9 +406,8 @@ InteFlow/
 │   ├── src/components/        workspace panes · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · CustomDictionaryManager · import/library UI
 │   └── src/lib/               wordExamQr (compact JSON + multi-part QR) · subjects (palette) · theme · sections
 ├── start.sh / start.ps1        one-command start (auto setup + both servers + browser)
-├── InteFlow.command           macOS double-click start
 ├── start.bat                  Windows double-click start
-├── desktop/                   Electron shell · PyInstaller spec · PDF bridge · build scripts
+├── desktop/                   Electron shell · PyInstaller spec · PDF bridge · build/verify scripts
 ├── scripts/dev.sh             one-command dev environment (no preflight checks)
 ├── data/                      runtime data (git-ignored)
 ├── website/                   static project website (GitHub Pages)

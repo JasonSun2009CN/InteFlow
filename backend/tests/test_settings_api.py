@@ -62,6 +62,24 @@ def test_vocabulary_toggles_default_and_roundtrip(client: TestClient) -> None:
     assert again["vocab_learner_definitions"] is True
 
 
+def test_builtin_library_is_hidden_by_default_and_can_be_enabled(
+    client: TestClient,
+) -> None:
+    # A fresh install must look empty: the bundled sample bank is opt-in.
+    assert client.get("/api/settings").json()["show_builtin_library"] is False
+
+    saved = client.put(
+        "/api/settings", json={"show_builtin_library": True}
+    ).json()
+    assert saved["show_builtin_library"] is True
+    assert client.get("/api/settings").json()["show_builtin_library"] is True
+
+    saved = client.put(
+        "/api/settings", json={"show_builtin_library": False}
+    ).json()
+    assert saved["show_builtin_library"] is False
+
+
 def test_put_stores_and_masks_key(client: TestClient) -> None:
     put = client.put(
         "/api/settings",

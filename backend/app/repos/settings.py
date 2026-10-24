@@ -19,6 +19,7 @@ ALLOWED_KEYS = (
     "vocab_learner_definitions",
     "vocab_exam_ai_grading",
     "custom_dictionary_enabled",
+    "show_builtin_library",
 )
 
 

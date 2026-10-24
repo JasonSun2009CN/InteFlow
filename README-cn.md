@@ -53,7 +53,7 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | 模块 | 能力 |
 |---|---|
 | **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
-| **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等 |
+| **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等（默认隐藏，可在 Settings 打开） |
 | **资料库** | 文档列表（题数、已作答数、答案状态）、练习历史、删除（级联） |
 | **学科分类** | 自定义学科（如 SAT Math、Physics）+ 颜色；每套试卷最多一个学科，可在 Library 行内或答案页顶部直接归类、现场新建；支持改名/换色/删除与按学科筛选。删除学科只把试卷移回 Uncategorized，不影响题目/答案/分析/词表 |
 | **答案录入** | 选择题 A–Z 网格（题面有几个选项就显示几个，如 AMC 的 A–E；**多选**题可勾多个）+ **填空题多答案**（加号添加可接受答案）+ **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA` / 多选 `3-AC` / `1-E`）+ 校验 + 预览，同步回写源文件 |
@@ -104,7 +104,7 @@ sudo apt install libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 
 
 ## 快速开始
 
-### 一键启动（推荐）
+### 一键启动（源码运行）
 
 ```bash
 git clone <你的仓库地址> InteFlow
@@ -122,9 +122,9 @@ cd InteFlow
 `start.sh` / `start.ps1` **幂等**：首次运行自动建 `.venv`、装前后端依赖（缺才装），之后再运行直接启动。
 它会同时拉起**后端 :8000** 与**前端 :5173**，等后端健康后**自动打开浏览器**，按 `Ctrl-C` 同时停止两端。
 
-- **macOS 双击启动**：在 Finder 里双击 **`InteFlow.app`**（或 `InteFlow.command`）。
-  从 zip 解压后首次运行若提示「无法打开/权限不足」，在项目目录执行一次：
-  `chmod +x start.sh InteFlow.command && xattr -dr com.apple.quarantine .`
+- **macOS / Linux**：在终端运行 `./start.sh`（这是开发启动方式，会在浏览器中打开前端）。
+  从 zip 解压后若提示「权限不足」，在项目目录执行一次：
+  `chmod +x start.sh && xattr -dr com.apple.quarantine .`
 - **Windows 双击启动**：双击 **`start.bat`**。
 - 换端口：`INTEFLOW_BACKEND_PORT=8010 INTEFLOW_FRONTEND_PORT=5174 ./start.sh`
   （Windows：`$env:INTEFLOW_FRONTEND_PORT=5174; .\start.ps1`）。
@@ -139,10 +139,12 @@ cd InteFlow
 
 有 release 时，下载页的 Mac / Windows 卡片会直接指向对应安装包；如果还没发布构建，页面会给出源码运行步骤。
 
+桌面版运行在自己的原生窗口里（不会打开浏览器）。新下载的应用是**完全空的**：安装包不包含任何导入的试卷、作答记录、分析、生词本或设置。用过的应用可以通过 **File → 清空本地数据…**（或 Settings 里的同一按钮）恢复到首次启动状态；`dictionary/` 里你自己的 `.eudb` 词典源文件会保留。
+
 目前暂未签名：macOS 首次打开请右键 →「打开」；Windows 选择「更多信息」→「仍要运行」。
 
-- 后端 API：<http://localhost:8000>（健康检查 <http://localhost:8000/api/health>）
-- 前端页面：<http://localhost:5173> ← **浏览器打开这个**
+- 源码运行时：后端 API <http://localhost:8000>（健康检查 <http://localhost:8000/api/health>）；
+  前端页面 <http://localhost:5173> ← **浏览器打开这个**。桌面安装包不需要这些地址。
 
 <details>
 <summary><b>分步启动（先 setup 再 dev）与纯手动启动</b></summary>
@@ -184,7 +186,8 @@ npm run dev
 3. **等待流水线跑完**：`detect → convert → review` 三阶段，附**逐页报告**（该页是文本/OCR/低置信/无引擎）。
    - 转换结果干净 → 自动提交入库；
    - 有疑点 → 停在复核阶段，由你点 **Commit** 落库或 **Cancel** 取消（全程 0 token）。
-4. **（可选）用内置题库**：Library 页的题库卡展开后按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
+4. **（可选）用内置题库**：先到 **Settings → Show built-in library** 打开开关（默认隐藏，保证新安装是空的），
+   再回 Library 展开题库卡；按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
 5. **回首页开考**：返回 **Select an exam**，新导入的卷子直接点 **Start** 开考。
 
 **按学科分组（可选）**：Library 每套试卷那一行有 **Subject** 下拉，选已有学科，或点 **+ New subject…**
@@ -319,7 +322,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 304 passed, 1 skipped；用临时数据目录，不动你的数据）
+# 后端测试（基线 312 passed；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -362,9 +365,8 @@ InteFlow/
 │   ├── src/components/        复盘分屏 · VocabGrid · WordExamPanel / WordExamResultView · SubjectControls · CustomDictionaryManager · 导入/资料库 UI
 │   └── src/lib/               wordExamQr（紧凑 JSON + 多段 QR）· subjects（调色板）· theme · sections
 ├── start.sh / start.ps1       一键启动（自动 setup + 起前后端 + 开浏览器）
-├── InteFlow.command           macOS 双击启动
 ├── start.bat                  Windows 双击启动
-├── desktop/                   Electron 外壳 · PyInstaller 配置 · PDF 桥 · 构建脚本
+├── desktop/                   Electron 外壳 · PyInstaller 配置 · PDF 桥 · 构建/校验脚本
 ├── scripts/dev.sh             一键起前后端（不做前置检查）
 ├── data/                      运行期数据（gitignore）
 ├── website/                   项目官网（GitHub Pages）

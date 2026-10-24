@@ -25,13 +25,13 @@
 2. **本地优先**：所有数据在 `data/`（SQLite + 每篇文档的 `doc.ifmd.md` 与图片），不上传云端。
 3. 界面默认英文，可在 **Settings → Language** 切换为中文（全前端 i18n，0 token；考试原文、用户内容与后端报错保持原样）；与维护者交流用中文；**有疑问必须先用 `question` 工具问，不许自己猜**。
 
-## 3. 当前状态（2026-10-21）
+## 3. 当前状态（2026-10-24）
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **310 passed, 1 skipped** |
+| 后端测试 | `pytest` **312 passed** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **145 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **149 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
 | API 面 | 67 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
@@ -126,6 +126,16 @@
 > 现在改为横向排列的**四个图标 + 小字标签**按钮（Question / Analysis / AI Tutor / Vocabulary，Lucide 图标），
 > 当前工具高亮（`aria-pressed`），另一侧的工具略淡并提示 “click to swap”；点另一个 pane 已有的工具仍按原逻辑
 > 左右互换。纯前端改动，未改任何接口 / 存储格式。
+>
+> 2026-10-24：**下载渠道与桌面端清理**。官网首页不再把源码 ZIP / 旧启动器当主入口：平台卡片全部指向
+> Electron 安装包（macOS arm64/x64、Windows x64），源码运行只保留在下载页的 “From source / 开发者选项” 小节。
+> 删除仓库根目录的旧 `InteFlow.app` / `InteFlow.command`（它们会打开终端和浏览器，容易和桌面版混淆）。
+> **新下载的桌面应用是纯空的**：安装包不含 `app.db`、导入文档、作答、分析、生词本、导出或词典索引；
+> `desktop/verify_bundle.py` 在 CI 打包后校验资源目录，发现本地数据直接失败。内置 SAT 题库仍随包分发，
+> 但新增设置 `show_builtin_library` **默认关**，Library 首屏只有导入卡片；需要时在 Settings 打开。
+> 桌面端新增 **File → Reset local data…** 与 Settings → Desktop 的同一入口：停止后端、清空 app-data
+> 与 Electron 的 localStorage/cache，然后重启回到首次启动状态（保留 `dictionary/*.eudb` 源文件）。
+> `.github/workflows/desktop.yml` 现在在 `main` push 上也构建（仅上传 artifact），`v*` tag 才发布 Release。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -180,6 +190,8 @@
 | LLM 预置目录 | 默认服务商 = **OrcaRouter**（`providers.DEFAULT_PROVIDER`）；共 **19 家**：`deepseek` 拆成 `deepseek-openai` / `deepseek-anthropic`（旧 id 有别名 + DB 迁移），并新增 `xai`（Grok）、`custom-anthropic`。base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic 系不带（`endpoint_url()` 只在缺版本段时补 `/v1`），所以文档上的 URL 可以直接粘贴 |
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
 | 界面语言（2026-10-22） | 默认英文；Settings → Language 即时切换中文（`localStorage` 键 `inteflow.language`）。所有前端 UI 文案经 `frontend/src/lib/i18n.tsx` 的 `t()`；考试原文、用户内容与后端报错不翻译 |
+| 桌面端分发（2026-10-24） | 官网主入口只用 Electron 安装包（`.github/workflows/desktop.yml`，macOS arm64/x64 + Windows x64）；旧 `InteFlow.app` / `InteFlow.command` 已删除。源码运行仅作为开发者选项保留在下载页与 README。`main` push 构建并上传 artifact，`v*` tag 发布 GitHub Release |
+| 新安装是纯空应用（2026-10-24） | 安装包不包含任何本地运行数据；`desktop/verify_bundle.py` 在 CI 校验资源目录（`app.db` / `mw.db` / `.eudb` / `data/`）。内置 SAT 题库仍随包，但 `show_builtin_library` 默认关，Library 首屏为空。桌面端 File 菜单与 Settings 提供 **Reset local data…**（清空 app-data + localStorage/cache 并重启，保留 `dictionary/*.eudb` 源文件） |
 
 ## 6. 待办 / 已知缺口
 
@@ -201,7 +213,7 @@
 
 ```bash
 # 一键启动（缺环境先 setup + 起前后端 :8000/:5173 + 开浏览器）
-./start.sh                  # Windows: .\start.ps1（双击 InteFlow.command / start.bat）
+./start.sh                  # Windows: .\start.ps1（或双击 start.bat）
 
 # 只建环境（幂等，不启动）
 ./scripts/setup.sh          # Windows: .\scripts\setup.ps1
@@ -210,11 +222,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 310 passed, 1 skipped
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 312 passed
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 145 passed, 5 skipped
+cd frontend && npm test         # 149 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -251,11 +263,15 @@ cd frontend && npm test         # 145 passed, 5 skipped
 | `frontend/src/lib/i18n.tsx` · `components/ui/LanguagePicker.tsx` | 前端中英文案表 / `I18nProvider` / `useI18n` / `useT` + Settings 里的语言切换（`inteflow.language`） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
-| `website/` | 项目官网（静态多页 HTML/CSS/JS：`index.html` / `en.html` 首页含下载区，`download*.html` 平台安装包，`features*.html` 功能与工作流，`demo*.html` 四个演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 主题预览；`assets/site.js` 的 `DEMO` 保存中英题目、错题与词库，`assets/downloads.js` 读取最新 GitHub Release 并升级平台直链） |
+| `website/` | 项目官网（静态多页 HTML/CSS/JS：`index.html` / `en.html` 首页下载区**全部是安装包卡片**（第 4 张进入 Releases），`download*.html` 平台安装包 + 首次打开说明 + 开发者源码小节，`features*.html` 功能与工作流，`demo*.html` 四个演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 主题预览；`assets/site.js` 的 `DEMO` 保存中英题目、错题与词库，`assets/downloads.js` 读取最新 GitHub Release 并升级平台直链） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
+| `.github/workflows/desktop.yml` | 桌面端 CI/CD：`main` push 构建 artifact；`v*` tag 打包 macOS arm64/x64 DMG 与 Windows x64 NSIS 并发布 Release；打包后跑 `verify_bundle.py` |
+| `desktop/main.cjs` · `desktop/preload.cjs` | Electron 主进程（起后端、PDF 桥、菜单、**Reset local data** IPC）与最小 preload 桥（`window.inteflow.resetData()`） |
+| `desktop/verify_bundle.py` | 校验打包资源不含 `app.db` / `mw.db` / `.eudb` / `data/`，保证官网下载到的应用是纯空安装 |
+| `docs/DESKTOP.md` | 桌面端下载、数据位置、纯空安装保证、Reset、本地构建与 CI 说明 |
 | `scripts/build_builtin.py` | 内置题库离线构建脚本 |
 | `docs/examples/simple-math.ifmd.md` | 可直接导入的 10 题简单数学 demo（单选 / 多选 / 填空 / 材料题 / 公式） |
-| `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`InteFlow.command` / `start.bat` 为双击入口 |
+| `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`start.bat` 为 Windows 双击入口（源码运行，非桌面安装包） |
 
 ## 9. 工作约定
 

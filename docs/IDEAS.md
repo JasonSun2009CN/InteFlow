@@ -15,6 +15,18 @@
 
 <!-- 从这里开始往下写 -->
 
+### ✅ 官网只发桌面安装包 + 新应用纯空（2026-10-24）
+
+- 打包下来的还是网页端体验：之前官网首页把源码 ZIP / 旧 `InteFlow.app` 当主入口，双击后是终端 + 浏览器。
+- 改为：官网主入口只保留 Electron 安装包（macOS arm64/x64、Windows x64）；源码运行只在下载页的开发者小节。
+  删除根目录旧 `InteFlow.app` / `InteFlow.command`。
+- 从官网下载的应用必须是纯空的新应用：不包含测试数据、导入试卷、作答、分析、生词本、导出、词典索引或设置。
+  CI 打包后用 `desktop/verify_bundle.py` 校验；内置题库保留但默认隐藏（Settings → Show built-in library）。
+- 桌面端加 **File → Reset local data…** 与 Settings 入口，清空 app-data + localStorage/cache 后重启；
+  保留 `dictionary/*.eudb` 源文件。
+- CI/CD：`.github/workflows/desktop.yml` 在 `main` push 构建 artifact，`v*` tag 发布 GitHub Release；
+  三个平台都跑“资源目录无本地数据”检查。
+
 ### ✅ 简单数学题示例卷（2026-10-22）
 
 - 要有一套简单数学题放进 Library，并附带可直接使用的 `.ifmd.md` demo。

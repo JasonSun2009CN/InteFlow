@@ -74,7 +74,7 @@
             </p>
             <div class="hero-actions">
               <a class="btn btn-accent" href="#platforms">选择平台 <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="#source">从源码运行 <span aria-hidden="true">→</span></a>
+              <a class="btn btn-outline" href="#install">安装说明 <span aria-hidden="true">→</span></a>
             </div>
             <p class="download-note">macOS Apple Silicon / Intel · Windows 10 / 11 x64 · 未签名版本</p>
           </div>
@@ -95,7 +95,7 @@
               <strong data-release-title>安装包发布在 GitHub Releases</strong>
               <span data-release-detail>如果 Releases 里还没有安装包，可以先用源码运行；发布后本页按钮会自动更新为直接下载。</span>
             </p>
-            <a class="download-status-link" href="#source">从源码运行 →</a>
+            <a class="download-status-link" href="#install">安装说明 →</a>
           </div>
         </div>
       </section>
@@ -152,18 +152,18 @@
             <em aria-hidden="true">↓</em>
           </div>
         </a>
-        <a class="platform-card platform-card--source" href="#source" id="linux">
+        <a class="platform-card" href="https://github.com/JasonSun2009CN/InteFlow/releases" id="all-releases">
           <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span>
-            <span class="platform-tag">source</span>
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
+            <span class="platform-tag">all builds</span>
           </div>
           <div class="platform-copy">
-            <strong>Linux / 其他平台</strong>
-            <p>从源码运行 · Python 3.11+ / Node 18+</p>
+            <strong>所有安装包</strong>
+            <p>GitHub Releases · macOS / Windows</p>
           </div>
           <div class="platform-action">
-            <span data-download-label>查看步骤</span>
-            <em aria-hidden="true">↓</em>
+            <span data-download-label>打开 Releases</span>
+            <em aria-hidden="true">↗</em>
           </div>
         </a>
           </div>
@@ -211,7 +211,8 @@
               <p>
                 桌面版的数据默认在系统应用数据目录下的 <code>InteFlow/data/</code>：
                 macOS 是 <code>~/Library/Application Support/InteFlow/data</code>，
-                Windows 是 <code>%APPDATA%\InteFlow\data</code>。应用菜单里有「Open data folder」。
+                Windows 是 <code>%APPDATA%\InteFlow\data</code>。新下载的应用是空的——不会预置示例试卷、
+                作答记录或生词本。应用菜单里有「Open data folder」；File →「清空本地数据…」可恢复全新安装状态。
                 卸载应用不会自动删除这份数据；需要彻底清理时请先备份，再手动删除。
               </p>
             </article>
@@ -223,14 +224,14 @@
         <div class="wrap source-grid">
           <div class="source-copy reveal">
             <p class="section-index">03 / FROM SOURCE</p>
-            <h2>不想等安装包？<br />从源码启动。</h2>
+            <h2>开发者选项：<br />从源码启动。</h2>
             <p>
-              需要 Python 3.11+ 与 Node 18+。<code>start.sh</code> 首次运行会自动建
+              这里下载的是源码，不是桌面安装包。推荐使用上面的安装包。这一节面向开发：需要 Python 3.11+ 与 Node 18+。<code>start.sh</code> 首次运行会自动建
               <code>.venv</code>、安装前后端依赖；之后直接启动。Windows 用
               <code>start.ps1</code> 或双击 <code>start.bat</code>。
             </p>
             <div class="source-actions">
-              <a class="btn btn-ink" href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip" title="下载源码 ZIP（不含本地 data/ 与词典文件）">下载源码 ZIP <span aria-hidden="true">↓</span></a>
+              <a class="btn btn-ink" href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip" title="下载源码 ZIP（仅供开发；不含本地 data/ 与词典文件）">下载源码 ZIP（开发者） <span aria-hidden="true">↓</span></a>
               <a class="btn btn-outline" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a>
             </div>
           </div>

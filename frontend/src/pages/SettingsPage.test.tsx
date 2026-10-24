@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api, type AppSettings } from "../api/client";
 import SettingsPage from "./SettingsPage";
 
@@ -35,6 +35,7 @@ const settings: AppSettings = {
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
   analysis_template: "",
+  show_builtin_library: false,
 };
 
 beforeEach(() => {
@@ -42,6 +43,10 @@ beforeEach(() => {
   getSettings.mockResolvedValue(settings);
   listProviders.mockResolvedValue([]);
   saveSettings.mockImplementation(async (input) => ({ ...settings, ...input }));
+});
+
+afterEach(() => {
+  delete window.inteflow;
 });
 
 describe("SettingsPage vocabulary options", () => {
@@ -90,6 +95,35 @@ describe("SettingsPage vocabulary options", () => {
         expect.objectContaining({ vocab_exam_ai_grading: true }),
       ),
     );
+  });
+
+  it("keeps the built-in library hidden by default and can enable it", async () => {
+    render(<SettingsPage />);
+
+    const builtin = await screen.findByRole("checkbox", {
+      name: /Show built-in library/,
+    });
+    expect(builtin).not.toBeChecked();
+
+    fireEvent.click(builtin);
+    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
+
+    await waitFor(() =>
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ show_builtin_library: true }),
+      ),
+    );
+  });
+
+  it("resets local data through the desktop bridge", async () => {
+    const resetData = vi.fn().mockResolvedValue({ ok: false, cancelled: true });
+    window.inteflow = { desktop: true, resetData };
+    render(<SettingsPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Reset local data…" }));
+
+    await waitFor(() => expect(resetData).toHaveBeenCalledTimes(1));
+    expect(await screen.findByText("Reset cancelled.")).toBeInTheDocument();
   });
 
   it("loads and saves the analysis template exactly as typed", async () => {

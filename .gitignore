@@ -22,13 +22,10 @@ data/
 .vscode/
 .DS_Store
 
-# Local macOS launcher bundle (generated, not shared) deleted from here
-
 # Desktop build artifacts
 desktop/build/
 desktop/backend-dist/
 desktop/build-tmp/
 desktop/release/
 desktop/.venv-build/
-InteFlow.app/Contents/Resources/root-path.txt
 

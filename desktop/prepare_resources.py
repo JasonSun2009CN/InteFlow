@@ -10,7 +10,10 @@ Usage:
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
+
+from verify_bundle import find_forbidden
 
 DESKTOP = Path(__file__).resolve().parent
 ROOT = DESKTOP.parent
@@ -27,6 +30,8 @@ def copy_tree(source: Path, target: Path) -> None:
 
 def main() -> int:
     BUILD.mkdir(parents=True, exist_ok=True)
+    # Never ship local runtime state, even if an earlier dev run left it behind.
+    shutil.rmtree(BUILD / "data", ignore_errors=True)
 
     web = ROOT / "frontend" / "dist"
     if not (web / "index.html").is_file():
@@ -58,6 +63,13 @@ def main() -> int:
         print("warning: MathJax node_modules missing; formulas will fall back to text")
 
     (BUILD / "tesseract").mkdir(parents=True, exist_ok=True)
+
+    forbidden = find_forbidden(BUILD)
+    if forbidden:
+        print("refusing to package local data:", file=sys.stderr)
+        for rel in forbidden[:40]:
+            print(f"  {rel}", file=sys.stderr)
+        return 1
     return 0
 
 

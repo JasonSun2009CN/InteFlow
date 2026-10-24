@@ -46,6 +46,7 @@ class SettingsPayload(BaseModel):
     vocab_learner_definitions: bool | None = None  # prefer the in-entry learner section
     vocab_exam_ai_grading: bool | None = None  # AI may grade word-test answers
     custom_dictionary_enabled: bool | None = None  # consult the user dictionary first
+    show_builtin_library: bool | None = None  # show the bundled sample bank in Library
 
 
 def _mask(key: str) -> str:
@@ -70,6 +71,7 @@ def _load() -> dict[str, str]:
         "vocab_learner_definitions": stored.get("vocab_learner_definitions", "0"),
         "vocab_exam_ai_grading": stored.get("vocab_exam_ai_grading", "0"),
         "custom_dictionary_enabled": stored.get("custom_dictionary_enabled", "1"),
+        "show_builtin_library": stored.get("show_builtin_library", "0"),
     }
 
 
@@ -88,6 +90,7 @@ def _view(s: dict[str, str]) -> dict:
         "vocab_learner_definitions": s["vocab_learner_definitions"] == "1",
         "vocab_exam_ai_grading": s["vocab_exam_ai_grading"] == "1",
         "custom_dictionary_enabled": s["custom_dictionary_enabled"] != "0",
+        "show_builtin_library": s["show_builtin_library"] == "1",
     }
 
 
@@ -147,6 +150,8 @@ def put_settings(payload: SettingsPayload) -> dict:
         updates["custom_dictionary_enabled"] = (
             "1" if payload.custom_dictionary_enabled else "0"
         )
+    if payload.show_builtin_library is not None:
+        updates["show_builtin_library"] = "1" if payload.show_builtin_library else "0"
     settings_repo.set_values(updates)
     return _view(_load())
 

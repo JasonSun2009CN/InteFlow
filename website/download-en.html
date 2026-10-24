@@ -74,7 +74,7 @@
             </p>
             <div class="hero-actions">
               <a class="btn btn-accent" href="#platforms">Choose a platform <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="#source">Run from source <span aria-hidden="true">→</span></a>
+              <a class="btn btn-outline" href="#install">Install notes <span aria-hidden="true">→</span></a>
             </div>
             <p class="download-note">macOS Apple Silicon / Intel · Windows 10 / 11 x64 · unsigned builds</p>
           </div>
@@ -95,7 +95,7 @@
               <strong data-release-title>Installers are published on GitHub Releases</strong>
               <span data-release-detail>If there is no release yet, run from source; once a build exists, these buttons update to direct downloads.</span>
             </p>
-            <a class="download-status-link" href="#source">Run from source →</a>
+            <a class="download-status-link" href="#install">Install notes →</a>
           </div>
         </div>
       </section>
@@ -153,18 +153,18 @@
             <em aria-hidden="true">↓</em>
           </div>
         </a>
-        <a class="platform-card platform-card--source" href="#source" id="linux">
+        <a class="platform-card" href="https://github.com/JasonSun2009CN/InteFlow/releases" id="all-releases">
           <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg></span>
-            <span class="platform-tag">source</span>
+            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
+            <span class="platform-tag">all builds</span>
           </div>
           <div class="platform-copy">
-            <strong>Linux / other</strong>
-            <p>Run from source · Python 3.11+ / Node 18+</p>
+            <strong>All installers</strong>
+            <p>GitHub Releases · macOS / Windows</p>
           </div>
           <div class="platform-action">
-            <span data-download-label>View steps</span>
-            <em aria-hidden="true">↓</em>
+            <span data-download-label>Open Releases</span>
+            <em aria-hidden="true">↗</em>
           </div>
         </a>
           </div>
@@ -212,7 +212,9 @@
               <p>
                 Desktop data lives under the app-data folder in <code>InteFlow/data/</code>:
                 on macOS <code>~/Library/Application Support/InteFlow/data</code>, on Windows
-                <code>%APPDATA%\InteFlow\data</code>. The app menu has “Open data folder”.
+                <code>%APPDATA%\InteFlow\data</code>. A new download starts empty — no sample exams,
+                sessions or vocabulary are preloaded. The app menu has “Open data folder”, and
+                File → “Reset local data…” restores a fresh install.
                 Uninstalling does not delete that data; back it up first, then remove it manually if you want a clean slate.
               </p>
             </article>
@@ -224,14 +226,15 @@
         <div class="wrap source-grid">
           <div class="source-copy reveal">
             <p class="section-index">03 / FROM SOURCE</p>
-            <h2>Don't want to wait?<br />Run from source.</h2>
+            <h2>For developers:<br />run from source.</h2>
             <p>
-              You need Python 3.11+ and Node 18+. <code>start.sh</code> creates a
+              This downloads source code, not the desktop installer. The installers above are the recommended way to use InteFlow. This section is for development:
+              you need Python 3.11+ and Node 18+. <code>start.sh</code> creates a
               <code>.venv</code> and installs frontend/backend dependencies on first run; later runs start directly.
               On Windows use <code>start.ps1</code> or double-click <code>start.bat</code>.
             </p>
             <div class="source-actions">
-              <a class="btn btn-ink" href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip" title="Download the source ZIP (local data/ and dictionary files are not included)">Download source ZIP <span aria-hidden="true">↓</span></a>
+              <a class="btn btn-ink" href="https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip" title="Download the source ZIP (developers only; local data/ and dictionary files are not included)">Download source ZIP (developers) <span aria-hidden="true">↓</span></a>
               <a class="btn btn-outline" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub repository <span aria-hidden="true">↗</span></a>
             </div>
           </div>

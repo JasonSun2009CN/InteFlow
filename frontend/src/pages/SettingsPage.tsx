@@ -27,11 +27,13 @@ export default function SettingsPage() {
   const [vocabLearner, setVocabLearner] = useState(false);
   const [vocabExamAi, setVocabExamAi] = useState(false);
   const [customDictionary, setCustomDictionary] = useState(true);
+  const [showBuiltin, setShowBuiltin] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
   const [busy, setBusy] = useState<"save" | "test" | null>(null);
+  const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [probe, setProbe] = useState<ProbeResult | null>(null);
 
@@ -49,6 +51,7 @@ export default function SettingsPage() {
         setVocabLearner(s.vocab_learner_definitions);
         setVocabExamAi(s.vocab_exam_ai_grading);
         setCustomDictionary(s.custom_dictionary_enabled);
+        setShowBuiltin(s.show_builtin_library);
         setProviders(list);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
@@ -90,6 +93,7 @@ export default function SettingsPage() {
         vocab_learner_definitions: vocabLearner,
         vocab_exam_ai_grading: vocabExamAi,
         custom_dictionary_enabled: customDictionary,
+        show_builtin_library: showBuiltin,
         ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
       });
       setStored(saved);
@@ -136,6 +140,31 @@ export default function SettingsPage() {
       setBusy(null);
     }
   }
+
+  async function onResetData() {
+    const reset = window.inteflow?.resetData;
+    if (!reset) {
+      setMessage({
+        kind: "err",
+        text: t("Reset is only available in the desktop app."),
+      });
+      return;
+    }
+    setMessage(null);
+    setResetting(true);
+    try {
+      const result = await reset();
+      if (result?.cancelled) {
+        setMessage({ kind: "ok", text: t("Reset cancelled.") });
+      }
+    } catch (err) {
+      setMessage({ kind: "err", text: errText(err) });
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  const desktop = typeof window !== "undefined" && Boolean(window.inteflow?.desktop);
 
   const input =
     "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none";
@@ -210,6 +239,28 @@ export default function SettingsPage() {
               "Pre-filled into every empty analysis page (wrong answers, starred questions and the review workspace). Markdown is supported. An existing analysis is never overwritten, and the template itself is only saved once you start editing the page.",
             )}
           </p>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <label className="flex items-start gap-3" htmlFor="show-builtin">
+            <input
+              id="show-builtin"
+              type="checkbox"
+              checked={showBuiltin}
+              onChange={(e) => setShowBuiltin(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <span className="block text-sm font-medium text-slate-800">
+                {t("Show built-in library")}
+              </span>
+              <span className="mt-1 block text-xs leading-5 text-slate-600">
+                {t(
+                  "Show the bundled SAT sample bank in Library. It is off by default so a new install starts empty; turning it on lets you add sample units without importing a file.",
+                )}
+              </span>
+            </span>
+          </label>
         </div>
 
         <div>
@@ -462,6 +513,28 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {desktop && (
+        <section className="mt-5 rounded-xl border border-red-200 bg-white p-6 shadow-sm">
+          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
+            {t("Desktop")}
+          </p>
+          <h2 className="mt-2 text-lg font-semibold">{t("Reset local data")}</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {t(
+              "Remove the local database, imported documents, analyses, vocabulary, exports and preferences, then restart InteFlow. Your own dictionary source files in the dictionary folder are kept. This cannot be undone.",
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => void onResetData()}
+            disabled={resetting}
+            className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-50"
+          >
+            {resetting ? t("Resetting…") : t("Reset local data…")}
+          </button>
+        </section>
+      )}
 
       {customOpen && (
         <CustomDictionaryManager onClose={() => setCustomOpen(false)} />

@@ -110,6 +110,7 @@ const settings: AppSettings = {
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
   analysis_template: "",
+  show_builtin_library: false,
 };
 
 function renderPage() {

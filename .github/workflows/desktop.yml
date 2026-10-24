@@ -2,6 +2,8 @@ name: Build desktop apps
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
   workflow_dispatch:
@@ -96,6 +98,16 @@ jobs:
         if: matrix.platform == 'win'
         run: cd desktop && npx electron-builder --win --x64 --publish never
 
+      - name: Verify bundle has no local data
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "mac" ]; then
+            APP=$(ls -d desktop/release/mac*/InteFlow.app | head -1)
+            python desktop/verify_bundle.py "$APP/Contents/Resources"
+          else
+            python desktop/verify_bundle.py desktop/release/win-unpacked/resources
+          fi
+
       - name: Smoke test packaged app (macOS)
         if: matrix.platform == 'mac'
         continue-on-error: true
@@ -132,6 +144,7 @@ jobs:
         with:
           name: InteFlow-${{ matrix.platform }}-${{ matrix.arch }}
           if-no-files-found: error
+          retention-days: 7
           path: |
             desktop/release/*.dmg
             desktop/release/*.exe

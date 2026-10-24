@@ -67,10 +67,11 @@ website/
 
 The home page puts downloads in the first screen: a compact macOS Apple
 Silicon / macOS Intel / Windows shortcut row sits directly under the hero
-buttons, followed by the full download strip. The shortcuts and cards fall
-back to `download.html` / `download-en.html` anchors, then `downloads.js`
-upgrades them to direct release assets. The download page repeats the cards
-with first-launch and source instructions.
+buttons, followed by the full download strip. Every platform card is an
+installer link; the fourth card opens the full GitHub **Releases** page.
+`downloads.js` upgrades the platform cards to direct release assets. The
+download page repeats the cards with first-launch notes. Source instructions
+live only in the separate “From source / 开发者选项” section at the bottom.
 
 Platform cards use `data-download-platform` and start with a safe fallback:
 
@@ -92,16 +93,20 @@ release yet, the API returns 404, is rate-limited, or the request fails, the
 cards keep their fallbacks and the page tells the visitor to run from source.
 There is no build step and no token in the page.
 
-Desktop artifacts are produced by `.github/workflows/desktop.yml` on `v*` tags:
+Desktop artifacts are produced by `.github/workflows/desktop.yml` on every push
+to `main` (artifact only) and on `v*` tags (artifact + GitHub Release):
 
 - `InteFlow-<version>-arm64.dmg`
 - `InteFlow-<version>-x64.dmg`
 - `InteFlow-Setup-<version>-x64.exe`
 
+Each build runs `desktop/verify_bundle.py` first, so an installer that contains
+local data cannot be published.
+
 Do **not** commit installers to `website/`: GitHub Pages has a 100 MB per-file
 limit and the repository should not carry hundreds of megabytes of binaries.
-The source ZIP is linked directly from
-`https://github.com/JasonSun2009CN/InteFlow/archive/refs/heads/main.zip`.
+The source ZIP is linked only from the separate developer section on
+`download*.html` (it is not a desktop installer).
 
 ## Live demo
 

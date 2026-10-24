@@ -85,6 +85,17 @@ const MESSAGES: Record<string, string> = {
     "配置用于按需解析与导入兜底的 LLM API。所有内容都保存在本地；除了调用你指定的服务商，密钥不会离开这台电脑。",
   "Settings saved.": "设置已保存。",
   "API key removed.": "API 密钥已移除。",
+  Desktop: "桌面端",
+  "Show built-in library": "显示内置题库",
+  "Show the bundled SAT sample bank in Library. It is off by default so a new install starts empty; turning it on lets you add sample units without importing a file.":
+    "在题库页显示随包分发的 SAT 示例题库。默认关闭，因此新安装的应用是空的；开启后可以不导入文件就直接添加示例单元。",
+  "Reset local data": "清空本地数据",
+  "Remove the local database, imported documents, analyses, vocabulary, exports and preferences, then restart InteFlow. Your own dictionary source files in the dictionary folder are kept. This cannot be undone.":
+    "删除本地数据库、导入的文档、分析、生词本、导出文件与界面偏好，然后重启 InteFlow。dictionary 文件夹里你自己的词典源文件会保留。此操作不可撤销。",
+  "Reset local data…": "清空本地数据…",
+  "Resetting…": "正在清空…",
+  "Reset cancelled.": "已取消清空。",
+  "Reset is only available in the desktop app.": "只有桌面端应用才能清空本地数据。",
   "Your name": "你的名字",
   "Printed on page 1 of every exported notebook":
     "会打印在每次导出笔记本的封面页",

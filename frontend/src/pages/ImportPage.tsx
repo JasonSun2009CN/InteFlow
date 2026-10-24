@@ -25,6 +25,7 @@ export default function ImportPage() {
   const { t } = useI18n();
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [banks, setBanks] = useState<BuiltinBank[] | null>(null);
+  const [showBuiltin, setShowBuiltin] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilterValue>("all");
   const [importSubjectId, setImportSubjectId] = useState<number | "">("");
@@ -85,7 +86,15 @@ export default function ImportPage() {
   useEffect(() => {
     void refresh();
     void refreshSubjects();
-    void refreshBanks();
+    // The sample question bank is opt-in (Settings → Show built-in library),
+    // so a fresh install starts with an empty Library.
+    api
+      .getSettings()
+      .then((s) => {
+        setShowBuiltin(s.show_builtin_library);
+        if (s.show_builtin_library) void refreshBanks();
+      })
+      .catch((err) => console.warn("settings unavailable:", err));
     api
       .health()
       .then((h) => setOcr(h.ocr))
@@ -409,7 +418,7 @@ export default function ImportPage() {
         </section>
       )}
 
-      {banks && banks.length > 0 && (
+      {showBuiltin && banks && banks.length > 0 && (
         <div>
           {banks.map((bank) => (
             <BuiltinBankCard key={bank.id} bank={bank} onChanged={() => void refreshAll()} />

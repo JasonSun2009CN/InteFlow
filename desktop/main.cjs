@@ -9,7 +9,7 @@
 // Nothing in the web app is replaced: the window loads the same UI, the same
 // API and all export/download paths still work (Chromium handles downloads).
 
-const { app, BrowserWindow, Menu, dialog, shell } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain, session, shell } = require("electron");
 const { spawn, spawnSync } = require("child_process");
 const crypto = require("crypto");
 const fs = require("fs");
@@ -308,6 +308,103 @@ function stopBackend() {
   }
 }
 
+/** Stop the backend and wait until it is really gone (used before wiping data). */
+function stopBackendAndWait(timeoutMs = 5000) {
+  const child = backend;
+  backend = null;
+  if (!child || child.killed) return Promise.resolve();
+  if (process.platform === "win32") {
+    spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], { stdio: "ignore" });
+    // Give Windows a moment to release the backend's file handles before the
+    // caller deletes the data folder.
+    return new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        /* already gone */
+      }
+      finish();
+    }, timeoutMs);
+    child.once("exit", finish);
+    try {
+      child.kill("SIGTERM");
+    } catch {
+      finish();
+    }
+  });
+}
+
+/**
+ * Wipe user data and restart into a first-run state.
+ *
+ * The bundled app itself contains no user data; this only clears what this
+ * machine accumulated under app.getPath("userData"). Dictionary source files
+ * (.eudb) are deliberately kept: they are user-supplied reference material,
+ * not app state, and the derived index lives in data/ and is rebuilt on demand.
+ */
+async function resetLocalData() {
+  if (!mainWindow) return { ok: false, cancelled: true };
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type: "warning",
+    title: "Reset InteFlow data",
+    message: "Remove all local data and restart InteFlow?",
+    detail:
+      "This deletes the database, imported documents, analyses, vocabulary, " +
+      "exports, settings and window preferences. Dictionary source files in the " +
+      "dictionary folder are kept. This cannot be undone.",
+    buttons: ["Cancel", "Reset and restart"],
+    defaultId: 0,
+    cancelId: 0,
+    noLink: true,
+  });
+  if (response !== 1) return { ok: false, cancelled: true };
+
+  quitting = true;
+  await stopBackendAndWait();
+
+  // Theme / language / sidebar / layout preferences live in the Electron
+  // profile, not in the Python data directory.
+  try {
+    if (session.defaultSession) {
+      await session.defaultSession.clearStorageData();
+      await session.defaultSession.clearCache();
+    }
+  } catch (error) {
+    console.error(`[inteflow] could not clear web storage: ${error}`);
+  }
+
+  try {
+    if (logStream) {
+      logStream.end();
+      logStream = null;
+    }
+  } catch {
+    /* best effort */
+  }
+
+  for (const name of ["data", "logs"]) {
+    try {
+      fs.rmSync(path.join(userDataDir(), name), { recursive: true, force: true });
+    } catch (error) {
+      console.error(`[inteflow] could not remove ${name}: ${error}`);
+    }
+  }
+
+  app.relaunch();
+  app.exit(0);
+  return { ok: true };
+}
+
 // --------------------------------------------------------------------------
 // window / menu
 // --------------------------------------------------------------------------
@@ -348,7 +445,7 @@ function createWindow() {
     if (!isSmoke) return;
     try {
       const info = await mainWindow.webContents.executeJavaScript(
-        `({ title: document.title, rootChildren: document.querySelector('#root')?.childElementCount ?? -1 })`,
+        `({ title: document.title, rootChildren: document.querySelector('#root')?.childElementCount ?? -1, resetBridge: typeof window.inteflow?.resetData === 'function' })`,
       );
       console.log(`INTEFLOW_SMOKE_OK ${JSON.stringify(info)}`);
       quitting = true;
@@ -398,6 +495,11 @@ function buildMenu() {
           click: () => shell.showItemInFolder(path.join(userDataDir(), "logs", "backend.log")),
         },
         { type: "separator" },
+        {
+          label: "Reset local data…",
+          click: () => void resetLocalData(),
+        },
+        { type: "separator" },
         { role: process.platform === "darwin" ? "close" : "quit" },
       ],
     },
@@ -436,6 +538,8 @@ const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
 } else {
+  ipcMain.handle("inteflow:reset-data", async () => resetLocalData());
+
   app.on("second-instance", () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
