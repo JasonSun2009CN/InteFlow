@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **339 passed**、`npm run build` 0 错误、`npm test` 164 passed, 5 skipped。
+> 基线：pytest **339 passed**、`npm run build` 0 错误、`npm test` 165 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---

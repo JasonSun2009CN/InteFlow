@@ -31,7 +31,7 @@
 |---|---|
 | 后端测试 | `pytest` **339 passed** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **164 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **165 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
 | API 面 | 67 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
@@ -263,7 +263,7 @@ cd backend && ../.venv/bin/python -m pytest -q     # 基线 339 passed
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 164 passed, 5 skipped
+cd frontend && npm test         # 165 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
