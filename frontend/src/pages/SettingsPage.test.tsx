@@ -13,6 +13,7 @@ vi.mock("../api/client", async (importOriginal) => {
       saveSettings: vi.fn(),
       listProviders: vi.fn(),
       testSettings: vi.fn(),
+      health: vi.fn(),
     },
   };
 });
@@ -20,6 +21,7 @@ vi.mock("../api/client", async (importOriginal) => {
 const getSettings = vi.mocked(api.getSettings);
 const saveSettings = vi.mocked(api.saveSettings);
 const listProviders = vi.mocked(api.listProviders);
+const health = vi.mocked(api.health);
 
 const settings: AppSettings = {
   provider: "orcarouter",
@@ -38,15 +40,59 @@ const settings: AppSettings = {
   show_builtin_library: false,
 };
 
+/** Auto-save is debounced, so give the PUT more room than the default 1s. */
+async function waitForSave() {
+  await waitFor(() => expect(saveSettings).toHaveBeenCalled(), { timeout: 3000 });
+  return saveSettings.mock.calls.at(-1)?.[0];
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   getSettings.mockResolvedValue(settings);
   listProviders.mockResolvedValue([]);
+  health.mockResolvedValue({ status: "ok", version: "0.1.2", ocr: [] });
   saveSettings.mockImplementation(async (input) => ({ ...settings, ...input }));
 });
 
 afterEach(() => {
   delete window.inteflow;
+});
+
+describe("SettingsPage", () => {
+  it("shows the app version reported by the backend", async () => {
+    render(<SettingsPage />);
+
+    expect(await screen.findByText("Version 0.1.2")).toBeInTheDocument();
+  });
+
+  it("auto-saves edits without a Save button", async () => {
+    render(<SettingsPage />);
+
+    const name = await screen.findByLabelText("Your name");
+    expect(screen.queryByRole("button", { name: "Save settings" })).not.toBeInTheDocument();
+
+    fireEvent.change(name, { target: { value: "Alexandra" } });
+
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({ user_name: "Alexandra" }),
+    );
+    expect(await screen.findByText("Saved")).toBeInTheDocument();
+  });
+
+  it("coalesces rapid keystrokes into one save with the final value", async () => {
+    render(<SettingsPage />);
+
+    const name = await screen.findByLabelText("Your name");
+    fireEvent.change(name, { target: { value: "A" } });
+    fireEvent.change(name, { target: { value: "Al" } });
+    fireEvent.change(name, { target: { value: "Alexandra" } });
+
+    await waitForSave();
+    expect(saveSettings).toHaveBeenCalledTimes(1);
+    expect(saveSettings.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ user_name: "Alexandra" }),
+    );
+  });
 });
 
 describe("SettingsPage vocabulary options", () => {
@@ -65,18 +111,14 @@ describe("SettingsPage vocabulary options", () => {
     fireEvent.click(aiSense);
     fireEvent.click(learner);
     fireEvent.click(custom);
-    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
-    await waitFor(() =>
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({
-          vocab_ai_sense: false,
-          vocab_learner_definitions: true,
-          custom_dictionary_enabled: false,
-        }),
-      ),
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({
+        vocab_ai_sense: false,
+        vocab_learner_definitions: true,
+        custom_dictionary_enabled: false,
+      }),
     );
-    expect(await screen.findByText("Settings saved.")).toBeInTheDocument();
   });
 
   it("saves the AI word-test grading toggle", async () => {
@@ -88,12 +130,9 @@ describe("SettingsPage vocabulary options", () => {
     expect(examAi).not.toBeChecked();
 
     fireEvent.click(examAi);
-    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
-    await waitFor(() =>
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ vocab_exam_ai_grading: true }),
-      ),
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({ vocab_exam_ai_grading: true }),
     );
   });
 
@@ -106,12 +145,9 @@ describe("SettingsPage vocabulary options", () => {
     expect(builtin).not.toBeChecked();
 
     fireEvent.click(builtin);
-    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
-    await waitFor(() =>
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({ show_builtin_library: true }),
-      ),
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({ show_builtin_library: true }),
     );
   });
 
@@ -139,14 +175,11 @@ describe("SettingsPage vocabulary options", () => {
     fireEvent.change(field, {
       target: { value: "**Why**\n- evidence\n\n**Takeaway**" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save settings" }));
 
-    await waitFor(() =>
-      expect(saveSettings).toHaveBeenCalledWith(
-        expect.objectContaining({
-          analysis_template: "**Why**\n- evidence\n\n**Takeaway**",
-        }),
-      ),
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({
+        analysis_template: "**Why**\n- evidence\n\n**Takeaway**",
+      }),
     );
   });
 });

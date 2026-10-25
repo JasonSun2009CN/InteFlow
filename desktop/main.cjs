@@ -176,6 +176,9 @@ function backendEnv(port, logFile, pdfBridgeUrl) {
   const env = {
     ...process.env,
     INTEFLOW_PORT: String(port),
+    // Keep /api/health in sync with the installer version that electron-builder
+    // stamped into package.json (the CI tag step writes it).
+    INTEFLOW_VERSION: app.getVersion(),
     INTEFLOW_DATA: path.join(userDataDir(), "data"),
     INTEFLOW_STATIC_DIR: webDir(),
     INTEFLOW_MATHJAX_DIR: mathjaxDir(),
