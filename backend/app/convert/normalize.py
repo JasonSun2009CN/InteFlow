@@ -91,6 +91,46 @@ def join_lines(prev: str, nxt: str) -> str:
     return prev + " " + nxt
 
 
+VERSE_MIN_LINES = 4
+VERSE_MIN_CAPITAL_RATIO = 1.0
+VERSE_MAX_AVG_LINE = 60.0
+
+
+def looks_like_verse(lines: list[str]) -> bool:
+    """True for a block whose *visual* lines are poem/song lines, not wrapped prose.
+
+    Wrapped prose almost never starts a continuation line with a capital; verse
+    almost always does. Requiring four lines, mostly capitalised continuations
+    and short lines keeps normal passages (and their one-word proper nouns) out.
+    """
+    lines = [line.strip() for line in lines if line.strip()]
+    if len(lines) < VERSE_MIN_LINES:
+        return False
+    # Option blocks are not poems, even when they wrap onto four lines.
+    if any(re.match(r"^(?:[-*]\s*)?[A-Z][.)]\s", line) for line in lines):
+        return False
+    continuation = lines[1:]
+    capitals = sum(1 for line in continuation if line[:1].isupper())
+    if capitals / len(continuation) < VERSE_MIN_CAPITAL_RATIO:
+        return False
+    average = sum(len(line) for line in lines) / len(lines)
+    if average > VERSE_MAX_AVG_LINE:
+        return False
+    return not any(line.endswith("-") for line in lines)
+
+
+def join_paragraph(lines: list[str]) -> str:
+    """One paragraph from its visual lines, keeping verse line breaks intact."""
+    lines = [line for line in lines if line.strip()]
+    if looks_like_verse(lines):
+        return "\n".join(lines)
+    out = ""
+    for line in lines:
+        out = join_lines(out, line)
+    return out
+
+
+
 def match_question_start(line: str) -> int | None:
     """Return the question number if the line starts a numbered question."""
     m = _QNUM_RE.match(line) or _QWORD_RE.match(line)

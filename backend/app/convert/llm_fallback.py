@@ -27,6 +27,7 @@ import pymupdf
 from app import llm
 from app.convert.model import BuiltQuestion
 from app.convert.normalize import guess_sec
+from app.convert.paired import split_paired_material
 from app.convert.pdf import (  # pdf does not import this module at load time
     ConvertError,
     ConvertedDoc,
@@ -246,9 +247,13 @@ def _interpret(
             if not stem:
                 errors.append(f"question {cur['no']} has an empty stem")
             else:
+                material, material2 = split_paired_material(
+                    "\n\n".join(cur["material"]) or None
+                )
                 questions.append(
                     BuiltQuestion(
-                        material="\n\n".join(cur["material"]) or None,
+                        material=material,
+                        material2=material2,
                         stem=stem,
                         options={},
                         no=cur["no"],
@@ -269,9 +274,13 @@ def _interpret(
                 errors.append(f"question {cur['no']} has an empty stem")
             else:
                 text = stem + " " + " ".join(cur["material"])
+                material, material2 = split_paired_material(
+                    "\n\n".join(cur["material"]) or None
+                )
                 questions.append(
                     BuiltQuestion(
-                        material="\n\n".join(cur["material"]) or None,
+                        material=material,
+                        material2=material2,
                         stem=stem,
                         options=cur["options"],
                         no=cur["no"],

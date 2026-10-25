@@ -36,6 +36,8 @@ def render_question(q: Question) -> list[str]:
     out = [f":::q {{{' '.join(attrs)}}}"]
     if q.material:
         out += ["@material", q.material, ""]
+    if q.material2:
+        out += ["@material2", q.material2, ""]
     out += ["@stem", q.stem, ""]
     out.append("")
     for opt in q.options:                       # already "A. text"

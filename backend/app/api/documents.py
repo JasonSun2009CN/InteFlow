@@ -108,7 +108,12 @@ def _question_context(doc_id: int, question_id: int | None, fallback: str):
     question = repos.documents.get_question(doc_id, question_id)
     if question is None:
         return None, " ".join(fallback.split())[:2000]
-    parts = [question.get("material") or "", question.get("stem") or "", *question.get("options", [])]
+    parts = [
+        question.get("material") or "",
+        question.get("material2") or "",
+        question.get("stem") or "",
+        *question.get("options", []),
+    ]
     server_context = "\n".join(part for part in parts if part.strip())
     context = fallback.strip() or server_context
     return question.get("no"), " ".join(context.split())[:2000]
@@ -408,6 +413,37 @@ def add_word_from_selection(doc_id: int, payload: SelectionPayload) -> dict:
     question_no, context = _question_context(
         doc_id, payload.question_id, payload.context
     )
+
+    # Settings → Vocabulary → auto-fill definitions: when off, the word is
+    # added with an empty Meaning so the student writes their own. No lookup,
+    # no LLM, 0 token.
+    if not settings_repo.vocabulary_auto_definition_enabled():
+        try:
+            result = words_repo.add_entry(
+                doc_id, word=text, context=context, question_no=question_no
+            )
+        except words_repo.GridError as exc:
+            _fail(str(exc), 400)
+            raise                                      # pragma: no cover
+        result.update(
+            {
+                "matched": False,
+                "used_ai": False,
+                "pos": "",
+                "definition": "",
+                "entry_id": None,
+                "dictionary_word": None,
+                "reason": "",
+                "warning": (
+                    "Auto-fill definitions is off in Settings; added without a definition."
+                ),
+                "selected": text,
+                "source": "standard",
+                "dictionary_title": None,
+                "learner": False,
+            }
+        )
+        return result
 
     status = dictionary.status("standard")
     use_learner = settings_repo.learner_definitions_enabled()

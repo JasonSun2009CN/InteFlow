@@ -20,6 +20,7 @@ def _question_dict(row: Any, include_answer: bool = True) -> dict:
         "type": row["type"],
         "difficulty": row["difficulty"],
         "material": row["material"],
+        "material2": row["material2"] if "material2" in row.keys() else None,
         "stem": row["stem"],
         "options": json.loads(row["options_json"]),
         "kind": row["kind"] if "kind" in row.keys() else "choice",
@@ -96,9 +97,9 @@ def insert_questions(doc_id: int, questions: list[Question]) -> None:
         for idx, q in enumerate(questions):
             conn.execute(
                 "INSERT INTO questions (document_id, ext_id, no, sec, type, difficulty,"
-                " material, stem, options_json, kind, multi, answers_json, answer, explain,"
+                " material, material2, stem, options_json, kind, multi, answers_json, answer, explain,"
                 " source_ref, images_json, order_idx)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     doc_id,
                     q.ext_id,
@@ -107,6 +108,7 @@ def insert_questions(doc_id: int, questions: list[Question]) -> None:
                     q.type,
                     q.difficulty,
                     q.material,
+                    q.material2,
                     q.stem,
                     json.dumps(q.options, ensure_ascii=False),
                     q.kind,
@@ -132,11 +134,12 @@ def update_questions(doc_id: int, questions: list[Question]) -> int:
         changed = 0
         for q in questions:
             cur = conn.execute(
-                "UPDATE questions SET material = ?, stem = ?, options_json = ?,"
+                "UPDATE questions SET material = ?, material2 = ?, stem = ?, options_json = ?,"
                 " kind = ?, multi = ?"
                 " WHERE document_id = ? AND ext_id = ?",
                 (
                     q.material,
+                    q.material2,
                     q.stem,
                     json.dumps(q.options, ensure_ascii=False),
                     q.kind,

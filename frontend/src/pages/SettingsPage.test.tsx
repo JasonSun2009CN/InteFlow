@@ -33,11 +33,13 @@ const settings: AppSettings = {
   user_name: "Alex",
   llm_fallback: true,
   vocab_ai_sense: true,
+  vocab_auto_definition: true,
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
   analysis_template: "",
   show_builtin_library: false,
+  dictionary_auto_lookup: true,
 };
 
 /** Auto-save is debounced, so give the PUT more room than the default 1s. */
@@ -79,6 +81,30 @@ describe("SettingsPage", () => {
     expect(await screen.findByText("Saved")).toBeInTheDocument();
   });
 
+  it("keeps edits typed while an API-key save is in flight", async () => {
+    let resolveFirst!: (value: AppSettings) => void;
+    saveSettings.mockImplementationOnce(
+      () => new Promise<AppSettings>((resolve) => { resolveFirst = resolve; }),
+    );
+    render(<SettingsPage />);
+
+    const key = await screen.findByLabelText("API Key");
+    fireEvent.change(key, { target: { value: "sk-test-123456" } });
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledTimes(1), { timeout: 3000 });
+
+    // This edit lands while the key PUT is still pending.
+    fireEvent.change(screen.getByLabelText("Your name"), {
+      target: { value: "Alexandra" },
+    });
+    resolveFirst({ ...settings, api_key_set: true, api_key_masked: "sk-t…3456" });
+
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledTimes(2), { timeout: 3000 });
+    expect(saveSettings.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ user_name: "Alexandra" }),
+    );
+    expect(saveSettings.mock.calls[1][0].api_key).toBeUndefined();
+  });
+
   it("coalesces rapid keystrokes into one save with the final value", async () => {
     render(<SettingsPage />);
 
@@ -118,6 +144,36 @@ describe("SettingsPage vocabulary options", () => {
         vocab_learner_definitions: true,
         custom_dictionary_enabled: false,
       }),
+    );
+  });
+
+  it("lets the user turn off automatically filled vocabulary definitions", async () => {
+    render(<SettingsPage />);
+
+    const auto = await screen.findByRole("checkbox", {
+      name: /Auto-fill definitions in the word list/,
+    });
+    expect(auto).toBeChecked();
+
+    fireEvent.click(auto);
+
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({ vocab_auto_definition: false }),
+    );
+  });
+
+  it("auto-saves the dictionary lookup toggle too", async () => {
+    render(<SettingsPage />);
+
+    const auto = await screen.findByRole("checkbox", {
+      name: /Look up dictionary words while typing/,
+    });
+    expect(auto).toBeChecked();
+
+    fireEvent.click(auto);
+
+    expect(await waitForSave()).toEqual(
+      expect.objectContaining({ dictionary_auto_lookup: false }),
     );
   });
 

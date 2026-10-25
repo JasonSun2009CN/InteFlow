@@ -204,13 +204,22 @@ def _header_text(box: pymupdf.Rect, lines: list[dict]) -> str:
     return _caption_text([ln for _, ln in header])
 
 
+X_LABEL_GAP = 24.0          # pt; x-axis tick labels / category row below the figure
+BELOW_MAX_CHARS = 40        # only short labels are absorbed below (never prose)
+BELOW_MAX_WIDTH = 0.5       # ... and only labels narrower than half the figure
+
+
 def _absorb(box: pymupdf.Rect, lines: list[dict]) -> tuple[pymupdf.Rect, list[dict]]:
-    """Grow a figure box to take in its own title and y-axis labels.
+    """Grow a figure box to take in its own title, axis labels and table headers.
 
     Charts and tables in the scanned collection label themselves with ordinary
-    text just outside the drawn strokes: a centered title above and tick values
-    to the left of the y-axis. Those labels must be *cropped into* the picture
-    (so the figure stays self-contained) rather than left behind as body text.
+    text just outside the drawn strokes: a centered title above, tick values to
+    the left of the y-axis, x-axis labels / table categories just below. Those
+    labels must be *cropped into* the picture (so the figure stays
+    self-contained) rather than left behind as body text.
+
+    Only short, horizontally-contained lines are absorbed below the figure: a
+    wrapped prose line is wide, so it can never be swallowed into a screenshot.
     Returns the grown box plus the title lines, for use as a caption.
     """
     title_lines: list[dict] = []
@@ -231,6 +240,23 @@ def _absorb(box: pymupdf.Rect, lines: list[dict]) -> tuple[pymupdf.Rect, list[di
             continue
         if box.x0 - AXIS_MARGIN <= r.x1 <= box.x0 + 2 and r.x0 < box.x0:
             box.x0 = r.x0
+    absorbed = True
+    while absorbed:                        # x-axis labels / table category row below
+        absorbed = False
+        for line in lines:
+            r = pymupdf.Rect(line["bbox"])
+            text = _line_text(line)
+            if len(text) > BELOW_MAX_CHARS:
+                continue
+            if text[-1:] in ".?!;:":            # a stem/instruction, not a tick label
+                continue
+            if (r.x1 - r.x0) > (box.x1 - box.x0) * BELOW_MAX_WIDTH:
+                continue
+            if r.x0 < box.x0 - 3 or r.x1 > box.x1 + 3:
+                continue
+            if box.y1 - 2 <= r.y0 <= box.y1 + X_LABEL_GAP and r.y1 > box.y1:
+                box.y1 = r.y1
+                absorbed = True
     return box, title_lines
 
 
@@ -308,13 +334,26 @@ def collect_images(
         png = _to_png(block["image"])
         if not png:
             continue
+        # A bitmap chart often carries its title, axis labels and table headers
+        # as a separate text layer. Crop the page (not the bare bitmap) whenever
+        # such labels sit just outside it, so the figure stays self-contained.
+        grown, title_lines = _absorb(pymupdf.Rect(rect), lines)
+        if (grown.x0, grown.y0, grown.x1, grown.y1) != (rect.x0, rect.y0, rect.x1, rect.y1):
+            rect = pymupdf.Rect(
+                grown.x0 - 3, grown.y0 - 3, grown.x1 + 3, grown.y1 + 3
+            ) & page.rect
+            png = _clip_png(page, rect)
         h = hashlib.sha1(png).hexdigest()
         if h in seen_hashes:
             taken.append(rect)
             continue
         seen_hashes.add(h)
         taken.append(rect)
-        out.append(ExtractedImage(tuple(rect), name_for(h), png))
+        out.append(
+            ExtractedImage(
+                tuple(rect), name_for(h), png, caption=_caption_text(title_lines)
+            )
+        )
 
     # 2. vector figures (number lines, geometry sketches, charts, tables)
     rects = [_normalized(d["rect"]) for d in page.get_drawings() if d.get("rect")]

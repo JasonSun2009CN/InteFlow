@@ -252,6 +252,8 @@ const MESSAGES: Record<string, string> = {
   Submit: "提交",
   "Your answer": "你的答案",
   Passage: "文章",
+  "Text 1": "文本 1",
+  "Text 2": "文本 2",
   "Submit your answers?": "提交答案？",
   "{answered} of {total} answered": "已答 {answered} / {total} 题",
   ", {count} still blank": "，还有 {count} 题未答",
@@ -574,6 +576,32 @@ const MESSAGES: Record<string, string> = {
   "No exact entry. Pick a suggestion below.": "没有完全匹配的词条，请从下方建议中选择。",
   "Collegiate definition": "大学词典释义",
   Suggestions: "建议",
+  "Auto-fill definitions in the word list": "自动填入释义",
+  "When you drag a word into the Vocabulary pane, fill its Meaning with the Merriam-Webster definition automatically. Turn this off to add the word with an empty Meaning and write your own definition.":
+    "拖词进生词本时，自动把韦氏释义填入 Meaning。关闭后只添加单词，Meaning 留空，由你自己写释义。",
+  "Look up dictionary words while typing": "输入时自动查词",
+  "The Dictionary tool queries the built-in Merriam-Webster index as you type. Turn it off to look up only when you press Enter, or to add your own definition instead.":
+    "词典工具会在输入时自动查询内置韦氏索引。关闭后只有按回车才查询，也方便直接添加自己的释义。",
+  "{title} · {count} entries · local, no tokens.":
+    "{title} · {count} 个词条 · 本地查询，不消耗 token。",
+  "Merriam-Webster · local, no tokens.": "韦氏词典 · 本地查询，不消耗 token。",
+  "Look up any word from the question.": "查题干里的任意单词。",
+  "Definitions come from the bundled Merriam-Webster index. Your own definitions are checked first.":
+    "释义来自内置韦氏索引；如果有自定义释义，会优先查询。",
+  "Add my own definition": "添加自定义释义",
+  "Can't find it? Add my own definition": "没找到？添加自定义释义",
+  "Part of speech (optional)": "词性（可选）",
+  "Save definition": "保存释义",
+  "Saved “{word}” to My dictionary ({count} words).":
+    "已把「{word}」保存到我的词典（共 {count} 个单词）。",
+  "Auto lookup is off — press Enter in the search box to look a word up.":
+    "自动查词已关闭——在搜索框按回车查词。",
+  "Your own definitions are saved locally and checked first.":
+    "自定义释义保存在本地，并优先查询。",
+  "Auto lookup is on. Change it in Settings → Look up dictionary words while typing.":
+    "自动查词已开启。可在 设置 → 输入时自动查词 中修改。",
+  "Auto lookup is off. Change it in Settings → Look up dictionary words while typing.":
+    "自动查词已关闭。可在 设置 → 输入时自动查词 中修改。",
   "No exams yet": "还没有考试",
   "Import an exam, then drag words from the review workspace into its vocabulary list. Every exam keeps its own list, and re-practising edits the same one.":
     "先导入一套考试，然后在复盘工作台中把单词拖入它的词表。每套试卷都有自己的词表，重新练习时会编辑同一份。",

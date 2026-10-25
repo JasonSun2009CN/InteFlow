@@ -21,12 +21,14 @@ from app.convert import twocolumn as _twocolumn
 from app.convert import images as _images
 from app.convert import ocr as _ocr
 from app.convert.model import BuiltQuestion, Item, PageReport
+from app.convert.paired import split_paired_material
 from app.convert.normalize import (
     clean_text,
     guess_sec,
     is_answer_key_heading,
     is_chrome,
     join_lines,
+    join_paragraph,
     match_question_start,
     match_section_heading,
     parse_answer_entries,
@@ -169,7 +171,8 @@ def _scan_page(
                               rect.x0, rect.y0, rect.x1, rect.y1, rect.y1 - rect.y0))
             continue
 
-        buf, first_y, last_y, size = "", None, None, 10.0
+        texts: list[str] = []
+        first_y, last_y, size = None, None, 10.0
         for raw in block["lines"]:
             text = clean_text("".join(s.get("text", "") for s in raw.get("spans", [])))
             if not text:
@@ -179,9 +182,10 @@ def _scan_page(
                 first_y = y0
             last_y = y1
             size = max(size, max((s.get("size", 10.0) for s in raw["spans"]), default=10.0))
-            buf = join_lines(buf, text) if buf else text
-        if not buf or first_y is None or last_y is None:
+            texts.append(text)
+        if not texts or first_y is None or last_y is None:
             continue
+        buf = join_paragraph(texts)
         if is_chrome(buf, first_y, last_y, height):
             continue
         if any(_images.covers_text(r, block["bbox"][0], first_y, block["bbox"][2], last_y)
@@ -500,6 +504,7 @@ def _build_question(
         sec = section_hint or guess_sec(stem)
         return BuiltQuestion(
             material=None,
+            material2=None,
             stem=stem,
             options={},
             no=group.no,
@@ -516,6 +521,7 @@ def _build_question(
         return None
 
     material, stem = _split_material_stem(pre)
+    material, material2 = split_paired_material(material)
     if not stem:
         warnings.append(f"skipped question {_label(group)}: empty stem")
         return None
@@ -537,6 +543,7 @@ def _build_question(
     sec = section_hint or guess_sec(f"{stem}\n{material or ''}")
     return BuiltQuestion(
         material=material,
+        material2=material2,
         stem=stem,
         options=options,
         no=group.no,
@@ -630,19 +637,19 @@ _VISIBLE_TEXT_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 
 def _emit(lines: list[str]) -> str:
     paragraphs: list[str] = []
-    buf = ""
+    buf: list[str] = []
     for text in lines:
         m = IMG_TOKEN_RE.match(text)
         if m:
             if buf:
-                paragraphs.append(buf)
-                buf = ""
+                paragraphs.append(join_paragraph(buf))
+                buf = []
             alt = (m.group(2) or "").strip() or "figure"
             paragraphs.append(f"![{alt}](assets/{m.group(1)}.png)")
         else:
-            buf = join_lines(buf, text) if buf else text
+            buf.append(text)
     if buf:
-        paragraphs.append(buf)
+        paragraphs.append(join_paragraph(buf))
     return "\n\n".join(p for p in paragraphs if p)
 
 
@@ -662,6 +669,8 @@ def _render_question(idx: int, q: BuiltQuestion) -> str:
     out = [f":::q {{{' '.join(attrs)}}}"]
     if q.material:
         out += ["@material", q.material, ""]
+    if q.material2:
+        out += ["@material2", q.material2, ""]
     out += ["@stem", q.stem, ""]
     if q.kind != "blank":
         for letter, content in q.options.items():

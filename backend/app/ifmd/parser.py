@@ -51,6 +51,7 @@ class Question:
     type: str | None = None
     difficulty: str | None = None
     material: str | None = None
+    material2: str | None = None             # paired passage ("Text 2"), SAT dual-text items
     answer: str | None = None                # legacy single letter (choice only)
     answers: list[str] = field(default_factory=list)   # letters (choice) or text (blank)
     kind: str = "choice"                     # choice | blank
@@ -128,31 +129,54 @@ def _parse_attrs(attr_text: str, line: int) -> dict[str, str]:
     return attrs
 
 
-def _split_body(body_lines: list[str], start_line: int) -> tuple[str | None, str]:
-    """Split block body into (material, stem_or_rest) around optional @material/@stem markers."""
-    mat_idx = next((i for i, l in enumerate(body_lines) if l.strip() == "@material"), None)
-    stem_idx = next((i for i, l in enumerate(body_lines) if l.strip() == "@stem"), None)
+def _split_body(body_lines: list[str], start_line: int) -> tuple[str | None, str | None, str]:
+    """Split block body into (material, material2, stem) around optional markers.
 
+    ``@material`` holds the (single) passage; ``@material2`` is the second text of
+    a paired-passage question and may only appear between ``@material`` and
+    ``@stem``. Both are optional: a block without markers is all stem.
+    """
+    def marker_index(name: str) -> int | None:
+        hits = [i for i, line in enumerate(body_lines) if line.strip() == name]
+        if len(hits) > 1:
+            raise IfmdError(f"duplicate {name} marker", start_line + hits[1])
+        return hits[0] if hits else None
+
+    mat_idx = marker_index("@material")
+    mat2_idx = marker_index("@material2")
+    stem_idx = marker_index("@stem")
+
+    if mat2_idx is not None and mat_idx is None:
+        raise IfmdError("@material2 requires a preceding @material", start_line + mat2_idx)
     if mat_idx is None and stem_idx is None:
-        return None, "\n".join(body_lines).strip()
-    if mat_idx is not None and stem_idx is not None:
-        if stem_idx <= mat_idx:
-            raise IfmdError("@stem must come after @material", start_line + stem_idx)
-        material = "\n".join(body_lines[mat_idx + 1 : stem_idx]).strip()
-        stem = "\n".join(body_lines[stem_idx + 1 :]).strip()
-        return (material or None), stem
-    if mat_idx is not None:
+        return None, None, "\n".join(body_lines).strip()
+    if mat_idx is not None and stem_idx is None:
         raise IfmdError("@material requires a following @stem", start_line + mat_idx)
-    if stem_idx is not None:
+    if stem_idx is not None and mat_idx is not None and stem_idx <= mat_idx:
+        raise IfmdError("@stem must come after @material", start_line + stem_idx)
+    if mat2_idx is not None:
+        if mat2_idx <= mat_idx:
+            raise IfmdError("@material2 must come after @material", start_line + mat2_idx)
+        if mat2_idx >= stem_idx:
+            raise IfmdError("@material2 must come before @stem", start_line + mat2_idx)
+
+    if stem_idx is None:                                       # pragma: no cover - guarded above
+        return None, None, ""
+    if mat_idx is None:
+        # No @material marker: content before @stem is the material.
         before = "\n".join(body_lines[:stem_idx]).strip()
-        stem = "\n".join(body_lines[stem_idx + 1 :]).strip()
-        if before:
-            # No @material marker: content before @stem is the material.
-            return before, stem
-        return None, stem
-    # @material without @stem: everything after it is material+stem in one go -> treat as stem.
-    material = "\n".join(body_lines[mat_idx + 1 :]).strip()
-    return None, material
+        return (before or None), None, "\n".join(body_lines[stem_idx + 1 :]).strip()
+
+    stem = "\n".join(body_lines[stem_idx + 1 :]).strip()
+    if mat2_idx is None:
+        material = "\n".join(body_lines[mat_idx + 1 : stem_idx]).strip()
+        return (material or None), None, stem
+
+    material = "\n".join(body_lines[mat_idx + 1 : mat2_idx]).strip()
+    material2 = "\n".join(body_lines[mat2_idx + 1 : stem_idx]).strip()
+    if not material2:
+        raise IfmdError("@material2 must not be empty", start_line + mat2_idx)
+    return (material or None), material2, stem
 
 
 def parse(text: str) -> ParsedDoc:
@@ -289,7 +313,7 @@ def parse(text: str) -> ParsedDoc:
                 if not multi and len(answers) > 1:  # pragma: no cover - guarded above
                     answers = answers[:1]
 
-        material, stem = _split_body(body_wo_opts, block_start + 1)
+        material, material2, stem = _split_body(body_wo_opts, block_start + 1)
         if not stem:
             raise IfmdError("question has empty stem", block_start)
 
@@ -306,7 +330,11 @@ def parse(text: str) -> ParsedDoc:
                 f"invalid difficulty={difficulty!r} (expected e|m|h)", block_start
             )
 
-        images = _IMAGE_RE.findall(material or "") + _IMAGE_RE.findall(stem)
+        images = (
+            _IMAGE_RE.findall(material or "")
+            + _IMAGE_RE.findall(material2 or "")
+            + _IMAGE_RE.findall(stem)
+        )
         for opt in options:
             images += _IMAGE_RE.findall(opt)
 
@@ -320,6 +348,7 @@ def parse(text: str) -> ParsedDoc:
                 type=attrs.get("type"),
                 difficulty=difficulty,
                 material=(material.strip() or None) if material else None,
+                material2=(material2.strip() or None) if material2 else None,
                 answer=answers[0] if kind == "choice" and len(answers) == 1 else None,
                 answers=answers,
                 kind=kind,

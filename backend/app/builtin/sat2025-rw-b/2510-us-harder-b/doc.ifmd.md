@@ -103,19 +103,11 @@ Based on the texts, the author of Text 2 would most likely agree with which stat
 
 :::q {#Q007 sec=rw no=7}
 @material
-![Tax Penalties Assessed on Private by Reason, 2003–2005](assets/p04-92871ff4.png)
+![Tax Penalties Assessed on Private Foundations That Filed Form 4720, by Reason, 2003–2005](assets/p04-92871ff4.png)
 
-excess business holdings
+**Bar categories, left to right:** self-dealing · undistributed income · taxable expenditures · excess business holdings.
 
-taxable expenditures
-
-undistributed income
-
-self-dealing
-
-Reason for tax penalty
-
-2003 2004 2005
+**Legend (bars left to right):** 2003 · 2004 · 2005.
 
 While US public charities, like Kaiser Foundation Hospitals, must file Form 990 yearly with the IRS, private foundations, such as the David and Lucile Packard Foundation, must file a different form, 990- PF. In addition, foundations that engage in certain prohibited activities must also file Form 4720 and pay a penalty tax on the money involved. Private foundations are prohibited from holding excess interests in a business enterprise, "self-dealing"(conducting activities that benefit foundation insiders), making taxable expenditures such as outlays for lobbying, and failing to cross a required threshold in making charitable distributions from income. Out of the organizations that filed Form 990-PF in the years 2003–2005, ______
 

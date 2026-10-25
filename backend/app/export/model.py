@@ -32,6 +32,7 @@ class ExportQuestion:
     sec: str
     source: str | None
     material: str | None
+    material2: str | None
     stem: str
     options: dict[str, str]
     images: list
@@ -72,6 +73,7 @@ def build_export(doc_id: int) -> ExportDoc | None:
                 sec=q["sec"] or "",
                 source=q["source"],
                 material=q["material"],
+                material2=q.get("material2"),
                 stem=q["stem"],
                 options=option_map(q["options"]),
                 images=images,

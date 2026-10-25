@@ -9,6 +9,7 @@ import {
 } from "../api/client";
 import AnalysisEditor from "../components/workspace/AnalysisEditor";
 import RichText from "../components/RichText";
+import PassageText from "../components/PassageText";
 import { SubjectBadge } from "../components/SubjectControls";
 import { SlidingTabs } from "../components/ui";
 import { sectionLabel } from "../lib/sections";
@@ -453,9 +454,14 @@ export default function MistakesPage() {
                 </Link>
               </div>
 
-              {selected.material && (
-                <div className="max-h-44 overflow-y-auto border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                  <RichText text={selected.material} docId={selected.document_id} />
+              {(selected.material || selected.material2) && (
+                <div className="max-h-44 overflow-y-auto border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm [scrollbar-gutter:stable]">
+                  <PassageText
+                    material={selected.material}
+                    material2={selected.material2}
+                    docId={selected.document_id}
+                    textClassName="text-sm"
+                  />
                 </div>
               )}
 

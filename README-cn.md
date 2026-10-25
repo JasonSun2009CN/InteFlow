@@ -52,19 +52,19 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 
 | 模块 | 能力 |
 |---|---|
-| **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
+| **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取/**双篇 Text 1·Text 2 识别**/**诗歌换行**）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
 | **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等（默认隐藏，可在 Settings 打开） |
 | **资料库** | 文档列表（题数、已作答数、答案状态）、练习历史、删除（级联） |
 | **学科分类** | 自定义学科（如 SAT Math、Physics）+ 颜色；每套试卷最多一个学科，可在 Library 行内或答案页顶部直接归类、现场新建；支持改名/换色/删除与按学科筛选。删除学科只把试卷移回 Uncategorized，不影响题目/答案/分析/词表 |
 | **答案录入** | 选择题 A–Z 网格（题面有几个选项就显示几个，如 AMC 的 A–E；**多选**题可勾多个）+ **填空题多答案**（加号添加可接受答案）+ **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA` / 多选 `3-AC` / `1-E`）+ 校验 + 预览，同步回写源文件 |
 | **练习** | 考试风格全屏、**正计时 / 倒计时两种计时**（开始屏选择；倒计时到 `00:00` 自动交卷，并按试卷记住上次模式与时长）、单题视图、题号导航、标记、键盘 `选项字母` / `← →`、多选与填空作答、交卷确认 |
 | **结果 / 复盘** | 得分 / 分板块 / 用时统计、**全屏复盘**（无侧栏）、`All · Correct · Wrong` 过滤、左上角可折叠题号导航、左题面 + 右 Pages 式分析编辑器（自动保存 / 续写）、补键重判（regrade） |
-| **工作区** | 每题分析页（Markdown，支持公式/图片）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、导出抽屉 |
+| **工作区** | **2-of-5 分屏**：题目 / 分析 / AI Tutor / 生词本 / **词典**；每题分析页（Markdown，支持公式/图片）、生词表 `Word \| Meaning \| Notes`（增删改 + 导出 `.xlsx`）、**AI 讲解**（显式触发）、本地韦氏词典、导出抽屉 |
 | **生词本** | 一套试卷一份词表（Word · POS · Meaning · Notes）、本地韦氏词典查词、拖词入表、按条添加、`.xlsx` 导出 |
 | **单词考试** | Vocabulary 页内 **Word list / Word test** 两 tab：随机抽题或全测，**English → Chinese**（手写释义，本地宽松判分）或 **Chinese → English**（看释义拼写，忽略大小写/空格/标点）；结果含正确率、考察范围、每题正确答案/用户答案 + 紧凑 JSON 二维码；可选 AI 严格判分 |
 | **错题集 / 精选题集** | 侧栏 **Review**：**Mistakes** 按题去重并保留最近一次作答（后来做对自动移出）；**Starred** 是练习/复盘/错题列表中点星收藏的题目。支持按套题/题干/选项搜索、exam 过滤、时间正倒序，并共用分析编辑器；旧分析只读列出 |
 | **导出** | **PDF**（WeasyPrint，页脚页码、图片、MathJax SVG 公式）、**DOCX**（python-docx）、**复盘笔记本 md/docx/pdf**（只含已写解析的题，存 `data/exports/`）、生词 **`.xlsx`** |
-| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**错题分析模板**、**题目识别 API 兜底**、**AI 选义**、**Definition for English Learners**、**My dictionary**、**单词考试 AI 评分**、**English / 中文 界面语言** |
+| **设置** | 19 家 LLM 服务商目录、protocol（openai / anthropic）、Base URL、API Key（掩码）、模型、连通性测试、**用户名**（导出封面）、**错题分析模板**、**题目识别 API 兜底**、**AI 选义**、**Definition for English Learners**、**My dictionary**、**单词考试 AI 评分**、**词典自动查词**、**自动填入释义**、**English / 中文 界面语言**、应用版本号 + **自动保存** |
 
 > **词典说明**：本地韦氏 `.eudb` 的索引里会保留部分词条自带的 **Definition for English Learners** 栏目；
 > 开启对应设置后优先显示该栏，没有就回退普通释义。**My dictionary** 是独立的用户词典，可在 Settings
@@ -322,7 +322,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 312 passed；用临时数据目录，不动你的数据）
+# 后端测试（基线 339 passed；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）

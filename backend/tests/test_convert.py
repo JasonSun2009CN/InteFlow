@@ -179,3 +179,76 @@ def test_non_pdf_is_rejected(tmp_path: Path) -> None:
 def test_missing_file_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(ConvertError):
         convert_pdf(tmp_path / "absent.pdf")
+
+def _paired_pdf(path: Path) -> Path:
+    import pymupdf
+
+    doc = pymupdf.open()
+    page = doc.new_page(width=612, height=792)
+    page.insert_text((60, 80), "1. The two texts discuss planting street trees.", fontsize=10)
+    page.insert_text((60, 110), "Text 1", fontsize=10)
+    page.insert_text((60, 125), "Cities should plant more trees: shade improves at once.", fontsize=10)
+    page.insert_text((60, 155), "Text 2", fontsize=10)
+    page.insert_text((60, 170), "Maintenance budgets are routinely underestimated.", fontsize=10)
+    page.insert_text((60, 200), "How would the author of Text 2 respond to Text 1?", fontsize=10)
+    for i, opt in enumerate([
+        "A. By accepting the benefits but questioning the budget",
+        "B. By denying that trees provide shade",
+        "C. By proposing a different city",
+        "D. By citing a third study",
+    ]):
+        page.insert_text((80, 220 + i * 15), opt, fontsize=10)
+    doc.save(path)
+    doc.close()
+    return path
+
+
+def test_paired_passages_are_split_into_material2(tmp_path: Path) -> None:
+    q = parse(convert_pdf(_paired_pdf(tmp_path / "paired.pdf")).ifmd).questions[0]
+    assert q.material is not None and "Dates" not in q.material
+    assert "Cities should plant" in (q.material or "")
+    assert q.material2 is not None and "Maintenance budgets" in q.material2
+    assert "Text 1" not in (q.material or "")
+    assert "Text 2" not in q.material2
+
+
+def test_poem_lines_keep_their_breaks(tmp_path: Path) -> None:
+    import pymupdf
+
+    path = tmp_path / "poem.pdf"
+    doc = pymupdf.open()
+    page = doc.new_page(width=612, height=792)
+    page.insert_text((60, 80), "1. The following text is adapted from a poem.", fontsize=10)
+    for i, line in enumerate([
+        "The little fern-leaf, bending",
+        "Upon the brink, its green reflection greets,",
+        "And kisses soft the shadow that it meets",
+        "With touch so fine,",
+        "The border line",
+    ]):
+        page.insert_text((60, 110 + i * 14), line, fontsize=10)
+    page.insert_text((60, 210), "As used in the text, what does \"define\" most nearly mean?", fontsize=10)
+    for i, opt in enumerate(["A. Abbreviate", "B. Reword", "C. Explain", "D. Perceive"]):
+        page.insert_text((80, 230 + i * 15), opt, fontsize=10)
+    doc.save(path)
+    doc.close()
+
+    q = parse(convert_pdf(path).ifmd).questions[0]
+    assert q.material is not None
+    assert "bending\nUpon the brink" in q.material
+
+def test_builtin_harder_b_q7_chart_categories_are_in_bar_order() -> None:
+    """The cropped chart lost its x-axis labels; their textual fallback must
+    follow the bars left-to-right (self-dealing first, excess holdings last)."""
+    doc_path = (
+        Path(__file__).resolve().parents[1]
+        / "app/builtin/sat2025-rw-b/2510-us-harder-b/doc.ifmd.md"
+    )
+    q = next(q for q in parse(doc_path.read_text(encoding="utf-8")).questions if q.no == 7)
+    material = q.material or ""
+    assert (
+        "self-dealing · undistributed income · taxable expenditures · excess business holdings"
+        in material
+    )
+    assert "excess business holdings\n\ntaxable expenditures" not in material
+

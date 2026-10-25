@@ -97,6 +97,8 @@ def _html(doc: ExportDoc, svgs: dict) -> str:
         )
         if q.material:
             out.append(f"<div class='material'>{_rich(q.material, svgs)}</div>")
+        if q.material2:
+            out.append(f"<div class='material'>{_rich(q.material2, svgs)}</div>")
         out.append(f"<div class='stem'>{_rich(q.stem, svgs)}</div>")
         if q.options:
             out.append("<div class='options'>")
@@ -145,7 +147,7 @@ def _html(doc: ExportDoc, svgs: dict) -> str:
 def _all_text(doc: ExportDoc) -> list[str]:
     texts = [doc.title, doc.source_filename, *doc.vocab_headers]
     for q in doc.questions:
-        texts += [q.material or "", q.stem, q.explain or "", *q.options.values()]
+        texts += [q.material or "", q.material2 or "", q.stem, q.explain or "", *q.options.values()]
     for row in doc.vocab_rows:
         texts.extend(row)
     return texts

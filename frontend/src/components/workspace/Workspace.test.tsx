@@ -13,6 +13,8 @@ vi.mock("../../api/client", async (importOriginal) => {
       getAnalysis: vi.fn(),
       getWords: vi.fn(),
       getSettings: vi.fn(),
+      dictionaryStatus: vi.fn(),
+      dictionaryLookup: vi.fn(),
       listStarredIds: vi.fn(),
       starQuestion: vi.fn(),
       unstarQuestion: vi.fn(),
@@ -23,6 +25,7 @@ vi.mock("../../api/client", async (importOriginal) => {
 const getAnalysis = vi.mocked(api.getAnalysis);
 const getWords = vi.mocked(api.getWords);
 const getSettings = vi.mocked(api.getSettings);
+const dictionaryStatus = vi.mocked(api.dictionaryStatus);
 const listStarredIds = vi.mocked(api.listStarredIds);
 const starQuestion = vi.mocked(api.starQuestion);
 
@@ -108,6 +111,13 @@ describe("Workspace", () => {
     getAnalysis.mockResolvedValue({ document_id: 7, title: "October Review", pages: [] });
     getWords.mockResolvedValue(emptyGrid);
     getSettings.mockResolvedValue({ analysis_template: "" } as AppSettings);
+    dictionaryStatus.mockResolvedValue({
+      available: true,
+      indexed: true,
+      entry_count: 92006,
+      learner_enabled: false,
+      custom_dictionary: { enabled: true, count: 0 },
+    } as never);
     listStarredIds.mockResolvedValue({ question_ids: [] });
     starQuestion.mockResolvedValue({ question_id: 5, starred: true });
   });
@@ -179,8 +189,8 @@ describe("Workspace", () => {
     expect(left).toHaveAttribute("data-tool", "question");
     expect(right).toHaveAttribute("data-tool", "analysis");
 
-    // Each pane header carries all four tools as icon buttons.
-    expect(within(paneSwitch("right")).getAllByRole("button")).toHaveLength(4);
+    // Each pane header carries all five tools as icon buttons.
+    expect(within(paneSwitch("right")).getAllByRole("button")).toHaveLength(5);
     expect(
       within(paneSwitch("right")).getByRole("button", { name: "Analysis" }),
     ).toHaveAttribute("aria-pressed", "true");
@@ -193,6 +203,21 @@ describe("Workspace", () => {
     expect(
       within(paneSwitch("right")).getByRole("button", { name: "AI Tutor" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("opens the local dictionary as a fifth workspace tool", async () => {
+    media(true);
+    render(
+      <MemoryRouter>
+        <Workspace detail={detail} result={result} t={0} sessionId={11} />
+      </MemoryRouter>,
+    );
+    await waitFor(() => expect(screen.getByTestId("right-pane")).toBeInTheDocument());
+
+    fireEvent.click(within(paneSwitch("right")).getByRole("button", { name: "Dictionary" }));
+
+    expect(screen.getByTestId("right-pane")).toHaveAttribute("data-tool", "dictionary");
+    expect(await screen.findByRole("heading", { name: "Dictionary" })).toBeInTheDocument();
   });
 
   it("swaps panes when a tool is chosen that is already on the other side", async () => {

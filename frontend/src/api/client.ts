@@ -87,6 +87,7 @@ export interface Question {
   type: string | null;
   difficulty: string | null;
   material: string | null;
+  material2?: string | null;
   stem: string;
   options: string[];
   kind: QuestionKind;
@@ -138,6 +139,7 @@ export interface ResultItem {
   kind: QuestionKind;
   multi: boolean;
   material: string | null;
+  material2?: string | null;
   stem: string;
   options: string[];
   images: string[];
@@ -420,6 +422,7 @@ export interface ReviewItem {
   kind: QuestionKind;
   multi: boolean;
   material: string | null;
+  material2?: string | null;
   stem: string;
   options: string[];
   images: string[];
@@ -482,10 +485,12 @@ export interface AppSettings {
   analysis_template: string;
   llm_fallback: boolean;
   vocab_ai_sense: boolean;
+  vocab_auto_definition: boolean;
   vocab_learner_definitions: boolean;
   vocab_exam_ai_grading: boolean;
   custom_dictionary_enabled: boolean;
   show_builtin_library: boolean;
+  dictionary_auto_lookup: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -508,10 +513,12 @@ export interface SettingsInput {
   analysis_template?: string;
   llm_fallback?: boolean;
   vocab_ai_sense?: boolean;
+  vocab_auto_definition?: boolean;
   vocab_learner_definitions?: boolean;
   vocab_exam_ai_grading?: boolean;
   custom_dictionary_enabled?: boolean;
   show_builtin_library?: boolean;
+  dictionary_auto_lookup?: boolean;
 }
 
 export class ApiError extends Error {

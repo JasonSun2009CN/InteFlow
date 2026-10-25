@@ -209,6 +209,7 @@ def _grade(session_id: int, answers: dict[int, list[str] | str]) -> dict:
                     "kind": kind,
                     "multi": multi,
                     "material": q["material"],
+                    "material2": q.get("material2"),
                     "stem": q["stem"],
                     "options": q["options"],
                     "images": q["images"],

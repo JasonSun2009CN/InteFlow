@@ -33,7 +33,8 @@ import pymupdf
 
 from app.convert import images as _images
 from app.convert.model import BuiltQuestion, Item
-from app.convert.normalize import clean_text, guess_sec, is_chrome, join_lines
+from app.convert.normalize import clean_text, guess_sec, is_chrome, join_lines, join_paragraph
+from app.convert.paired import split_paired_material
 from app.ifmd.parser import MAX_OPTIONS, OPTION_LETTERS
 
 BADGE_RE = re.compile(r"^\d{1,3}$")
@@ -77,7 +78,8 @@ class TwoColumnResult:
 
 
 def _read_block(b: dict, page_no: int) -> Block | None:
-    buf, first_y, last_y, size, circled = "", None, None, 10.0, False
+    texts: list[str] = []
+    first_y, last_y, size, circled = None, None, 10.0, False
     for raw in b.get("lines", []):
         text = ""
         for span in raw.get("spans", []):
@@ -88,13 +90,13 @@ def _read_block(b: dict, page_no: int) -> Block | None:
         text = clean_text(text)
         if not text:
             continue
-        if buf:
-            buf = join_lines(buf, text)
-        else:
-            buf, first_y = text, raw["bbox"][1]
+        texts.append(text)
+        if first_y is None:
+            first_y = raw["bbox"][1]
         last_y = raw["bbox"][3]
-    if not buf or first_y is None or last_y is None:
+    if not texts or first_y is None or last_y is None:
         return None
+    buf = join_paragraph(texts)
     x0, _, x1, _ = b["bbox"]
     return Block(page_no, x0, first_y, x1, last_y, buf, size, circled)
 
@@ -430,11 +432,13 @@ def convert(doc: pymupdf.Document, warnings: list[str]) -> TwoColumnResult:
                 options[letter] = content
 
             material = _assemble_field(left, mat_figs) or None
+            material, material2 = split_paired_material(material)
 
             no = int(badge.text.strip())
             sec = sec_page or guess_sec(f"{stem}\n{material or ''}")
             q = BuiltQuestion(
                 material=material,
+                material2=material2,
                 stem=stem,
                 options=options,
                 no=no,

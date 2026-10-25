@@ -80,6 +80,28 @@ def test_builtin_library_is_hidden_by_default_and_can_be_enabled(
     assert saved["show_builtin_library"] is False
 
 
+def test_vocab_auto_definition_defaults_on_and_roundtrips(client: TestClient) -> None:
+    assert client.get("/api/settings").json()["vocab_auto_definition"] is True
+
+    saved = client.put("/api/settings", json={"vocab_auto_definition": False}).json()
+    assert saved["vocab_auto_definition"] is False
+    assert client.get("/api/settings").json()["vocab_auto_definition"] is False
+
+    saved = client.put("/api/settings", json={"vocab_auto_definition": True}).json()
+    assert saved["vocab_auto_definition"] is True
+
+
+def test_dictionary_auto_lookup_defaults_on_and_roundtrips(client: TestClient) -> None:
+    assert client.get("/api/settings").json()["dictionary_auto_lookup"] is True
+
+    saved = client.put("/api/settings", json={"dictionary_auto_lookup": False}).json()
+    assert saved["dictionary_auto_lookup"] is False
+    assert client.get("/api/settings").json()["dictionary_auto_lookup"] is False
+
+    saved = client.put("/api/settings", json={"dictionary_auto_lookup": True}).json()
+    assert saved["dictionary_auto_lookup"] is True
+
+
 def test_put_stores_and_masks_key(client: TestClient) -> None:
     put = client.put(
         "/api/settings",

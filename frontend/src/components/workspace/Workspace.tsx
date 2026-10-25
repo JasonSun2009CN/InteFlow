@@ -9,9 +9,11 @@ import {
   type SubmitResult,
 } from "../../api/client";
 import RichText from "../RichText";
+import PassageText from "../PassageText";
 import { buttonClasses } from "../ui";
 import AiTutorPane from "./AiTutorPane";
 import AnalysisEditor from "./AnalysisEditor";
+import DictionaryPane from "./DictionaryPane";
 import ExportDrawer from "./ExportDrawer";
 import NotebookPreview from "./NotebookPreview";
 import QuestionNav, { type Filter } from "./QuestionNav";
@@ -65,10 +67,10 @@ interface Props {
 }
 
 /**
- * Review workspace: a 2-of-4 split.
+ * Review workspace: a 2-of-5 split.
  *
- * Question, Analysis, AI Tutor and Vocabulary are peers. Each side can switch
- * to any of the other three; choosing the tool already shown on the opposite
+ * Question, Analysis, AI Tutor, Vocabulary and Dictionary are peers. Each side
+ * can switch to any of the other tools; choosing the tool already shown on the opposite
  * side swaps the two panes. The default is Question | Analysis. The question
  * list stays a floating overlay, and exports live in the top bar so they never
  * compete with the reading surface.
@@ -94,7 +96,11 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
   // Stored layouts can be stale (older release / hand-edited localStorage):
   // fall back to the default pair instead of rendering an invalid tool.
   const validTool = (tool: WorkspaceTool) =>
-    tool === "question" || tool === "analysis" || tool === "ai" || tool === "vocabulary";
+    tool === "question" ||
+    tool === "analysis" ||
+    tool === "ai" ||
+    tool === "vocabulary" ||
+    tool === "dictionary";
   const leftTool: WorkspaceTool = validTool(layout.leftTool) ? layout.leftTool : "question";
   const rightTool: WorkspaceTool =
     validTool(layout.rightTool) && layout.rightTool !== leftTool
@@ -298,9 +304,14 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
         </div>
       </div>
 
-      {selected.material && (
+      {(selected.material || selected.material2) && (
         <div className="mt-3 rounded-lg border bg-slate-50 p-3 text-sm">
-          <RichText text={selected.material} docId={docId} />
+          <PassageText
+            material={selected.material}
+            material2={selected.material2}
+            docId={docId}
+            textClassName="text-sm"
+          />
         </div>
       )}
       <div className="mt-3 text-[15px]">
@@ -420,6 +431,8 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
         return <AiTutorPane docId={docId} item={selected} sessionId={sessionId} />;
       case "vocabulary":
         return <VocabularyPane docId={docId} item={selected} />;
+      case "dictionary":
+        return <DictionaryPane />;
     }
   }
 

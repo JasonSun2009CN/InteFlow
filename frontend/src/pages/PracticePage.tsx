@@ -9,6 +9,7 @@ import {
   type TimerPreference,
 } from "../api/client";
 import RichText from "../components/RichText";
+import PassageText from "../components/PassageText";
 import { sectionLabel } from "../lib/sections";
 import { useI18n } from "../lib/i18n";
 
@@ -557,6 +558,7 @@ export default function PracticePage() {
 
   const unanswered = questions.length - answered;
   const material = current.material;
+  const material2 = current.material2;
   const clockValue =
     timerMode === "countdown" && countdownTotal !== null
       ? Math.max(0, countdownTotal - seconds)
@@ -618,19 +620,17 @@ export default function PracticePage() {
       )}
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <div className={material ? "grid gap-4 lg:grid-cols-2" : "mx-auto max-w-3xl"}>
-          {material && (
-            <aside className="max-h-[70vh] overflow-y-auto rounded-xl border bg-white p-5">
-              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {t("Passage")}
-              </div>
-              <div className="text-[15px]">
-                <RichText text={material} docId={docId} />
-              </div>
+        <div className={material || material2 ? "grid gap-4 lg:grid-cols-2" : "mx-auto max-w-3xl"}>
+          {(material || material2) && (
+            <aside
+              className="max-h-[70vh] overflow-y-auto rounded-xl border bg-white p-5 [scrollbar-gutter:stable]"
+              data-testid="practice-passage"
+            >
+              <PassageText material={material} material2={material2} docId={docId} />
             </aside>
           )}
 
-          <section className={`rounded-xl border bg-white p-5 ${material ? "" : "p-6"}`}>
+          <section className={`rounded-xl border bg-white p-5 ${material || material2 ? "" : "p-6"}`}>
             <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-500">
               <span>
                 {t("Question {number}", { number: current.no ?? idx + 1 })}

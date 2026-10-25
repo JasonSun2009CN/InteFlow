@@ -1,5 +1,12 @@
 import type { ReactNode } from "react";
-import { BookOpen, FileQuestion, NotebookPen, Sparkles, type LucideIcon } from "lucide-react";
+import {
+  BookMarked,
+  BookOpen,
+  FileQuestion,
+  NotebookPen,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 import type { WorkspaceTool } from "./usePersistentLayout";
 import { useT } from "../../lib/i18n";
 
@@ -8,6 +15,7 @@ export const TOOLS: { id: WorkspaceTool; label: string; Icon: LucideIcon }[] = [
   { id: "analysis", label: "Analysis", Icon: NotebookPen },
   { id: "ai", label: "AI Tutor", Icon: Sparkles },
   { id: "vocabulary", label: "Vocabulary", Icon: BookOpen },
+  { id: "dictionary", label: "Dictionary", Icon: BookMarked },
 ];
 
 export function toolLabel(
@@ -28,7 +36,7 @@ interface Props {
 }
 
 /**
- * One half of the workspace split. The header switcher shows all four peer
+ * One half of the workspace split. The header switcher shows all peer
  * tools as icon buttons in a row; the active one is highlighted. Selecting the
  * tool that is currently in the opposite pane is handled by the parent, which
  * swaps the two sides.

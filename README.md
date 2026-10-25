@@ -53,18 +53,18 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 
 | Area | Capability |
 |---|---|
-| **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
+| **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction, **paired `Text 1`/`Text 2` detection**, **poetry line breaks**), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
 | **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent (hidden by default; enable in Settings) |
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
 | **Subjects** | User-defined subject groups (e.g. SAT Math, Physics) with a color; assign each paper inline from Library or the answer-key header, create a subject on the spot, manage/rename/recolor/delete it, filter Library and Exams by subject. Deleting a group only moves its papers to Uncategorized |
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
 | **Practice** | Exam-style fullscreen, **count-up or countdown timer** (chosen on the start screen; countdown auto-submits at `00:00` and defaults to the last timer used for that paper), single-question view, question palette, flagging, keyboard option letters / `← →`, multi-select and blank answers, submit confirmation |
 | **Results / review** | Score / per-section / time stats, **fullscreen review** (no sidebar), `All · Correct · Wrong` filter, collapsible top-left question navigator, question on the left + a **Pages-style analysis editor** on the right (autosave / resume), re-grade after back-filling the key |
-| **Workspace** | **2-of-4 pane split** (Question · Analysis · AI Tutor · Vocabulary) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, export drawer |
+| **Workspace** | **2-of-5 pane split** (Question · Analysis · AI Tutor · Vocabulary · **Dictionary**) with per-pane switching, one analysis page per question (Markdown, formulas/images), drag a word from a question/option into the vocabulary pane (Merriam-Webster sense, optional AI matching), add/edit/delete + export `.xlsx`, local dictionary pane, export drawer |
 | **Vocabulary** | One word list per paper (Word · POS · Meaning · Notes), local Merriam-Webster lookup, drag-to-add, manual add/edit, `.xlsx` export, and a built-in **Word test**: random sample or test all, **English → Chinese** (typed meaning) or **Chinese → English** (spelling), local lenient grading, optional strict AI grading, result table + compact-JSON QR codes |
 | **Review** | **Mistakes** (every wrong answer, one row per question using the latest attempt; corrected later = removed) and **Starred** (questions you star while practising or reviewing). Search papers/stems/options, filter by exam, sort newest/oldest, and read or edit the shared analysis; extra legacy analyses are shown read-only |
 | **Export** | **PDF** (WeasyPrint: footer page numbers, images, MathJax SVG math), **DOCX** (python-docx), **review notebook md/docx/pdf** (only analysed questions; also saved under `data/exports/`), vocabulary **`.xlsx`** |
-| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **analysis template**, **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests**, **English / 中文 interface language** |
+| **Settings** | 19 LLM providers catalog, protocol (openai / anthropic), Base URL, API key (masked), model, connectivity test, **your name** (export cover), **analysis template**, **AI recognition fallback**, **AI sense matching**, **Definition for English Learners**, **My dictionary**, **AI grading for word tests**, **dictionary auto-lookup**, **auto-fill vocabulary definitions**, **English / 中文 interface language**, app version + **auto-save** |
 
 > **Dictionary:** lookups run locally against a user-installed Eudic `.eudb` (Merriam-Webster).
 > Put the file in `dictionary/`; the index is built automatically on first lookup (0 token). Some entries carry
@@ -363,7 +363,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 312 passed; uses a temp data dir)
+# backend tests (baseline 339 passed; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)

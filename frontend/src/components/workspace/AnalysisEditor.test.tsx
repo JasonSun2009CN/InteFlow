@@ -29,10 +29,12 @@ const settings: AppSettings = {
   analysis_template: "",
   llm_fallback: true,
   vocab_ai_sense: true,
+  vocab_auto_definition: true,
   vocab_learner_definitions: false,
   vocab_exam_ai_grading: false,
   custom_dictionary_enabled: true,
   show_builtin_library: false,
+  dictionary_auto_lookup: true,
 };
 
 function item(no: number, kind: "choice" | "blank" = "choice"): ResultItem {

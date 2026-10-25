@@ -65,8 +65,13 @@ function write<T>(key: string, value: T): void {
   }
 }
 
-/** The four peer tools that can occupy either workspace pane. */
-export type WorkspaceTool = "question" | "analysis" | "ai" | "vocabulary";
+/** The five peer tools that can occupy either workspace pane. */
+export type WorkspaceTool =
+  | "question"
+  | "analysis"
+  | "ai"
+  | "vocabulary"
+  | "dictionary";
 
 /** Persistent layout for the review workspace, scoped to one document. */
 export interface WorkspaceLayout {

@@ -32,6 +32,7 @@ class NotebookQuestion:
     kind: str
     multi: bool
     material: str | None
+    material2: str | None
     stem: str
     options: dict[str, str]
     images: list[Path] = field(default_factory=list)
@@ -124,6 +125,7 @@ def build_notebook(
                 kind=q.get("kind") or "choice",
                 multi=bool(q.get("multi")),
                 material=q.get("material"),
+                material2=q.get("material2"),
                 stem=q["stem"],
                 options=_option_map(q.get("options") or []),
                 images=images,
@@ -193,6 +195,8 @@ def render_notebook_markdown(notebook: Notebook) -> str:
         lines.append("")
         if q.material:
             lines += [q.material, ""]
+        if q.material2:
+            lines += [q.material2, ""]
         lines += [q.stem, ""]
         for option in _option_lines(q):
             lines.append(f"- {option}")
@@ -321,6 +325,8 @@ def render_notebook_html(notebook: Notebook) -> str:
         )
         if q.material:
             parts.append(f"<div class='material'>{_md_blocks_to_html(q.material)}</div>")
+        if q.material2:
+            parts.append(f"<div class='material'>{_md_blocks_to_html(q.material2)}</div>")
         parts.append(f"<div class='stem'>{_md_blocks_to_html(q.stem)}</div>")
         for letter, text in q.options.items():
             parts.append(
@@ -396,10 +402,12 @@ def render_notebook_docx(notebook: Notebook) -> bytes:
 
     for q in notebook.questions:
         document.add_heading(f"Question {q.no} · {section_label(q.sec)}", level=2)
-        if q.material:
+        for material in (q.material, q.material2):
+            if not material:
+                continue
             paragraph = document.add_paragraph()
             paragraph.paragraph_format.left_indent = Inches(0.2)
-            paragraph.add_run(_plain_md(q.material)).italic = True
+            paragraph.add_run(_plain_md(material)).italic = True
         document.add_paragraph(_plain_md(q.stem))
         for letter, text in q.options.items():
             document.add_paragraph(f"{letter}. {_plain_md(text)}", style="List Bullet")

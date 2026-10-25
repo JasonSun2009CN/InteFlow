@@ -101,6 +101,7 @@ def _item(row: object, analyses: dict[int, list[dict]]) -> dict:
         "kind": row["kind"] or "choice",  # type: ignore[index]
         "multi": bool(row["multi"]),  # type: ignore[index]
         "material": row["material"],  # type: ignore[index]
+        "material2": row["material2"],  # type: ignore[index]
         "stem": row["stem"],  # type: ignore[index]
         "options": _json(row["options_json"], []),  # type: ignore[index]
         "images": _json(row["images_json"], []),  # type: ignore[index]
@@ -138,7 +139,7 @@ WITH ranked AS (
 SELECT r.question_id, r.session_id, r.chosen, r.chosen_json, r.is_correct,
        r.answered_at, s.finished_at,
        q.document_id, q.no, q.sec, q.kind, q.multi, q.material, q.stem,
-       q.options_json, q.answers_json, q.explain, q.source_ref, q.images_json,
+       q.options_json, q.answers_json, q.explain, q.source_ref, q.images_json, q.material2,
        q.order_idx, d.title AS document_title,
        subj.id AS subject_id, subj.name AS subject_name, subj.color AS subject_color,
        CASE WHEN st.question_id IS NULL THEN 0 ELSE 1 END AS starred,
@@ -158,7 +159,7 @@ _STARRED_SQL = """
 SELECT st.question_id, latest.session_id, latest.chosen, latest.chosen_json,
        latest.is_correct, latest.answered_at, ls.finished_at,
        q.document_id, q.no, q.sec, q.kind, q.multi, q.material, q.stem,
-       q.options_json, q.answers_json, q.explain, q.source_ref, q.images_json,
+       q.options_json, q.answers_json, q.explain, q.source_ref, q.images_json, q.material2,
        q.order_idx, d.title AS document_title,
        subj.id AS subject_id, subj.name AS subject_name, subj.color AS subject_color,
        1 AS starred, st.created_at AS starred_at

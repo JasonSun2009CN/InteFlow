@@ -189,3 +189,76 @@
   （Question / Analysis / AI Tutor / Vocabulary），当前工具高亮，另一侧的工具点按即左右交换。
 - **已实现（2026-10-21）**：`WorkspacePane.tsx` 用 Lucide 图标渲染四个按钮（`aria-pressed` 标记当前项，
   `title` 提示 swap），`Workspace.tsx` 把另一侧的工具作为 `otherTool` 传入；测试更新在 `Workspace.test.tsx`。
+
+### ✅ SAT 双篇题（paired passages）（2026-10-25）
+
+- 练习 / 复盘里两个文本**上下叠放**，各自加 `Text 1` / `Text 2` 小标签；单篇仍显示 `Passage`。
+- 格式：`.ifmd.md` 新增 `@material2`，必须位于 `@material` 与 `@stem` 之间；旧文件与内置题库完全不受影响。
+- 导入：PDF / DOCX / LLM 兜底会识别源文件里的 `Text 1` / `Text 2`（兼容 `Passage 1/2`）并自动拆分；
+  两个标签不齐或顺序不对时保持原文，**不做猜测**。
+- 数据：`questions.material2`（旧库自动迁移）；AI 讲解上下文、复盘、Notebook 预览与 md/docx/pdf 导出都带第二篇。
+- 代码：`backend/app/ifmd/parser.py` · `writer.py` · `backend/app/convert/paired.py` · `frontend/src/components/PassageText.tsx`。
+
+### ✅ 诗歌 / 摘录版式（2026-10-25）
+
+- 练习、复盘、Notebook 与导出都按源文件的换行显示，不再把诗行挤成一段。
+- 导入启发式（0 token）：一个段落 ≥4 行、续行大多以大写字母开头、行长较短时按诗歌保留换行；
+  普通换行的正文段落仍然合并。
+- 注意：**本次改动之前**已导入的卷子（如内置 25年10月北美 Harder B 第 2 题的诗）在导入时已被合并，
+  要恢复原版行距需从源 PDF 重新导入。
+
+### ✅ 图表题标题 / 表头 / 坐标轴标签进图片（2026-10-25）
+
+- 截图会向上吸收图标题、向左吸收 y 轴刻度、向下吸收 **短标签**（x 轴刻度、表格分类行）；
+  长句（正文换行）永远不会被吞进图片，避免题干丢字。
+- 位图图表如果标题/表头是独立文字层，改为按页面区域重新截图，而不是只保存裸位图。
+- 纯离线裁剪，0 token。仍缺表头时再走视觉模型兜底（见下方“后续”）。
+- **已修数据（2026-10-25）**：内置「25年10月北美 · Harder B」第 7 题（Form 4720 罚款）旧导入时
+  把柱状图的分类标签当正文抽了出来，且顺序被反转（excess business holdings → … → self-dealing）。
+  现在按真实柱序写成 `self-dealing · undistributed income · taxable expenditures · excess business holdings`
+  （图例 2003 · 2004 · 2005），与答案 D 一致。该题的 PNG 本身仍是旧裁剪，**重新从源 PDF 导入后**
+  才会得到把标签一起截进去的完整图。
+
+### ✅ 练习页题面闪烁 + 侧栏滚动条抖动（2026-10-25）
+
+- 现象：25年10月北美 Harder B 第 8 题题面闪动，文章侧栏滚动条规律出现/消失。
+- 原因：计时器每秒重渲染，`RichText` 里内联的 Markdown 组件函数每次都是新身份 → 图片被卸载重建 →
+  懒加载瞬间零高度 → 滚动条反复出现。
+- 修复：组件提升到模块级 + `memo` / `useMemo`；文章侧栏 `scrollbar-gutter: stable`；
+  `RichText.test.tsx` 增加“重渲染后图片节点不变”的回归测试。
+
+### ✅ 设置页显示版本号 + 自动保存（2026-10-25）
+
+- 设置页标题下显示版本：数据来自 `GET /api/health`；桌面端由 Electron 把打包版本通过 `INTEFLOW_VERSION`
+  传给后端，源码运行回退到当前发布号 `0.1.2`。
+- 移除 **Save settings / 保存设置** 按钮，改为 **600ms 防抖自动保存**，底部状态依次提示
+  `修改会自动保存 / 有未保存的修改… / 正在保存… / 已保存`；失败显示错误，下一次修改自动重试。
+- 连续输入合并成一次请求；保存进行中继续编辑会排队保存最新值，不会乱序覆盖。
+- API Key 仍然只写：保存后清空输入框并显示掩码；**移除** 按钮逻辑保留。
+- 审阅补充：点「移除」前会丢弃排队中的自动保存并等待在途请求（最多 5s），避免竞态把刚清掉的 key 写回；
+  配置改动后清除旧的连通性测试结果，避免显示过期结论。
+- 代码：`frontend/src/pages/SettingsPage.tsx` · `SettingsPage.test.tsx` · `backend/app/main.py`
+  （`INTEFLOW_VERSION`）· `desktop/main.cjs` · `frontend/src/lib/i18n.tsx`。
+
+### ✅ 复盘第 5 个工具：词典（2026-10-25）
+
+- 复盘工作台从 2-of-4 变 **2-of-5**：Question / Analysis / AI Tutor / Vocabulary / **Dictionary**。
+- 词典直接用内置韦氏，本地查询 0 token：搜索、完整词条、建议词、English Learner 释义（按设置）、
+  自定义释义；词条显示词性与换行完整的释义。
+- Settings 新增 **Look up dictionary words while typing**（默认开）：开 → 输入即查（防抖 350ms）；
+  关 → 只有回车才查，也可以直接在面板里 **Add my own definition**，写入 My dictionary，之后查词优先命中。
+- 代码：`frontend/src/components/workspace/DictionaryPane.tsx`；后端复用 `/api/dictionary/*` 与
+  `/api/custom-dictionary/entries`，设置键 `dictionary_auto_lookup`。
+
+### ✅ 是否自动把释义写入单词表（2026-10-25）
+
+- Settings → Vocabulary 新增 **Auto-fill definitions in the word list**（默认开）。
+- 开：拖词进 Vocabulary 时照旧自动查韦氏并填入 Meaning（AI 选义仍由下一个开关控制）。
+- 关：只把单词加入词表，Meaning 留空，由学生自己写；不查词典、不调用 LLM，0 token。
+- 实现：设置键 `vocab_auto_definition`；`POST /api/documents/{id}/words/entries/from-selection`
+  在关闭时走“只加单词”分支并返回提示；从词典面板手动 **Add** 的路径不受影响（那是用户显式选义）。
+
+### 🔜 后续（尚未实现）
+
+- 图表仍缺表头时的视觉模型兜底：检测图片 → 回报页码 → 支持图片的模型识别 + 截图。
+  会消耗 token，需要单独的设置开关，且不进入默认导入主链路。

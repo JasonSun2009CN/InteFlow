@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiError, type ResultItem } from "../../api/client";
 import RichText from "../RichText";
+import PassageText from "../PassageText";
 import { sectionLabel } from "../../lib/sections";
 import { CloseIcon } from "./icons";
 import { useI18n } from "../../lib/i18n";
@@ -166,9 +167,14 @@ export default function NotebookPreview({ docId, title, items, pages, sessionId,
                 </span>
               </div>
 
-              {item.material && (
+              {(item.material || item.material2) && (
                 <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-                  <RichText text={item.material} docId={docId} breaks />
+                  <PassageText
+                    material={item.material}
+                    material2={item.material2}
+                    docId={docId}
+                    textClassName="text-sm"
+                  />
                 </div>
               )}
 

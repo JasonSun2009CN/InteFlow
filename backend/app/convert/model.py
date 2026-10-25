@@ -23,6 +23,7 @@ class Item:
 @dataclass
 class BuiltQuestion:
     material: str | None
+    material2: str | None
     stem: str
     options: dict[str, str]
     no: int | None

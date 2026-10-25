@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **312 passed**、`npm run build` 0 错误、`npm test` 149 passed, 5 skipped。
+> 基线：pytest **339 passed**、`npm run build` 0 错误、`npm test` 164 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -148,6 +148,7 @@ erDiagram
     text type
     text difficulty "e|m|h"
     text material
+    text material2
     text stem
     text options_json "0 (blank) or >=2 labelled options"
     text kind "choice|blank"
@@ -224,20 +225,22 @@ App.tsx (BrowserRouter)
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
     ├── "/mistakes"             MistakesPage      —— Review：Mistakes / Starred 两集合（搜索/过滤/排序/分析）
     ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
-    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 自定义词典 / 单词考试评分开关 / 内置题库开关 / 桌面端清空数据
+    ├── "/settings"             SettingsPage      —— LLM 服务商配置 + 用户名 + AI 兜底 / 生词本 / 自定义词典 / 单词考试评分开关 / 内置题库开关 / 词典自动查词开关 / 版本号 + 600ms 防抖自动保存 / 桌面端清空数据
     ├── "/doc/:id/answers"      AnswerKeyPage     —— 答案网格（多选 + 填空多答案）+ 批量粘贴 + 预览 + 学科归类（含侧栏）
     ├── "/doc/:id/practice"     PracticePage      —— 全屏练习（计时，无侧栏、保持 slate/blue）
     ├── "/session/:sid/result"  ResultPage        —— 载入会话 → 全屏复盘工作台（无侧栏）
     └── "/manage"               → 重定向到 /library（兼容旧链接）
 
 components/  AppSidebar（六个 tab：Exams/Library/Sessions/Review/Vocabulary/Settings；桌面可 Compact 为图标栏）· RichText (markdown+KaTeX+图片) ·
-             workspace/（Workspace 四选二分屏 · WorkspacePane 每侧头部四个图标按钮切换工具 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
+             workspace/（Workspace **五选二分屏** · WorkspacePane 每侧头部五个图标按钮切换工具 · QuestionNav 左上角折叠悬浮题目导航 (All/Wrong/Correct) ·
              AnalysisEditor Pages 式分析页 (Write/Preview + 自动保存 + 单换行保留) · AiTutorPane AI 讲解 pane ·
-             VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） · ExportDrawer 顶栏导出抽屉 ·
+             VocabularyPane 生词本 pane（拖词 + 可选 AI 选义 + 手动添加） ·
+             DictionaryPane 词典 pane（内置韦氏本地查词、输入即查开关、自定义释义） · ExportDrawer 顶栏导出抽屉 ·
              NotebookPreview 整套解析预览/导出 · VocabGrid v2 电子表格 · Splitter 分隔条 ·
              WordExamPanel 单词考试设置/作答 · WordExamResultView 结果 + 二维码/JSON 下载 ·
              usePersistentLayout · useMediaQuery · icons）·
              SubjectControls（学科徽章 / 筛选条 / 行内选择 + 现场创建 / 管理弹窗） ·
+             PassageText（单篇 Passage / 双篇 Text 1·Text 2，保留诗歌换行） ·
              ImportPipeline · IfmdTemplate · LibraryList · BuiltinBankCard · CustomDictionaryManager（Settings 导入/增删） · ui/（设计系统原语；Review 用 SlidingTabs 滑块切换）
 lib/         sections.ts（板块标签，与后端 sections.py 对齐）· wordExamQr.ts（紧凑分享 JSON + 多段 QR 分块）
              subjects.ts（学科调色板 + Tailwind 色调映射 + 筛选类型）· i18n.tsx（中英文案表 + I18nProvider / useI18n / useT）
@@ -386,8 +389,8 @@ AI 讲解（显式）        POST /api/ai/answer {document_id, question_id}     
 ```
 
 界面：复盘页全屏（无侧栏）；题号导航默认缩到左上角，点击旋转展开为悬浮面板（All/Wrong/Correct），
-点击某题即选中并收起；四选二分屏（题目 / 分析 / AI Tutor / 生词本，默认左题目右分析，选择另一侧已有的工具则交换）；
-每侧头部把四个工具排成一行**图标 + 小字标签**按钮（Lucide 图标，当前项高亮 `aria-pressed`，另一侧的工具略淡并有“click to swap”提示），不再使用下拉菜单；
+点击某题即选中并收起；**五选二分屏**（题目 / 分析 / AI Tutor / 生词本 / 词典，默认左题目右分析，选择另一侧已有的工具则交换）；
+每侧头部把五个工具排成一行**图标 + 小字标签**按钮（Lucide 图标，当前项高亮 `aria-pressed`，另一侧的工具略淡并有“click to swap”提示），不再使用下拉菜单；
 分析页 Write/Preview，900ms 防抖自动保存 + ⌘S，Preview 用 `remark-breaks` 保留单换行；
 顶部 **Notebook** 打开整套解析预览，**Export** 打开导出抽屉（导出不再是分屏工具）。
 
@@ -484,7 +487,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
   后来做对则自动移出；未评分（没有答案键）的最近作答不算错题。
 - **Starred**：`question_stars(question_id PK, document_id, created_at)`，每题一行、级联删除。
   练习页 `☆ Star for review`、复盘工作台、Mistakes 列表都可即时加/取消星；`starred/ids` 让练习页恢复星标。
-- 两类条目返回统一形状：题干/选项/图片/material、正确答案与用户答案、题型/多选、套题与学科、
+- 两类条目返回统一形状：题干/选项/图片/material（+ 双篇 material2）、正确答案与用户答案、题型/多选、套题与学科、
   最近 attempt（session_id / finished_at）、星标状态、`analysis`（当前页）+ `analyses`（当前页 + legacy
   `analyses` 全部内容）。前端右侧复用 `AnalysisEditor` 编辑当前分析，额外旧分析只读列出。
 - Review 页支持按套题/题干/选项/答案搜索、按 exam 过滤、Newest/Oldest 时间排序；Mistakes 与 Starred
@@ -551,7 +554,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | GET | `/api/review/starred` | 精选题集（含最近作答与分析） |
 | GET | `/api/review/starred/ids` | 某套试卷的星标 question_id 列表 |
 | POST/DELETE | `/api/review/starred/{question_id}` | 加星 / 取消星标（幂等） |
-| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_learner_definitions` / `vocab_exam_ai_grading` / `show_builtin_library`） |
+| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_auto_definition` / `vocab_learner_definitions` / `vocab_exam_ai_grading` / `show_builtin_library` / `dictionary_auto_lookup`） |
 | GET | `/api/settings/providers` | Provider 目录 |
 | POST | `/api/settings/test` | 连通性测试 |
 | POST | `/api/ai/answer` | AI 讲解（显式） |

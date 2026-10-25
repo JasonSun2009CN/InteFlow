@@ -70,7 +70,7 @@ def _add_rich(document: Document, text: str, svgs: dict, **para_kwargs):
 def _all_text(doc: ExportDoc) -> list[str]:
     texts = [doc.title, doc.source_filename, *doc.vocab_headers]
     for q in doc.questions:
-        texts += [q.material or "", q.stem, q.explain or "", *q.options.values()]
+        texts += [q.material or "", q.material2 or "", q.stem, q.explain or "", *q.options.values()]
     for row in doc.vocab_rows:
         texts.extend(row)
     return texts
@@ -96,8 +96,9 @@ def render_docx(doc: ExportDoc) -> bytes:
             r = src.add_run(q.source)
             r.font.size = Pt(8)
             r.font.color.rgb = RGBColor(0x94, 0xA3, 0xB8)
-        if q.material:
-            _add_rich(document, q.material, svgs, style="Intense Quote")
+        for material in (q.material, q.material2):
+            if material:
+                _add_rich(document, material, svgs, style="Intense Quote")
         _add_rich(document, q.stem, svgs)
         for letter, text in q.options.items():
             _add_rich(document, f"{letter}. {text}", svgs, style="List Bullet")

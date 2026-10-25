@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS questions (
   type         TEXT,
   difficulty   TEXT,
   material     TEXT,
+  material2    TEXT,                              -- second text of a paired-passage item
   stem         TEXT NOT NULL,
   options_json TEXT NOT NULL DEFAULT '[]',  -- ["A. ...", ...] one per option, or [] for a blank
   kind         TEXT NOT NULL DEFAULT 'choice',  -- choice|blank
@@ -291,6 +292,11 @@ def _migrate(conn: sqlite3.Connection) -> None:
             "CREATE INDEX IF NOT EXISTS idx_question_stars_document"
             " ON question_stars(document_id)"
         )
+        # paired passages (2026-10-25): SAT dual-text items keep a second
+        # material column next to the existing one.
+        qcols = {row["name"] for row in conn.execute("PRAGMA table_info(questions)")}
+        if "material2" not in qcols:
+            conn.execute("ALTER TABLE questions ADD COLUMN material2 TEXT")
 
     # user-managed dictionary (2026-10-20): plain word/pos/definition rows.
     conn.execute(

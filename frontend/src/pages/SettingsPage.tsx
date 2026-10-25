@@ -30,10 +30,12 @@ export default function SettingsPage() {
   const [analysisTemplate, setAnalysisTemplate] = useState("");
   const [llmFallback, setLlmFallback] = useState(true);
   const [vocabAiSense, setVocabAiSense] = useState(true);
+  const [vocabAutoDefinition, setVocabAutoDefinition] = useState(true);
   const [vocabLearner, setVocabLearner] = useState(false);
   const [vocabExamAi, setVocabExamAi] = useState(false);
   const [customDictionary, setCustomDictionary] = useState(true);
   const [showBuiltin, setShowBuiltin] = useState(false);
+  const [dictionaryAuto, setDictionaryAuto] = useState(true);
   const [customOpen, setCustomOpen] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
@@ -64,10 +66,12 @@ export default function SettingsPage() {
         setAnalysisTemplate(s.analysis_template);
         setLlmFallback(s.llm_fallback);
         setVocabAiSense(s.vocab_ai_sense);
+        setVocabAutoDefinition(s.vocab_auto_definition);
         setVocabLearner(s.vocab_learner_definitions);
         setVocabExamAi(s.vocab_exam_ai_grading);
         setCustomDictionary(s.custom_dictionary_enabled);
         setShowBuiltin(s.show_builtin_library);
+        setDictionaryAuto(s.dictionary_auto_lookup);
         setProviders(list);
         setLoaded(true);
       })
@@ -97,10 +101,12 @@ export default function SettingsPage() {
       analysis_template: analysisTemplate,
       llm_fallback: llmFallback,
       vocab_ai_sense: vocabAiSense,
+      vocab_auto_definition: vocabAutoDefinition,
       vocab_learner_definitions: vocabLearner,
       vocab_exam_ai_grading: vocabExamAi,
       custom_dictionary_enabled: customDictionary,
       show_builtin_library: showBuiltin,
+      dictionary_auto_lookup: dictionaryAuto,
       ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
     }),
     [
@@ -111,10 +117,12 @@ export default function SettingsPage() {
       analysisTemplate,
       llmFallback,
       vocabAiSense,
+      vocabAutoDefinition,
       vocabLearner,
       vocabExamAi,
       customDictionary,
       showBuiltin,
+      dictionaryAuto,
       apiKey,
     ],
   );
@@ -132,17 +140,22 @@ export default function SettingsPage() {
         if (fingerprint === lastSavedRef.current) break;
 
         setSaveState("saving");
+        setProbe(null);                 // a probe result belongs to the old config
         const saved = await api.saveSettings(current);
         lastSavedRef.current = fingerprint;
         setStored(saved);
         setMessage(null);
 
         if (current.api_key) {
-          // Clearing the password field is not a new edit to persist.
-          const cleared: SettingsInput = { ...current, api_key: undefined };
-          pendingRef.current = cleared;
-          lastSavedRef.current = JSON.stringify(cleared);
-          setApiKey("");
+          // The server now has this key. Only drop it from the queue when no
+          // newer key was typed meanwhile, and keep any edits queued while the
+          // request was in flight — they still need their own save.
+          const queued: SettingsInput = pendingRef.current ?? current;
+          if (queued.api_key === current.api_key) {
+            pendingRef.current = { ...queued, api_key: undefined };
+            setApiKey("");
+          }
+          lastSavedRef.current = JSON.stringify({ ...current, api_key: undefined });
         }
 
         setSaveState("saved");
@@ -210,6 +223,16 @@ export default function SettingsPage() {
   async function onRemoveKey() {
     setBusy("remove");
     setMessage(null);
+    // Drop the queued autosave (it may still carry a just-typed key) and let an
+    // in-flight PUT finish before clearing the key. Otherwise a racing save
+    // could write the key back after the clear. The 5 s cap keeps the button
+    // from ever hanging on a stalled request.
+    pendingRef.current = null;
+    setApiKey("");
+    const deadline = Date.now() + 5000;
+    while (savingRef.current && Date.now() < deadline) {
+      await new Promise((resolve) => window.setTimeout(resolve, 25));
+    }
     try {
       const saved = await api.saveSettings({ clear_key: true });
       setStored(saved);
@@ -334,6 +357,28 @@ export default function SettingsPage() {
               "Pre-filled into every empty analysis page (wrong answers, starred questions and the review workspace). Markdown is supported. An existing analysis is never overwritten, and the template itself is only saved once you start editing the page.",
             )}
           </p>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <label className="flex items-start gap-3" htmlFor="dictionary-auto">
+            <input
+              id="dictionary-auto"
+              type="checkbox"
+              checked={dictionaryAuto}
+              onChange={(e) => setDictionaryAuto(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span>
+              <span className="block text-sm font-medium text-slate-800">
+                {t("Look up dictionary words while typing")}
+              </span>
+              <span className="mt-1 block text-xs leading-5 text-slate-600">
+                {t(
+                  "The Dictionary tool queries the built-in Merriam-Webster index as you type. Turn it off to look up only when you press Enter, or to add your own definition instead.",
+                )}
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -488,6 +533,26 @@ export default function SettingsPage() {
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <p className="text-sm font-medium text-slate-800">{t("Vocabulary")}</p>
           <div className="mt-3 space-y-3">
+            <label className="flex items-start gap-3" htmlFor="vocab-auto-definition">
+              <input
+                id="vocab-auto-definition"
+                type="checkbox"
+                checked={vocabAutoDefinition}
+                onChange={(e) => setVocabAutoDefinition(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="block text-sm font-medium text-slate-800">
+                  {t("Auto-fill definitions in the word list")}
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  {t(
+                    "When you drag a word into the Vocabulary pane, fill its Meaning with the Merriam-Webster definition automatically. Turn this off to add the word with an empty Meaning and write your own definition.",
+                  )}
+                </span>
+              </span>
+            </label>
+
             <label className="flex items-start gap-3" htmlFor="vocab-ai-sense">
               <input
                 id="vocab-ai-sense"

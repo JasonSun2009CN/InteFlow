@@ -223,6 +223,33 @@ def test_from_selection_without_dictionary_still_adds(client, monkeypatch) -> No
     assert words_repo.get_grid(doc_id)["rows"][0]["cells"]["c1"] == "elusive"
 
 
+def test_from_selection_respects_auto_definition_off(client, monkeypatch) -> None:
+    """Settings can turn off auto-filling the Meaning column (0 token)."""
+    doc_id, _ = _doc(client)
+    monkeypatch.setattr(
+        settings_repo, "vocabulary_auto_definition_enabled", lambda: False
+    )
+
+    def must_not_look_up(*args, **kwargs):
+        raise AssertionError("the dictionary must not be consulted when auto-fill is off")
+
+    monkeypatch.setattr(vocab_assist, "candidates_for", must_not_look_up)
+
+    body = client.post(
+        f"/api/documents/{doc_id}/words/entries/from-selection",
+        json={"text": "elusive"},
+    ).json()
+    assert body["matched"] is False
+    assert body["definition"] == ""
+    assert "off" in body["warning"].lower()
+
+    grid = words_repo.get_grid(doc_id)
+    columns = {column["name"]: column["id"] for column in grid["columns"]}
+    row = grid["rows"][0]
+    assert row["cells"][columns["Word"]] == "elusive"
+    assert row["cells"].get(columns.get("Meaning", ""), "") == ""
+
+
 def test_from_selection_falls_back_to_first_sense_without_ai(
     client, monkeypatch
 ) -> None:

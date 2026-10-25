@@ -71,6 +71,8 @@ def ai_answer(payload: AnswerPayload) -> dict:
     user_parts = []
     if q.get("material"):
         user_parts.append(f"Material:\n{q['material']}")
+    if q.get("material2"):
+        user_parts.append(f"Text 2:\n{q['material2']}")
     user_parts.append(f"Question:\n{q['stem']}")
     user_parts.append("Options:")
     for letter, text in opts.items():

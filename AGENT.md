@@ -29,9 +29,9 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **312 passed** |
+| 后端测试 | `pytest` **339 passed** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **149 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **164 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
 | API 面 | 67 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
@@ -137,6 +137,30 @@
 > 与 Electron 的 localStorage/cache，然后重启回到首次启动状态（保留 `dictionary/*.eudb` 源文件）。
 > `.github/workflows/desktop.yml` 现在在 `main` push 上也构建（仅上传 artifact），`v*` tag 才发布 Release。
 
+> 2026-10-25：**SAT 特殊格式 + 词典工具**。以下改动：
+> 1. **双篇题**：`questions.material2`（旧库自动迁移）+ `.ifmd.md` 的 `@material2`（必须位于
+>    `@material` 与 `@stem` 之间）；PDF/DOCX/LLM 兜底在源文件同时出现 `Text 1`/`Text 2`
+>    （或 `Passage 1/2`）时自动拆分，否则不猜。练习/复盘/Notebook/导出以 **Text 1 / Text 2**
+>    上下叠放显示（`PassageText.tsx`）。
+> 2. **诗歌/摘录**：材料里的单换行按原文保留，练习/复盘/Notebook/导出均生效；导入启发式只在
+>    ≥4 行、续行多为大写开头且行长较短时按诗歌保留换行（`normalize.join_paragraph`）。旧卷
+>    （如内置 25年10月北美 Harder B 第 2 题）在旧版导入时已被合并，需重新从源 PDF 导入才能恢复。
+> 3. **图表裁剪**：`convert/images.py` 的 `_absorb` 增加向下吸收短标签（x 轴刻度/表格分类行），
+>    位图图表若带独立文字层改为按页面区域重新截图；正文长句不会被吞进图片。仍然离线、0 token。
+> 4. **复盘第 5 个工具 Dictionary**（2-of-5 分屏）：`DictionaryPane.tsx` 直接用内置韦氏，本地查询
+>    0 token；Settings 新增 `dictionary_auto_lookup`（默认开，输入即查；关闭后回车查词），面板内可
+>    **Add my own definition** 写入 My dictionary（查词优先）。复用 `/api/dictionary/*` 与
+>    `/api/custom-dictionary/entries`，未新增 API。
+> 5. **修复练习页题面闪烁**：计时器每秒重渲染时 `RichText` 的内联 Markdown 组件身份变化导致图片
+>    重挂/懒加载零高度，侧栏滚动条抖动；改为模块级组件 + `memo`/`useMemo`，并对文章侧栏加
+>    `scrollbar-gutter: stable`。回归测试在 `RichText.test.tsx`。
+> 6. **单词表释义自动填充开关**：Settings → Vocabulary 的 **Auto-fill definitions in the word list**
+>    （键 `vocab_auto_definition`，默认开）。关闭后拖词只添加 Word、Meaning 留空（0 token，不查词典），
+>    方便学生自己写释义；从词典面板显式 Add 的路径不受影响。
+> 7. **设置页版本号 + 自动保存**：标题下显示 `/api/health` 的版本（桌面端由 Electron 通过
+>    `INTEFLOW_VERSION` 传入打包版本，源码回退 `0.1.2`）；移除 Save 按钮，改为 600ms 防抖自动保存，
+>    连续输入合并、保存中继续编辑排队，失败下次修改重试。移除 API Key 前会清空排队并等待在途保存。
+
 ## 4. 迁移与改名映射（已执行）
 
 从 SATeacher 全量迁移（排除 `.venv` / `node_modules` / `dist` / `data` / `.env` / IDE 文件），并做了如下改名：
@@ -174,6 +198,11 @@
 | 分析存储与导出 | 一套试卷 = 一套分析（`analysis_pages` 一题一页，按题序）；旧 `questions.explain` 首次读取时映射迁入（`id` 为 null）。复盘页顶部 **Notebook** 全屏预览：试卷标题 → 所有已写解析的题目（题干/图表/解析）+ 导出按钮。导出 md / docx / pdf **只含已写解析的题**：浏览器下载 + 在 `data/exports/` 存一份，响应头 `X-Export-Path` 显示路径；封面页含设置里的用户名 |
 | 错题分析模板（2026-10-21） | Settings → **Analysis template** 一份全局 Markdown 模板（settings 键 `analysis_template`）。分析页没有已保存内容时自动填为草稿；已有分析绝不覆盖；模板未改动不落库（导出仍只算真正写过的题）；notebook 异步加载完成前不填。0 token |
 | 题型扩展（2026-10-19） | 选择题支持多选（头部 `multi=1`，答案 `A,C`）；新增填空题（`kind=blank`，无选项，答案 `a \| b` 多个可接受答案）；**导入时未识别到选项一律按填空题处理** |
+| 双篇题 / 诗歌（2026-10-25） | 第二篇材料存 `questions.material2`，`.ifmd.md` 用 `@material2`；UI 上下叠放 Text 1/Text 2；材料单换行保留（诗歌版式）。导入仅在同时出现 `Text 1`/`Text 2` 标签时拆分 |
+| 图表裁剪（2026-10-25） | 标题、y 轴刻度、x 轴/分类短标签自动并入截图；只吸收短标签，长句正文不会被吞；位图带文字层时按页面区域重新截图；0 token |
+| 词典工具（2026-10-25） | 复盘 2-of-5 分屏新增 **Dictionary**；内置韦氏本地查询；Settings `dictionary_auto_lookup`（默认开）控制输入即查；面板可添加自定义释义（写入 My dictionary，优先查询） |
+| 设置页版本 / 自动保存（2026-10-25） | 版本来自 `/api/health`（桌面端 `INTEFLOW_VERSION`）；设置改动 600ms 防抖自动保存，无 Save 按钮；API Key 只写、移除前避免竞态 |
+| 单词表释义自动填充（2026-10-25） | Settings `vocab_auto_definition`（默认开）：拖词入 Vocabulary 时自动写入韦氏释义；关闭后只加单词、Meaning 留空，0 token。词典页手动 Add 不受影响 |
 | AI 识别兜底开关 | 设置项 `llm_fallback`（默认开）。关闭时导入失败会提示启用；`convert/pdf.py` 与 `imports.run_ai_fallback` 均检查该开关 |
 | 生词释义开关（2026-10-20） | 设置项 `vocab_ai_sense`（默认开）：关闭后拖词不调用 LLM，使用第一条真实韦氏释义并提示。设置项 `vocab_learner_definitions`（默认关）：开启后优先使用韦氏词条内部的 **Definition for English Learners** 栏目；词条没有该栏目时自动回退普通释义。**不再有单独的 learner `.eudb`**。设置项 `custom_dictionary_enabled`（默认开）：优先查用户自定义词典，未命中再查韦氏 |
 | 作答历史 | 左侧栏 Sessions 页：按做题时间倒序，可搜索、可逐条删除（`GET/DELETE /api/sessions`）。**只有提交过（submit）的作答才算一条记录**；开始练习只建临时 session，中途离开即删除 |
@@ -204,6 +233,14 @@
    （2026-10-19）。继续审查中：练习界面、复盘工作台（分析编辑器/导航/抽屉）的细节可能还要微调。
 5. ~~**Mistakes 仍是占位页**~~ **已实现（2026-10-20）**：侧栏改名 **Review**，内含 **Mistakes**（按题去重保留最近作答）与 **Starred**（精选题集）；支持搜索、exam 过滤、时间排序、分析查看/编辑。Vocabulary 已完成；**单词考试**与**学科分类**均已完成。
 
+### 已知缺口
+- 图表若仍缺表头/分类标签，后续可加**视觉模型兜底**（检测图片 → 回报页码 → 多模态模型识别 + 截图）；
+  会消耗 token，需单独开关，且不进入默认导入主链路。
+- 旧版导入的诗歌行已被合并，只能重新从源 PDF 导入恢复。
+- 内置「25年10月北美 · Harder B」第 7 题的图表 PNG 仍是旧裁剪（不含分类标签）；现已用文字按正确柱序
+  标注（`self-dealing · undistributed income · taxable expenditures · excess business holdings`），
+  重新从源 PDF 导入后才会得到完整截图。
+
 ### 泛化的尾项
 - `guess_sec()` 的启发式仍是 SAT 调参（`rw`/`math` 信号）；无标题时回退到
   `INTEFLOW_DEFAULT_SECTION`（默认 `rw`）。非 SAT 题库可显式写 `sec=...`，或改这个环境变量。
@@ -222,11 +259,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 312 passed
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 339 passed
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 149 passed, 5 skipped
+cd frontend && npm test         # 164 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。
@@ -246,6 +283,7 @@ cd frontend && npm test         # 149 passed, 5 skipped
 | `backend/app/repos/review.py` · `backend/app/api/review.py` | 错题集（最近一次错题去重）+ 精选题集（`question_stars`）+ 星标接口；分析/科目/作答一起返回 |
 | `backend/app/imports.py` | 导入流水线服务：detect → convert → commit（0 token；AI 兜底受设置开关控制） |
 | `backend/app/convert/pdf.py` | PyMuPDF → InteFlow-MD（含 OCR 分支、无选项 → 填空） |
+| `backend/app/convert/paired.py` | 双篇识别：`Text 1`/`Text 2`（兼容 `Passage 1/2`）→ material + material2 |
 | `backend/app/convert/twocolumn.py` | 双栏版面 profile（原 bluebook.py） |
 | `backend/app/convert/docx.py` | DOCX → InteFlow-MD（zip 安全校验） |
 | `backend/app/ifmd/parser.py` · `writer.py` | InteFlow-MD 解析 / 回写（确定性状态机；多选/填空/多答案） |
@@ -256,9 +294,10 @@ cd frontend && npm test         # 149 passed, 5 skipped
 | `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
 | `frontend/src/pages/` | ExamHome · **Library(Import)** · **Sessions** · **Review (MistakesPage)** · **Vocabulary** · AnswerKey · **Practice** · Result · Settings |
 | `frontend/src/components/ui/AppSidebar.tsx` | 工作区左侧栏（6 tab，移动端抽屉；桌面 Compact 图标栏，存 `inteflow.sidebar.compact`） |
+| `frontend/src/components/PassageText.tsx` | 文章/双篇材料渲染（单篇 `Passage`，双篇 `Text 1`/`Text 2`，保留诗歌换行） |
 | `frontend/src/index.css` | 设计令牌 + `@theme`；主题层：`.app-theme[data-theme=…]` 语义变量 → Tailwind 颜色族映射 + 各主题特征样式 |
 | `frontend/src/theme.ts` | 主题注册表（id / 名称 / 说明 / 色板）+ `localStorage` 持久化 + `useTheme()`；`components/ui/ThemePicker.tsx` 是 Settings 里的选择器 |
-| `frontend/src/components/workspace/` | 复盘工作台（Workspace 2-of-4 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / ExportDrawer / NotebookPreview / VocabGrid / **WordExamPanel / WordExamResultView** / Splitter / usePersistentLayout） |
+| `frontend/src/components/workspace/` | 复盘工作台（Workspace **2-of-5** 分屏 / WorkspacePane 切换器 / QuestionNav / AnalysisEditor / AiTutorPane / VocabularyPane / **DictionaryPane** / ExportDrawer / NotebookPreview / VocabGrid / **WordExamPanel / WordExamResultView** / Splitter / usePersistentLayout） |
 | `frontend/src/lib/sections.ts` | 前端板块标签（与后端 `sections.py` 对齐） |
 | `frontend/src/lib/i18n.tsx` · `components/ui/LanguagePicker.tsx` | 前端中英文案表 / `I18nProvider` / `useI18n` / `useT` + Settings 里的语言切换（`inteflow.language`） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |

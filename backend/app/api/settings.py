@@ -43,10 +43,12 @@ class SettingsPayload(BaseModel):
     analysis_template: str | None = None  # pre-filled into empty analysis pages
     llm_fallback: bool | None = None  # allow AI question recognition when parsing fails
     vocab_ai_sense: bool | None = None  # AI picks the MW sense on drag-to-vocabulary
+    vocab_auto_definition: bool | None = None  # drag-to-vocabulary fills Meaning automatically
     vocab_learner_definitions: bool | None = None  # prefer the in-entry learner section
     vocab_exam_ai_grading: bool | None = None  # AI may grade word-test answers
     custom_dictionary_enabled: bool | None = None  # consult the user dictionary first
     show_builtin_library: bool | None = None  # show the bundled sample bank in Library
+    dictionary_auto_lookup: bool | None = None  # Dictionary tool: look up while typing
 
 
 def _mask(key: str) -> str:
@@ -68,10 +70,12 @@ def _load() -> dict[str, str]:
         "analysis_template": stored.get("analysis_template", ""),
         "llm_fallback": stored.get("llm_fallback", "1"),
         "vocab_ai_sense": stored.get("vocab_ai_sense", "1"),
+        "vocab_auto_definition": stored.get("vocab_auto_definition", "1"),
         "vocab_learner_definitions": stored.get("vocab_learner_definitions", "0"),
         "vocab_exam_ai_grading": stored.get("vocab_exam_ai_grading", "0"),
         "custom_dictionary_enabled": stored.get("custom_dictionary_enabled", "1"),
         "show_builtin_library": stored.get("show_builtin_library", "0"),
+        "dictionary_auto_lookup": stored.get("dictionary_auto_lookup", "1"),
     }
 
 
@@ -87,10 +91,12 @@ def _view(s: dict[str, str]) -> dict:
         "analysis_template": s["analysis_template"],
         "llm_fallback": s["llm_fallback"] != "0",
         "vocab_ai_sense": s["vocab_ai_sense"] != "0",
+        "vocab_auto_definition": s["vocab_auto_definition"] != "0",
         "vocab_learner_definitions": s["vocab_learner_definitions"] == "1",
         "vocab_exam_ai_grading": s["vocab_exam_ai_grading"] == "1",
         "custom_dictionary_enabled": s["custom_dictionary_enabled"] != "0",
         "show_builtin_library": s["show_builtin_library"] == "1",
+        "dictionary_auto_lookup": s["dictionary_auto_lookup"] != "0",
     }
 
 
@@ -138,6 +144,8 @@ def put_settings(payload: SettingsPayload) -> dict:
         updates["llm_fallback"] = "1" if payload.llm_fallback else "0"
     if payload.vocab_ai_sense is not None:
         updates["vocab_ai_sense"] = "1" if payload.vocab_ai_sense else "0"
+    if payload.vocab_auto_definition is not None:
+        updates["vocab_auto_definition"] = "1" if payload.vocab_auto_definition else "0"
     if payload.vocab_learner_definitions is not None:
         updates["vocab_learner_definitions"] = (
             "1" if payload.vocab_learner_definitions else "0"
@@ -152,6 +160,8 @@ def put_settings(payload: SettingsPayload) -> dict:
         )
     if payload.show_builtin_library is not None:
         updates["show_builtin_library"] = "1" if payload.show_builtin_library else "0"
+    if payload.dictionary_auto_lookup is not None:
+        updates["dictionary_auto_lookup"] = "1" if payload.dictionary_auto_lookup else "0"
     settings_repo.set_values(updates)
     return _view(_load())
 

@@ -20,6 +20,8 @@ ALLOWED_KEYS = (
     "vocab_exam_ai_grading",
     "custom_dictionary_enabled",
     "show_builtin_library",
+    "dictionary_auto_lookup",
+    "vocab_auto_definition",
 )
 
 
@@ -54,6 +56,11 @@ def vocabulary_ai_sense_enabled() -> bool:
     return get_all().get("vocab_ai_sense", "1") != "0"
 
 
+def vocabulary_auto_definition_enabled() -> bool:
+    """Whether dropping a word into the word list fills its Meaning automatically."""
+    return get_all().get("vocab_auto_definition", "1") != "0"
+
+
 def learner_definitions_enabled() -> bool:
     """Whether to prefer the in-entry "Definition for English Learners" section."""
     return get_all().get("vocab_learner_definitions", "0") == "1"
@@ -62,6 +69,11 @@ def learner_definitions_enabled() -> bool:
 def custom_dictionary_enabled() -> bool:
     """Whether the user's own dictionary is consulted before Merriam-Webster."""
     return get_all().get("custom_dictionary_enabled", "1") != "0"
+
+
+def dictionary_auto_lookup_enabled() -> bool:
+    """Whether the Dictionary tool looks words up as the user types."""
+    return get_all().get("dictionary_auto_lookup", "1") != "0"
 
 
 def word_exam_ai_grading_enabled() -> bool:

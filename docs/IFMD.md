@@ -42,6 +42,8 @@ answers: none                 # inline | external | none（见 §5）
 :::q {#Q001 sec=rw}      ← 块开始：id + 属性
 @material                  ← 可选：本题自带材料（阅读段落/图表说明）
 ……材料正文……
+@material2                 ← 可选：双篇题的第二篇（SAT paired passages）
+……第二篇正文……
 @stem                      ← 可选但强烈建议：题干起点
 ……题干正文……
 - A. 选项一                 ← 选择题：从 A 起连续的大写字母 + 点，至少 2 个（AMC 5 个，部分卷 6 个）
@@ -56,6 +58,11 @@ answers: none                 # inline | external | none（见 §5）
 - **无任何标记**：块内全部内容都是题干。
 - **只有 `@stem`**：`@stem` 之前的内容自动作为材料（`@material` 的简写形式）。
 - **`@material` 与 `@stem` 同时出现**：分别界定材料与题干；只有 `@material` 而没有 `@stem` 是错误。
+- **`@material2`**：双篇题的第二篇材料，必须同时出现 `@material`，且顺序为
+  `@material` → `@material2` → `@stem`；每个标记在块内只能出现一次，`@material2` 不能为空。
+  双篇在界面上以 `Text 1` / `Text 2` 上下叠放显示；单篇仍然只显示 `Passage`。
+- **换行**：材料正文里的**单个换行会保留**（诗歌、歌词、书信落款等源版式），段落之间用空行分隔。
+  导入器只在识别为诗歌时保留视觉换行，普通被 PDF 折行的正文会自动合并成一段。
 - **题型有两种**：
   - 选择题：选项行从 `A` 起**连续**排列（`A B C …`），至少 2 个、最多 26 个；跳号或不足 2 个 → **报错，不猜测**。
   - 填空题（`kind=blank`）：**没有选项行**。导入时若识别不到选项即按填空题处理（见 §3.2）。
@@ -168,6 +175,34 @@ Which TWO of the following are renewable energy sources?
 它覆盖单选、多选（`multi=1`）、填空（`kind=blank`，多个可接受答案）、`@material` / `@stem` 与 `$...$` 公式，
 可直接在 Library 页上传，也可以复制内容作为自己出题的起点。
 
+### 6.6 双篇题（paired passages）
+
+```markdown
+:::q {#Q020 sec=rw no=20}
+@material
+Text 1
+Cities should plant more street trees: shade and air quality improve
+immediately, and the cost is modest.
+
+@material2
+Text 2
+The same programme is expensive to maintain; pruning and irrigation
+budgets are routinely underestimated.
+
+@stem
+How would the author of Text 2 respond to the claim in Text 1?
+
+- A. By accepting the benefits but questioning the budget
+- B. By denying that trees provide shade
+- C. By proposing a different city
+- D. By citing a third study
+! answer: A
+:::
+```
+
+> 导入 PDF / DOCX 时，源文件里的 `Text 1` / `Text 2`（或 `Passage 1` / `Passage 2`）标签会被
+> 自动拆成 `@material` / `@material2`；标签不齐时保持原样，不猜测。
+
 ## 7. 设计决议（已确认）
 
 1. 材料内标题不做独立字段，由转换器写成材料首行（如 `**Title — Source**`）。
@@ -176,9 +211,11 @@ Which TWO of the following are renewable energy sources?
 4. **选择题字母从 A 起连续**（A、B、C、…），至少 2 个、最多 26 个；跳号或不足 2 个一律报错，答案字母必须落在题目已有的选项内。**填空题（`kind=blank`）刻意没有选项**——转换器识别不到选项时按填空处理，不再报"选项不足"。
 5. **`sec` 自由标签**：解析器只要求非空，不校验取值（SAT 卷仍用 `rw`/`math`，其他学科自定）。转换器在无板块标题时回退到 `INTEFLOW_DEFAULT_SECTION`（默认 `rw`）。
 6. **多答案**：选择题多选由头部 `multi=1` 声明，答案写成 `A,C`；填空题的多个可接受答案写成 `a | b`。
+7. **双篇**：第二篇材料用 `@material2`，顺序固定为 `@material` → `@material2` → `@stem`；
+   第二篇为空视为结构错误。导入器只在同时看到 `Text 1` 与 `Text 2` 标签时拆分。
 
 ## 8. 解析器实现约定
 
 - 单一入口：`parse(text) -> {meta, questions[]}`，纯函数，**不调用 LLM、不做模糊推断**。
 - 任何结构错误抛出带行号的 `IfmdError`，导入界面直接展示错误位置。
-- 单元测试覆盖：正常块 / **无选项（填空题）** / 选项数不对（1–3 或 >4） / 版本不符 / 公式与图片 / `@material` 组合 / 未知 `!` key / **`multi=1` 与多答案 `A,C`** / **填空多答案 `a | b`**。
+- 单元测试覆盖：正常块 / **无选项（填空题）** / 选项数不对（1–3 或 >4） / 版本不符 / 公式与图片 / `@material` 组合 / 未知 `!` key / **`multi=1` 与多答案 `A,C`** / **填空多答案 `a | b`** / **`@material2` 双篇与顺序校验**。
