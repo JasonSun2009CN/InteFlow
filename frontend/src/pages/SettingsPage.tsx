@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   api,
   ApiError,
   type AppSettings,
   type ProbeResult,
   type ProviderInfo,
+  type SettingsInput,
 } from "../api/client";
 import { Button, LanguagePicker, ThemePicker } from "../components/ui";
 import CustomDictionaryManager from "../components/CustomDictionaryManager";
 import { useI18n } from "../lib/i18n";
+
+/** Typing pause before a field is persisted; toggles land on the same timer. */
+const AUTOSAVE_DELAY = 600;
+
+type SaveState = "idle" | "dirty" | "saving" | "saved" | "error";
 
 function errText(err: unknown): string {
   return err instanceof ApiError ? err.message : String(err);
@@ -32,10 +38,20 @@ export default function SettingsPage() {
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [providersLoaded, setProvidersLoaded] = useState(false);
-  const [busy, setBusy] = useState<"save" | "test" | null>(null);
+  const [version, setVersion] = useState("");
+  const [loaded, setLoaded] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [busy, setBusy] = useState<"test" | "remove" | null>(null);
   const [resetting, setResetting] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [probe, setProbe] = useState<ProbeResult | null>(null);
+
+  // Auto-save bookkeeping: the fingerprint of the last persisted form lets us
+  // ignore hydration and no-op edits, while pending/saving refs serialize
+  // overlapping keystrokes into one in-flight request at a time.
+  const lastSavedRef = useRef<string | null>(null);
+  const pendingRef = useRef<SettingsInput | null>(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     Promise.all([api.getSettings(), api.listProviders()])
@@ -53,9 +69,16 @@ export default function SettingsPage() {
         setCustomDictionary(s.custom_dictionary_enabled);
         setShowBuiltin(s.show_builtin_library);
         setProviders(list);
+        setLoaded(true);
       })
       .catch((err) => setMessage({ kind: "err", text: errText(err) }))
       .finally(() => setProvidersLoaded(true));
+
+    // Version is furniture: the page still works when /api/health is down.
+    api
+      .health()
+      .then((h) => setVersion(h.version))
+      .catch(() => undefined);
   }, []);
 
   function presetOf(id: string): ProviderInfo | undefined {
@@ -63,6 +86,93 @@ export default function SettingsPage() {
   }
 
   const currentPreset = presetOf(provider);
+
+  /** Everything the PUT endpoint accepts, built from the current form. */
+  const payload = useMemo<SettingsInput>(
+    () => ({
+      provider,
+      base_url: baseUrl.trim(),
+      model: model.trim(),
+      user_name: userName.trim(),
+      analysis_template: analysisTemplate,
+      llm_fallback: llmFallback,
+      vocab_ai_sense: vocabAiSense,
+      vocab_learner_definitions: vocabLearner,
+      vocab_exam_ai_grading: vocabExamAi,
+      custom_dictionary_enabled: customDictionary,
+      show_builtin_library: showBuiltin,
+      ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
+    }),
+    [
+      provider,
+      baseUrl,
+      model,
+      userName,
+      analysisTemplate,
+      llmFallback,
+      vocabAiSense,
+      vocabLearner,
+      vocabExamAi,
+      customDictionary,
+      showBuiltin,
+      apiKey,
+    ],
+  );
+
+  /** Persist the newest form snapshot, coalescing edits made while saving. */
+  const persist = useCallback(async (next: SettingsInput) => {
+    pendingRef.current = next;
+    if (savingRef.current) return;
+    savingRef.current = true;
+
+    try {
+      while (pendingRef.current) {
+        const current: SettingsInput = pendingRef.current;
+        const fingerprint = JSON.stringify(current);
+        if (fingerprint === lastSavedRef.current) break;
+
+        setSaveState("saving");
+        const saved = await api.saveSettings(current);
+        lastSavedRef.current = fingerprint;
+        setStored(saved);
+        setMessage(null);
+
+        if (current.api_key) {
+          // Clearing the password field is not a new edit to persist.
+          const cleared: SettingsInput = { ...current, api_key: undefined };
+          pendingRef.current = cleared;
+          lastSavedRef.current = JSON.stringify(cleared);
+          setApiKey("");
+        }
+
+        setSaveState("saved");
+        if (JSON.stringify(pendingRef.current) === lastSavedRef.current) break;
+      }
+    } catch (err) {
+      setSaveState("error");
+      setMessage({ kind: "err", text: errText(err) });
+    } finally {
+      savingRef.current = false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const fingerprint = JSON.stringify(payload);
+
+    // First render after hydration: record the baseline, never save it.
+    if (lastSavedRef.current === null) {
+      lastSavedRef.current = fingerprint;
+      return;
+    }
+    if (fingerprint === lastSavedRef.current) return;
+
+    setSaveState("dirty");
+    const timer = window.setTimeout(() => {
+      void persist(payload);
+    }, AUTOSAVE_DELAY);
+    return () => window.clearTimeout(timer);
+  }, [loaded, payload, persist]);
 
   function onProviderChange(next: string) {
     const previousPreset = presetOf(provider);
@@ -75,35 +185,6 @@ export default function SettingsPage() {
     }
     // Auto-routing gateways (OrcaRouter/OpenRouter/OpenPaths) set the model too.
     if (nextPreset?.default_model) setModel(nextPreset.default_model);
-  }
-
-  async function onSave() {
-    setBusy("save");
-    setMessage(null);
-    setProbe(null);
-    try {
-      const saved = await api.saveSettings({
-        provider,
-        base_url: baseUrl.trim(),
-        model: model.trim(),
-        user_name: userName.trim(),
-        analysis_template: analysisTemplate,
-        llm_fallback: llmFallback,
-        vocab_ai_sense: vocabAiSense,
-        vocab_learner_definitions: vocabLearner,
-        vocab_exam_ai_grading: vocabExamAi,
-        custom_dictionary_enabled: customDictionary,
-        show_builtin_library: showBuiltin,
-        ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
-      });
-      setStored(saved);
-      setApiKey("");
-      setMessage({ kind: "ok", text: t("Settings saved.") });
-    } catch (err) {
-      setMessage({ kind: "err", text: errText(err) });
-    } finally {
-      setBusy(null);
-    }
   }
 
   async function onTest() {
@@ -127,7 +208,7 @@ export default function SettingsPage() {
   }
 
   async function onRemoveKey() {
-    setBusy("save");
+    setBusy("remove");
     setMessage(null);
     try {
       const saved = await api.saveSettings({ clear_key: true });
@@ -166,6 +247,17 @@ export default function SettingsPage() {
 
   const desktop = typeof window !== "undefined" && Boolean(window.inteflow?.desktop);
 
+  const saveLabel =
+    saveState === "saving"
+      ? t("Saving…")
+      : saveState === "dirty"
+        ? t("Unsaved changes…")
+        : saveState === "error"
+          ? t("Could not save — retrying on the next change.")
+          : saveState === "saved"
+            ? t("Saved")
+            : t("Changes save automatically.");
+
   const input =
     "w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none";
   const label = "block text-sm font-medium text-slate-700 mb-1";
@@ -181,6 +273,9 @@ export default function SettingsPage() {
           {t(
             "Configure the LLM API used for on-demand explanations and import fallback. Everything is stored locally; the key never leaves this machine except to call the provider you name below.",
           )}
+        </p>
+        <p className="mt-2 text-xs font-medium text-slate-400">
+          {t("Version {version}", { version: version || "…" })}
         </p>
       </header>
 
@@ -486,10 +581,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex gap-3 pt-1">
-          <Button type="button" onClick={() => void onSave()} disabled={busy !== null}>
-            {busy === "save" ? t("Saving…") : t("Save settings")}
-          </Button>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <p className="text-xs text-slate-500" aria-live="polite" data-testid="settings-save-state">
+            {saveLabel}
+          </p>
           <Button
             type="button"
             variant="secondary"

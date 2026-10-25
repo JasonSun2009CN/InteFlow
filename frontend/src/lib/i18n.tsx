@@ -84,6 +84,10 @@ const MESSAGES: Record<string, string> = {
   "Configure the LLM API used for on-demand explanations and import fallback. Everything is stored locally; the key never leaves this machine except to call the provider you name below.":
     "配置用于按需解析与导入兜底的 LLM API。所有内容都保存在本地；除了调用你指定的服务商，密钥不会离开这台电脑。",
   "Settings saved.": "设置已保存。",
+  "Changes save automatically.": "修改会自动保存。",
+  "Unsaved changes…": "有未保存的修改…",
+  "Could not save — retrying on the next change.": "保存失败——下次修改时会重试。",
+  "Version {version}": "版本 {version}",
   "API key removed.": "API 密钥已移除。",
   Desktop: "桌面端",
   "Show built-in library": "显示内置题库",
