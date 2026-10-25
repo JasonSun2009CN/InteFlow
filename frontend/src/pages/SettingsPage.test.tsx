@@ -52,7 +52,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   getSettings.mockResolvedValue(settings);
   listProviders.mockResolvedValue([]);
-  health.mockResolvedValue({ status: "ok", version: "0.1.2", ocr: [] });
+  health.mockResolvedValue({ status: "ok", version: "1.0.0", ocr: [] });
   saveSettings.mockImplementation(async (input) => ({ ...settings, ...input }));
 });
 
@@ -64,7 +64,7 @@ describe("SettingsPage", () => {
   it("shows the app version reported by the backend", async () => {
     render(<SettingsPage />);
 
-    expect(await screen.findByText("Version 0.1.2")).toBeInTheDocument();
+    expect(await screen.findByText("Version 1.0.0")).toBeInTheDocument();
   });
 
   it("auto-saves edits without a Save button", async () => {

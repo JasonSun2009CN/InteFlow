@@ -32,7 +32,7 @@ from app.db import init_db
 # The desktop shell passes its packaged version through INTEFLOW_VERSION so the
 # Settings screen always matches the installer, even when this constant drifts.
 # Bump the fallback when cutting a source/web release.
-VERSION = (os.environ.get("INTEFLOW_VERSION") or "").strip() or "0.1.2"
+VERSION = (os.environ.get("INTEFLOW_VERSION") or "").strip() or "1.0.0"
 
 
 @asynccontextmanager
