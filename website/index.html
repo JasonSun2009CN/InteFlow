@@ -45,9 +45,7 @@
           <a href="features.html">功能</a>
           <a href="demo.html">在线试用</a>
           <a href="themes.html">主题</a>
-          <a href="features.html#architecture">技术</a>
           <a href="features.html#faq">问答</a>
-          <a class="nav-github" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
         </nav>
 
         <div class="header-actions">
@@ -62,64 +60,30 @@
         </div>
       </div>
     </header>
+
     <main id="main">
-<!-- ================================================================ hero -->
+      <!-- ================================================================ hero -->
       <section class="hero" id="top">
         <div class="wrap hero-grid">
           <div class="hero-copy reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> OPEN SOURCE · MIT · RUNS LOCALLY</p>
+            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> LOCAL-FIRST STUDY WORKFLOW</p>
             <h1>题库进来，<br /><em>理解</em>留下来。</h1>
             <p class="hero-lede">
-              InteFlow 是一个跑在自己电脑上的学习工作流：把 PDF / DOCX / Markdown
-              题库导入、全屏刷题、逐题复盘，写成自己的解析与生词本，最后导出成可以带走的文件。
+              导入 PDF / DOCX / Markdown 题库，全屏刷题，逐题复盘。
+              解析、生词和作答记录都留在本机，最后导出成能带走的文件。
             </p>
 
             <div class="hero-actions">
-              <a
-                class="btn btn-accent"
-                href="download.html"
-                >下载桌面版 <span aria-hidden="true">↓</span></a
-              >
+              <a class="btn btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
               <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
-              <a
-                class="btn btn-outline"
-                href="https://github.com/JasonSun2009CN/InteFlow"
-                target="_blank"
-                rel="noreferrer"
-                >GitHub 仓库 <span aria-hidden="true">↗</span></a
-              >
             </div>
-            <div class="hero-platforms" aria-label="按平台直接下载">
-              <span class="hero-platforms-label">直接下载</span>
-              <a class="platform-pill" href="download.html#mac-arm64" data-download-platform="mac-arm64" data-download-static-label>
-                <span class="platform-pill-os">macOS</span>
-                <span data-download-label>Apple Silicon</span>
-              </a>
-              <a class="platform-pill" href="download.html#mac-x64" data-download-platform="mac-x64" data-download-static-label>
-                <span class="platform-pill-os">macOS</span>
-                <span data-download-label>Intel</span>
-              </a>
-              <a class="platform-pill" href="download.html#windows" data-download-platform="win-x64" data-download-static-label>
-                <span class="platform-pill-os">Windows</span>
-                <span data-download-label>64 位</span>
-              </a>
-            </div>
-            <p class="download-note">
-              <a href="download.html#install">未签名版本安装说明</a> ·
-              <a href="download.html">所有平台与源码运行</a>
-            </p>
 
-            <div class="hero-command">
-              <span class="prompt" aria-hidden="true">↳</span>
-              <code>macOS · Windows</code>
-              <span class="command-note">双击安装，无需 Python / Node；数据只存在你的电脑上</span>
-            </div>
+            <p class="hero-meta">macOS · Windows · 无需 Python / Node · 主链路 0 token</p>
 
             <ul class="hero-facts" aria-label="项目一览">
               <li><strong>0</strong><span>主链路 token</span></li>
               <li><strong>1,186</strong><span>内置题目</span></li>
               <li><strong>92,006</strong><span>词典条目</span></li>
-              <li><strong>5</strong><span>套界面主题</span></li>
             </ul>
           </div>
 
@@ -188,122 +152,101 @@
                 </div>
               </div>
             </div>
-
-            <div class="hero-stamp" aria-hidden="true">
-              <span>LOCAL</span>
-              <span>FIRST</span>
-              <small>no account</small>
-            </div>
           </div>
         </div>
       </section>
 
-      <section class="download-strip" id="download">
+      <!-- ============================================================ download -->
+      <section class="download-band" id="download">
         <div class="wrap">
-          <div class="download-strip-head reveal">
+          <div class="download-band-head reveal">
             <div>
-              <p class="section-index">DOWNLOAD / 桌面版</p>
-              <h2>先选平台，<br /><em>再开始。</em></h2>
-              <p class="section-lede">
-                桌面版把后端、前端、MathJax 与可选 OCR 打成一个安装包；不用装 Python / Node。
-                安装包由 GitHub Releases 发布，下面每个平台都会指向对应文件。
-              </p>
+              <p class="section-index">DOWNLOAD</p>
+              <h2>下载桌面版</h2>
+              <p class="section-lede">安装包已包含后端、前端与数学公式渲染，不需要 Python 或 Node。</p>
             </div>
-            <a class="btn btn-outline" href="download.html">安装说明 <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="download.html">安装说明 <span aria-hidden="true">→</span></a>
           </div>
 
-          <div class="platform-grid is-four reveal">
-        <a class="platform-card" href="download.html#mac-arm64" data-download-platform="mac-arm64">
-          <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
-            <span class="platform-tag">.dmg · arm64</span>
-          </div>
-          <div class="platform-copy">
-            <strong>macOS · Apple Silicon</strong>
-            <p>M1 / M2 / M3 / M4 芯片</p>
-          </div>
-          <div class="platform-action">
-            <span data-download-label>查看下载</span>
-            <em aria-hidden="true">↓</em>
-          </div>
-        </a>
-        <a class="platform-card" href="download.html#mac-x64" data-download-platform="mac-x64">
-          <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
-            <span class="platform-tag">.dmg · x64</span>
-          </div>
-          <div class="platform-copy">
-            <strong>macOS · Intel</strong>
-            <p>Intel 芯片的 Mac</p>
-          </div>
-          <div class="platform-action">
-            <span data-download-label>查看下载</span>
-            <em aria-hidden="true">↓</em>
-          </div>
-        </a>
-        <a class="platform-card" href="download.html#windows" data-download-platform="win-x64">
-          <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></span>
-            <span class="platform-tag">.exe · x64</span>
-          </div>
-          <div class="platform-copy">
-            <strong>Windows</strong>
-            <p>Windows 10 / 11 · 64 位</p>
-          </div>
-          <div class="platform-action">
-            <span data-download-label>查看下载</span>
-            <em aria-hidden="true">↓</em>
-          </div>
-        </a>
-        <a class="platform-card" href="https://github.com/JasonSun2009CN/InteFlow/releases">
-          <div class="platform-card-top">
-            <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 21h14"/></svg></span>
-            <span class="platform-tag">all builds · releases</span>
-          </div>
-          <div class="platform-copy">
-            <strong>所有安装包</strong>
-            <p>GitHub Releases · macOS / Windows</p>
-          </div>
-          <div class="platform-action">
-            <span data-download-label>打开 Releases</span>
-            <em aria-hidden="true">↗</em>
-          </div>
-        </a>
+          <div class="platform-grid reveal">
+            <a class="platform-card platform-card--compact" href="download.html#mac-arm64" data-download-platform="mac-arm64">
+              <div class="platform-card-top">
+                <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
+                <span class="platform-tag">.dmg · arm64</span>
+              </div>
+              <div class="platform-copy">
+                <strong>macOS · Apple Silicon</strong>
+                <p>M1 / M2 / M3 / M4</p>
+              </div>
+              <div class="platform-action">
+                <span data-download-label>下载</span>
+                <em aria-hidden="true">↓</em>
+              </div>
+            </a>
+            <a class="platform-card platform-card--compact" href="download.html#mac-x64" data-download-platform="mac-x64">
+              <div class="platform-card-top">
+                <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></span>
+                <span class="platform-tag">.dmg · x64</span>
+              </div>
+              <div class="platform-copy">
+                <strong>macOS · Intel</strong>
+                <p>Intel 芯片的 Mac</p>
+              </div>
+              <div class="platform-action">
+                <span data-download-label>下载</span>
+                <em aria-hidden="true">↓</em>
+              </div>
+            </a>
+            <a class="platform-card platform-card--compact" href="download.html#windows" data-download-platform="win-x64">
+              <div class="platform-card-top">
+                <span class="platform-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></span>
+                <span class="platform-tag">.exe · x64</span>
+              </div>
+              <div class="platform-copy">
+                <strong>Windows</strong>
+                <p>Windows 10 / 11 · 64 位</p>
+              </div>
+              <div class="platform-action">
+                <span data-download-label>下载</span>
+                <em aria-hidden="true">↓</em>
+              </div>
+            </a>
           </div>
 
           <p class="download-strip-note">
             未签名版本首次打开：macOS 右键 →「打开」；Windows「更多信息」→「仍要运行」。
-            <a href="download.html#install">安装说明</a> ·
             <a href="https://github.com/JasonSun2009CN/InteFlow/releases">所有版本</a> ·
-            <a href="download.html#source">开发者：从源码运行</a>
+            <a href="download.html#source">从源码运行</a>
           </p>
         </div>
       </section>
 
+      <!-- =============================================================== why -->
       <section class="section" id="why">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">01 / WHY</p>
-            <h2>一条链路，<br />三件事做扎实。</h2>
+            <p class="section-index">WHY INTEFLOW</p>
+            <h2>一条链路，三件事。</h2>
             <p class="section-lede">
-              不把“什么都能聊”当成学习工具。InteFlow 先把导入、复盘和带走做对，再把可选的 AI 放到你明确按键之后。
+              不把“什么都能聊”当成学习工具。先把导入、复盘和带走做对，再把可选的 AI 放到你明确按键之后。
             </p>
           </div>
-          <div class="home-highlights">
+
+          <div class="home-highlights home-highlights--plain">
             <article class="home-highlight reveal">
-              <span class="mono">CAPTURE</span>
+              <span class="mono">01 / CAPTURE</span>
               <h3>题库进来</h3>
               <p>PDF、DOCX、Markdown 或现成的 InteFlow-MD，导入时逐页报告；图片、答案表与双栏结构都留在本地。</p>
               <a href="features.html#features">看导入能力 →</a>
             </article>
             <article class="home-highlight reveal" style="--delay: 70ms">
-              <span class="mono">REVIEW</span>
+              <span class="mono">02 / REVIEW</span>
               <h3>逐题复盘</h3>
               <p>题目、分析、AI Tutor、生词本四块面板自由切换。写自己的解析，而不是只看标准答案。</p>
               <a href="demo.html">进入在线试用 →</a>
             </article>
             <article class="home-highlight reveal" style="--delay: 140ms">
-              <span class="mono">PORTABLE</span>
+              <span class="mono">03 / PORTABLE</span>
               <h3>把理解带走</h3>
               <p>笔记本导出 md / docx / pdf，词表导出 xlsx；备份就是复制 data/ 文件夹，没有云端锁定。</p>
               <a href="features.html#features">看输出能力 →</a>
@@ -312,42 +255,23 @@
         </div>
       </section>
 
-      <section class="section section-alt" id="explore">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <p class="section-index">02 / EXPLORE</p>
-            <h2>别只看首页。</h2>
-            <p class="section-lede">下载、试用、功能与主题各自成页，按你现在的需要往下走。</p>
+      <!-- ============================================================= closing -->
+      <section class="closing">
+        <div class="wrap closing-inner reveal">
+          <div class="closing-copy">
+            <p class="section-index">READY WHEN YOU ARE</p>
+            <h2>先试用，<br />再下载。</h2>
+            <p>在线做四道题，或直接安装桌面版。不需要账号，也不需要 API key。</p>
           </div>
-          <div class="explore-grid">
-            <a class="explore-card reveal" href="demo.html">
-              <span class="mono">LIVE DEMO</span>
-              <strong>在线试用</strong>
-              <span>做题、工作区、错题集、生词集，四个页面分开看。</span>
-              <em>开始做题 →</em>
-            </a>
-            <a class="explore-card reveal" href="features.html" style="--delay: 60ms">
-              <span class="mono">FEATURES</span>
-              <strong>完整功能</strong>
-              <span>22 项能力，从导入到导出的完整索引。</span>
-              <em>看功能 →</em>
-            </a>
-            <a class="explore-card reveal" href="themes.html" style="--delay: 120ms">
-              <span class="mono">THEMES</span>
-              <strong>五套主题</strong>
-              <span>真实 HTML/CSS 预览，不是截图。</span>
-              <em>看主题 →</em>
-            </a>
-            <a class="explore-card reveal" href="download.html" style="--delay: 180ms">
-              <span class="mono">DOWNLOAD</span>
-              <strong>下载与安装</strong>
-              <span>macOS / Windows / 源码，安装与更新说明。</span>
-              <em>去下载 →</em>
-            </a>
+          <div class="closing-actions">
+            <a class="btn btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="features.html">完整功能与工作流 <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </section>
     </main>
+
     <footer class="site-footer">
       <div class="wrap footer-grid">
         <div class="footer-brand">
@@ -365,8 +289,6 @@
           <a href="demo.html">在线试用</a>
           <a href="themes.html">主题</a>
           <a href="download.html">下载桌面版</a>
-          <a href="download.html#install">安装说明</a>
-          <a href="download.html#source">从源码运行</a>
         </nav>
 
         <nav class="footer-col" aria-label="文档">
@@ -382,7 +304,6 @@
           <a href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/issues" target="_blank" rel="noreferrer">Issues</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
-          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/AGENT.md" target="_blank" rel="noreferrer">Agent notes</a>
         </nav>
       </div>
 

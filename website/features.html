@@ -45,9 +45,7 @@
           <a href="features.html" aria-current="page">功能</a>
           <a href="demo.html">在线试用</a>
           <a href="themes.html">主题</a>
-          <a href="features.html#architecture">技术</a>
           <a href="features.html#faq">问答</a>
-          <a class="nav-github" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
         </nav>
 
         <div class="header-actions">
@@ -62,473 +60,214 @@
         </div>
       </div>
     </header>
+
     <main id="main">
-<section class="page-hero">
-        <div class="wrap page-hero-grid">
-          <div class="reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> FEATURES / 完整功能</p>
-            <h1>从题库进来，<br />到理解<em>留下来</em>。</h1>
-            <p class="section-lede">
-              22 项已经落地的能力，覆盖导入、练习、复盘、词汇与输出。这里是完整索引；想看真实交互，去在线试用。
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
-            </div>
+      <!-- ============================================================== hero -->
+      <section class="page-hero page-hero--slim">
+        <div class="wrap">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> FEATURES</p>
+          <h1>功能与工作流</h1>
+          <p class="section-lede">
+            从导入到导出，22 项已经落地的能力。先看核心与五步链路，需要时再展开完整索引。
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
           </div>
-          <aside class="page-hero-aside reveal" style="--delay: 80ms">
-            <p class="mono">AT A GLANCE</p>
-            <dl>
-              <div><dt>FEATURES</dt><dd>22 项</dd></div>
-              <div><dt>MAIN PATH</dt><dd>0 token</dd></div>
-              <div><dt>REVIEW</dt><dd>2-of-4 工作台</dd></div>
-              <div><dt>EXPORT</dt><dd>md · docx · pdf · xlsx</dd></div>
-            </dl>
-          </aside>
         </div>
       </section>
 
-<!-- ============================================================= position -->
+      <!-- ========================================================= principles -->
       <section class="section" id="position">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">01 / POSITION</p>
-            <h2>先把边界说清楚。</h2>
+            <p class="section-index">01 / PRINCIPLES</p>
+            <h2>两条底线。</h2>
             <p class="section-lede">
-              InteFlow 不做“什么都能聊”的学习助手。它先把确定的事做对，再把可选的 AI
-              放在你明确按键之后。
+              InteFlow 不做“什么都能聊”的学习助手。它先把确定的事做对，再把可选的 AI 放在你明确按键之后。
             </p>
           </div>
 
-          <div class="rules-grid">
-            <article class="rule-card rule-dark reveal">
-              <div class="rule-top">
-                <span class="mono">RULE 01</span>
-                <span class="micro-badge micro-badge-light">0 TOKEN</span>
-              </div>
+          <div class="principles">
+            <article class="principle reveal">
+              <span class="principle-no">01</span>
               <h3>LLM 不在主链路。</h3>
               <p>
-                导入、解析、判分、复盘、导出默认都是确定性的本地计算；AI 只作为显式操作或你开启的兜底出现。
+                导入、解析、判分、复盘、导出默认都是确定性的本地计算；AI 只作为显式操作，或你主动开启的兜底出现。
               </p>
-              <ul class="check-list">
+              <ul class="plain-list">
                 <li>PDF / DOCX / Markdown 默认本地转换，0 token</li>
-                <li>AI 识别兜底：仅在你开启且确定性失败时尝试</li>
-                <li>AI 讲解 / 连通性测试 / 可选单词考试评分（显式）</li>
+                <li>AI 识别兜底仅在开启且确定性解析失败时尝试</li>
                 <li>关闭开关、无 key 或调用失败时回退本地并说明</li>
               </ul>
-              <p class="rule-foot">一条链路跑通，不需要任何账号。</p>
             </article>
 
-            <article class="rule-card rule-paper reveal" style="--delay: 80ms">
-              <div class="rule-top">
-                <span class="mono">RULE 02</span>
-                <span class="stamp">LOCAL FIRST</span>
-              </div>
-              <h3>数据默认留在这台电脑。</h3>
+            <article class="principle reveal" style="--delay: 80ms">
+              <span class="principle-no">02</span>
+              <h3>数据留在本机。</h3>
               <p>
-                题库、作答、分析、生词表都存在仓库的 <code>data/</code> 下：一个 SQLite
-                文件，加上每套试卷的 <code>doc.ifmd.md</code> 与图片。默认不上传云端；使用 AI
-                时，只会把当前题目上下文发给你配置的服务商。
+                题库、作答、分析、生词表都存在 <code>data/</code> 下：一个 SQLite 文件，加上每套试卷的
+                <code>doc.ifmd.md</code> 与图片。默认不上传云端。
               </p>
-              <ul class="check-list">
+              <ul class="plain-list">
                 <li>没有账号，没有云端同步</li>
                 <li>备份 = 复制 <code>data/</code> 文件夹</li>
-                <li>删除 <code>data/</code> 即可从零开始</li>
-                <li>词典索引与导出文件也全部在本地</li>
+                <li>断网时，除了可选 AI，一切照常</li>
               </ul>
-              <p class="rule-foot">断网时，除了可选 AI，一切照常。</p>
             </article>
           </div>
-
-          <blockquote class="pull-quote reveal">
-            <p>“A study tool should still work on a plane.”</p>
-            <cite>断网也能导入、刷题、判分、复盘、导出。</cite>
-          </blockquote>
         </div>
       </section>
 
-<!-- ============================================================= workflow -->
+      <!-- =========================================================== workflow -->
       <section class="section section-alt" id="workflow">
         <div class="wrap">
           <div class="section-head reveal">
             <p class="section-index">02 / WORKFLOW</p>
             <h2>五步，从文件到笔记。</h2>
-            <p class="section-lede">
-              没有隐藏的同步步骤，也没有必须在线的工作台。每一步都能单独停下来，改完再继续。
-            </p>
+            <p class="section-lede">没有隐藏的同步步骤，也没有必须在线的工作台。每一步都能单独停下来，改完再继续。</p>
           </div>
 
-          <ol class="steps">
-            <li class="step reveal">
-              <div class="step-marker">01</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>导入题库</h3>
-                  <span class="chip">CAPTURE</span>
-                </div>
-                <p>
-                  拖入 PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>。PyMuPDF
-                  负责双栏版面、题号、选项、答案表回填与图片抽取；扫描页自动走 OCR。可疑页面会在
-                  review 阶段停下，让你决定 Commit 还是 Cancel。
-                </p>
-                <ul class="step-tags">
-                  <li>≤ 60 MB</li>
-                  <li>逐页报告</li>
-                  <li>macOS Vision / Tesseract</li>
-                  <li>无选项 → 填空题</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>确定性转换</p>
-              </div>
+          <ol class="flow-grid">
+            <li class="flow-card reveal">
+              <span class="flow-card-no">01</span>
+              <h3>导入题库</h3>
+              <p>拖入 PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>，逐页报告；扫描页自动走 OCR。</p>
+              <span class="flow-card-meta">0 token</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">02</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>补齐答案</h3>
-                  <span class="chip">ANSWER KEY</span>
-                </div>
-                <p>
-                  缺答案的试卷进入答案录入页：逐题点字母、多选、填空题可添加多个可接受答案，或直接粘贴
-                  <code>1-A 2-C</code>、<code>ACBDA</code>、<code>3-AC</code>。保存前可预览，保存后回写源文件。
-                </p>
-                <ul class="step-tags">
-                  <li>字母网格</li>
-                  <li>批量粘贴</li>
-                  <li>多可接受答案</li>
-                  <li>校验 + 预览</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WRITE-BACK</span>
-                <p>同步 doc.ifmd.md</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">02</span>
+              <h3>补齐答案</h3>
+              <p>字母网格、多选、填空与批量粘贴；保存前可预览，保存后回写源文件。</p>
+              <span class="flow-card-meta">write-back</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">03</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>全屏刷题</h3>
-                  <span class="chip">PRACTICE</span>
-                </div>
-                <p>
-                  开始屏选择正计时或倒计时（记住上次的 <code>mm:ss</code>），进入考试式全屏界面。题号面板跳转、Mark
-                  for review 标记、<code>A–D</code> 与 <code>← →</code> 键盘操作，多选和填空都能作答。
-                </p>
-                <ul class="step-tags">
-                  <li>倒计时</li>
-                  <li>键盘操作</li>
-                  <li>题号面板</li>
-                  <li>交卷确认</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>答案提交前不出后端</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">03</span>
+              <h3>全屏刷题</h3>
+              <p>正计时或倒计时、题号面板、键盘操作、自动判分；多选和填空都能作答。</p>
+              <span class="flow-card-meta">fullscreen</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">04</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>逐题复盘</h3>
-                  <span class="chip chip-accent">CORE</span>
-                </div>
-                <p>
-                  全屏复盘工作台把题目、分析、AI Tutor、生词本放进 2-of-4
-                  分屏。左侧看题与正确答案，右侧用 Pages 式编辑器写解析，0.9 秒自动保存；拖一个词到生词本，直接从上下文里积累词汇。
-                </p>
-                <ul class="step-tags">
-                  <li>All / Wrong / Correct</li>
-                  <li>Markdown + KaTeX</li>
-                  <li>拖词入表</li>
-                  <li>Notebook 预览</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WORKSPACE</span>
-                <p>布局与比例会记住</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">04</span>
+              <h3>逐题复盘</h3>
+              <p>2-of-4 工作台里写解析、问 AI、拖词入生词本；编辑器约 0.9 秒自动保存。</p>
+              <span class="flow-card-meta">core</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">05</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>沉淀与导出</h3>
-                  <span class="chip">OUTPUT</span>
-                </div>
-                <p>
-                  Mistakes 会自动汇总最近一次仍错的题，Starred 保存你手动标记的题；Sessions
-                  留下每次提交。一套试卷一套复盘笔记本，只导出已写解析的题；词表可导出 xlsx，也能生成单词考试结果二维码。
-                </p>
-                <ul class="step-tags">
-                  <li>Mistakes + Starred</li>
-                  <li>Sessions</li>
-                  <li>PDF / DOCX / MD</li>
-                  <li>xlsx · QR</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">PORTABLE</span>
-                <p>文件留在 data/exports/</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">05</span>
+              <h3>沉淀与导出</h3>
+              <p>Mistakes、Starred 与 Sessions 汇总练习；导出 md / docx / pdf 与词表 xlsx。</p>
+              <span class="flow-card-meta">portable</span>
             </li>
           </ol>
         </div>
       </section>
 
-<!-- ============================================================= features -->
+      <!-- =========================================================== features -->
       <section class="section" id="features">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">03 / FEATURE INDEX</p>
-            <h2>该有的，都在这里。</h2>
-            <p class="section-lede">
-              22 项已经落地的能力，覆盖导入、练习、复盘、词汇与输出。按阶段筛选，快速找到你需要的那一块。
-            </p>
+            <p class="section-index">03 / CORE FEATURES</p>
+            <h2>六项最常用的能力。</h2>
+            <p class="section-lede">覆盖导入、练习、复盘、词汇与导出。完整 22 项在下方展开。</p>
           </div>
 
-          <div class="filter-bar reveal" role="group" aria-label="按阶段筛选功能">
-            <button class="filter is-active" type="button" data-filter="all" aria-pressed="true">
-              全部 <span>22</span>
-            </button>
-            <button class="filter" type="button" data-filter="import" aria-pressed="false">
-              导入与整理 <span>7</span>
-            </button>
-            <button class="filter" type="button" data-filter="practice" aria-pressed="false">
-              练习与判分 <span>2</span>
-            </button>
-            <button class="filter" type="button" data-filter="review" aria-pressed="false">
-              复盘与收藏 <span>5</span>
-            </button>
-            <button class="filter" type="button" data-filter="vocab" aria-pressed="false">
-              词汇与词典 <span>4</span>
-            </button>
-            <button class="filter" type="button" data-filter="output" aria-pressed="false">
-              输出与系统 <span>4</span>
-            </button>
-            <p class="filter-count" data-filter-count aria-live="polite">显示 22 项</p>
-          </div>
-
-          <div class="feature-grid" data-feature-grid>
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">01</span><span class="feature-cat">CAPTURE</span></div>
+          <div class="core-grid">
+            <article class="core-card reveal">
+              <span class="core-kicker">IMPORT</span>
               <h3>多格式导入</h3>
-              <p>
-                拖拽上传 PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>，60 MB
-                以内。导入流水线给出逐页报告，可疑页面可暂停复核。
-              </p>
-              <ul class="feature-tags"><li>PDF</li><li>DOCX</li><li>Markdown</li></ul>
+              <p>PDF、DOCX、Markdown 与 InteFlow-MD，60 MB 以内；逐页报告，可疑页面可暂停复核。</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">02</span><span class="feature-cat">CAPTURE</span></div>
+            <article class="core-card reveal">
+              <span class="core-kicker">IMPORT</span>
               <h3>PDF 结构识别</h3>
-              <p>
-                双栏版面、题号、选项、答案表回填与图片抽取。识别不到选项时按填空题处理，不猜测、不静默修补。
-              </p>
-              <ul class="feature-tags"><li>PyMuPDF</li><li>答案回填</li><li>图片抽取</li></ul>
+              <p>双栏版面、题号、选项、答案表回填与图片抽取；识别不到选项时按填空题处理。</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">03</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>扫描件 OCR</h3>
-              <p>
-                按页面文本密度判断扫描页。macOS 优先用 Vision，其他系统走 Tesseract；没有引擎时给出明确提示，不会崩溃。
-              </p>
-              <ul class="feature-tags"><li>Vision</li><li>Tesseract</li><li>可选安装</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">PRACTICE</span>
+              <h3>全屏练习与判分</h3>
+              <p>考试式全屏、计时、题号面板与键盘操作；多选全对、填空归一化后比较，0 token。</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">04</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>内置题库</h3>
-              <p>
-                随仓库附带《SAT 机考 25 年语文合集（下）》：44 个单元、1,186 道题，可按单元 Add 或一键 Add all。
-              </p>
-              <ul class="feature-tags"><li>44 units</li><li>1,186 题</li><li>离线 · 幂等</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">REVIEW</span>
+              <h3>2-of-4 复盘工作台</h3>
+              <p>题目、分析、AI Tutor、生词本四选二；Pages 式编辑器自动保存，布局与比例会记住。</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">05</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Library 与学科</h3>
-              <p>
-                一览题数、已答数与答案状态。自定义学科名称和颜色，在列表里行内归类、现场新建，并按学科筛选试卷。
-              </p>
-              <ul class="feature-tags"><li>Subject 分组</li><li>调色板</li><li>筛选</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">VOCABULARY</span>
+              <h3>本地词典与生词本</h3>
+              <p>韦氏 92,006 条离线索引，支持自定义词典；从题目或选项拖词入表，可导出 xlsx。</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">06</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>答案录入</h3>
-              <p>
-                字母网格、多选、填空题多可接受答案；支持 <code>1-A 2-C</code>、<code>1. A</code>、<code>ACBDA</code>、<code>3-AC</code>
-                等批量粘贴，校验后回写源文件。
-              </p>
-              <ul class="feature-tags"><li>批量粘贴</li><li>多答案</li><li>Preview</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">07</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>InteFlow-MD</h3>
-              <p>
-                纯文本中间格式：front matter + <code>:::q</code> 题目块。公式、图片、多选、填空与多答案都有确定语法，可手写、可模板、可回写。
-              </p>
-              <ul class="feature-tags"><li>开放格式</li><li>round-trip</li><li>KaTeX</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">08</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>考试式全屏练习</h3>
-              <p>
-                正计时或倒计时（记住上次值）、题号面板、Mark for review、<code>A–D</code> 与箭头键、多选与填空、交卷确认。
-              </p>
-              <ul class="feature-tags"><li>全屏</li><li>键盘</li><li>计时</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">09</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>确定性判分</h3>
-              <p>
-                多选必须全对，填空在 NFKC 归一化后比较。正确答案在提交前不会下发；补录答案后可按已存作答重新判分。
-              </p>
-              <ul class="feature-tags"><li>0 token</li><li>regrade</li><li>答案不出后端</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">10</span><span class="feature-cat">REVIEW</span></div>
-              <h3>复盘工作台</h3>
-              <p>
-                题目 / 分析 / AI Tutor / 生词本四选二分屏。每侧可切换工具，选择已在另一侧的工具时自动交换；分隔条可拖拽或用方向键。
-              </p>
-              <ul class="feature-tags"><li>2-of-4</li><li>可拖拽</li><li>布局记忆</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">11</span><span class="feature-cat">REVIEW</span></div>
-              <h3>分析笔记本</h3>
-              <p>
-                每题一页 Pages 式编辑器，支持 Markdown、KaTeX 与图片；约 0.9 秒自动保存，⌘S 立即保存，离开再回来继续写。
-                空白的分析页会先用 Settings 里的错题分析模板填充，已有分析绝不覆盖。
-              </p>
-              <ul class="feature-tags"><li>autosave</li><li>Write / Preview</li><li>Notebook</li><li>template</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">12</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Mistakes + Starred</h3>
-              <p>
-                错题按题去重并保留最近一次作答，后来做对自动移出；Starred 保存手动标记。两栏都支持搜索、按考试过滤和时间排序。
-              </p>
-              <ul class="feature-tags"><li>latest attempt</li><li>star</li><li>search</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">13</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Sessions 作答历史</h3>
-              <p>
-                只有“已提交”的作答才会留下记录。按时间倒序，可搜索、可打开复盘、可删除；中途退出练习不会留下痕迹。
-              </p>
-              <ul class="feature-tags"><li>历史</li><li>搜索</li><li>删除</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">14</span><span class="feature-cat">REVIEW</span></div>
-              <h3>AI Tutor（显式）</h3>
-              <p>
-                只有点击 AI 讲解才调用模型。内置 19 家服务商目录，支持 OpenAI 与 Anthropic 两套协议、Base URL 覆盖与连通性测试。
-              </p>
-              <ul class="feature-tags"><li>19 providers</li><li>2 protocols</li><li>masked key</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">15</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>本地韦氏词典</h3>
-              <p>
-                用户自备 Eudic <code>.eudb</code>，首次查词自动构建 SQLite 索引，共 92,006 条。纯英英释义，可选词条内的
-                Definition for English Learners 栏目。
-              </p>
-              <ul class="feature-tags"><li>offline</li><li>92,006</li><li>0 token</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">16</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>我的自定义词典</h3>
-              <p>
-                全局自定义词表，可手动增删，或导入 CSV / TSV / JSON / TXT。查词时先查自定义词典，未命中再回退韦氏。
-              </p>
-              <ul class="feature-tags"><li>My dictionary</li><li>import</li><li>优先命中</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">17</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>生词本与拖词</h3>
-              <p>
-                一套试卷一份词表（Word · POS · Meaning · Notes）。从题目或选项选中单词拖进生词本，可选 AI
-                在真实韦氏候选里选义，也能手动增改与导出 xlsx。
-              </p>
-              <ul class="feature-tags"><li>drag-to-add</li><li>sense match</li><li>xlsx</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">18</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>单词考试</h3>
-              <p>
-                English → Chinese 或 Chinese → English，随机抽样或全测（≤500）。本地宽松判分，可选 AI
-                严格判分并自动回退；结果生成紧凑 JSON 二维码（大卷自动分片）和 JSON 下载。
-              </p>
-              <ul class="feature-tags"><li>EN↔ZH</li><li>QR</li><li>lenient grading</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">19</span><span class="feature-cat">OUTPUT</span></div>
+            <article class="core-card reveal">
+              <span class="core-kicker">OUTPUT</span>
               <h3>导出套件</h3>
-              <p>
-                复盘笔记本 md / docx / pdf 只含已写解析的题；整套试卷可导出 PDF / DOCX；词表导出 xlsx。数学公式经
-                MathJax 桥渲染，缺失时降级纯文本而不是失败。
-              </p>
-              <ul class="feature-tags"><li>WeasyPrint</li><li>python-docx</li><li>openpyxl</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">20</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>五套界面主题</h3>
-              <p>
-                Clear Blue、Paper &amp; Ink、Minimal Light、Midnight Navy、Warm Editorial。Settings →
-                Appearance 切换，localStorage 记忆；桌面侧栏还能收成 80px 图标栏。全屏练习页刻意保持中性。
-              </p>
-              <ul class="feature-tags"><li>5 themes</li><li>token layer</li><li>localStorage</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">21</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>设置与 AI 开关</h3>
-              <p>
-                用户名（导出封面）、错题分析模板、AI 识别兜底、AI 选义、Learner 释义、自定义词典、单词考试 AI
-                评分。所有开关都写清默认值与回退行为。
-              </p>
-              <ul class="feature-tags"><li>user name</li><li>analysis template</li><li>fallbacks</li><li>key masking</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">22</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>本地数据与可测试性</h3>
-              <p>
-                SQLite + 文件系统并存，65 条 API，305 个后端测试与 142 个前端组件测试。MIT
-                开源，随时可以自己改一条链路。
-              </p>
-              <ul class="feature-tags"><li>MIT</li><li>305 + 142 tests</li><li>65 endpoints</li></ul>
+              <p>复盘笔记本导出 md / docx / pdf，整套试卷导出 PDF / DOCX，词表导出 xlsx。</p>
             </article>
           </div>
+
+          <details class="feature-details reveal">
+            <summary>
+              <span>查看全部 22 项能力</span>
+              <em>展开 <span aria-hidden="true">＋</span></em>
+            </summary>
+            <div class="feature-groups">
+              <section class="feature-group">
+                <h3>导入与整理 <span>7</span></h3>
+                <dl>
+                  <div><dt>多格式导入</dt><dd>PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>，逐页报告。</dd></div>
+                  <div><dt>PDF 结构识别</dt><dd>双栏、题号、选项、答案表回填与图片抽取。</dd></div>
+                  <div><dt>扫描件 OCR</dt><dd>macOS Vision 优先，其他系统走 Tesseract。</dd></div>
+                  <div><dt>内置题库</dt><dd>44 个单元、1,186 道题，可按单元或一键添加。</dd></div>
+                  <div><dt>Library 与学科</dt><dd>题数、答案状态一览；自定义学科、颜色与筛选。</dd></div>
+                  <div><dt>答案录入</dt><dd>字母网格、多选、多可接受答案与批量粘贴。</dd></div>
+                  <div><dt>InteFlow-MD</dt><dd>纯文本中间格式，公式、图片、多选与填空都有确定语法。</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>练习与判分 <span>2</span></h3>
+                <dl>
+                  <div><dt>全屏练习</dt><dd>计时、题号面板、Mark for review、键盘操作与交卷确认。</dd></div>
+                  <div><dt>确定性判分</dt><dd>多选必须全对，填空 NFKC 归一化；答案提交前不下发。</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>复盘与收藏 <span>5</span></h3>
+                <dl>
+                  <div><dt>复盘工作台</dt><dd>题目 / 分析 / AI Tutor / 生词本四选二分屏。</dd></div>
+                  <div><dt>分析笔记本</dt><dd>Markdown、KaTeX、图片与自动保存；支持分析模板。</dd></div>
+                  <div><dt>Mistakes + Starred</dt><dd>错题按题去重保留最近一次；手动标星；搜索与筛选。</dd></div>
+                  <div><dt>Sessions 作答历史</dt><dd>只记录已提交作答，可搜索、复盘与删除。</dd></div>
+                  <div><dt>AI Tutor（显式）</dt><dd>点击才调用；19 家服务商、两套协议与连通性测试。</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>词汇与词典 <span>4</span></h3>
+                <dl>
+                  <div><dt>本地韦氏词典</dt><dd>自备 Eudic <code>.eudb</code>，首次查词建 SQLite 索引。</dd></div>
+                  <div><dt>我的自定义词典</dt><dd>手动增删或导入 CSV / TSV / JSON / TXT，优先命中。</dd></div>
+                  <div><dt>生词本与拖词</dt><dd>一套试卷一份词表；拖词入表，可选 AI 选义。</dd></div>
+                  <div><dt>单词考试</dt><dd>EN↔ZH 双向、随机或全测、宽松判分与二维码结果。</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>输出与系统 <span>4</span></h3>
+                <dl>
+                  <div><dt>导出套件</dt><dd>笔记本 md / docx / pdf，试卷 PDF / DOCX，词表 xlsx。</dd></div>
+                  <div><dt>五套界面主题</dt><dd>Clear Blue、Paper &amp; Ink、Minimal Light、Midnight Navy、Warm Editorial。</dd></div>
+                  <div><dt>设置与 AI 开关</dt><dd>用户名、分析模板、AI 识别兜底、选义、评分等，默认值与回退写清。</dd></div>
+                  <div><dt>本地数据与可测试性</dt><dd>SQLite + 文件系统，MIT 开源，后端与前端都有自动化测试。</dd></div>
+                </dl>
+              </section>
+            </div>
+          </details>
         </div>
       </section>
 
-<!-- =============================================================== numbers -->
+      <!-- ============================================================ numbers -->
       <section class="numbers" aria-label="项目数据">
         <div class="wrap numbers-grid">
           <div class="number-item reveal"><strong>1,186</strong><span>内置题目</span></div>
@@ -540,7 +279,7 @@
         </div>
       </section>
 
-<!-- ========================================================== architecture -->
+      <!-- ======================================================= architecture -->
       <section class="section" id="architecture">
         <div class="wrap">
           <div class="section-head reveal">
@@ -653,22 +392,19 @@ cd InteFlow
                 <li><span>Storage</span><strong>SQLite + local files</strong></li>
                 <li><span>Convert</span><strong>PyMuPDF · python-docx · OCR</strong></li>
                 <li><span>Export</span><strong>WeasyPrint · openpyxl · MathJax</strong></li>
-                <li><span>Tests</span><strong>pytest 305 · frontend 142</strong></li>
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-<!-- =================================================================== faq -->
+      <!-- ================================================================ faq -->
       <section class="section section-alt" id="faq">
         <div class="wrap faq-grid">
           <div class="faq-intro reveal">
             <p class="section-index">05 / QUESTIONS</p>
             <h2>还有疑问？</h2>
-            <p>
-              这里先回答最容易卡住的几件事。更细的规格、数据模型与格式说明都在仓库文档里。
-            </p>
+            <p>这里先回答最容易卡住的几件事。更细的规格与格式说明都在仓库文档里。</p>
             <a
               class="btn btn-outline"
               href="https://github.com/JasonSun2009CN/InteFlow/issues"
@@ -692,7 +428,7 @@ cd InteFlow
               <summary><span class="faq-no">02</span>必须联网或配置 API Key 吗？<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  不需要。导入、解析、判分、复盘、生词本、导出都不依赖网络。只有 AI 讲解、连通性测试、以及你主动开启的单词考试 AI 评分会调用外部模型，并把当前题目 / 答案上下文发送给你配置的服务商；无 key 或调用失败时会回退本地并提示。
+                  不需要。导入、解析、判分、复盘、生词本、导出都不依赖网络。只有 AI 讲解、连通性测试、以及你主动开启的单词考试 AI 评分会调用外部模型；无 key 或调用失败时会回退本地并提示。
                 </p>
               </div>
             </details>
@@ -701,7 +437,7 @@ cd InteFlow
               <summary><span class="faq-no">03</span>我的数据存在哪里？<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  全部在仓库的 <code>data/</code>：<code>app.db</code> 存结构化数据，<code>docs/&lt;id&gt;/doc.ifmd.md</code> 存原始题目与答案，<code>assets/</code> 存图片，导出文件在 <code>exports/</code>。备份就复制整个目录，重置就删掉它（后端会重建）。
+                  全部在仓库的 <code>data/</code>：<code>app.db</code> 存结构化数据，<code>docs/&lt;id&gt;/doc.ifmd.md</code> 存原始题目与答案，<code>assets/</code> 存图片，导出文件在 <code>exports/</code>。备份就复制整个目录，重置就删掉它。
                 </p>
               </div>
             </details>
@@ -710,7 +446,7 @@ cd InteFlow
               <summary><span class="faq-no">04</span>需要装哪些系统依赖？<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  基础运行只需要 Python 3.11+ 与 Node.js 18+；一键脚本会创建 <code>.venv</code> 并安装前后端依赖。PDF 导出额外需要 pango / cairo / gdk-pixbuf / harfbuzz；扫描件 OCR 可选安装系统 <code>tesseract</code>，macOS 也可用 Vision；数学公式导出可再装 MathJax 桥。缺哪一项，只有对应功能降级或提示，不会拖垮其他功能。
+                  桌面版不需要 Python / Node。从源码运行时需要 Python 3.11+ 与 Node.js 18+；PDF 导出额外需要 pango / cairo / gdk-pixbuf / harfbuzz；扫描件 OCR 可选安装 <code>tesseract</code>，macOS 也可用 Vision。缺哪一项，只有对应功能降级或提示。
                 </p>
               </div>
             </details>
@@ -725,38 +461,10 @@ cd InteFlow
             </details>
 
             <details class="faq-item">
-              <summary><span class="faq-no">06</span>为什么练习页不跟随主题？<i aria-hidden="true"></i></summary>
+              <summary><span class="faq-no">06</span>导出的笔记本包含什么？<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  这是刻意的。刷题时需要最低的视觉干扰和稳定的对比度，所以全屏练习页保持在 <code>.app-theme</code> 之外，使用中性的 slate / blue；复盘工作台则跟随你选择的主题。主题只改变视觉语言，不改变题目布局与交互。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">07</span>导出的笔记本包含什么？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  一套试卷对应一套复盘笔记本：封面带用户名与分数，正文按题序包含所有已写解析的题目（题干、图表、你的分析）。支持 Markdown / DOCX / PDF，浏览器直接下载，同时在 <code>data/exports/</code> 留一份副本。整套试卷的 PDF / DOCX 则从 Library 导出。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">08</span>应用界面是中文吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  应用界面是英文，按钮与页面名都和 README 一致；文档提供中文与英文两版。题库内容不受语言限制，中英混合的试卷都能导入与练习。这个官网用中文介绍，只是为了让第一次接触的人更快看懂完整链路。
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">09</span>可以自定义错题分析的模板吗？<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  可以。在 Settings → Analysis template 写一份 Markdown 模板，空的错题分析页会自动填入；已有分析绝不覆盖。
-                  模板只是初始草稿，未改动不会保存，开始写作后才走自动保存，所以不会把空白题误算成“已写解析”而进入导出。
+                  一套试卷对应一套复盘笔记本：封面带用户名与分数，正文按题序包含所有已写解析的题目（题干、图表、你的分析）。支持 Markdown / DOCX / PDF，浏览器直接下载，同时在 <code>data/exports/</code> 留一份副本。
                 </p>
               </div>
             </details>
@@ -764,26 +472,23 @@ cd InteFlow
         </div>
       </section>
 
-      <section class="cta-section" id="start">
-        <div class="wrap cta-grid">
-          <div class="cta-copy reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> READY WHEN YOU ARE</p>
+      <!-- ============================================================= closing -->
+      <section class="closing">
+        <div class="wrap closing-inner reveal">
+          <div class="closing-copy">
+            <p class="section-index">READY WHEN YOU ARE</p>
             <h2>看完功能，<br />试一下真的。</h2>
             <p>先在线做四道题，或者直接下载桌面版。主链路不需要账号，也不需要 API key。</p>
-            <div class="cta-actions">
-              <a class="btn btn-ink" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
-            </div>
           </div>
-          <div class="cta-panel reveal" style="--delay: 80ms">
-            <div class="cta-panel-head"><span class="mono">WHAT SHIPS</span><span class="micro-badge">LOCAL</span></div>
-            <div class="command-row"><code>22 features · 5 themes · 2-of-4 review</code></div>
-            <div class="command-row"><code>import → practice → review → export</code></div>
-            <p class="cta-note">0 token 主链路 · 数据留在本机 · 无账号 · 可离线</p>
+          <div class="closing-actions">
+            <a class="btn btn-accent" href="download.html">下载桌面版 <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-outline" href="demo.html">在线试用 <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="themes.html">看看五套主题 <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </section>
     </main>
+
     <footer class="site-footer">
       <div class="wrap footer-grid">
         <div class="footer-brand">
@@ -801,8 +506,6 @@ cd InteFlow
           <a href="demo.html">在线试用</a>
           <a href="themes.html">主题</a>
           <a href="download.html">下载桌面版</a>
-          <a href="download.html#install">安装说明</a>
-          <a href="download.html#source">从源码运行</a>
         </nav>
 
         <nav class="footer-col" aria-label="文档">
@@ -818,7 +521,6 @@ cd InteFlow
           <a href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/issues" target="_blank" rel="noreferrer">Issues</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
-          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/AGENT.md" target="_blank" rel="noreferrer">Agent notes</a>
         </nav>
       </div>
 

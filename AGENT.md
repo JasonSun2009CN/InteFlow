@@ -136,6 +136,20 @@
 > 桌面端新增 **File → Reset local data…** 与 Settings → Desktop 的同一入口：停止后端、清空 app-data
 > 与 Electron 的 localStorage/cache，然后重启回到首次启动状态（保留 `dictionary/*.eudb` 源文件）。
 > `.github/workflows/desktop.yml` 现在在 `main` push 上也构建（仅上传 artifact），`v*` tag 才发布 Release。
+>
+> 2026-10-25：**官网精简重排（首页 + 功能页）**。目标：减少内容与视觉噪音，保留米色纸感 + 橙色强调。
+> 1. **首页**从 5 个区块压到 4 个：hero（去掉平台 pill、命令提示、印章与 explore 卡片区）→ 三张紧凑
+>    下载卡片（macOS arm64 / macOS x64 / Windows，`all releases` 与 `from source` 降为文字链接）→
+>    三栏 highlights（题库进来 / 逐题复盘 / 把理解带走）→ 单个收尾 CTA。
+> 2. **功能页**从 22 张筛选卡片 + 5 段长步骤压到：瘦 hero → 两条原则 → 五步工作流卡片 → 六项核心能力
+>    → 可折叠的完整 22 项索引（原生 `<details>`，按导入 / 练习 / 复盘 / 词汇 / 输出分组）→ 数据条 →
+>    架构 → 6 条 FAQ → 收尾 CTA。移除了筛选栏与 `data-cat` / `data-filter` 标记（`site.js` 里的筛选
+>    代码保留但不再命中）。
+> 3. **全站** header 导航统一为 5 项（下载 / 功能 / 在线试用 / 主题 / 问答，英文对应），GitHub 只保留在
+>    header actions；footer 的产品 / 文档 / 项目三栏同步精简。样式改动集中在 `assets/site.css` 末尾的
+>    “2026 layout refresh” 区块；中文标题单独覆盖 `text-wrap: wrap`，避免 `balance` 把短句拆成三行。
+> 4. `404.html` 标题改为显式两行（`这一页` / `走丢了。`），不再被自动断行拆开。
+>    中英页面保持同步；`website/README.md` 已同步新的页面结构与编辑说明。
 
 > 2026-10-25：**SAT 特殊格式 + 词典工具**。以下改动：
 > 1. **双篇题**：`questions.material2`（旧库自动迁移）+ `.ifmd.md` 的 `@material2`（必须位于
@@ -302,7 +316,7 @@ cd frontend && npm test         # 165 passed, 5 skipped
 | `frontend/src/lib/i18n.tsx` · `components/ui/LanguagePicker.tsx` | 前端中英文案表 / `I18nProvider` / `useI18n` / `useT` + Settings 里的语言切换（`inteflow.language`） |
 | `frontend/src/lib/wordExamQr.ts` | 单词考试分享 payload + 多段 QR 分块（`IFWT1|id|part/total|`） |
 | `frontend/src/components/SubjectControls.tsx` · `frontend/src/lib/subjects.ts` | 学科徽章/筛选/行内选择（可现场创建并归类）/管理弹窗 + 调色板映射 |
-| `website/` | 项目官网（静态多页 HTML/CSS/JS：`index.html` / `en.html` 首页下载区**全部是安装包卡片**（第 4 张进入 Releases），`download*.html` 平台安装包 + 首次打开说明 + 开发者源码小节，`features*.html` 功能与工作流，`demo*.html` 四个演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 主题预览；`assets/site.js` 的 `DEMO` 保存中英题目、错题与词库，`assets/downloads.js` 读取最新 GitHub Release 并升级平台直链） |
+| `website/` | 项目官网（静态多页 HTML/CSS/JS：`index.html` / `en.html` 首页 = hero + 三张安装包卡片 + 三栏 highlights + 收尾 CTA，`download*.html` 平台安装包 + 首次打开说明 + 开发者源码小节，`features*.html` 两条原则 + 五步工作流 + 六项核心能力 + 可折叠的 22 项完整索引 + 架构 + FAQ，`demo*.html` 四个演示页（做题 / 2-of-4 工作区 / 错题集 / 生词集），`themes*.html` 主题预览；`assets/site.js` 的 `DEMO` 保存中英题目、错题与词库，`assets/downloads.js` 读取最新 GitHub Release 并升级平台直链；样式集中在 `assets/site.css`） |
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `.github/workflows/desktop.yml` | 桌面端 CI/CD：`main` push 构建 artifact；`v*` tag 打包 macOS arm64/x64 DMG 与 Windows x64 NSIS 并发布 Release；打包后跑 `verify_bundle.py` |
 | `desktop/main.cjs` · `desktop/preload.cjs` | Electron 主进程（起后端、PDF 桥、菜单、**Reset local data** IPC）与最小 preload 桥（`window.inteflow.resetData()`） |

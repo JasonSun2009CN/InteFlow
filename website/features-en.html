@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Features and workflow — InteFlow</title>
-    <meta name="description" content="From PDF / DOCX / Markdown import and answer entry to full-screen practice, the 2-of-4 review workspace, AI Tutor, vocabulary and export. All 22 shipped capabilities." />
+    <title>Features &amp; workflow — InteFlow</title>
+    <meta name="description" content="From PDF / DOCX / Markdown import, answer entry and full-screen practice, to 2-of-4 review, AI Tutor, vocabulary and export. See the 22 shipped capabilities in InteFlow." />
     <meta name="theme-color" content="#f4f1e8" />
-    <meta property="og:title" content="Features and workflow — InteFlow" />
-    <meta property="og:description" content="From PDF / DOCX / Markdown import and answer entry to full-screen practice, the 2-of-4 review workspace, AI Tutor, vocabulary and export. All 22 shipped capabilities." />
+    <meta property="og:title" content="Features &amp; workflow — InteFlow" />
+    <meta property="og:description" content="From PDF / DOCX / Markdown import, answer entry and full-screen practice, to 2-of-4 review, AI Tutor, vocabulary and export. See the 22 shipped capabilities in InteFlow." />
     <meta property="og:type" content="website" />
     <link rel="canonical" href="https://jasonsun2009cn.github.io/InteFlow/features-en.html" />
     <link rel="alternate" hreflang="zh-CN" href="https://jasonsun2009cn.github.io/InteFlow/features.html" />
@@ -45,13 +45,11 @@
           <a href="features-en.html" aria-current="page">Features</a>
           <a href="demo-en.html">Demo</a>
           <a href="themes-en.html">Themes</a>
-          <a href="features-en.html#architecture">Stack</a>
           <a href="features-en.html#faq">FAQ</a>
-          <a class="nav-github" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
         </nav>
 
         <div class="header-actions">
-          <a class="lang-switch" href="features.html" hreflang="zh-CN" lang="zh-CN" aria-label="Switch to Chinese">中文</a>
+          <a class="lang-switch" href="features.html" hreflang="zh-CN" lang="zh-CN" aria-label="切换到中文">中文</a>
           <a class="ghost-link" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">
             GitHub <span aria-hidden="true">↗</span>
           </a>
@@ -62,512 +60,216 @@
         </div>
       </div>
     </header>
+
     <main id="main">
-<section class="page-hero">
-        <div class="wrap page-hero-grid">
-          <div class="reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> FEATURES / WHAT SHIPS</p>
-            <h1>Question banks in,<br /><em>understanding</em> stays.</h1>
-            <p class="section-lede">
-              All 22 shipped capabilities, covering import, practice, review, vocabulary and output.
-              This is the full index; open the demo if you want the real interaction first.
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-accent" href="download-en.html">Download <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="demo-en.html">Try the demo <span aria-hidden="true">→</span></a>
-            </div>
+      <!-- ============================================================== hero -->
+      <section class="page-hero page-hero--slim">
+        <div class="wrap">
+          <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> FEATURES</p>
+          <h1>Features &amp; workflow</h1>
+          <p class="section-lede">
+            22 shipped capabilities, from import to export. Start with the core and the five-step path, then open the full index when you need it.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-accent" href="download-en.html">Download <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-outline" href="demo-en.html">Try the demo <span aria-hidden="true">→</span></a>
           </div>
-          <aside class="page-hero-aside reveal" style="--delay: 80ms">
-            <p class="mono">AT A GLANCE</p>
-            <dl>
-              <div><dt>FEATURES</dt><dd>22 shipped</dd></div>
-              <div><dt>MAIN PATH</dt><dd>0 tokens</dd></div>
-              <div><dt>REVIEW</dt><dd>2-of-4 workspace</dd></div>
-              <div><dt>EXPORT</dt><dd>md · docx · pdf · xlsx</dd></div>
-            </dl>
-          </aside>
         </div>
       </section>
 
-<!-- ============================================================= position -->
+      <!-- ========================================================= principles -->
       <section class="section" id="position">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">01 / POSITION</p>
-            <h2>Let's start with the boundaries.</h2>
+            <p class="section-index">01 / PRINCIPLES</p>
+            <h2>Two ground rules.</h2>
             <p class="section-lede">
               InteFlow is not a study assistant that can chat about anything. It gets the certain things right
               first, then puts optional AI behind a key you explicitly press.
             </p>
           </div>
 
-          <div class="rules-grid">
-            <article class="rule-card rule-dark reveal">
-              <div class="rule-top">
-                <span class="mono">RULE 01</span>
-                <span class="micro-badge micro-badge-light">0 TOKEN</span>
-              </div>
+          <div class="principles">
+            <article class="principle reveal">
+              <span class="principle-no">01</span>
               <h3>The LLM is not on the main path.</h3>
               <p>
                 Import, parsing, grading, review and export are deterministic local computation by default; AI
                 appears only as an explicit action, or as a fallback you have switched on.
               </p>
-              <ul class="check-list">
+              <ul class="plain-list">
                 <li>PDF / DOCX / Markdown convert locally by default, 0 tokens</li>
-                <li>AI recognition fallback: only when you enable it and deterministic parsing fails</li>
-                <li>AI explanations / connectivity test / optional word-exam grading (explicit)</li>
-                <li>If the switch is off, there's no key, or a call fails, it falls back to local and says so</li>
+                <li>AI recognition fallback only when enabled and deterministic parsing fails</li>
+                <li>No switch, no key or a failed call → local fallback with a clear message</li>
               </ul>
-              <p class="rule-foot">One path that works end to end, with no account required.</p>
             </article>
 
-            <article class="rule-card rule-paper reveal" style="--delay: 80ms">
-              <div class="rule-top">
-                <span class="mono">RULE 02</span>
-                <span class="stamp">LOCAL FIRST</span>
-              </div>
-              <h3>Your data stays on this computer by default.</h3>
+            <article class="principle reveal" style="--delay: 80ms">
+              <span class="principle-no">02</span>
+              <h3>Your data stays on this computer.</h3>
               <p>
-                Question banks, answers, analysis and vocabulary all live under the repo's <code>data/</code>:
-                one SQLite file, plus each paper's <code>doc.ifmd.md</code> and images. Nothing is uploaded to the
-                cloud by default; when you use AI, only the current question context is sent to the provider you
-                configured.
+                Question banks, answers, analysis and vocabulary live under <code>data/</code>: one SQLite file,
+                plus each paper's <code>doc.ifmd.md</code> and images. Nothing is uploaded to the cloud by default.
               </p>
-              <ul class="check-list">
+              <ul class="plain-list">
                 <li>No accounts, no cloud sync</li>
                 <li>Backup = copy the <code>data/</code> folder</li>
-                <li>Delete <code>data/</code> to start from scratch</li>
-                <li>The dictionary index and exported files stay local too</li>
+                <li>Offline, everything works as usual — except the optional AI</li>
               </ul>
-              <p class="rule-foot">Offline, everything works as usual — except the optional AI.</p>
             </article>
           </div>
-
-          <blockquote class="pull-quote reveal">
-            <p>“A study tool should still work on a plane.”</p>
-            <cite>No network? Import, practise, grade, review and export all still work.</cite>
-          </blockquote>
         </div>
       </section>
 
-<!-- ============================================================= workflow -->
+      <!-- =========================================================== workflow -->
       <section class="section section-alt" id="workflow">
         <div class="wrap">
           <div class="section-head reveal">
             <p class="section-index">02 / WORKFLOW</p>
             <h2>Five steps, from file to notes.</h2>
-            <p class="section-lede">
-              No hidden sync step, and no workbench that has to be online. Every step can stop on its own —
-              change what you need, then carry on.
-            </p>
+            <p class="section-lede">No hidden sync step, and no workbench that has to be online. Every step can stop on its own — change what you need, then carry on.</p>
           </div>
 
-          <ol class="steps">
-            <li class="step reveal">
-              <div class="step-marker">01</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>Import a question bank</h3>
-                  <span class="chip">CAPTURE</span>
-                </div>
-                <p>
-                  Drag in PDF, DOCX, <code>.md</code> or <code>.ifmd.md</code>. PyMuPDF handles two-column
-                  layouts, question numbers, options, answer-table write-back and image extraction; scanned pages
-                  go through OCR automatically. Suspicious pages stop at the review stage so you can choose Commit
-                  or Cancel.
-                </p>
-                <ul class="step-tags">
-                  <li>≤ 60 MB</li>
-                  <li>Page-by-page report</li>
-                  <li>macOS Vision / Tesseract</li>
-                  <li>No options → fill-in</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>Deterministic conversion</p>
-              </div>
+          <ol class="flow-grid">
+            <li class="flow-card reveal">
+              <span class="flow-card-no">01</span>
+              <h3>Import a question bank</h3>
+              <p>Drag in PDF, DOCX, <code>.md</code> or <code>.ifmd.md</code> with a page-by-page report; scanned pages go through OCR.</p>
+              <span class="flow-card-meta">0 token</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">02</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>Complete the answer key</h3>
-                  <span class="chip">ANSWER KEY</span>
-                </div>
-                <p>
-                  Papers missing answers go to the answer-entry page: click letters question by question, select
-                  several options, add multiple accepted answers for fill-ins, or paste
-                  <code>1-A 2-C</code>, <code>ACBDA</code>, <code>3-AC</code> directly. Preview before saving;
-                  saving writes the answers back to the source file.
-                </p>
-                <ul class="step-tags">
-                  <li>Letter grid</li>
-                  <li>Bulk paste</li>
-                  <li>Multiple accepted answers</li>
-                  <li>Validation + preview</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WRITE-BACK</span>
-                <p>Syncs doc.ifmd.md</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">02</span>
+              <h3>Complete the answer key</h3>
+              <p>Letter grid, multi-select, fill-ins and bulk paste; preview before saving, then write back to the source.</p>
+              <span class="flow-card-meta">write-back</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">03</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>Practise in full screen</h3>
-                  <span class="chip">PRACTICE</span>
-                </div>
-                <p>
-                  On the start screen choose a count-up or countdown timer (it remembers your last
-                  <code>mm:ss</code>), then enter the exam-style full-screen view. Jump with the question panel,
-                  flag with Mark for review, drive it from the keyboard with <code>A–D</code> and
-                  <code>← →</code>, and answer both multiple-select and fill-in questions.
-                </p>
-                <ul class="step-tags">
-                  <li>Countdown</li>
-                  <li>Keyboard</li>
-                  <li>Question panel</li>
-                  <li>Submit confirmation</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">0 TOKEN</span>
-                <p>Answers never leave the backend before submission</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">03</span>
+              <h3>Practise in full screen</h3>
+              <p>Count-up or countdown timer, question panel, keyboard control and automatic grading; multi-select and fill-in included.</p>
+              <span class="flow-card-meta">fullscreen</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">04</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>Review question by question</h3>
-                  <span class="chip chip-accent">CORE</span>
-                </div>
-                <p>
-                  The full-screen review workbench puts the question, analysis, AI Tutor and vocabulary into a
-                  2-of-4 split view. Read the question and correct answer on the left, and write your analysis in
-                  a Pages-style editor on the right with autosave every 0.9 seconds; drag a word into the
-                  vocabulary list to build vocabulary straight from context.
-                </p>
-                <ul class="step-tags">
-                  <li>All / Wrong / Correct</li>
-                  <li>Markdown + KaTeX</li>
-                  <li>Drag words in</li>
-                  <li>Notebook preview</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">WORKSPACE</span>
-                <p>Layout and split ratios are remembered</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">04</span>
+              <h3>Review question by question</h3>
+              <p>Write analysis, ask AI and drag words into vocabulary in the 2-of-4 workspace; autosave in about 0.9 seconds.</p>
+              <span class="flow-card-meta">core</span>
             </li>
-
-            <li class="step reveal">
-              <div class="step-marker">05</div>
-              <div class="step-body">
-                <div class="step-title">
-                  <h3>Distil and export</h3>
-                  <span class="chip">OUTPUT</span>
-                </div>
-                <p>
-                  Mistakes automatically gathers the questions still wrong on your latest attempt; Starred keeps
-                  the ones you flag by hand; Sessions records every submission. One review notebook per paper,
-                  exporting only the questions with written analysis; word lists export to xlsx, and word-exam
-                  results can become a QR code.
-                </p>
-                <ul class="step-tags">
-                  <li>Mistakes + Starred</li>
-                  <li>Sessions</li>
-                  <li>PDF / DOCX / MD</li>
-                  <li>xlsx · QR</li>
-                </ul>
-              </div>
-              <div class="step-side">
-                <span class="mono">PORTABLE</span>
-                <p>Files stay in data/exports/</p>
-              </div>
+            <li class="flow-card reveal">
+              <span class="flow-card-no">05</span>
+              <h3>Distil and export</h3>
+              <p>Mistakes, Starred and Sessions gather your practice; export md / docx / pdf and word lists as xlsx.</p>
+              <span class="flow-card-meta">portable</span>
             </li>
           </ol>
         </div>
       </section>
 
-<!-- ============================================================= features -->
+      <!-- =========================================================== features -->
       <section class="section" id="features">
         <div class="wrap">
           <div class="section-head reveal">
-            <p class="section-index">03 / FEATURE INDEX</p>
-            <h2>Everything that belongs here, is here.</h2>
-            <p class="section-lede">
-              22 shipped capabilities covering import, practice, review, vocabulary and output. Filter by stage
-              to find the part you need.
-            </p>
+            <p class="section-index">03 / CORE FEATURES</p>
+            <h2>Six capabilities you will use most.</h2>
+            <p class="section-lede">Covering import, practice, review, vocabulary and export. The full set of 22 is below.</p>
           </div>
 
-          <div class="filter-bar reveal" role="group" aria-label="Filter features by stage">
-            <button class="filter is-active" type="button" data-filter="all" aria-pressed="true">
-              All <span>22</span>
-            </button>
-            <button class="filter" type="button" data-filter="import" aria-pressed="false">
-              Import &amp; organize <span>7</span>
-            </button>
-            <button class="filter" type="button" data-filter="practice" aria-pressed="false">
-              Practice &amp; grading <span>2</span>
-            </button>
-            <button class="filter" type="button" data-filter="review" aria-pressed="false">
-              Review &amp; bookmarks <span>5</span>
-            </button>
-            <button class="filter" type="button" data-filter="vocab" aria-pressed="false">
-              Vocabulary &amp; dictionary <span>4</span>
-            </button>
-            <button class="filter" type="button" data-filter="output" aria-pressed="false">
-              Output &amp; system <span>4</span>
-            </button>
-            <p class="filter-count" data-filter-count aria-live="polite">Showing 22 items</p>
-          </div>
-
-          <div class="feature-grid" data-feature-grid>
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">01</span><span class="feature-cat">CAPTURE</span></div>
+          <div class="core-grid">
+            <article class="core-card reveal">
+              <span class="core-kicker">IMPORT</span>
               <h3>Multi-format import</h3>
-              <p>
-                Drag and drop PDF, DOCX, <code>.md</code> or <code>.ifmd.md</code>, up to 60 MB. The import
-                pipeline gives a page-by-page report, and suspicious pages can pause for review.
-              </p>
-              <ul class="feature-tags"><li>PDF</li><li>DOCX</li><li>Markdown</li></ul>
+              <p>PDF, DOCX, Markdown and InteFlow-MD up to 60 MB; page-by-page reports, with suspicious pages paused for review.</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">02</span><span class="feature-cat">CAPTURE</span></div>
+            <article class="core-card reveal">
+              <span class="core-kicker">IMPORT</span>
               <h3>PDF structure recognition</h3>
-              <p>
-                Two-column layouts, question numbers, options, answer-table write-back and image extraction. When
-                options can't be detected it treats the item as a fill-in — no guessing, no silent patching.
-              </p>
-              <ul class="feature-tags"><li>PyMuPDF</li><li>Answer write-back</li><li>Image extraction</li></ul>
+              <p>Two-column layouts, question numbers, options, answer-table write-back and image extraction; no options → fill-in.</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">03</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Scanned-page OCR</h3>
-              <p>
-                Detects scanned pages by text density. On macOS it uses Vision first, other systems use
-                Tesseract; with no engine installed it shows a clear message instead of crashing.
-              </p>
-              <ul class="feature-tags"><li>Vision</li><li>Tesseract</li><li>Optional install</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">PRACTICE</span>
+              <h3>Full-screen practice and grading</h3>
+              <p>Exam-style full screen, timer, question panel and keyboard control; deterministic grading, 0 tokens.</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">04</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Built-in question bank</h3>
-              <p>
-                Ships with the repo: <em>SAT Digital 2025 Verbal Collection (Part 2)</em>: 44 units and
-                1,186 questions, added unit by unit or all at once with Add all.
-              </p>
-              <ul class="feature-tags"><li>44 units</li><li>1,186 questions</li><li>Offline · idempotent</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">REVIEW</span>
+              <h3>2-of-4 review workspace</h3>
+              <p>Question, analysis, AI Tutor and vocabulary — pick two. Pages-style editor autosaves, layout is remembered.</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">05</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Library and subjects</h3>
-              <p>
-                See question counts, answered counts and answer status at a glance. Name and color your own
-                subjects, classify inline in the list, create them on the spot, and filter papers by subject.
-              </p>
-              <ul class="feature-tags"><li>Subject grouping</li><li>Palette</li><li>Filtering</li></ul>
+            <article class="core-card reveal">
+              <span class="core-kicker">VOCABULARY</span>
+              <h3>Local dictionary and vocabulary</h3>
+              <p>92,006-entry offline Merriam-Webster index plus a custom dictionary; drag words in from questions, export xlsx.</p>
             </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">06</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>Answer entry</h3>
-              <p>
-                Letter grid, multi-select, and several accepted answers for fill-ins; supports bulk pasting of
-                <code>1-A 2-C</code>, <code>1. A</code>, <code>ACBDA</code>, <code>3-AC</code> and the like, then
-                writes back to the source file after validation.
-              </p>
-              <ul class="feature-tags"><li>Bulk paste</li><li>Multi-answer</li><li>Preview</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="import">
-              <div class="feature-top"><span class="feature-no">07</span><span class="feature-cat">CAPTURE</span></div>
-              <h3>InteFlow-MD</h3>
-              <p>
-                A plain-text intermediate format: front matter + <code>:::q</code> question blocks. Formulas,
-                images, multiple choice, fill-ins and multiple answers all have deterministic syntax — you can
-                hand-write it, use it as a template, and write back to it.
-              </p>
-              <ul class="feature-tags"><li>Open format</li><li>round-trip</li><li>KaTeX</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">08</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>Exam-style full-screen practice</h3>
-              <p>
-                Count-up or countdown timer (last value remembered), question panel, Mark for review,
-                <code>A–D</code> and arrow keys, multiple select and fill-in, submit confirmation.
-              </p>
-              <ul class="feature-tags"><li>Full screen</li><li>Keyboard</li><li>Timer</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="practice">
-              <div class="feature-top"><span class="feature-no">09</span><span class="feature-cat">PRACTICE</span></div>
-              <h3>Deterministic grading</h3>
-              <p>
-                Multiple select must match exactly; fill-ins are compared after NFKC normalization. Correct
-                answers are never sent before submission; once answers are added later, stored attempts can be
-                regraded.
-              </p>
-              <ul class="feature-tags"><li>0 token</li><li>regrade</li><li>answers stay server-side</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">10</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Review workbench</h3>
-              <p>
-                A 2-of-4 split between question / analysis / AI Tutor / vocabulary. Each side can switch tools,
-                and picking the tool already on the other side swaps them; drag the divider or move it with the
-                arrow keys.
-              </p>
-              <ul class="feature-tags"><li>2-of-4</li><li>Draggable</li><li>Layout memory</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">11</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Analysis notebook</h3>
-              <p>
-                A Pages-style editor page per question, with Markdown, KaTeX and images; autosave in about 0.9
-                seconds, ⌘S saves immediately, and you can leave and come back to keep writing. Empty analysis
-                pages are first filled from the wrong-answer analysis template in Settings; existing analysis is
-                never overwritten.
-              </p>
-              <ul class="feature-tags"><li>autosave</li><li>Write / Preview</li><li>Notebook</li><li>template</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">12</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Mistakes + Starred</h3>
-              <p>
-                Mistakes are de-duplicated per question and keep the latest attempt; answering correctly later
-                removes the item automatically. Starred keeps your manual flags. Both columns support search,
-                filtering by exam and sorting by time.
-              </p>
-              <ul class="feature-tags"><li>latest attempt</li><li>star</li><li>search</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">13</span><span class="feature-cat">REVIEW</span></div>
-              <h3>Sessions, the attempt history</h3>
-              <p>
-                Only submitted attempts leave a record. Newest first, searchable, openable for review, and
-                deletable; quitting practice midway leaves no trace.
-              </p>
-              <ul class="feature-tags"><li>history</li><li>search</li><li>delete</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="review">
-              <div class="feature-top"><span class="feature-no">14</span><span class="feature-cat">REVIEW</span></div>
-              <h3>AI Tutor (explicit)</h3>
-              <p>
-                The model is only called when you click AI explanation. A built-in catalogue of 19 providers,
-                support for both the OpenAI and Anthropic protocols, Base URL overrides and a connectivity test.
-              </p>
-              <ul class="feature-tags"><li>19 providers</li><li>2 protocols</li><li>masked key</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">15</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>Local Merriam-Webster dictionary</h3>
-              <p>
-                Bring your own Eudic <code>.eudb</code>; the first lookup builds a SQLite index of 92,006 entries.
-                English-to-English definitions only, with the optional Definition for English Learners section
-                inside entries.
-              </p>
-              <ul class="feature-tags"><li>offline</li><li>92,006</li><li>0 token</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">16</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>My custom dictionary</h3>
-              <p>
-                A global custom word list you can edit by hand, or import from CSV / TSV / JSON / TXT. Lookups
-                check your custom dictionary first and fall back to Merriam-Webster when nothing matches.
-              </p>
-              <ul class="feature-tags"><li>My dictionary</li><li>import</li><li>matched first</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">17</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>Vocabulary list and drag-to-add</h3>
-              <p>
-                One word list per paper (Word · POS · Meaning · Notes). Select a word in the question or options
-                and drag it into the list; optionally let AI pick the sense among real Merriam-Webster
-                candidates, and edit by hand or export xlsx.
-              </p>
-              <ul class="feature-tags"><li>drag-to-add</li><li>sense match</li><li>xlsx</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="vocab">
-              <div class="feature-top"><span class="feature-no">18</span><span class="feature-cat">VOCABULARY</span></div>
-              <h3>Word exam</h3>
-              <p>
-                English → Chinese or Chinese → English, random sampling or a full test (≤500). Lenient local
-                grading, with optional stricter AI grading that falls back automatically; results become a
-                compact JSON QR code (large sets are split automatically) plus a JSON download.
-              </p>
-              <ul class="feature-tags"><li>EN↔ZH</li><li>QR</li><li>lenient grading</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">19</span><span class="feature-cat">OUTPUT</span></div>
+            <article class="core-card reveal">
+              <span class="core-kicker">OUTPUT</span>
               <h3>Export suite</h3>
-              <p>
-                Review notebooks in md / docx / pdf contain only the questions with written analysis; whole
-                papers export to PDF / DOCX; word lists export to xlsx. Math goes through a MathJax bridge, and
-                degrades to plain text instead of failing when that bridge is missing.
-              </p>
-              <ul class="feature-tags"><li>WeasyPrint</li><li>python-docx</li><li>openpyxl</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">20</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>Five UI themes</h3>
-              <p>
-                Clear Blue, Paper &amp; Ink, Minimal Light, Midnight Navy, Warm Editorial. Switch them in Settings
-                → Appearance, remembered in localStorage; the desktop sidebar can also collapse to an 80px icon
-                rail. The full-screen practice page stays deliberately neutral.
-              </p>
-              <ul class="feature-tags"><li>5 themes</li><li>token layer</li><li>localStorage</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">21</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>Settings and AI switches</h3>
-              <p>
-                User name (export cover), wrong-answer analysis template, AI recognition fallback, AI sense
-                selection, Learner definitions, custom dictionary, word-exam AI grading. Every switch spells out
-                its default and its fallback behaviour.
-              </p>
-              <ul class="feature-tags"><li>user name</li><li>analysis template</li><li>fallbacks</li><li>key masking</li></ul>
-            </article>
-
-            <article class="feature-card reveal" data-cat="output">
-              <div class="feature-top"><span class="feature-no">22</span><span class="feature-cat">OUTPUT</span></div>
-              <h3>Local data and testability</h3>
-              <p>
-                SQLite and the filesystem side by side, 65 APIs, 305 backend tests and 142 frontend component
-                tests. MIT open source — you can change any part of the path yourself at any time.
-              </p>
-              <ul class="feature-tags"><li>MIT</li><li>305 + 142 tests</li><li>65 endpoints</li></ul>
+              <p>Review notebooks as md / docx / pdf, whole papers as PDF / DOCX, word lists as xlsx.</p>
             </article>
           </div>
+
+          <details class="feature-details reveal">
+            <summary>
+              <span>View all 22 capabilities</span>
+              <em>Expand <span aria-hidden="true">＋</span></em>
+            </summary>
+            <div class="feature-groups">
+              <section class="feature-group">
+                <h3>Import &amp; organize <span>7</span></h3>
+                <dl>
+                  <div><dt>Multi-format import</dt><dd>PDF, DOCX, <code>.md</code> or <code>.ifmd.md</code>, with page-by-page reports.</dd></div>
+                  <div><dt>PDF structure recognition</dt><dd>Two columns, question numbers, options, answer write-back and images.</dd></div>
+                  <div><dt>Scanned-page OCR</dt><dd>macOS Vision first, Tesseract on other systems.</dd></div>
+                  <div><dt>Built-in question bank</dt><dd>44 units and 1,186 questions, unit by unit or all at once.</dd></div>
+                  <div><dt>Library and subjects</dt><dd>Counts and answer status at a glance; custom subjects, colors and filtering.</dd></div>
+                  <div><dt>Answer entry</dt><dd>Letter grid, multi-select, multiple accepted answers and bulk paste.</dd></div>
+                  <div><dt>InteFlow-MD</dt><dd>Plain-text format with deterministic syntax for formulas, images, multi-select and fill-ins.</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>Practice &amp; grading <span>2</span></h3>
+                <dl>
+                  <div><dt>Full-screen practice</dt><dd>Timer, question panel, Mark for review, keyboard control and submit confirmation.</dd></div>
+                  <div><dt>Deterministic grading</dt><dd>Exact multi-select, NFKC-normalized fill-ins; answers never sent before submission.</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>Review &amp; bookmarks <span>5</span></h3>
+                <dl>
+                  <div><dt>Review workbench</dt><dd>Question / analysis / AI Tutor / vocabulary, two of four at a time.</dd></div>
+                  <div><dt>Analysis notebook</dt><dd>Markdown, KaTeX, images and autosave; supports an analysis template.</dd></div>
+                  <div><dt>Mistakes + Starred</dt><dd>De-duplicated wrong answers keep the latest attempt; manual stars; search and filters.</dd></div>
+                  <div><dt>Sessions history</dt><dd>Only submitted attempts are recorded; search, reopen for review or delete.</dd></div>
+                  <div><dt>AI Tutor (explicit)</dt><dd>Called only on click; 19 providers, two protocols and a connectivity test.</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>Vocabulary &amp; dictionary <span>4</span></h3>
+                <dl>
+                  <div><dt>Local Merriam-Webster dictionary</dt><dd>Bring your own Eudic <code>.eudb</code>; a SQLite index is built on first lookup.</dd></div>
+                  <div><dt>My custom dictionary</dt><dd>Edit by hand or import CSV / TSV / JSON / TXT; matched first.</dd></div>
+                  <div><dt>Vocabulary list and drag-to-add</dt><dd>One list per paper; drag words in, optionally let AI pick the sense.</dd></div>
+                  <div><dt>Word exam</dt><dd>EN↔ZH both ways, random or full test, lenient grading and a QR result.</dd></div>
+                </dl>
+              </section>
+
+              <section class="feature-group">
+                <h3>Output &amp; system <span>4</span></h3>
+                <dl>
+                  <div><dt>Export suite</dt><dd>Notebooks as md / docx / pdf, papers as PDF / DOCX, word lists as xlsx.</dd></div>
+                  <div><dt>Five UI themes</dt><dd>Clear Blue, Paper &amp; Ink, Minimal Light, Midnight Navy, Warm Editorial.</dd></div>
+                  <div><dt>Settings and AI switches</dt><dd>User name, analysis template, AI fallbacks, sense selection and grading — defaults and fallbacks documented.</dd></div>
+                  <div><dt>Local data and testability</dt><dd>SQLite plus files, MIT open source, automated backend and frontend tests.</dd></div>
+                </dl>
+              </section>
+            </div>
+          </details>
         </div>
       </section>
 
-<!-- =============================================================== numbers -->
+      <!-- ============================================================ numbers -->
       <section class="numbers" aria-label="Project numbers">
         <div class="wrap numbers-grid">
           <div class="number-item reveal"><strong>1,186</strong><span>built-in questions</span></div>
@@ -579,7 +281,7 @@
         </div>
       </section>
 
-<!-- ========================================================== architecture -->
+      <!-- ======================================================= architecture -->
       <section class="section" id="architecture">
         <div class="wrap">
           <div class="section-head reveal">
@@ -693,23 +395,19 @@ cd InteFlow
                 <li><span>Storage</span><strong>SQLite + local files</strong></li>
                 <li><span>Convert</span><strong>PyMuPDF · python-docx · OCR</strong></li>
                 <li><span>Export</span><strong>WeasyPrint · openpyxl · MathJax</strong></li>
-                <li><span>Tests</span><strong>pytest 305 · frontend 142</strong></li>
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-<!-- =================================================================== faq -->
+      <!-- ================================================================ faq -->
       <section class="section section-alt" id="faq">
         <div class="wrap faq-grid">
           <div class="faq-intro reveal">
             <p class="section-index">05 / QUESTIONS</p>
             <h2>Still have questions?</h2>
-            <p>
-              Here are the answers to the things people trip over first. More detailed specs, the data model and
-              format documentation all live in the repo docs.
-            </p>
+            <p>Here are the answers to the things people trip over first. More detailed specs and format documentation live in the repo docs.</p>
             <a
               class="btn btn-outline"
               href="https://github.com/JasonSun2009CN/InteFlow/issues"
@@ -733,7 +431,7 @@ cd InteFlow
               <summary><span class="faq-no">02</span>Do I need to be online or configure an API key?<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  No. Import, parsing, grading, review, vocabulary and export don't depend on a network. Only AI explanations, connectivity tests, and word-exam AI grading that you turn on yourself call an external model, sending the current question / answer context to the provider you configured; with no key or a failed call it falls back to local and tells you.
+                  No. Import, parsing, grading, review, vocabulary and export don't depend on a network. Only AI explanations, connectivity tests, and word-exam AI grading that you turn on yourself call an external model; with no key or a failed call it falls back to local and tells you.
                 </p>
               </div>
             </details>
@@ -742,7 +440,7 @@ cd InteFlow
               <summary><span class="faq-no">03</span>Where is my data stored?<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  All under the repo's <code>data/</code>: <code>app.db</code> holds structured data, <code>docs/&lt;id&gt;/doc.ifmd.md</code> holds the original questions and answers, <code>assets/</code> holds images, and exports land in <code>exports/</code>. To back up, copy the whole directory; to reset, delete it (the backend rebuilds it).
+                  All under <code>data/</code>: <code>app.db</code> holds structured data, <code>docs/&lt;id&gt;/doc.ifmd.md</code> holds the original questions and answers, <code>assets/</code> holds images, and exports land in <code>exports/</code>. To back up, copy the whole directory; to reset, delete it.
                 </p>
               </div>
             </details>
@@ -751,7 +449,7 @@ cd InteFlow
               <summary><span class="faq-no">04</span>Which system dependencies do I need?<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  Running the basics only needs Python 3.11+ and Node.js 18+; the one-click script creates <code>.venv</code> and installs the frontend and backend dependencies. PDF export additionally needs pango / cairo / gdk-pixbuf / harfbuzz; scanned-page OCR can optionally use the system <code>tesseract</code>, and macOS can also use Vision; math export can add a MathJax bridge. When something is missing, only that feature degrades or warns — it won't take the rest down with it.
+                  The desktop app needs no Python or Node. Running from source needs Python 3.11+ and Node.js 18+; PDF export additionally needs pango / cairo / gdk-pixbuf / harfbuzz; scanned-page OCR can optionally use <code>tesseract</code>, and macOS can also use Vision. When something is missing, only that feature degrades or warns.
                 </p>
               </div>
             </details>
@@ -766,38 +464,10 @@ cd InteFlow
             </details>
 
             <details class="faq-item">
-              <summary><span class="faq-no">06</span>Why doesn't the practice page follow the theme?<i aria-hidden="true"></i></summary>
+              <summary><span class="faq-no">06</span>What does the exported notebook contain?<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  It's deliberate. Practising needs the least visual distraction and stable contrast, so the full-screen practice page stays outside <code>.app-theme</code> and uses a neutral slate / blue; the review workbench follows the theme you chose. A theme only changes the visual language, never the question layout or the interactions.
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">07</span>What does the exported notebook contain?<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  One review notebook per paper: a cover with the user name and score, then every question with written analysis in question order (stem, figures, your analysis). Markdown / DOCX / PDF, downloaded straight from the browser with a copy left in <code>data/exports/</code>. Whole-paper PDF / DOCX is exported from the Library instead.
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">08</span>Is the app interface in Chinese?<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  The app interface is in English, with buttons and page names matching the README; the documentation comes in both Chinese and English. Question content isn't limited by language — mixed Chinese/English papers can be imported and practised alike. This site is available in both languages so that first-time visitors can grasp the whole path faster.
-                </p>
-              </div>
-            </details>
-
-            <details class="faq-item">
-              <summary><span class="faq-no">09</span>Can I customize the wrong-answer analysis template?<i aria-hidden="true"></i></summary>
-              <div class="faq-answer">
-                <p>
-                  Yes. Write a Markdown template under Settings → Analysis template and empty wrong-answer analysis pages are filled in automatically; existing analysis is never overwritten.
-                  The template is only an initial draft — it isn't saved until you change it, and autosave only starts once you begin writing, so a blank question is never miscounted as "analysis written" and pulled into an export.
+                  One review notebook per paper: a cover with the user name and score, then every question with written analysis in question order (stem, figures, your analysis). Markdown / DOCX / PDF, downloaded straight from the browser with a copy left in <code>data/exports/</code>.
                 </p>
               </div>
             </details>
@@ -805,26 +475,23 @@ cd InteFlow
         </div>
       </section>
 
-      <section class="cta-section" id="start">
-        <div class="wrap cta-grid">
-          <div class="cta-copy reveal">
-            <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span> READY WHEN YOU ARE</p>
+      <!-- ============================================================= closing -->
+      <section class="closing">
+        <div class="wrap closing-inner reveal">
+          <div class="closing-copy">
+            <p class="section-index">READY WHEN YOU ARE</p>
             <h2>Seen the features?<br />Try the real thing.</h2>
             <p>Do four questions online first, or download the desktop app. The main path needs no account and no API key.</p>
-            <div class="cta-actions">
-              <a class="btn btn-ink" href="download-en.html">Download <span aria-hidden="true">↓</span></a>
-              <a class="btn btn-outline" href="demo-en.html">Try the demo <span aria-hidden="true">→</span></a>
-            </div>
           </div>
-          <div class="cta-panel reveal" style="--delay: 80ms">
-            <div class="cta-panel-head"><span class="mono">WHAT SHIPS</span><span class="micro-badge">LOCAL</span></div>
-            <div class="command-row"><code>22 features · 5 themes · 2-of-4 review</code></div>
-            <div class="command-row"><code>import → practice → review → export</code></div>
-            <p class="cta-note">0 tokens on the main path · local data · no account · works offline</p>
+          <div class="closing-actions">
+            <a class="btn btn-accent" href="download-en.html">Download <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-outline" href="demo-en.html">Try the demo <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="themes-en.html">See the five themes <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </section>
     </main>
+
     <footer class="site-footer">
       <div class="wrap footer-grid">
         <div class="footer-brand">
@@ -838,12 +505,10 @@ cd InteFlow
 
         <nav class="footer-col" aria-label="Product">
           <h3>Product</h3>
-          <a href="features-en.html">Workflow & features</a>
+          <a href="features-en.html">Workflow &amp; features</a>
           <a href="demo-en.html">Live demo</a>
           <a href="themes-en.html">Themes</a>
           <a href="download-en.html">Download</a>
-          <a href="download-en.html#install">Install notes</a>
-          <a href="download-en.html#source">Run from source</a>
         </nav>
 
         <nav class="footer-col" aria-label="Documentation">
@@ -859,7 +524,6 @@ cd InteFlow
           <a href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/issues" target="_blank" rel="noreferrer">Issues</a>
           <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
-          <a href="https://github.com/JasonSun2009CN/InteFlow/blob/main/AGENT.md" target="_blank" rel="noreferrer">Agent notes</a>
         </nav>
       </div>
 

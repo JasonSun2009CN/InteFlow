@@ -21,9 +21,9 @@ download lookup and some browser APIs behave better over HTTP.
 
 | Page | Purpose |
 | --- | --- |
-| `index.html` / `en.html` | Home. Hero, a prominent download strip right below it, a short “why”, and links into the other pages. |
+| `index.html` / `en.html` | Home. Hero, a compact three-card download band, three highlights, and one closing call to action. |
 | `download.html` / `download-en.html` | Platform downloads, first-launch notes and source instructions. |
-| `features.html` / `features-en.html` | Boundaries, workflow, all 22 features, architecture and FAQ. |
+| `features.html` / `features-en.html` | Two principles, the five-step workflow, six core capabilities, a collapsed index of all 22 features, architecture and FAQ. |
 | `demo.html` / `demo-en.html` | Practice demo. |
 | `demo-workspace.html` / `demo-workspace-en.html` | Standalone 2-of-4 review workspace. |
 | `demo-mistakes.html` / `demo-mistakes-en.html` | Mistake collection with filters, search and mastery. |
@@ -48,7 +48,7 @@ website/
 ├── 404.html · robots.txt · sitemap.xml · .nojekyll
 ├── assets/
 │   ├── site.css             # all layout, components, responsive rules
-│   ├── site.js              # nav, filters, theme lab, code tabs, copy, demo
+│   ├── site.js              # nav, theme lab, code tabs, copy, demo
 │   ├── downloads.js         # latest GitHub release → platform cards
 │   └── favicon.svg
 └── themes/                  # five standalone theme previews
@@ -65,13 +65,12 @@ website/
 
 ## Downloads and platform links
 
-The home page puts downloads in the first screen: a compact macOS Apple
-Silicon / macOS Intel / Windows shortcut row sits directly under the hero
-buttons, followed by the full download strip. Every platform card is an
-installer link; the fourth card opens the full GitHub **Releases** page.
-`downloads.js` upgrades the platform cards to direct release assets. The
-download page repeats the cards with first-launch notes. Source instructions
-live only in the separate “From source / 开发者选项” section at the bottom.
+The home page puts downloads in the first screen: three compact cards (macOS
+Apple Silicon, macOS Intel, Windows) sit in a band directly under the hero.
+Every card is an installer link; “all releases” and “run from source” are plain
+text links under the band, and the full download page repeats the cards with
+first-launch notes. Source instructions live only in the separate “From
+source / 开发者选项” section at the bottom of `download*.html`.
 
 Platform cards use `data-download-platform` and start with a safe fallback:
 
@@ -184,11 +183,15 @@ One-time setup:
 
 - **Copy** lives in paired pages, not a central CMS. Keep the Chinese and
   English pages in sync: same sections, ids, card counts and links, only the
-  human-visible copy changes. Shared header and footer markup is repeated in
-  each page; update all ten pages when a nav item changes.
-- **Feature cards** use `data-cat="import|practice|review|vocab|output"`; update
-  the counts in the filter bar and the `data-filter-count` default if you add or
-  remove cards.
+  human-visible copy changes. The header nav is five links (Download / Features
+  / Demo / Themes / FAQ) plus a GitHub link in the header actions; it is
+  repeated in every page that uses the shared shell, so update all of them when
+  a nav item changes. `404.html` is standalone.
+- **The features page** is deliberately short: six `.core-card` summaries plus
+  a native `<details class="feature-details">` holding the full 22-item index,
+  grouped into five `.feature-group` sections. Add new capabilities to the
+  matching group and bump its count; only promote one to `.core-card` when it
+  belongs in the top six.
 - **Downloads** are the `data-download-platform` cards plus the matching rules
   in `assets/downloads.js`. Add a platform to both language download pages and
   add a rule in `matchAsset`.
@@ -209,9 +212,10 @@ One-time setup:
 
 ## Accessibility notes
 
-- Pages are usable without JavaScript: content, native `<details>` FAQ and the
-  first theme preview remain. The demo and the release-version lookup are the
-  only parts that need JS; their shells contain fallback copy.
+- Pages are usable without JavaScript: content, the native `<details>` FAQ and
+  the collapsed 22-item feature index remain, and the first theme preview is
+  visible. The demo and the release-version lookup are the only parts that need
+  JS; their shells contain fallback copy.
 - Download cards are real links with visible labels; release lookup failures
   leave a working fallback instead of an empty button.
 - The demo uses real buttons with `aria-pressed` / `aria-selected`, a visible
