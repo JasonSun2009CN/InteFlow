@@ -172,8 +172,29 @@
 >    （键 `vocab_auto_definition`，默认开）。关闭后拖词只添加 Word、Meaning 留空（0 token，不查词典），
 >    方便学生自己写释义；从词典面板显式 Add 的路径不受影响。
 > 7. **设置页版本号 + 自动保存**：标题下显示 `/api/health` 的版本（桌面端由 Electron 通过
->    `INTEFLOW_VERSION` 传入打包版本，源码回退 `1.0.0`）；移除 Save 按钮，改为 600ms 防抖自动保存，
+>    `INTEFLOW_VERSION` 传入打包版本，源码回退版本见 `backend/app/main.py` 的 `VERSION`）；移除 Save 按钮，改为 600ms 防抖自动保存，
 >    连续输入合并、保存中继续编辑排队，失败下次修改重试。移除 API Key 前会清空排队并等待在途保存。
+
+> 2026-10-26：**Settings 页重做（布局 + 视觉）**。目标是消掉原来的“单列窄卡片 + 大留白”，
+> 让它读起来像设计师做的设置页，而不是表单堆叠：
+> 1. **两栏结构**：左侧 `On this page` 目录（图标 + 高亮，桌面 sticky；窄屏是横向可滚动药丸条），
+>    右侧内容列。页面宽度从 `max-w-2xl` 提到 `max-w-6xl`，行内用“左侧标签 / 右侧控件”的
+>    两列节奏（`FieldRow`），信息密度明显提高但仍有呼吸感。
+> 2. **分区**：Profile / Appearance / AI model / Importing / Vocabulary / Writing /（桌面端）Desktop。
+>    每个分区是“图标 + 标题 + 一句说明 + 一张 hairline 卡片”，卡片内行与行之间用细线分隔；
+>    原来的「Show built-in library」并入 Importing，不再单独占一张卡。
+> 3. **开关改成 switch 外观**：视觉是 44×24 的轨道 + 圆点，但底层仍是 `<input type="checkbox">`
+>    （保留 `role=checkbox` 与 label 关联，测试与读屏行为不变），并且整块开关本身可点。
+> 4. **主题选择器改成 5 个迷你窗口预览**（用各主题自己的 ground / surface / accent / ink 上色），
+>    桌面上一行 5 个；语言改成两段式 segmented control。
+> 5. **状态条**：标题下的自动保存状态改成带状态点的小药丸（idle / dirty / saving / saved / error），
+>    版本号并列显示；Test connection 移到 AI model 分区标题右侧，结果以带图标的横条出现在卡片下方。
+> 6. 纯前端改动：`frontend/src/pages/SettingsPage.tsx`、`components/ui/ThemePicker.tsx`、
+>    `components/ui/LanguagePicker.tsx`；新增文案全部走 `t()`（中文表已补）。
+>    未改任何接口、设置键或保存逻辑；`npm test` 仍 165 passed / 5 skipped，`npm run build` 0 错误。
+> 7. **发布 `v1.0.1`**：`frontend/package.json`、`desktop/package.json`（含 lock）与
+>    `backend/app/main.py` 的源码回退 `VERSION` 同步为 `1.0.1`；CI 的 “Set version from tag”
+>    仍会按 tag 重写 desktop 版本，因此安装包版本以 tag 为准。
 
 ## 4. 迁移与改名映射（已执行）
 
@@ -216,6 +237,7 @@
 | 图表裁剪（2026-10-25） | 标题、y 轴刻度、x 轴/分类短标签自动并入截图；只吸收短标签，长句正文不会被吞；位图带文字层时按页面区域重新截图；0 token |
 | 词典工具（2026-10-25） | 复盘 2-of-5 分屏新增 **Dictionary**；内置韦氏本地查询；Settings `dictionary_auto_lookup`（默认开）控制输入即查；面板可添加自定义释义（写入 My dictionary，优先查询） |
 | 设置页版本 / 自动保存（2026-10-25） | 版本来自 `/api/health`（桌面端 `INTEFLOW_VERSION`）；设置改动 600ms 防抖自动保存，无 Save 按钮；API Key 只写、移除前避免竞态 |
+| 设置页布局（2026-10-26） | 两栏：左侧 sticky 分区目录（窄屏横向药丸条）+ 右侧分区卡片；分区为 Profile / Appearance / AI model / Importing / Vocabulary / Writing / Desktop。开关注释外观用 `<input type=checkbox>` 保持可访问性；主题选择器为 5 个迷你窗口预览，语言为 segmented control；自动保存状态与版本以药丸显示在标题下 |
 | 单词表释义自动填充（2026-10-25） | Settings `vocab_auto_definition`（默认开）：拖词入 Vocabulary 时自动写入韦氏释义；关闭后只加单词、Meaning 留空，0 token。词典页手动 Add 不受影响 |
 | AI 识别兜底开关 | 设置项 `llm_fallback`（默认开）。关闭时导入失败会提示启用；`convert/pdf.py` 与 `imports.run_ai_fallback` 均检查该开关 |
 | 生词释义开关（2026-10-20） | 设置项 `vocab_ai_sense`（默认开）：关闭后拖词不调用 LLM，使用第一条真实韦氏释义并提示。设置项 `vocab_learner_definitions`（默认关）：开启后优先使用韦氏词条内部的 **Definition for English Learners** 栏目；词条没有该栏目时自动回退普通释义。**不再有单独的 learner `.eudb`**。设置项 `custom_dictionary_enabled`（默认开）：优先查用户自定义词典，未命中再查韦氏 |

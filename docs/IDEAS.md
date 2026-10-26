@@ -230,7 +230,7 @@
 ### ✅ 设置页显示版本号 + 自动保存（2026-10-25）
 
 - 设置页标题下显示版本：数据来自 `GET /api/health`；桌面端由 Electron 把打包版本通过 `INTEFLOW_VERSION`
-  传给后端，源码运行回退到当前发布号 `1.0.0`。
+  传给后端，源码运行回退到 `backend/app/main.py` 的 `VERSION`。
 - 移除 **Save settings / 保存设置** 按钮，改为 **600ms 防抖自动保存**，底部状态依次提示
   `修改会自动保存 / 有未保存的修改… / 正在保存… / 已保存`；失败显示错误，下一次修改自动重试。
 - 连续输入合并成一次请求；保存进行中继续编辑会排队保存最新值，不会乱序覆盖。
@@ -257,6 +257,20 @@
 - 关：只把单词加入词表，Meaning 留空，由学生自己写；不查词典、不调用 LLM，0 token。
 - 实现：设置键 `vocab_auto_definition`；`POST /api/documents/{id}/words/entries/from-selection`
   在关闭时走“只加单词”分支并返回提示；从词典面板手动 **Add** 的路径不受影响（那是用户显式选义）。
+
+### ✅ Settings 页重做（2026-10-26）
+
+- 反馈：设置页内容太空、留白太多，整体 UI 太「理工男」，不像设计师做的界面。
+- 做法：改为 **左侧 sticky 分区目录 + 右侧分区卡片** 的两栏布局（窄屏目录变成横向药丸条）；
+  页面宽度 `max-w-2xl → max-w-6xl`，表单行改成「左标签 / 右控件」，信息密度提高。
+- 分区：Profile / Appearance / AI model / Importing / Vocabulary / Writing /（桌面端）Desktop；
+  built-in library 开关并入 Importing，不再单独一张卡。
+- 开关改成 switch 外观（底层仍是 `input[type=checkbox]`，保留 label 关联与 `role=checkbox`）；
+  主题选择器改成 5 个迷你窗口预览（桌面一行 5 个），语言改成两段式 segmented control。
+- 自动保存状态 + 版本号合并成标题下的小药丸；Test connection 放到 AI model 分区标题右侧。
+- 纯前端：`SettingsPage.tsx` · `ThemePicker.tsx` · `LanguagePicker.tsx` + i18n 中文文案。
+  接口、设置键、自动保存逻辑均未改；`npm test` 165 passed / 5 skipped，`npm run build` 0 错误。
+- 随本次改动发布 **v1.0.1**（frontend / desktop / 后端源码回退版本同步）。
 
 ### 🔜 后续（尚未实现）
 
