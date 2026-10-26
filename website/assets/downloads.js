@@ -8,12 +8,22 @@
  *
  * Plain JavaScript, no dependencies. GitHub's API allows browser CORS and this
  * request is anonymous; the site never sends anything about the visitor.
+ *
+ * "Latest" is resolved at runtime, never baked into the HTML, so publishing a
+ * new GitHub Release is enough — no site redeploy. Requests bypass the browser
+ * cache and carry a cache-busting query so a visitor who opens the page right
+ * after a release cannot be served the previous version. The lookup also runs
+ * again when the tab becomes visible and every 15 minutes, so long-lived tabs
+ * pick up a new release without a reload.
  */
 (function () {
   "use strict";
 
   var REPO = "JasonSun2009CN/InteFlow";
-  var API = "https://api.github.com/repos/" + REPO + "/releases/latest";
+  var LATEST = "https://api.github.com/repos/" + REPO + "/releases/latest";
+  var LIST = "https://api.github.com/repos/" + REPO + "/releases?per_page=5";
+  var REFRESH_MS = 15 * 60 * 1000;
+
   var isEnglish = /^en/i.test(document.documentElement.lang || "");
   var cards = Array.prototype.slice.call(
     document.querySelectorAll("[data-download-platform]")
@@ -92,67 +102,120 @@
     if (detailEl) detailEl.textContent = detail;
   }
 
-  function markReady(card, asset) {
+  function markReady(card, asset, version) {
     card.href = asset.browser_download_url;
     card.setAttribute("data-download-ready", "true");
     card.removeAttribute("aria-disabled");
     if (asset.size) card.setAttribute("data-size", formatSize(asset.size));
 
+    var suffix = (version ? " " + version : "") + (asset.size ? " · " + formatSize(asset.size) : "");
+    card.title = MESSAGES.download + suffix;
+
     var label = card.querySelector("[data-download-label]");
     if (label && !card.hasAttribute("data-download-static-label")) {
-      label.textContent =
-        MESSAGES.download + (asset.size ? " · " + formatSize(asset.size) : "");
-    }
-    if (card.hasAttribute("data-download-static-label")) {
-      card.title = MESSAGES.download + (asset.size ? " · " + formatSize(asset.size) : "");
+      label.textContent = MESSAGES.download + (asset.size ? " · " + formatSize(asset.size) : "");
     }
   }
 
-  fetch(API, {
-    headers: { Accept: "application/vnd.github+json" },
-    credentials: "omit"
-  })
-    .then(function (response) {
+  /** Git api call that never reuses a browser-cached response. */
+  function request(url) {
+    return fetch(
+      url + (url.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now(),
+      {
+        headers: { Accept: "application/vnd.github+json" },
+        credentials: "omit",
+        cache: "no-store"
+      }
+    ).then(function (response) {
       if (response.status === 404) return null;
       if (!response.ok) throw new Error("HTTP " + response.status);
       return response.json();
-    })
-    .then(function (release) {
-      if (!release || !release.tag_name) {
-        setStatus("empty", MESSAGES.emptyTitle, MESSAGES.emptyDetail);
-        return;
-      }
-
-      var assets = Array.isArray(release.assets) ? release.assets : [];
-      var found = 0;
-      var seen = {};
-
-      cards.forEach(function (card) {
-        var platform = card.getAttribute("data-download-platform");
-        var asset = matchAsset(assets, platform);
-        if (!asset) return;
-        if (!seen[platform]) {
-          seen[platform] = true;
-          found += 1;
-        }
-        markReady(card, asset);
-      });
-
-      if (found) {
-        setStatus(
-          "ready",
-          MESSAGES.readyTitle(release.tag_name, found),
-          MESSAGES.readyDetail
-        );
-      } else {
-        setStatus(
-          "empty",
-          MESSAGES.noMatchTitle(release.tag_name),
-          MESSAGES.noMatchDetail
-        );
-      }
-    })
-    .catch(function () {
-      setStatus("error", MESSAGES.errorTitle, MESSAGES.errorDetail);
     });
+  }
+
+  /**
+   * `/releases/latest` is the intended endpoint. If it is empty or briefly
+   * unavailable (for example while a release is still being published), fall
+   * back to the newest entry in the release list; prefer a stable release over
+   * a prerelease.
+   */
+  function loadRelease() {
+    return request(LATEST)
+      .catch(function () {
+        return null;
+      })
+      .then(function (release) {
+        if (release && release.tag_name) return release;
+        return request(LIST).then(function (list) {
+          if (!Array.isArray(list)) return null;
+          var prerelease = null;
+          for (var index = 0; index < list.length; index += 1) {
+            var item = list[index];
+            if (!item || item.draft) continue;
+            if (!item.prerelease) return item;
+            if (!prerelease) prerelease = item;
+          }
+          return prerelease;
+        });
+      });
+  }
+
+  var lastRelease = null;
+
+  function apply(release) {
+    if (!release || !release.tag_name) {
+      setStatus("empty", MESSAGES.emptyTitle, MESSAGES.emptyDetail);
+      return;
+    }
+
+    lastRelease = release;
+    var assets = Array.isArray(release.assets) ? release.assets : [];
+    var found = 0;
+    var seen = {};
+
+    cards.forEach(function (card) {
+      var platform = card.getAttribute("data-download-platform");
+      var asset = matchAsset(assets, platform);
+      if (!asset) return;
+      if (!seen[platform]) {
+        seen[platform] = true;
+        found += 1;
+      }
+      markReady(card, asset, release.tag_name);
+    });
+
+    var box = document.querySelector("[data-release-status]");
+    if (box) box.setAttribute("data-release-version", release.tag_name);
+
+    if (found) {
+      setStatus(
+        "ready",
+        MESSAGES.readyTitle(release.tag_name, found),
+        MESSAGES.readyDetail
+      );
+    } else {
+      setStatus(
+        "empty",
+        MESSAGES.noMatchTitle(release.tag_name),
+        MESSAGES.noMatchDetail
+      );
+    }
+  }
+
+  function refresh() {
+    loadRelease().then(apply).catch(function () {
+      // Keep a version that was already resolved; only show the error state
+      // when there is nothing on screen yet.
+      if (!lastRelease) {
+        setStatus("error", MESSAGES.errorTitle, MESSAGES.errorDetail);
+      }
+    });
+  }
+
+  refresh();
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) refresh();
+  });
+  window.setInterval(refresh, REFRESH_MS);
 })();

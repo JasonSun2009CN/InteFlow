@@ -272,6 +272,16 @@
   接口、设置键、自动保存逻辑均未改；`npm test` 165 passed / 5 skipped，`npm run build` 0 错误。
 - 随本次改动发布 **v1.0.1**（frontend / desktop / 后端源码回退版本同步）。
 
+### ✅ 官网下载自动跟随最新版本（2026-10-26）
+
+- 反馈：官网下载还显示 1.0.0，但最新版本已经是 1.0.1，希望能自动匹配最新版本。
+- 机制：`website/assets/downloads.js` 一直在运行时请求 GitHub `/releases/latest`，版本号不写进 HTML，
+  发新 Release 本身就会生效；旧版本显示通常是浏览器/接口缓存造成。
+- 已加固：请求使用 `cache: "no-store"` + cache-busting 时间戳；`/latest` 为空时回退到 release 列表
+  （优先正式版）；标签页重新可见与每 15 分钟自动复查；下载页平台卡片兜底到 `/releases/latest`，
+  卡片 `title` 显示解析到的版本号。
+- 网站改动随 `main` 推送由 Pages workflow 自动发布，不需要新 tag。
+
 ### 🔜 后续（尚未实现）
 
 - 图表仍缺表头时的视觉模型兜底：检测图片 → 回报页码 → 支持图片的模型识别 + 截图。

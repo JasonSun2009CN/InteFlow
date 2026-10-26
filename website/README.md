@@ -75,10 +75,14 @@ source / 开发者选项” section at the bottom of `download*.html`.
 Platform cards use `data-download-platform` and start with a safe fallback:
 
 - on the home page the fallback is `download.html#mac-arm64`, etc.;
-- on the download page the fallback is the GitHub **Releases** page.
+- on the download page the fallback is the GitHub **latest release** page.
 
 `assets/downloads.js` asks GitHub for the latest release and upgrades matching
-cards to direct asset URLs. Matching is name-based:
+cards to direct asset URLs. The version is never written into the HTML, so
+publishing a new GitHub Release is enough — the site does not need a redeploy.
+The request uses `cache: "no-store"` plus a cache-busting query, falls back to
+the release list when `/releases/latest` is empty, and re-checks when the tab
+becomes visible and every 15 minutes. Matching is name-based:
 
 | `data-download-platform` | Asset match |
 | --- | --- |

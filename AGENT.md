@@ -195,6 +195,11 @@
 > 7. **发布 `v1.0.1`**：`frontend/package.json`、`desktop/package.json`（含 lock）与
 >    `backend/app/main.py` 的源码回退 `VERSION` 同步为 `1.0.1`；CI 的 “Set version from tag”
 >    仍会按 tag 重写 desktop 版本，因此安装包版本以 tag 为准。
+> 8. **官网下载强制跟随最新 Release**：`website/assets/downloads.js` 的请求改为
+>    `cache: "no-store"` + cache-busting 时间戳，避免刚发布时浏览器/缓存仍返回上一版；
+>    `/releases/latest` 为空时回退到 release 列表（优先正式版）；标签页重新可见与每 15 分钟自动复查。
+>    下载页三张平台卡片的兜底链接改为 `/releases/latest`，卡片 `title` 带上解析到的版本号。
+>    版本号从不写进 HTML，发新 Release 无需重新部署网站。
 
 ## 4. 迁移与改名映射（已执行）
 
