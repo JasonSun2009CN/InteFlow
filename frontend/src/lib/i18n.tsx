@@ -81,6 +81,35 @@ const MESSAGES: Record<string, string> = {
 
   // --- settings -----------------------------------------------------------
   Workspace: "工作区",
+  "Everything on this page is stored on this machine. Changes are saved as you type.":
+    "这一页的所有内容都保存在本机，修改后会即时保存。",
+  "Settings sections": "设置分区",
+  "On this page": "本页目录",
+  "Local only. Nothing leaves this machine unless you click Test connection or ask for an explanation.":
+    "完全本地。除非你点「测试连接」或主动请求讲解，否则不会有任何内容离开这台电脑。",
+  Profile: "个人资料",
+  "The name printed on the cover of every exported notebook.":
+    "导出笔记本时印在封面上的名字。",
+  "Cover page": "封面",
+  "Make the workspace feel like yours. Saved locally on this machine.":
+    "把工作区调成你喜欢的样子，偏好保存在本机。",
+  "The practice screen keeps its own high-contrast look.":
+    "考试页面保留自己的高对比度外观。",
+  "AI model": "AI 模型",
+  "Used only when you ask: explanations, AI sense matching, word-test grading and the optional import fallback. The key is stored locally.":
+    "只在你主动使用讲解、AI 义项匹配、单词考试判分或可选的导入兜底时才会调用。密钥保存在本机。",
+  "Where the model runs": "模型服务",
+  Endpoint: "接口地址",
+  "Stored locally": "只存本机",
+  "Used on demand": "按需调用",
+  Importing: "导入",
+  "PDF, DOCX and InteFlow-MD conversion runs offline. The fallback below is the one exception.":
+    "PDF、DOCX 与 InteFlow-MD 的转换全部离线完成，只有下面的兜底开关是例外。",
+  "Word lists, the built-in Merriam-Webster dictionary and word tests.":
+    "生词表、内置韦氏词典与单词考试。",
+  Writing: "写作",
+  "What a fresh analysis page starts with.": "空白分析页的起始内容。",
+  "Housekeeping for the installed app.": "已安装应用的维护操作。",
   "Configure the LLM API used for on-demand explanations and import fallback. Everything is stored locally; the key never leaves this machine except to call the provider you name below.":
     "配置用于按需解析与导入兜底的 LLM API。所有内容都保存在本地；除了调用你指定的服务商，密钥不会离开这台电脑。",
   "Settings saved.": "设置已保存。",

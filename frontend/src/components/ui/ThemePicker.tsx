@@ -1,35 +1,34 @@
+import { Check } from "lucide-react";
 import { THEMES, useTheme } from "../../theme";
 import { useI18n } from "../../lib/i18n";
 
 /**
- * Appearance section for Settings: pick one of the built-in themes.
- *
- * The choice applies immediately (the shell re-skins in place) and is stored in
- * `localStorage`, so it survives reloads without a round trip to the backend.
- * The full-screen practice screen is unaffected by design.
+ * Theme picker for Settings: one mini "window" per theme so the choice is
+ * visible before switching. The choice applies immediately (the shell re-skins
+ * in place) and is stored in `localStorage`, so it survives reloads without a
+ * round trip to the backend. The full-screen practice screen is unaffected.
  */
 export function ThemePicker() {
   const [theme, setTheme] = useTheme();
   const { t } = useI18n();
 
   return (
-    <div className="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-800">{t("Appearance")}</h2>
-        <p className="mt-1 text-xs leading-5 text-slate-500">
-          {t(
-            "Applies to the whole workspace — the practice screen keeps its own high-contrast look. Saved locally on this machine.",
-          )}
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-ink-900">{t("Theme")}</p>
+        <p className="text-[11px] text-ink-400">
+          {t("The practice screen keeps its own high-contrast look.")}
         </p>
       </div>
 
       <div
         role="radiogroup"
         aria-label={t("Theme")}
-        className="grid gap-2 sm:grid-cols-2"
+        className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-10"
       >
         {THEMES.map((option) => {
           const active = option.id === theme;
+          const [ground, surface, accent, ink] = option.swatches;
           return (
             <button
               key={option.id}
@@ -38,38 +37,64 @@ export function ThemePicker() {
               aria-checked={active}
               data-theme-option={option.id}
               onClick={() => setTheme(option.id)}
-              className={`flex items-start gap-3 rounded-lg border px-3 py-3 text-left transition-colors ${
+              className={`group rounded-lg border p-2 text-left transition-all sm:col-span-1 xl:col-span-2 ${
                 active
-                  ? "border-primary-500 bg-primary-50"
-                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  ? "border-primary-500 bg-primary-50 shadow-sm"
+                  : "border-paper-200 bg-white hover:border-paper-300 hover:bg-paper-50"
               }`}
             >
+              {/* A tiny mock of the workspace, painted with the theme's own
+                  colours: ground, header bar, an accent mark and text lines. */}
               <span
-                className="mt-0.5 flex shrink-0 overflow-hidden rounded border border-black/10"
                 aria-hidden="true"
+                className="block overflow-hidden rounded-md border border-black/10"
+                style={{ backgroundColor: ground }}
               >
-                {option.swatches.map((color) => (
+                <span
+                  className="flex h-3 items-center gap-1 border-b border-black/5 px-1.5"
+                  style={{ backgroundColor: surface }}
+                >
                   <span
-                    key={color}
-                    className="h-6 w-3"
-                    style={{ backgroundColor: color }}
+                    className="h-1 w-1 rounded-full"
+                    style={{ backgroundColor: accent }}
                   />
-                ))}
+                  <span
+                    className="h-1 w-3 rounded-full"
+                    style={{ backgroundColor: ink, opacity: 0.25 }}
+                  />
+                </span>
+                <span className="block px-1.5 py-2">
+                  <span
+                    className="block h-1.5 w-3/5 rounded-full"
+                    style={{ backgroundColor: ink, opacity: 0.75 }}
+                  />
+                  <span
+                    className="mt-1 block h-1 w-4/5 rounded-full"
+                    style={{ backgroundColor: ink, opacity: 0.16 }}
+                  />
+                  <span
+                    className="mt-1 block h-1 w-2/3 rounded-full"
+                    style={{ backgroundColor: ink, opacity: 0.16 }}
+                  />
+                  <span
+                    className="mt-1.5 block h-1 w-2/5 rounded-full"
+                    style={{ backgroundColor: accent }}
+                  />
+                </span>
               </span>
-              <span className="min-w-0">
-                <span className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900">
-                    {option.label}
+
+              <span className="mt-2 flex items-center justify-between gap-2 px-0.5">
+                <span className="truncate text-[13px] font-medium text-ink-900">
+                  {option.label}
+                </span>
+                {active && (
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white">
+                    <Check className="h-2.5 w-2.5" aria-hidden="true" />
                   </span>
-                  {active && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-primary-700">
-                      {t("Active")}
-                    </span>
-                  )}
-                </span>
-                <span className="mt-0.5 block text-xs leading-5 text-slate-500">
-                  {t(option.blurb)}
-                </span>
+                )}
+              </span>
+              <span className="mt-0.5 block px-0.5 text-[11px] leading-4 text-ink-400">
+                {t(option.blurb)}
               </span>
             </button>
           );
