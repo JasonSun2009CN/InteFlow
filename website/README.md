@@ -47,8 +47,11 @@ website/
 ├── themes.html · themes-en.html
 ├── 404.html · robots.txt · sitemap.xml · .nojekyll
 ├── assets/
-│   ├── site.css             # all layout, components, responsive rules
+│   ├── site.css             # legacy layout, components, demo styles
+│   ├── ui.css               # design layer loaded after site.css: tokens,
+│   │                        #   shell, cards, buttons, day/night themes
 │   ├── site.js              # nav, theme lab, code tabs, copy, demo
+│   ├── ui.js                # day/night switch (localStorage + ?theme=)
 │   ├── downloads.js         # latest GitHub release → platform cards
 │   └── favicon.svg
 └── themes/                  # five standalone theme previews
@@ -210,8 +213,20 @@ One-time setup:
 - **Theme metadata** for the interactive lab is the `THEMES` object near the
   top of `assets/site.js`. The five preview pages themselves keep their own copy
   of `THEMES` in `themes/assets/mock.js` for the in-preview switcher.
-- **Visual tokens** (`--paper`, `--ink`, `--accent`, type stacks) are at the top
-  of `assets/site.css`.
+- **Visual design lives in `assets/ui.css`**, loaded after `assets/site.css` on
+  every page. It does not change markup or JS hooks: it remaps the legacy
+  tokens (`--paper`, `--ink`, `--accent`, …) and restyles the shared shell, so
+  new components inherit the current theme automatically. Edit the two token
+  blocks at the top (`[data-theme="light"]`, `[data-theme="dark"]`) to change
+  colour, then the component sections below them.
+- **Themes** are `data-theme="light|dark"` on `<html>`. Day is the default. The
+  inline boot script in each `<head>` applies the stored choice before paint to
+  avoid a flash, `assets/ui.js` owns the toggle, and `?theme=dark` (or
+  `?theme=light`) forces one for previewing or screenshots. `assets/site.js`
+  copy, cards and the demo never touch these tokens directly.
+- **New pages** need three additions to match the shell: the `ui.css` link after
+  `site.css`, the boot script in `<head>`, and a `.theme-btn` with
+  `data-theme-toggle` inside `.header-actions`.
 - Update `sitemap.xml` when adding or renaming a language page.
 
 ## Accessibility notes
@@ -231,3 +246,7 @@ One-time setup:
   each has an **Open full page** link for real interaction.
 - `prefers-reduced-motion` disables reveal animations, count-ups and smooth
   scrolling.
+- The theme toggle is a real `<button>` with `aria-pressed` and a label that
+  flips between 白天模式 / 黑夜模式; the icon change is a transform, not a text
+  swap. The choice is stored in `localStorage` (`if-theme`) and never blocks
+  the first paint.

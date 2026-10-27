@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>InteFlow — a local-first study workflow</title>
     <meta name="description" content="InteFlow is a study workflow that runs on your own computer: import PDF / DOCX / Markdown question banks, practise in full screen, review question by question, build vocabulary and analysis, then export files you can take with you. 0 tokens on the main path, data never leaves your machine." />
-    <meta name="theme-color" content="#f4f1e8" />
+    <meta name="theme-color" content="#faf8f3" />
     <meta property="og:title" content="InteFlow — a local-first study workflow" />
     <meta property="og:description" content="InteFlow is a study workflow that runs on your own computer: import PDF / DOCX / Markdown question banks, practise in full screen, review question by question, build vocabulary and analysis, then export files you can take with you. 0 tokens on the main path, data never leaves your machine." />
     <meta property="og:type" content="website" />
@@ -26,6 +26,17 @@
       });
     </script>
     <link rel="stylesheet" href="assets/site.css" />
+    <link rel="stylesheet" href="assets/ui.css" />
+    <script>
+      try {
+        document.documentElement.setAttribute(
+          "data-theme",
+          window.localStorage.getItem("if-theme") === "dark" ? "dark" : "light"
+        );
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
@@ -49,6 +60,7 @@
         </nav>
 
         <div class="header-actions">
+          <button class="theme-btn" type="button" data-theme-toggle aria-pressed="false" aria-label="切换到黑夜模式" title="黑夜模式"><svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.3A8.5 8.5 0 0 1 9.7 3.5a8.5 8.5 0 1 0 10.8 10.8Z"/></svg><svg class="ic-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
           <a class="lang-switch" href="index.html" hreflang="zh-CN" lang="zh-CN" aria-label="切换到中文">中文</a>
           <a class="ghost-link" href="https://github.com/JasonSun2009CN/InteFlow" target="_blank" rel="noreferrer">
             GitHub <span aria-hidden="true">↗</span>
@@ -315,5 +327,6 @@
     </footer>
     <script src="assets/site.js" defer></script>
     <script src="assets/downloads.js" defer></script>
+    <script src="assets/ui.js" defer></script>
   </body>
 </html>

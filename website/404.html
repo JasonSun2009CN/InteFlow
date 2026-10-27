@@ -7,61 +7,17 @@
     <meta name="robots" content="noindex" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/site.css" />
-    <style>
-      .not-found {
-        display: grid;
-        min-height: 100vh;
-        place-items: center;
-        padding: 40px 20px;
-        background-image: linear-gradient(
-            to right,
-            rgba(20, 21, 15, 0.055) 1px,
-            transparent 1px
-          );
-        background-size: 88px 100%;
+    <link rel="stylesheet" href="assets/ui.css" />
+    <script>
+      try {
+        document.documentElement.setAttribute(
+          "data-theme",
+          window.localStorage.getItem("if-theme") === "dark" ? "dark" : "light"
+        );
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
       }
-      .not-found-inner {
-        max-width: 560px;
-        border: 1px solid var(--ink);
-        background: var(--surface);
-        padding: 42px;
-        box-shadow: 12px 12px 0 var(--accent);
-      }
-      .not-found h1 {
-        margin: 18px 0 0;
-        font-family: var(--font-display);
-        font-size: clamp(44px, 9vw, 76px);
-        font-weight: 500;
-        line-height: 0.95;
-        letter-spacing: -0.045em;
-      }
-      .not-found h1 em {
-        color: var(--accent);
-        font-style: normal;
-      }
-      .not-found p {
-        margin-top: 16px;
-        color: var(--ink-2);
-        font-size: 13.5px;
-        line-height: 1.8;
-      }
-      .not-found-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 26px;
-      }
-
-      .not-found-actions .btn {
-        margin-top: 0;
-      }
-      @media (max-width: 520px) {
-        .not-found-inner {
-          padding: 26px;
-          box-shadow: 7px 7px 0 var(--accent);
-        }
-      }
-    </style>
+    </script>
   </head>
   <body>
     <main class="not-found">
@@ -87,5 +43,6 @@
         });
       })();
     </script>
+    <script src="assets/ui.js" defer></script>
   </body>
 </html>
