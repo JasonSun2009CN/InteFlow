@@ -70,7 +70,7 @@ flowchart LR
 |---|---|
 | **导入** | PDF（PyMuPDF 确定性转换：分栏、题号、选项、答案表回填、图片抽取）、DOCX（段落 / 表格 / 图片 + zip 安全校验）、`.md` / `.ifmd.md`；扫描页走 OCR（macOS Vision 或系统 `tesseract`，可选）；逐页导入报告、可暂停确认、可取消；单文件上限 60 MB |
 | **格式** | InteFlow-MD（`.ifmd.md`）：`:::q` 题目块、`@material` / `@material2`（双篇）/ `@stem`、`! answer:` 元数据；确定性状态机解析，结构错误带行号报错，**不猜测**；材料里的单换行按原文保留（诗歌/摘录） |
-| **内置题库** | 《SAT机考25年语文合集（下）》44 个单元 / 1186 题，离线、0 token、幂等，可单单元添加或一键全加 |
+| **题库导入** | 导入题库 ZIP：标准包 = `manifest.json` + 每单元 `doc.ifmd.md` + `assets/`；也可直接放多份 `.ifmd.md` 自动生成清单。安装到「我的题库」，逐套 Add / Add all，可移除；0 token。**安装包不含内置 SAT 题目**，样例题库只用于本地源码开发 |
 | **答案录入** | 逐题字母网格；多选（`multi=1`，答案 `A,C`）；填空（`kind=blank`，多个可接受答案用 `\|` 分隔）；批量粘贴（`1-A 2-C`、`1. A`、`ACBDA`、`3-AC`）；保存后回写题库源文件 |
 | **练习** | 全屏、无侧栏干扰；**正计时 / 倒计时**可选，倒计时到 `00:00` 自动交卷，并按试卷记住上次的选择；题号面板、标记待看、键盘 `A`–`D` 与 `←` `→` |
 | **复盘工作台** | 全屏、**2-of-5** 分屏（题目 / 分析 / AI Tutor / 生词本 / **词典**），每侧可切换并支持左右互换；左上角折叠式题号导航（All / Wrong / Correct）；可拖拽分隔条 |
@@ -128,7 +128,7 @@ flowchart LR
     MD["Markdown + KaTeX 渲染"]
   end
 
-  API["FastAPI · 13 个 router · 67 条 API"]
+  API["FastAPI · 13 个 router · 69 条 API"]
   CONV["convert<br/>pdf · docx · twocolumn · ocr · llm_fallback"]
   IFMD["ifmd<br/>parser / writer（确定性）"]
   REPO["repos<br/>documents · sessions · analyses · words · subjects · review …"]
@@ -183,11 +183,11 @@ data/
 
 | 指标 | 数值 |
 |---|---|
-| 后端测试 | `pytest` **309 passed, 1 skipped** |
-| 前端组件测试 | `npm test` **149 passed, 5 skipped** |
+| 后端测试 | `pytest` **349 passed** |
+| 前端组件测试 | `npm test` **167 passed, 5 skipped** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| API 面 | **67 条** |
-| 内置题库 | **44 单元 / 1186 题** |
+| API 面 | **69 条** |
+| 开发样例题库 | **44 单元 / 1186 题**（安装包不含） |
 | 本地词典 | 韦氏 **92,006 条** |
 | LLM 服务商目录 | **19 家**，2 种协议 |
 | 界面主题 | **5 套** |
@@ -213,8 +213,7 @@ cd InteFlow
 - 打开 <http://localhost:5173>；后端健康检查 <http://localhost:8000/api/health>。
 - 不想本地安装也可以先看静态官网 `website/index.html`，首页前段有平台下载；`website/demo.html` 可直接在浏览器里做题、交卷、复盘。
 
-**最短上手路径**：Library → 导入题库（或先到 Settings 打开 **Show built-in library**，再展开内置题库卡片 →
-**Add all**）→ 回 Exams → **Start** → 交卷 → 复盘写解析 →
+**最短上手路径**：Library → 导入题库 ZIP（源码运行时也可直接展开内置样例题库卡片 → **Add all**）→ 回 Exams → **Start** → 交卷 → 复盘写解析 →
 Review 看错题 / Vocabulary 建词表 → Notebook 导出。
 
 ## 10. 适用人群与典型场景

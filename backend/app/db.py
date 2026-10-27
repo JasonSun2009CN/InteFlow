@@ -15,6 +15,7 @@ DOCS_DIR = DATA_DIR / "docs"          # docs/<doc_id>/doc.ifmd.md + assets/
 UPLOAD_TMP = DATA_DIR / "tmp"         # transient upload staging
 JOBS_DIR = DATA_DIR / "jobs"          # import_jobs/<job_id>/ (staged conversion result)
 EXPORTS_DIR = DATA_DIR / "exports"
+BANKS_DIR = DATA_DIR / "banks"       # user-imported question banks
 
 
 def doc_dir(doc_id: int) -> Path:
@@ -206,7 +207,7 @@ CREATE TABLE IF NOT EXISTS llm_logs (
 
 
 def ensure_dirs() -> None:
-    for d in (DATA_DIR, DOCS_DIR, UPLOAD_TMP, JOBS_DIR, EXPORTS_DIR):
+    for d in (DATA_DIR, DOCS_DIR, UPLOAD_TMP, JOBS_DIR, EXPORTS_DIR, BANKS_DIR):
         d.mkdir(parents=True, exist_ok=True)
 
 

@@ -29,9 +29,16 @@ if sys.platform == "darwin":
     # Native macOS OCR (optional, but shipped in the desktop build).
     hiddenimports += ["Vision", "Quartz", "Foundation", "objc"]
 
-# Data shipped inside app/: built-in question banks, templates, etc.
+# Data shipped inside app/: templates, catalogues, etc. Copyrighted sample
+# question banks under app/builtin are deliberately NOT packaged — they stay in
+# the source tree for local development only (verify_bundle.py re-checks this).
+BUILTIN_DIR = os.path.abspath(os.path.join(BACKEND, "app", "builtin"))
 datas = []
-for base, _dirs, files in os.walk(os.path.join(BACKEND, "app")):
+for base, dirs, files in os.walk(os.path.join(BACKEND, "app")):
+    base_abs = os.path.abspath(base)
+    if base_abs == BUILTIN_DIR or base_abs.startswith(BUILTIN_DIR + os.sep):
+        dirs[:] = []
+        continue
     for name in files:
         if name.endswith((".md", ".json", ".yaml", ".yml", ".txt", ".html")):
             source = os.path.join(base, name)

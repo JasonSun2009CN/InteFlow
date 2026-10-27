@@ -2,9 +2,9 @@
 """Fail if a packaged desktop bundle contains local user data.
 
 The desktop app must be a clean, empty install: no SQLite database, imported
-documents, exports, dictionary index or Merriam-Webster source files. This
-script is run by CI (and can be run locally) against electron-builder's staged
-resources.
+documents, exports, dictionary index, Merriam-Webster source files or bundled
+copyrighted sample question banks. This script is run by CI (and can be run
+locally) against electron-builder's staged resources.
 
 Usage:
     python desktop/verify_bundle.py desktop/build
@@ -19,6 +19,9 @@ from pathlib import Path
 FORBIDDEN_FILES = {"app.db", "app.db-wal", "app.db-shm", "mw.db"}
 FORBIDDEN_SUFFIXES = {".eudb"}
 DATA_MARKERS = ("data/docs/", "data/exports/", "data/dictionary/", "data/jobs/", "data/tmp/")
+# Copyrighted sample banks live in the source tree for development only.
+BUILTIN_MARKERS = ("app/builtin/", "builtin/sat2025-rw-b")
+
 
 
 def find_forbidden(root: Path) -> list[str]:
@@ -32,6 +35,8 @@ def find_forbidden(root: Path) -> list[str]:
         if name in FORBIDDEN_FILES or path.suffix.lower() in FORBIDDEN_SUFFIXES:
             found.add(rel)
         elif rel.startswith("data/") or any(marker in f"/{rel}" for marker in DATA_MARKERS):
+            found.add(rel)
+        elif any(marker in f"/{rel}" for marker in BUILTIN_MARKERS):
             found.add(rel)
     return sorted(found)
 

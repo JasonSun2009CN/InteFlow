@@ -22,8 +22,9 @@ function splitTitle(title: string): { date: string; variant: string } {
 }
 
 /**
- * Collapsed card for one shipped question bank; expands into date-grouped
- * modules with single Add buttons and an "Add all" batch action.
+ * Collapsed card for one installed question bank; expands into date-grouped
+ * modules with single Add buttons, an "Add all" batch action and (for
+ * user-imported banks) Remove.
  */
 export default function BuiltinBankCard({ bank, onChanged }: Props) {
   const { t, locale } = useI18n();
@@ -61,6 +62,27 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
     }
   }
 
+  async function removeBank() {
+    if (!window.confirm(
+      t("Remove “{title}” and its bank files? Exams already in the Library stay.", {
+        title: bank.title,
+      }),
+    )) {
+      return;
+    }
+    setBusyAll(true);
+    setError(null);
+    setFlash(null);
+    try {
+      await api.removeBank(bank.id);
+      onChanged();
+    } catch (err) {
+      setError(errText(err));
+    } finally {
+      setBusyAll(false);
+    }
+  }
+
   async function addAll() {
     setBusyAll(true);
     setError(null);
@@ -92,7 +114,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
           <h2 className="text-lg font-semibold">
             {bank.title}
             <span className="ml-2 align-middle rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
-              {t("built-in")}
+              {bank.origin === "user" ? t("imported") : t("built-in")}
             </span>
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -131,6 +153,16 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
             </button>
             {flash && <span className="text-sm text-emerald-600">{flash}</span>}
             {error && <span className="text-sm text-red-600">{error}</span>}
+            {bank.removable && (
+              <button
+                type="button"
+                onClick={() => void removeBank()}
+                disabled={busy}
+                className="ml-auto rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+              >
+                {t("Remove bank")}
+              </button>
+            )}
           </div>
 
           <div className="space-y-4">

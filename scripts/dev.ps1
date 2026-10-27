@@ -10,6 +10,7 @@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$env:INTEFLOW_DEV = "1"
 
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $ROOT = Split-Path -Parent $ROOT

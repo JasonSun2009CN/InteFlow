@@ -37,15 +37,17 @@ override these paths for development.
 
 ### A fresh install is empty
 
-The installer contains the application code and the bundled sample bank, but **no
-user data**: no `app.db`, imported documents, sessions, analyses, vocabulary,
-exports or dictionary index. Runtime state is created under the app-data folder
-on first launch. `desktop/verify_bundle.py` checks this in CI and fails the build
-if a database, `.eudb` file or `data/` tree leaks into the packaged resources.
+The installer contains the application code but **no user data and no bundled
+question bank**: no `app.db`, imported documents, sessions, analyses, vocabulary,
+exports, dictionary index or copyrighted SAT questions. Runtime state is created
+under the app-data folder on first launch. `desktop/verify_bundle.py` checks this
+in CI and fails the build if a database, `.eudb` file, `data/` tree or
+`app/builtin/` bank leaks into the packaged resources.
 
-The bundled SAT sample bank is **hidden by default** (`show_builtin_library`
-is `false`), so Library opens with only the import card. Users who want the
-sample units can enable **Settings → Show built-in library**.
+The sample bank under `backend/app/builtin/` exists for **local source runs only**
+(the start scripts set `INTEFLOW_DEV=1`, so it is visible by default there).
+Installers ship no questions; users import their own bank ZIP from the Library
+page (**Import bank**).
 
 **File → Reset local data…** (also in Settings → Desktop) stops the backend,
 clears the app-data folder, web storage and cache, and restarts into the same
@@ -56,7 +58,8 @@ derived index lives in `data/` and is rebuilt on demand.
 
 - The FastAPI backend frozen with PyInstaller (`desktop/InteFlow.spec`).
 - The built React frontend (`frontend/dist`).
-- The bundled SAT sample bank (present but hidden until **Show built-in library** is enabled).
+- **No bundled question banks.** `backend/app/builtin/` is excluded by
+  `desktop/InteFlow.spec`; users import their own bank ZIP.
 - MathJax plus the TeX→SVG bridge. There is no separate Node install: the backend
   invokes the Electron binary with `ELECTRON_RUN_AS_NODE=1`.
 - macOS: the `pyobjc` Vision framework for OCR.
@@ -121,7 +124,8 @@ INTEFLOW_SMOKE=1 npx electron .
 - `windows-2025` → x64 NSIS installer
 
 Every build runs `desktop/verify_bundle.py` against the packaged resources so a
-bundle that contains local data fails instead of being published. All artifacts
+bundle that contains local data or a bundled sample bank fails instead of being
+published. All artifacts
 are attached to one GitHub Release by a final job. `workflow_dispatch` builds
 the same artifacts without publishing a release.
 

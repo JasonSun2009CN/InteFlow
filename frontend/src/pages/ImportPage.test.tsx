@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api, type AppSettings, type BuiltinBank } from "../api/client";
@@ -14,6 +14,7 @@ vi.mock("../api/client", async (importOriginal) => {
       listDocuments: vi.fn(),
       listSubjects: vi.fn(),
       listBanks: vi.fn(),
+      importBank: vi.fn(),
       health: vi.fn(),
     },
   };
@@ -23,6 +24,7 @@ const getSettings = vi.mocked(api.getSettings);
 const listDocuments = vi.mocked(api.listDocuments);
 const listSubjects = vi.mocked(api.listSubjects);
 const listBanks = vi.mocked(api.listBanks);
+const importBank = vi.mocked(api.importBank);
 const health = vi.mocked(api.health);
 
 const settings: AppSettings = {
@@ -48,6 +50,8 @@ const bank: BuiltinBank = {
   id: "sample",
   title: "Sample question bank",
   source: "builtin",
+  origin: "builtin",
+  removable: false,
   units: [],
 };
 
@@ -69,13 +73,44 @@ function renderPage() {
 }
 
 describe("ImportPage built-in library", () => {
-  it("does not load or show the sample bank by default", async () => {
+  it("keeps the sample bank hidden by default but still offers bank import", async () => {
     renderPage();
 
     expect(await screen.findByText("Nothing imported yet.")).toBeInTheDocument();
-    await waitFor(() => expect(getSettings).toHaveBeenCalled());
-    expect(listBanks).not.toHaveBeenCalled();
+    await waitFor(() => expect(listBanks).toHaveBeenCalled());
     expect(screen.queryByText("Sample question bank")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Question banks" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Import bank" })).toBeInTheDocument();
+  });
+
+  it("always shows user-imported banks, even when the sample bank is off", async () => {
+    listBanks.mockResolvedValue([
+      { ...bank, id: "mine", title: "My imported bank", origin: "user", removable: true },
+    ]);
+    renderPage();
+
+    expect(await screen.findByText("My imported bank")).toBeInTheDocument();
+    expect(screen.getByText("imported")).toBeInTheDocument();
+  });
+
+  it("imports a bank ZIP and reports the unit/question count", async () => {
+    importBank.mockResolvedValue({
+      bank_id: "mine",
+      title: "My bank",
+      units: 3,
+      questions: 81,
+      assets: 2,
+    });
+    renderPage();
+    await waitFor(() => expect(listBanks).toHaveBeenCalled());
+
+    const file = new File(["zip"], "bank.zip", { type: "application/zip" });
+    fireEvent.change(screen.getByTestId("bank-file"), { target: { files: [file] } });
+
+    await waitFor(() => expect(importBank).toHaveBeenCalledWith(file));
+    expect(
+      await screen.findByText("Imported “My bank” · 3 units · 81 questions."),
+    ).toBeInTheDocument();
   });
 
   it("shows the sample bank when the setting is enabled", async () => {

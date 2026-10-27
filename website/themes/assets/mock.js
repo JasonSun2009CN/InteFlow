@@ -99,7 +99,7 @@
   var PLACEHOLDERS = {
     library: {
       title: "Library",
-      text: "Import a PDF, DOCX or InteFlow-MD file, or add a ready-made set from the built-in bank.",
+      text: "Import a PDF, DOCX or InteFlow-MD file, or install a question-bank ZIP.",
       cta: "Import a file"
     },
     sessions: {

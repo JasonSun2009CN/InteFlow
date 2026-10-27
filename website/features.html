@@ -217,7 +217,7 @@
                   <div><dt>多格式导入</dt><dd>PDF、DOCX、<code>.md</code> 或 <code>.ifmd.md</code>，逐页报告。</dd></div>
                   <div><dt>PDF 结构识别</dt><dd>双栏、题号、选项、答案表回填与图片抽取。</dd></div>
                   <div><dt>扫描件 OCR</dt><dd>macOS Vision 优先，其他系统走 Tesseract。</dd></div>
-                  <div><dt>内置题库</dt><dd>44 个单元、1,186 道题，可按单元或一键添加。</dd></div>
+                  <div><dt>题库导入</dt><dd>ZIP（manifest + 单元，或散装 <code>.ifmd.md</code>）安装到我的题库，逐套 Add 或一键全加；安装包不含版权题目。</dd></div>
                   <div><dt>Library 与学科</dt><dd>题数、答案状态一览；自定义学科、颜色与筛选。</dd></div>
                   <div><dt>答案录入</dt><dd>字母网格、多选、多可接受答案与批量粘贴。</dd></div>
                   <div><dt>InteFlow-MD</dt><dd>纯文本中间格式，公式、图片、多选与填空都有确定语法。</dd></div>
@@ -270,11 +270,11 @@
       <!-- ============================================================ numbers -->
       <section class="numbers" aria-label="项目数据">
         <div class="wrap numbers-grid">
-          <div class="number-item reveal"><strong>1,186</strong><span>内置题目</span></div>
-          <div class="number-item reveal"><strong>44</strong><span>内置单元</span></div>
+          <div class="number-item reveal"><strong>ZIP</strong><span>题库导入</span></div>
+          <div class="number-item reveal"><strong>0</strong><span>随包 SAT 题目</span></div>
           <div class="number-item reveal"><strong>92,006</strong><span>词典条目</span></div>
           <div class="number-item reveal"><strong>19</strong><span>LLM 服务商</span></div>
-          <div class="number-item reveal"><strong>65</strong><span>API 端点</span></div>
+          <div class="number-item reveal"><strong>69</strong><span>API 端点</span></div>
           <div class="number-item reveal"><strong>447</strong><span>自动化测试</span></div>
         </div>
       </section>
@@ -419,7 +419,7 @@ cd InteFlow
               <summary><span class="faq-no">01</span>只支持 SAT 吗？<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  不是。题目的 <code>sec</code> 是自由标签（<code>rw</code>、<code>math</code>、<code>physics</code>、<code>history</code>……），不是固定枚举。任何“题号 + 两个以上选项”的题库都能导入；没有识别到选项的题会按填空题处理。内置 SAT 题库只是开箱即用的示例。
+                  不是。题目的 <code>sec</code> 是自由标签（<code>rw</code>、<code>math</code>、<code>physics</code>、<code>history</code>……），不是固定枚举。任何“题号 + 两个以上选项”的题库都能导入；没有识别到选项的题会按填空题处理。安装包不附带任何 SAT 真题；示例题库只存在于源码开发环境，发布会自动排除。你可以导入自己的题库 ZIP。
                 </p>
               </div>
             </details>

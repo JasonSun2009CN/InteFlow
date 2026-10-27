@@ -29,11 +29,11 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **339 passed** |
+| 后端测试 | `pytest` **349 passed** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **165 passed, 5 skipped** |
-| 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`） |
-| API 面 | 67 条（见 `docs/ARCHITECTURE.md`） |
+| 前端组件测试 | `npm test` **167 passed, 5 skipped** |
+| 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`）——**仅源码开发环境**，安装包不含 |
+| API 面 | 69 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
@@ -131,8 +131,8 @@
 > Electron 安装包（macOS arm64/x64、Windows x64），源码运行只保留在下载页的 “From source / 开发者选项” 小节。
 > 删除仓库根目录的旧 `InteFlow.app` / `InteFlow.command`（它们会打开终端和浏览器，容易和桌面版混淆）。
 > **新下载的桌面应用是纯空的**：安装包不含 `app.db`、导入文档、作答、分析、生词本、导出或词典索引；
-> `desktop/verify_bundle.py` 在 CI 打包后校验资源目录，发现本地数据直接失败。内置 SAT 题库仍随包分发，
-> 但新增设置 `show_builtin_library` **默认关**，Library 首屏只有导入卡片；需要时在 Settings 打开。
+> `desktop/verify_bundle.py` 在 CI 打包后校验资源目录，发现本地数据直接失败。内置 SAT 题库
+> **只在源码树里保留**，PyInstaller 打包时排除，CI 也会校验安装包内不存在（版权原因）。
 > 桌面端新增 **File → Reset local data…** 与 Settings → Desktop 的同一入口：停止后端、清空 app-data
 > 与 Electron 的 localStorage/cache，然后重启回到首次启动状态（保留 `dictionary/*.eudb` 源文件）。
 > `.github/workflows/desktop.yml` 现在在 `main` push 上也构建（仅上传 artifact），`v*` tag 才发布 Release。
@@ -201,6 +201,28 @@
 >    下载页三张平台卡片的兜底链接改为 `/releases/latest`，卡片 `title` 带上解析到的版本号。
 >    版本号从不写进 HTML，发新 Release 无需重新部署网站。
 
+## 3.1 最新：题库版权与题库导入（2026-10-27）
+
+- **安装包不含内置 SAT 题目**：`backend/app/builtin/` 仍留在仓库供本地开发使用，但
+  `desktop/InteFlow.spec` 在收集数据时跳过整个 `app/builtin/`；`desktop/verify_bundle.py`
+  新增 `app/builtin/` 拦截规则，CI 打包后会确认安装包里没有任何题库文件。
+- **开发环境默认可见**：`start.sh` / `scripts/dev.sh` / `start.ps1` / `scripts/dev.ps1` 会设置
+  `INTEFLOW_DEV=1`，`GET/PUT /api/settings` 的 `show_builtin_library` 默认值随之为开；
+  安装包/普通启动保持默认关。源码运行看到 44 套，只是没有自动写进 Library。
+- **用户可导入题库（而不是单份试卷）**：`POST /api/builtin/import` 接受 `.zip`：
+  - 标准包：根目录 `manifest.json` + `<unit>/doc.ifmd.md` + `<unit>/assets/`；
+  - 散装包：任意位置的 `*.ifmd.md`，缺 manifest 时自动扫描并生成清单；
+  - 自动剥掉「压缩文件夹」产生的一层根目录；
+  - 导入前做 ZIP 安全校验（大小/条目/压缩比/路径穿越/符号链接/未知文件），逐套解析校验，
+    归一化后装到 `data/banks/<bank_id>/`；重复 id 返回 409。
+- **导入后进入「我的题库」**：Import 页新增 **Question banks / 题库** 区，用户题库始终显示，
+  内置题库仍由 `show_builtin_library` 控制；卡片支持逐套 Add / Add all，用户题库可
+  `DELETE /api/builtin/{bank_id}` 移除（已加入 Library 的试卷保留）。
+- **代码**：`backend/app/api/builtin.py`（双根目录 + ZIP 导入）、`backend/app/db.py`（`BANKS_DIR`）、
+  `desktop/InteFlow.spec`、`desktop/verify_bundle.py`、`frontend/src/pages/ImportPage.tsx`、
+  `frontend/src/components/BuiltinBankCard.tsx`；测试 `tests/test_bank_import.py`、
+  `tests/test_bundle_guard.py`、`test_settings_api.py`。
+
 ## 4. 迁移与改名映射（已执行）
 
 从 SATeacher 全量迁移（排除 `.venv` / `node_modules` / `dist` / `data` / `.env` / IDE 文件），并做了如下改名：
@@ -231,7 +253,7 @@
 | 迁移范围 | **全量**迁移（含 OCR、内置题库、CB 规范化、导出、测试），再逐步 refine |
 | 改名 | **全部改名**（见 §4 映射），不只是 UI 文案 |
 | 题目模型 | 把 `sec` **泛化为自由板块标签**（去掉 `CHECK (sec IN ('rw','math'))`），SAT 卷仍填 `rw`/`math` |
-| 内置题库 | **保留**（开箱即用的示例题库） |
+| 内置题库 | **保留在仓库供开发**；2026-10-27 起**不进入安装包**（版权原因），用户改为导入题库 ZIP |
 | 计时 | 正计时 + 倒计时两种；开始屏手输倒计时，默认值按试卷读取上次提交的计时方式（无记录回退最近一次任意考试，再回退 localStorage）；倒计时到 0 **自动交卷** |
 | 主界面信息架构 | **左侧栏 6 个 tab**：Exams（选卷）/ Library（导入+题库+试卷列表）/ Sessions（作答历史）/ Review（错题集 + 精选题集）/ Vocabulary（生词本）/ Settings。**练习页与复盘页全屏无侧栏**；答案录入在侧栏布局内。窄屏侧栏变抽屉；桌面端可 **Compact** 为 80px 图标栏（存 `inteflow.sidebar.compact`，移动端不生效） |
 | 复盘（分析模式，2026-10-19） | 进入复盘**隐藏左侧栏**；题号导航默认缩到左上角、点击旋转展开为**悬浮**面板（All / Wrong / Correct），点击某题即选中并收起；**2-of-4 分屏**：题目 / 分析 / AI Tutor / 生词本，每侧可切换到另外三者；选择已在另一侧的工具则左右互换；默认左题目右分析；分隔条可拖拽/方向键。导出与 Notebook 放顶栏（不占用分屏）。**2026-10-21**：每侧头部的工具切换由下拉菜单改为**四个图标 + 标签的横向按钮行**（当前项高亮，另一侧的工具点按即交换）。 |
@@ -261,7 +283,8 @@
 | 文档语言 | `README.md` 英文、`README-cn.md` 中文、`AGENT.md` 中文、`docs/IDEAS.md` 中文（**不建 CLAUDE.md**） |
 | 界面语言（2026-10-22） | 默认英文；Settings → Language 即时切换中文（`localStorage` 键 `inteflow.language`）。所有前端 UI 文案经 `frontend/src/lib/i18n.tsx` 的 `t()`；考试原文、用户内容与后端报错不翻译 |
 | 桌面端分发（2026-10-24） | 官网主入口只用 Electron 安装包（`.github/workflows/desktop.yml`，macOS arm64/x64 + Windows x64）；旧 `InteFlow.app` / `InteFlow.command` 已删除。源码运行仅作为开发者选项保留在下载页与 README。`main` push 构建并上传 artifact，`v*` tag 发布 GitHub Release |
-| 新安装是纯空应用（2026-10-24） | 安装包不包含任何本地运行数据；`desktop/verify_bundle.py` 在 CI 校验资源目录（`app.db` / `mw.db` / `.eudb` / `data/`）。内置 SAT 题库仍随包，但 `show_builtin_library` 默认关，Library 首屏为空。桌面端 File 菜单与 Settings 提供 **Reset local data…**（清空 app-data + localStorage/cache 并重启，保留 `dictionary/*.eudb` 源文件） |
+| 新安装是纯空应用（2026-10-24） | 安装包不包含任何本地运行数据；`desktop/verify_bundle.py` 在 CI 校验资源目录（`app.db` / `mw.db` / `.eudb` / `data/`）。**内置 SAT 题库不再随包**（仅源码开发环境保留，spec 排除 + CI 校验）；`show_builtin_library` 在开发环境默认开、在安装包中无内置题库。桌面端 File 菜单与 Settings 提供 **Reset local data…**（清空 app-data + localStorage/cache 并重启，保留 `dictionary/*.eudb` 源文件） |
+| 题库导入（2026-10-27） | `POST /api/builtin/import` 接受 ZIP（manifest + units，或无 manifest 的多份 `.ifmd.md`）；安装到 `data/banks/`，Import 页“题库”区按需 Add / Add all；用户题库可删除。0 token；ZIP 安全校验 + 逐套 IFMD 解析后才落盘 |
 
 ## 6. 待办 / 已知缺口
 
@@ -332,7 +355,7 @@ cd frontend && npm test         # 165 passed, 5 skipped
 | `backend/app/api/` | documents · imports · builtin · sessions · settings · ai · **analysis** · **dictionary** · **custom_dictionary** · **vocabulary** · **word_exam** · **subjects** · **review** |
 | `backend/app/repos/` | documents · imports · sessions · **analyses** · words（grid v2 + 结构化词条） · **custom_dictionary** · **subjects** · **review** · settings |
 | `backend/app/export/` | PDF / DOCX / **notebook（复盘笔记本）** / 数学公式桥接 |
-| `backend/app/builtin/` | 内置题库（44 单元，随仓库分发） |
+| `backend/app/builtin/` | 内置题库（44 单元，**仅源码开发环境**；PyInstaller 打包排除，CI 校验安装包不含） |
 | `frontend/src/pages/` | ExamHome · **Library(Import)** · **Sessions** · **Review (MistakesPage)** · **Vocabulary** · AnswerKey · **Practice** · Result · Settings |
 | `frontend/src/components/ui/AppSidebar.tsx` | 工作区左侧栏（6 tab，移动端抽屉；桌面 Compact 图标栏，存 `inteflow.sidebar.compact`） |
 | `frontend/src/components/PassageText.tsx` | 文章/双篇材料渲染（单篇 `Passage`，双篇 `Text 1`/`Text 2`，保留诗歌换行） |
@@ -347,9 +370,10 @@ cd frontend && npm test         # 165 passed, 5 skipped
 | `.github/workflows/pages.yml` | GitHub Pages 部署：push 到 main 时发布 `website/` |
 | `.github/workflows/desktop.yml` | 桌面端 CI/CD：`main` push 构建 artifact；`v*` tag 打包 macOS arm64/x64 DMG 与 Windows x64 NSIS 并发布 Release；打包后跑 `verify_bundle.py` |
 | `desktop/main.cjs` · `desktop/preload.cjs` | Electron 主进程（起后端、PDF 桥、菜单、**Reset local data** IPC）与最小 preload 桥（`window.inteflow.resetData()`） |
-| `desktop/verify_bundle.py` | 校验打包资源不含 `app.db` / `mw.db` / `.eudb` / `data/`，保证官网下载到的应用是纯空安装 |
+| `desktop/verify_bundle.py` | 校验打包资源不含 `app.db` / `mw.db` / `.eudb` / `data/` **以及 `app/builtin/` 题库**，保证官网下载到的应用是纯空安装 |
 | `docs/DESKTOP.md` | 桌面端下载、数据位置、纯空安装保证、Reset、本地构建与 CI 说明 |
-| `scripts/build_builtin.py` | 内置题库离线构建脚本 |
+| `scripts/build_builtin.py` | 内置题库离线构建脚本（产物仅用于本地开发） |
+| `backend/tests/test_bank_import.py` · `test_bundle_guard.py` | 题库 ZIP 导入/安全校验；打包资源不得含内置题库 |
 | `docs/examples/simple-math.ifmd.md` | 可直接导入的 10 题简单数学 demo（单选 / 多选 / 填空 / 材料题 / 公式） |
 | `start.sh` / `start.ps1` | 一键启动：前置检查 + 缺则 setup + 起前后端 + 等健康 + 开浏览器；`start.bat` 为 Windows 双击入口（源码运行，非桌面安装包） |
 

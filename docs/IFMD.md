@@ -219,3 +219,61 @@ How would the author of Text 2 respond to the claim in Text 1?
 - 单一入口：`parse(text) -> {meta, questions[]}`，纯函数，**不调用 LLM、不做模糊推断**。
 - 任何结构错误抛出带行号的 `IfmdError`，导入界面直接展示错误位置。
 - 单元测试覆盖：正常块 / **无选项（填空题）** / 选项数不对（1–3 或 >4） / 版本不符 / 公式与图片 / `@material` 组合 / 未知 `!` key / **`multi=1` 与多答案 `A,C`** / **填空多答案 `a | b`** / **`@material2` 双篇与顺序校验**。
+
+## 9. 题库包（Bank ZIP）
+
+单份 `.ifmd.md` 是「一套试卷」；**题库包**是若干套试卷的 ZIP，用于一次性导入整套题库。
+导入由 `POST /api/builtin/import` 处理，安装到本机 `data/banks/<bank_id>/`（0 token）。
+
+### 9.1 标准布局
+
+```
+my-bank.zip
+├── manifest.json
+├── unit-1/
+│   ├── doc.ifmd.md
+│   └── assets/
+│       └── p05-3d21f841.png
+└── unit-2/
+    ├── doc.ifmd.md
+    └── assets/…
+```
+
+`manifest.json`：
+
+```json
+{
+  "id": "my-bank",
+  "title": "My question bank",
+  "source": "my-bank.zip",
+  "units": [
+    { "id": "unit-1", "title": "Unit 1", "module": 1 },
+    { "id": "unit-2", "title": "Unit 2", "module": 2 }
+  ]
+}
+```
+
+- `id` 只能包含 `A-Z a-z 0-9 . _ -`；缺省或非法时服务端会生成一个稳定 id。
+- `questions` / `assets` 由服务端解析后重新计算，manifest 里不需要手填。
+- 每个单元必须有 `<id>/doc.ifmd.md`；解析失败或 0 题会拒绝整个题库包。
+- 单元目录里的 `assets/` 会随单元一起复制。
+
+### 9.2 无 manifest（散装）
+
+也可以只放若干 `.ifmd.md`（根目录或各自文件夹）：
+
+```
+alpha.ifmd.md
+beta.ifmd.md
+assets/…
+```
+
+服务端会扫描所有 `.ifmd.md`，用文件名/所在文件夹名作为 unit id，并自动生成 `manifest.json`。
+ZIP 外面套了一层文件夹（macOS「压缩文件夹」）时会自动剥掉。
+
+### 9.3 安全与限制
+
+- 只接受 `.zip`；单包 ≤ 80 MB，解压后 ≤ 400 MB，条目 ≤ 5000，压缩比异常会被拒绝。
+- 绝对路径、`..`、符号链接、未知文件类型会被拒绝；隐藏文件（`.DS_Store`、`__MACOSX`）忽略。
+- 同一 `id` 已存在时返回 409；用户题库可通过 `DELETE /api/builtin/{bank_id}` 移除，
+  已经 Add 到 Library 的试卷保留。

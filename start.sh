@@ -14,6 +14,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
+export INTEFLOW_DEV=1
 
 BACKEND_PORT="${INTEFLOW_BACKEND_PORT:-8000}"
 FRONTEND_PORT="${INTEFLOW_FRONTEND_PORT:-5173}"

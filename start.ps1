@@ -14,6 +14,7 @@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+$env:INTEFLOW_DEV = "1"
 # 老版本 PowerShell 没有这个变量；显式关掉，避免环境把原生程序非 0 退出当成异常。
 if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -Scope Global -ErrorAction SilentlyContinue) {
     $PSNativeCommandUseErrorActionPreference = $false

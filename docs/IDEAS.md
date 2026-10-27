@@ -22,6 +22,7 @@
   删除根目录旧 `InteFlow.app` / `InteFlow.command`。
 - 从官网下载的应用必须是纯空的新应用：不包含测试数据、导入试卷、作答、分析、生词本、导出、词典索引或设置。
   CI 打包后用 `desktop/verify_bundle.py` 校验；内置题库保留但默认隐藏（Settings → Show built-in library）。
+  > 2026-10-27 更新：安装包已**完全不含内置题库**，这条只保留开发环境（见下方「安装包去掉内置 SAT 题目」）。
 - 桌面端加 **File → Reset local data…** 与 Settings 入口，清空 app-data + localStorage/cache 后重启；
   保留 `dictionary/*.eudb` 源文件。
 - CI/CD：`.github/workflows/desktop.yml` 在 `main` push 构建 artifact，`v*` tag 发布 GitHub Release；
@@ -281,6 +282,26 @@
   （优先正式版）；标签页重新可见与每 15 分钟自动复查；下载页平台卡片兜底到 `/releases/latest`，
   卡片 `title` 显示解析到的版本号。
 - 网站改动随 `main` 推送由 Pages workflow 自动发布，不需要新 tag。
+
+### ✅ 安装包去掉内置 SAT 题目 + 支持导入题库（2026-10-27）
+
+- 版权原因：**安装包不再包含任何内置 SAT 题目**。`backend/app/builtin/` 仍保留在仓库里，
+  只用于本地源码开发；`desktop/InteFlow.spec` 收集数据时跳过 `app/builtin/`，
+  `desktop/verify_bundle.py` 也会在 CI 拦截（发现题库文件直接失败）。
+- 本地开发默认可见：`start.sh` / `scripts/dev.sh` / `start.ps1` / `scripts/dev.ps1` 设置
+  `INTEFLOW_DEV=1`，设置项的 `show_builtin_library` 默认开；安装包/普通启动仍为关。
+  只是列出题库，不会自动把 44 套写进 Library。
+- 用户可以导入**题库**，而不只是单份试卷：Import 页新增 **Question banks / 题库** 区，
+  接受 `.zip`：
+  - 标准包：`manifest.json` + `<unit>/doc.ifmd.md` + `assets/`；
+  - 散装包：多份 `.ifmd.md`，缺 manifest 时自动扫描生成清单；
+  - 自动剥掉「压缩文件夹」外层目录；
+  - ZIP 安全检查（大小/条目/压缩比/路径穿越/符号链接/未知文件），逐套解析通过后才落盘。
+- 导入后安装到本机 **我的题库**（`data/banks/<bank_id>/`），用户题库始终显示；
+  卡片支持逐套 **Add** / **Add all**，也可 **Remove bank**（已进入 Library 的试卷保留）。
+- 代码：`backend/app/api/builtin.py`、`backend/app/db.py`（`BANKS_DIR`）、
+  `desktop/InteFlow.spec`、`desktop/verify_bundle.py`、`ImportPage.tsx`、`BuiltinBankCard.tsx`；
+  格式说明见 `docs/IFMD.md` §9，测试见 `tests/test_bank_import.py` / `test_bundle_guard.py`。
 
 ### 🔜 后续（尚未实现）
 

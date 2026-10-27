@@ -458,6 +458,16 @@ const MESSAGES: Record<string, string> = {
   "Choose file": "选择文件",
   "Uploading…": "上传中…",
   "Importing…": "导入中…",
+  "Question banks": "题库",
+  "Import bank": "导入题库",
+  "Import a bank ZIP: manifest.json + one folder per unit, or several .ifmd.md files. Imports stay local (0 tokens).":
+    "导入题库 ZIP：可以是 manifest.json + 每个单元一个文件夹，也可以是若干 .ifmd.md 文件。导入只保存在本地（0 token）。",
+  "Imported “{title}” · {units} units · {questions} questions.":
+    "已导入「{title}」：{units} 套、{questions} 题。",
+  imported: "已导入",
+  "Remove bank": "移除题库",
+  "Remove “{title}” and its bank files? Exams already in the Library stay.":
+    "移除「{title}」及其题库文件？已经加入 Library 的试卷会保留。",
   "Built-in library": "内置题库",
   "built-in": "内置",
   "Adding…": "正在添加…",

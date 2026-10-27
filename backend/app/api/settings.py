@@ -12,6 +12,8 @@ Distinction the app now enforces:
 
 from __future__ import annotations
 
+import os
+
 import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -57,6 +59,10 @@ def _mask(key: str) -> str:
     return f"{key[:4]}…{key[-4:]}"
 
 
+def _dev_default() -> str:
+    return "1" if os.environ.get("INTEFLOW_DEV") == "1" else "0"
+
+
 def _load() -> dict[str, str]:
     stored = settings_repo.get_all()
     provider = stored.get("provider") or DEFAULT_PROVIDER
@@ -74,7 +80,9 @@ def _load() -> dict[str, str]:
         "vocab_learner_definitions": stored.get("vocab_learner_definitions", "0"),
         "vocab_exam_ai_grading": stored.get("vocab_exam_ai_grading", "0"),
         "custom_dictionary_enabled": stored.get("custom_dictionary_enabled", "1"),
-        "show_builtin_library": stored.get("show_builtin_library", "0"),
+        # Source runs (./start.sh, scripts/dev.sh) keep the local sample bank
+        # visible; packaged builds contain no bundled bank and stay opt-in.
+        "show_builtin_library": stored.get("show_builtin_library", _dev_default()),
         "dictionary_auto_lookup": stored.get("dictionary_auto_lookup", "1"),
     }
 

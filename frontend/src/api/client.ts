@@ -465,12 +465,23 @@ export interface BuiltinUnit {
   document_id: number | null;
 }
 
-/** A question bank shipped with the app (offline, 0 token). */
+/** An installed question bank: shipped sample or user-imported (0 token). */
 export interface BuiltinBank {
   id: string;
   title: string;
   source: string;
+  origin: "builtin" | "user";
+  removable: boolean;
   units: BuiltinUnit[];
+}
+
+/** Result of installing a bank ZIP. */
+export interface BankImportResult {
+  bank_id: string;
+  title: string;
+  units: number;
+  questions: number;
+  assets: number;
 }
 
 /** Stored LLM API config — the key is write-only and always masked on read. */
@@ -631,6 +642,20 @@ export const api = {
       `/api/builtin/${bankId}/add-all`,
       { method: "POST" },
     ),
+
+  /** Install a question-bank ZIP (manifest + units, or loose .ifmd.md files). */
+  importBank: async (file: File): Promise<BankImportResult> => {
+    const form = new FormData();
+    form.append("file", file);
+    return request<BankImportResult>("/api/builtin/import", {
+      method: "POST",
+      body: form,
+    });
+  },
+
+  /** Remove a user-imported bank (shipped sample banks are read-only). */
+  removeBank: (bankId: string) =>
+    request<{ deleted: number }>(`/api/builtin/${bankId}`, { method: "DELETE" }),
 
   getQuestions: (id: number) => request<Question[]>(`/api/documents/${id}/questions`),
 

@@ -80,6 +80,15 @@ def test_builtin_library_is_hidden_by_default_and_can_be_enabled(
     assert saved["show_builtin_library"] is False
 
 
+def test_development_env_shows_the_local_sample_bank(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Source runs set INTEFLOW_DEV=1; packaged builds never do.
+    assert client.get("/api/settings").json()["show_builtin_library"] is False
+    monkeypatch.setenv("INTEFLOW_DEV", "1")
+    assert client.get("/api/settings").json()["show_builtin_library"] is True
+
+
 def test_vocab_auto_definition_defaults_on_and_roundtrips(client: TestClient) -> None:
     assert client.get("/api/settings").json()["vocab_auto_definition"] is True
 

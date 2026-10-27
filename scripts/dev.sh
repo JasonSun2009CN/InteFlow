@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 cd "$ROOT"
+export INTEFLOW_DEV=1
 [ -d .venv ] || python3 -m venv .venv
 . .venv/bin/activate
 pip install -q -r backend/requirements.txt

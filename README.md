@@ -54,7 +54,7 @@ import PDF / DOCX / Markdown ──► local parse (0 token) ──► fill in a
 | Area | Capability |
 |---|---|
 | **Import** | PDF (PyMuPDF deterministic conversion: columns / numbering / options / **answer-key back-fill** / image extraction, **paired `Text 1`/`Text 2` detection**, **poetry line breaks**), DOCX (paragraphs / tables / images + zip safety checks), `.md` / `.ifmd.md`, **scanned-page OCR** (macOS Vision or system `tesseract`), import pipeline (per-page report, cancelable), 60 MB cap |
-| **Built-in bank** | `SAT机考25年语文合集（下）` — **44 units / 1186 questions**, one-click **Add** / **Add all**, offline, 0 token, idempotent (hidden by default; enable in Settings) |
+| **Question banks** | Import a bank **ZIP** (manifest + unit folders, or loose `.ifmd.md` files) into **My banks**; add units one by one or all at once, offline (0 token). Packaged installers ship **no copyrighted SAT questions** — the repo's sample bank is for local development only and is excluded from the desktop bundle |
 | **Library** | Document list (question count, answered count, answer status), practice history, cascade delete |
 | **Subjects** | User-defined subject groups (e.g. SAT Math, Physics) with a color; assign each paper inline from Library or the answer-key header, create a subject on the spot, manage/rename/recolor/delete it, filter Library and Exams by subject. Deleting a group only moves its papers to Uncategorized |
 | **Answer entry** | Per-question letter grid, one button per option (A–E for AMC, A–D for the SAT key; **multi**-select where the question allows it) + **fill-in-the-blank answers** (add extra acceptable spellings with ⊕) + **bulk paste** (`1-A 2-C` / `1. A` / `ACBDA` / multi `3-AC` / `1-E`) + validation + preview, written back to the source file |
@@ -190,7 +190,7 @@ npm run dev
 ### 1. Import a question bank
 
 Open <http://localhost:5173>. The left sidebar has six tabs: **Exams** (pick one to take),
-**Library** (import a file, add the built-in bank, manage your exam list, group papers by subject), **Sessions** (every **submitted**
+**Library** (import a file or a bank ZIP, manage your exam list, group papers by subject), **Sessions** (every **submitted**
 attempt, searchable/deletable), **Review**, **Vocabulary** and **Settings**. **Review** holds the mistake and starred
 sets; **Vocabulary** holds the per-paper word lists and the word test. On desktop, use the collapse button at the top
 of the sidebar to switch it to an **icon-only compact rail**; the choice is remembered (`inteflow.sidebar.compact`).
@@ -204,7 +204,7 @@ The mobile drawer always stays expanded.
 3. **Wait for the pipeline**: `detect → convert → review`, with a **per-page report** (text / OCR / low-confidence / no-engine).
    - Clean conversion → committed automatically;
    - Suspicious pages → it pauses at review so you can **Commit** or **Cancel** (0 token throughout).
-4. **(Optional) built-in bank**: enable **Settings → Show built-in library** first (it is hidden by default so a new install starts empty), then expand the bank card on the Library page, grouped by date, and click **Add** per unit or **Add all**.
+4. **(Optional) question bank**: on the Library page use **Import bank** for a ZIP (manifest + units, or loose `.ifmd.md` files), then expand the card and click **Add** per unit or **Add all**. Source checkouts also show the bundled sample bank when `INTEFLOW_DEV=1` (set by the start scripts); installers contain no bundled questions.
 5. **Back home to practice**: return to **Select an exam** and click **Start**.
 
 **Group papers by subject (optional).** In **Library**, each paper's row has a **Subject** dropdown — pick an
@@ -363,7 +363,7 @@ Ports: backend `8000`, frontend `5173`.
 ## Development
 
 ```bash
-# backend tests (baseline 339 passed; uses a temp data dir)
+# backend tests (baseline 349 passed; uses a temp data dir)
 cd backend && ../.venv/bin/python -m pytest -q
 
 # frontend type-check + build (0 errors)
@@ -398,7 +398,7 @@ InteFlow/
 │   │   ├── repos/subjects.py  subject groups: CRUD + paper assignment
 │   │   ├── repos/review.py    mistakes + starred collections
 │   │   ├── repos/custom_dictionary.py  user dictionary: CRUD, import, lookup
-│   │   └── builtin/           built-in bank (44 units shipped with the repo)
+│   │   └── builtin/           development-only sample bank (excluded from installers)
 │   ├── tests/                 pytest (304)
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4

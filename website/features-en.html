@@ -219,7 +219,7 @@
                   <div><dt>Multi-format import</dt><dd>PDF, DOCX, <code>.md</code> or <code>.ifmd.md</code>, with page-by-page reports.</dd></div>
                   <div><dt>PDF structure recognition</dt><dd>Two columns, question numbers, options, answer write-back and images.</dd></div>
                   <div><dt>Scanned-page OCR</dt><dd>macOS Vision first, Tesseract on other systems.</dd></div>
-                  <div><dt>Built-in question bank</dt><dd>44 units and 1,186 questions, unit by unit or all at once.</dd></div>
+                  <div><dt>Question-bank import</dt><dd>Install a ZIP (manifest + units, or loose <code>.ifmd.md</code>) into My banks; add units one by one or all at once. Installers ship no copyrighted questions.</dd></div>
                   <div><dt>Library and subjects</dt><dd>Counts and answer status at a glance; custom subjects, colors and filtering.</dd></div>
                   <div><dt>Answer entry</dt><dd>Letter grid, multi-select, multiple accepted answers and bulk paste.</dd></div>
                   <div><dt>InteFlow-MD</dt><dd>Plain-text format with deterministic syntax for formulas, images, multi-select and fill-ins.</dd></div>
@@ -272,11 +272,11 @@
       <!-- ============================================================ numbers -->
       <section class="numbers" aria-label="Project numbers">
         <div class="wrap numbers-grid">
-          <div class="number-item reveal"><strong>1,186</strong><span>built-in questions</span></div>
-          <div class="number-item reveal"><strong>44</strong><span>built-in units</span></div>
+          <div class="number-item reveal"><strong>ZIP</strong><span>bank import</span></div>
+          <div class="number-item reveal"><strong>0</strong><span>bundled SAT questions</span></div>
           <div class="number-item reveal"><strong>92,006</strong><span>dictionary entries</span></div>
           <div class="number-item reveal"><strong>19</strong><span>LLM providers</span></div>
-          <div class="number-item reveal"><strong>65</strong><span>API endpoints</span></div>
+          <div class="number-item reveal"><strong>69</strong><span>API endpoints</span></div>
           <div class="number-item reveal"><strong>447</strong><span>automated tests</span></div>
         </div>
       </section>
@@ -422,7 +422,7 @@ cd InteFlow
               <summary><span class="faq-no">01</span>Does it only support SAT?<i aria-hidden="true"></i></summary>
               <div class="faq-answer">
                 <p>
-                  No. A question's <code>sec</code> is a free-form label (<code>rw</code>, <code>math</code>, <code>physics</code>, <code>history</code>…), not a fixed enum. Any bank made of "question number + two or more options" can be imported; items where no options are detected are treated as fill-ins. The built-in SAT bank is just an out-of-the-box example.
+                  No. A question's <code>sec</code> is a free-form label (<code>rw</code>, <code>math</code>, <code>physics</code>, <code>history</code>…), not a fixed enum. Any bank made of "question number + two or more options" can be imported; items where no options are detected are treated as fill-ins. Installers ship no SAT questions at all; the sample bank exists only in source checkouts and is excluded from packages. Import your own bank ZIP instead.
                 </p>
               </div>
             </details>

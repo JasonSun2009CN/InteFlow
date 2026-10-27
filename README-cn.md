@@ -53,7 +53,7 @@ InteFlow 是一个**跑在你自己电脑上的 Web 应用**（FastAPI 后端 + 
 | 模块 | 能力 |
 |---|---|
 | **导入** | PDF（PyMuPDF 确定性转换：分栏/题号/选项/**答案键回填**/图片抽取/**双篇 Text 1·Text 2 识别**/**诗歌换行**）、DOCX（段落/表格/图片 + zip 安全校验）、`.md` / `.ifmd.md`、**扫描件 OCR**（macOS Vision 或系统 `tesseract`）、导入流水线（逐页报告、可取消）、上限 60 MB |
-| **内置题库** | `SAT机考25年语文合集（下）` —— **44 个单元 / 1186 题**，离线一键 **Add** / **Add all**，0 token，幂等（默认隐藏，可在 Settings 打开） |
+| **题库导入** | 导入题库 **ZIP**（manifest + 单元文件夹，或若干散装 `.ifmd.md`）到「我的题库」，逐套 Add 或 Add all；0 token。**安装包不含版权 SAT 题目**——仓库里的示例题库只用于本地开发，打包时排除 |
 | **资料库** | 文档列表（题数、已作答数、答案状态）、练习历史、删除（级联） |
 | **学科分类** | 自定义学科（如 SAT Math、Physics）+ 颜色；每套试卷最多一个学科，可在 Library 行内或答案页顶部直接归类、现场新建；支持改名/换色/删除与按学科筛选。删除学科只把试卷移回 Uncategorized，不影响题目/答案/分析/词表 |
 | **答案录入** | 选择题 A–Z 网格（题面有几个选项就显示几个，如 AMC 的 A–E；**多选**题可勾多个）+ **填空题多答案**（加号添加可接受答案）+ **批量粘贴**（`1-A 2-C` / `1. A` / `ACBDA` / 多选 `3-AC` / `1-E`）+ 校验 + 预览，同步回写源文件 |
@@ -177,7 +177,7 @@ npm run dev
 
 ### 1. 导入题库
 
-打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 内置题库 / 试卷列表 / 学科管理 / 删除）、
+打开 <http://localhost:5173>，左侧栏固定六个 tab：**Exams**（选卷开考）、**Library**（导入文件 / 题库 ZIP / 试卷列表 / 学科管理 / 删除）、
 **Sessions**（作答历史：**只有提交过才记录**，可搜索/删除）、**Review**（错题集 + 精选题集）、**Vocabulary**（按试卷整理生词 + 本地韦氏查词 + 拖词入表 + 单词考试）、**Settings**（LLM / 用户名 / 兜底 / 生词本 / 单词考试评分开关）。桌面端可点侧栏顶部按钮收缩为**纯图标 Compact 栏**（悬浮显示名称），选择会记住（`inteflow.sidebar.compact`）；移动端抽屉始终完整显示。
 
 1. 点侧栏 **Library** 进入题库页。
@@ -186,7 +186,7 @@ npm run dev
 3. **等待流水线跑完**：`detect → convert → review` 三阶段，附**逐页报告**（该页是文本/OCR/低置信/无引擎）。
    - 转换结果干净 → 自动提交入库；
    - 有疑点 → 停在复核阶段，由你点 **Commit** 落库或 **Cancel** 取消（全程 0 token）。
-4. **（可选）用内置题库**：先到 **Settings → Show built-in library** 打开开关（默认隐藏，保证新安装是空的），
+4. **（可选）导入题库**：在 Library 页点 **Import bank** 选择题库 ZIP（manifest + 单元，或散装 `.ifmd.md`），再展开卡片逐套 **Add** 或 **Add all**。源码运行时启动脚本会设置 `INTEFLOW_DEV=1`，内置示例题库默认可见；安装包不含任何内置题目。
    再回 Library 展开题库卡；按日期分组列出 44 个单元，单个点 **Add**，或点 **Add all** 整库导入。
 5. **回首页开考**：返回 **Select an exam**，新导入的卷子直接点 **Start** 开考。
 
@@ -322,7 +322,7 @@ Base URL **按各官方文档原样存**：OpenAI 系自带 `/v1`，Anthropic �
 ## 开发与测试
 
 ```bash
-# 后端测试（基线 339 passed；用临时数据目录，不动你的数据）
+# 后端测试（基线 349 passed；用临时数据目录，不动你的数据）
 cd backend && ../.venv/bin/python -m pytest -q
 
 # 前端类型检查 + 构建（0 错误）
@@ -357,7 +357,7 @@ InteFlow/
 │   │   ├── repos/subjects.py  学科：CRUD + 试卷归属
 │   │   ├── repos/review.py    错题集 + 精选题集
 │   │   ├── repos/custom_dictionary.py 用户自定义词典：CRUD、导入、查词
-│   │   └── builtin/           内置题库（44 单元随仓库分发）
+│   │   └── builtin/           开发用示例题库（打包时排除，安装包不含）
 │   ├── tests/                 pytest（304）
 │   └── requirements.txt
 ├── frontend/                  Vite + React 19 + TS + Tailwind 4

@@ -36,7 +36,11 @@ export default function ImportPage() {
   const [imported, setImported] = useState<DocumentSummary | null>(null);
   const [ocr, setOcr] = useState<string[] | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [bankBusy, setBankBusy] = useState(false);
+  const [bankMsg, setBankMsg] = useState<string | null>(null);
+  const [bankErr, setBankErr] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const bankFileRef = useRef<HTMLInputElement>(null);
   /** Set when the user cancels while the conversion is still running. */
   const cancelledRef = useRef(false);
 
@@ -78,6 +82,28 @@ export default function ImportPage() {
     }
   }, []);
 
+  async function importBank(file: File) {
+    setBankBusy(true);
+    setBankErr(null);
+    setBankMsg(null);
+    try {
+      const res = await api.importBank(file);
+      setBankMsg(
+        t("Imported “{title}” · {units} units · {questions} questions.", {
+          title: res.title,
+          units: res.units,
+          questions: res.questions,
+        }),
+      );
+      await refreshAll();
+    } catch (err) {
+      setBankErr(errText(err));
+    } finally {
+      setBankBusy(false);
+      if (bankFileRef.current) bankFileRef.current.value = "";
+    }
+  }
+
   /** After adding built-in modules: reload flags + the library in one pass. */
   const refreshAll = useCallback(async () => {
     await Promise.all([refresh(), refreshBanks()]);
@@ -86,14 +112,12 @@ export default function ImportPage() {
   useEffect(() => {
     void refresh();
     void refreshSubjects();
-    // The sample question bank is opt-in (Settings → Show built-in library),
-    // so a fresh install starts with an empty Library.
+    // User-imported banks are always shown; the bundled sample bank is opt-in
+    // (Settings → Show built-in library) and only exists in source checkouts.
+    void refreshBanks();
     api
       .getSettings()
-      .then((s) => {
-        setShowBuiltin(s.show_builtin_library);
-        if (s.show_builtin_library) void refreshBanks();
-      })
+      .then((s) => setShowBuiltin(s.show_builtin_library))
       .catch((err) => console.warn("settings unavailable:", err));
     api
       .health()
@@ -418,13 +442,57 @@ export default function ImportPage() {
         </section>
       )}
 
-      {showBuiltin && banks && banks.length > 0 && (
-        <div>
-          {banks.map((bank) => (
-            <BuiltinBankCard key={bank.id} bank={bank} onChanged={() => void refreshAll()} />
-          ))}
+      <section className="mt-6 rounded-xl border bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold">{t("Question banks")}</h2>
+            <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
+              {t(
+                "Import a bank ZIP: manifest.json + one folder per unit, or several .ifmd.md files. Imports stay local (0 tokens).",
+              )}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <input
+              ref={bankFileRef}
+              type="file"
+              accept=".zip,application/zip"
+              data-testid="bank-file"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void importBank(file);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => bankFileRef.current?.click()}
+              disabled={bankBusy}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {bankBusy ? t("Importing…") : t("Import bank")}
+            </button>
+          </div>
         </div>
-      )}
+        {bankMsg && (
+          <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {bankMsg}
+          </p>
+        )}
+        {bankErr && (
+          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{bankErr}</p>
+        )}
+      </section>
+
+      {banks
+        ?.filter((bank) => bank.origin === "user" || showBuiltin)
+        .map((bank) => (
+          <BuiltinBankCard
+            key={bank.id}
+            bank={bank}
+            onChanged={() => void refreshAll()}
+          />
+        ))}
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">{t("Your exams")}</h2>

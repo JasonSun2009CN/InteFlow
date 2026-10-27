@@ -3,7 +3,7 @@
 > 本地优先（local-first）的学习工作流应用。单机运行：FastAPI 后端 + React 前端 + SQLite 单文件；
 > PDF 由 PyMuPDF 确定性转换；LLM 仅在用户显式操作时调用（导入主链路 0 token）。
 >
-> 基线：pytest **339 passed**、`npm run build` 0 错误、`npm test` 165 passed, 5 skipped。
+> 基线：pytest **349 passed**、`npm run build` 0 错误、`npm test` 167 passed, 5 skipped。
 > 相关：[`README.md`](../README.md)、[`AGENT.md`](../AGENT.md)、[`IFMD.md`](IFMD.md)、[`IDEAS.md`](IDEAS.md)、[`ROADMAP.md`](../ROADMAP.md)。
 
 ---
@@ -92,8 +92,8 @@ repo/
 `INTEFLOW_DICTIONARY`（标准 `.eudb` 文件或目录，默认 `./dictionary`）、`INTEFLOW_DICTIONARY_INDEX`（索引路径，默认 `data/dictionary/mw.db`）。
 
 桌面端把 `INTEFLOW_DATA` 指到系统 app-data 目录（macOS `~/Library/Application Support/InteFlow/data`，
-Windows `%APPDATA%\InteFlow\data`）。安装包本身不含 `data/`；内置题库随包但由设置 `show_builtin_library`
-控制是否显示（默认关）。详见 [`DESKTOP.md`](DESKTOP.md)。
+Windows `%APPDATA%\InteFlow\data`）。安装包本身不含 `data/`，也**不含内置题库**（版权原因，spec 排除 + CI 校验）；
+源码运行时由启动脚本设置 `INTEFLOW_DEV=1`，内置题库默认可见。详见 [`DESKTOP.md`](DESKTOP.md)。
 
 ---
 
@@ -221,7 +221,7 @@ erDiagram
 App.tsx (BrowserRouter)
 └── AppShell  —— 非考试页包在纸墨工作区（左侧栏 + 移动抽屉）；复盘与练习全屏无壳
     ├── "/"                     ExamHomePage      —— Exams：选卷开考（统计 + 学科筛选 + 编号行）
-    ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 内置题库卡 + 试卷列表 + 学科管理
+    ├── "/library"              ImportPage        —— Library：导入流水线 + 模板 + 题库 ZIP 导入/我的题库 + 试卷列表 + 学科管理
     ├── "/sessions"             SessionsPage      —— Sessions：所有作答历史（按时间倒序、搜索、删除）
     ├── "/mistakes"             MistakesPage      —— Review：Mistakes / Starred 两集合（搜索/过滤/排序/分析）
     ├── "/vocabulary"           VocabularyPage    —— 单词集合：顶部 Word list / Word test 两 tab（左考试索引 + 右词表编辑器 + 查词；单词考试）
@@ -267,14 +267,14 @@ api/client.ts —— 类型化 API client（所有 /api 路径由 Vite 代理）
 ```
 app/
 ├── main.py                 FastAPI 装配（lifespan=init_db；CORS；13 个 router）
-├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR，ifmd_path()）
+├── db.py                   SQLite 连接/迁移(_migrate)/SCHEMA；路径常量（DOCS_DIR/UPLOAD_TMP/JOBS_DIR/EXPORTS_DIR/BANKS_DIR，ifmd_path()）
 ├── imports.py              导入流水线服务：detect → convert → commit（确定性，0 token；PDF/DOCX/InteFlow-MD 单一代码路径）
 ├── sections.py             板块标签（KNOWN_LABELS / DEFAULT_SECTION / label()）
 ├── providers.py            Provider 目录（19 家）+ protocol(openai|anthropic) 解析
 ├── api/
 │   ├── documents.py        导入（调用 imports 服务）/列表/详情/题目/历史/答案/解析/词汇/导出/删除/资源
 │   ├── imports.py          暂存导入流水线（POST/GET/commit/cancel/delete/ai-fallback）
-│   ├── builtin.py          内置题库发现与导入（offline, 0 token）
+│   ├── builtin.py          题库发现、ZIP 导入/删除、单元导入（offline, 0 token）
 │   ├── sessions.py         开始/列表/获取/提交/regrade/删除
 │   ├── settings.py         读写配置/Provider 目录/probe
 │   ├── analysis.py         复盘笔记本 CRUD + 导出（md/docx/pdf）+ meta（用户名/历史）
@@ -323,7 +323,7 @@ app/
 │   ├── math_render.py      TeX->SVG 桥（Node/MathJax，可选；缺失降级纯文本；进程内缓存）
 │   └── mathjax/            Node 桥接（package.json + render.mjs；node_modules 不入库）
 ├── llm/base.py             统一 LLM 调用（temperature 0、60s 超时、有类型错误）
-└── builtin/                内置题库（44 单元：manifest.json + <unit>/doc.ifmd.md + assets/）
+└── builtin/                开发样例题库（44 单元；打包时排除，安装包不含）
 ```
 
 ---
@@ -352,7 +352,12 @@ file ─► app.imports.validate_upload（大小/空/类型）
         + set_ifmd_path + write_ifmd + write_assets + insert_questions  ──►  document
 ```
 
-内置题库：`backend/app/builtin/<bank>/manifest.json + <unit>/doc.ifmd.md`，`/api/builtin` 发现，`add` 走同一条 ifmd 导入路径（离线、0 token、幂等：`documents.builtin_key`）。当前 1 个 bank、44 个单元。
+题库有两个根目录：`backend/app/builtin/`（随源码分发的开发样例，**打包排除**）与
+`data/banks/`（用户导入）。两者都是 `<bank>/manifest.json + <unit>/doc.ifmd.md + <unit>/assets/`，
+`/api/builtin` 合并发现（`origin=builtin|user`），`add` 走同一条 ifmd 导入路径
+（离线、0 token、幂等：`documents.builtin_key`）。用户题库由 `POST /api/builtin/import`
+安装：ZIP 可带 manifest，也可只有多份 `.ifmd.md`（自动生成清单）；逐套解析通过后才落盘。
+开发样例当前 1 个 bank、44 个单元。
 
 ### 6.2 练习与判分
 
@@ -495,7 +500,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 
 ---
 
-## 7. 当前 API 面（67 条）
+## 7. 当前 API 面（69 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -539,9 +544,11 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | POST | `/api/custom-dictionary/import` | 导入 CSV / TSV / JSON / TXT |
 | GET | `/api/documents/{id}/export/{fmt}` | 导出 PDF / DOCX（0 token；数学经 MathJax SVG） |
 | GET | `/api/documents/{id}/assets/{name}` | 题目图片 |
-| GET | `/api/builtin` | 列出题库 |
+| GET | `/api/builtin` | 列出题库（内置 + 用户，带 `origin` / `removable`） |
+| POST | `/api/builtin/import` | 导入题库 ZIP（manifest 或散装 `.ifmd.md`；安全校验后装到 `data/banks/`） |
 | POST | `/api/builtin/{bank}/units/{unit}` | 加单个单元 |
 | POST | `/api/builtin/{bank}/add-all` | 一键加整库 |
+| DELETE | `/api/builtin/{bank}` | 移除用户导入的题库（内置只读） |
 | POST | `/api/sessions` | 开始练习 |
 | GET | `/api/sessions` | 作答历史列表（仅已提交的作答） |
 | GET | `/api/sessions/timer-preference?document_id=` | 该卷上次计时方式（无记录回退全局最近一次） |
