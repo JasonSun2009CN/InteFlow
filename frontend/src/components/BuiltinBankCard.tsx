@@ -103,17 +103,17 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
   }
 
   return (
-    <section className="mt-6 rounded-xl border bg-white shadow-sm">
+    <section className="mt-6 border-y border-slate-200">
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         data-bank={bank.id}
-        className="flex w-full items-center justify-between gap-4 p-5 text-left hover:bg-slate-50"
+        className="flex w-full items-center justify-between gap-4 py-4 text-left"
       >
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">
             {bank.title}
-            <span className="ml-2 align-middle rounded bg-indigo-50 px-1.5 py-0.5 text-xs font-medium text-indigo-700">
+            <span className="ml-2 align-middle text-xs font-medium text-slate-500">
               {bank.origin === "user" ? t("imported") : t("built-in")}
             </span>
           </h2>
@@ -138,12 +138,12 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
       </button>
 
       {open && (
-        <div className="border-t px-5 py-4">
+        <div className="border-t border-slate-200 py-4">
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <button
               onClick={() => void addAll()}
               disabled={busy}
-              className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {busyAll
                 ? t("Adding…")
@@ -158,7 +158,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                 type="button"
                 onClick={() => void removeBank()}
                 disabled={busy}
-                className="ml-auto rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                className="ml-auto border border-transparent px-3 py-1.5 text-sm font-medium text-red-700 hover:border-red-300 disabled:opacity-50"
               >
                 {t("Remove bank")}
               </button>
@@ -168,7 +168,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
           <div className="space-y-4">
             {groups.map((group) => (
               <div key={group.date}>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h3 className="text-xs font-medium text-slate-500">
                   {group.date}
                 </h3>
                 <ul className="mt-1.5 grid gap-1.5 sm:grid-cols-2">
@@ -178,7 +178,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                       <li
                         key={unit.id}
                         data-unit={unit.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2"
+                        className="flex items-center justify-between gap-3 border-b border-slate-200 py-2"
                       >
                         <div className="min-w-0">
                           <div className="truncate text-sm font-medium">
@@ -196,7 +196,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                           <Link
                             to={`/doc/${unit.document_id}/practice`}
                             title={t("Open in library")}
-                            className="shrink-0 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
+                            className="shrink-0 text-sm font-medium text-emerald-700 underline underline-offset-4"
                           >
                             ✓ {t("In library")}
                           </Link>
@@ -205,7 +205,7 @@ export default function BuiltinBankCard({ bank, onChanged }: Props) {
                             onClick={() => void addUnit(unit)}
                             disabled={busy}
                             data-add-unit={unit.id}
-                            className="btn btn-primary shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                            className="btn btn-primary shrink-0 px-3 py-1.5 text-sm font-medium disabled:opacity-50"
                           >
                             {busyUnit === unit.id ? t("Adding…") : t("Add")}
                           </button>

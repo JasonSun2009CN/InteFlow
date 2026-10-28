@@ -207,7 +207,7 @@ export default function AnswerKeyPage() {
   if (error && !questions) {
     return (
       <div className="mx-auto w-full max-w-3xl px-6 py-10">
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <div className="border-l-2 border-red-500 bg-red-50 px-4 py-3 text-red-800">
           {error}
         </div>
       </div>
@@ -227,10 +227,8 @@ export default function AnswerKeyPage() {
     <div className="mx-auto w-full max-w-4xl px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-            {t("Answer key")}
-          </p>
-          <h1 className="mt-2 text-2xl font-bold sm:text-3xl">{doc.title}</h1>
+          <p className="text-xs font-medium text-slate-500">{t("Answer key")}</p>
+          <h1 className="mt-1 text-2xl tracking-tight sm:text-3xl">{doc.title}</h1>
           <p className="mt-1 text-sm text-slate-600">
             {t("{count} questions · {filled}/{total} filled", {
               count: total,
@@ -254,7 +252,7 @@ export default function AnswerKeyPage() {
           <button
             onClick={save}
             disabled={saving || filled === 0}
-            className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="btn btn-primary px-4 py-2 font-medium disabled:opacity-50"
           >
             {saving
               ? t("Saving…")
@@ -264,7 +262,7 @@ export default function AnswerKeyPage() {
           </button>
           <Link
             to={`/doc/${doc.id}/practice`}
-            className="rounded-lg border px-4 py-2 font-medium hover:bg-slate-50"
+            className="btn btn-secondary px-4 py-2 font-medium no-underline"
           >
             {t("Practice")}
           </Link>
@@ -272,25 +270,25 @@ export default function AnswerKeyPage() {
       </div>
 
       {pendingSession && (
-        <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="mt-4 border-l-2 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {t(
             "You just submitted an attempt — enter the answer key to grade it, then you'll see the results.",
           )}
         </div>
       )}
       {message && (
-        <div className="mt-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-900">
+        <div className="mt-4 border-l-2 border-emerald-500 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-900">
           {message}
         </div>
       )}
       {error && (
-        <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-800">
+        <div className="mt-4 border-l-2 border-red-500 bg-red-50 px-4 py-2.5 text-sm text-red-800">
           {error}
         </div>
       )}
 
       {choiceQuestions.length > 0 && (
-        <section className="mt-6 rounded-xl border bg-white p-4">
+        <section className="mt-8 border-t border-slate-200 pt-5">
           <h2 className="font-semibold">{t("Bulk entry")}</h2>
           <p className="text-sm text-slate-600">
             {t(
@@ -302,11 +300,11 @@ export default function AnswerKeyPage() {
             onChange={(e) => setBulk(e.target.value)}
             rows={3}
             placeholder="1-A 2-C 3-D 4-A 5-B"
-            className="mt-2 w-full rounded-lg border px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none"
+            className="mt-2 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-2 font-mono text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
           />
           <button
             onClick={applyBulk}
-            className="mt-2 rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+            className="btn btn-secondary mt-2 px-3 py-1.5 text-sm"
           >
             {t("Apply to grid")}
           </button>
@@ -321,7 +319,7 @@ export default function AnswerKeyPage() {
             return (
               <div
                 key={q.ext_id}
-                className="flex items-center gap-3 rounded-lg border bg-white px-3 py-2"
+                className="flex items-center gap-3 border-b border-slate-200 py-2"
               >
                 <span
                   className={`w-10 shrink-0 text-sm font-semibold ${chosen.length ? "text-slate-800" : "text-slate-400"}`}
@@ -332,7 +330,7 @@ export default function AnswerKeyPage() {
                   {q.stem}
                 </span>
                 {q.multi && (
-                  <span className="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                  <span className="shrink-0 text-xs font-medium text-slate-500">
                     {t("multi")}
                   </span>
                 )}
@@ -342,10 +340,10 @@ export default function AnswerKeyPage() {
                       key={letter}
                       onClick={() => toggleLetter(q.ext_id, letter, q.multi)}
                       aria-pressed={chosen.includes(letter)}
-                      className={`h-8 w-8 rounded-md border text-sm font-semibold transition ${
+                      className={`h-8 w-8 rounded-sm border text-sm font-medium transition ${
                         chosen.includes(letter)
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-300 hover:border-slate-400"
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-300 hover:border-slate-900"
                       }`}
                     >
                       {letter}
@@ -360,14 +358,14 @@ export default function AnswerKeyPage() {
 
       {blankQuestions.length > 0 && (
         <section className="mt-6 space-y-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 className="text-sm font-medium text-slate-900">
             {t("Fill in the blank · list every acceptable answer")}
           </h2>
           {blankQuestions.map((q) => {
             const no = q.no ?? questions.indexOf(q) + 1;
             const values = answers[q.ext_id] ?? [""];
             return (
-              <div key={q.ext_id} className="rounded-lg border bg-white p-3">
+              <div key={q.ext_id} className="border-b border-slate-200 py-3">
                 <div className="flex items-start gap-3">
                   <span className="w-10 shrink-0 text-sm font-semibold text-slate-800">{no}</span>
                   <span className="min-w-0 flex-1 text-xs text-slate-600">{q.stem}</span>
@@ -388,7 +386,7 @@ export default function AnswerKeyPage() {
                           number: index + 1,
                           question: no,
                         })}
-                        className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                        className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
                       />
                       {values.length > 1 && (
                         <button
@@ -398,7 +396,7 @@ export default function AnswerKeyPage() {
                             number: index + 1,
                             question: no,
                           })}
-                          className="rounded-md border border-slate-200 p-1.5 text-slate-400 hover:border-red-300 hover:text-red-600"
+                          className="p-1.5 text-slate-400 hover:text-red-600"
                         >
                           <X className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
@@ -408,7 +406,7 @@ export default function AnswerKeyPage() {
                   <button
                     type="button"
                     onClick={() => addBlankValue(q.ext_id)}
-                    className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
+                    className="inline-flex items-center gap-1 py-1 text-xs font-medium text-slate-700 hover:text-slate-900"
                   >
                     <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     {t("Add acceptable answer")}
@@ -420,12 +418,12 @@ export default function AnswerKeyPage() {
         </section>
       )}
 
-      <section className="mt-6 rounded-xl border bg-white p-4">
+      <section className="mt-8 border-t border-slate-200 pt-5">
         <h2 className="font-semibold">{t("Preview")}</h2>
         <p className="text-sm text-slate-600">
           {t("First question as the practice UI will render it.")}
         </p>
-        <div className="mt-2 rounded-lg border bg-slate-50 p-3 text-sm">
+        <div className="mt-3 border-l-2 border-slate-200 pl-3 text-sm">
           <RichText text={questions[0]?.stem ?? ""} docId={docId} />
         </div>
       </section>
@@ -434,7 +432,7 @@ export default function AnswerKeyPage() {
         <button
           onClick={save}
           disabled={saving || filled === 0}
-          className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="btn btn-primary px-4 py-2 font-medium disabled:opacity-50"
         >
           {saving
             ? t("Saving…")
@@ -445,7 +443,7 @@ export default function AnswerKeyPage() {
         {filled === total && total > 0 && (
           <Link
             to={`/doc/${doc.id}/practice`}
-            className="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700"
+            className="btn btn-primary px-4 py-2 font-medium no-underline"
           >
             {t("All set — start practice")}
           </Link>

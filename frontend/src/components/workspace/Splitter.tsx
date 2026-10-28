@@ -82,7 +82,7 @@ export default function Splitter({
           : "h-1.5 cursor-row-resize touch-none")
       }
     >
-      <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-slate-200 transition-colors group-hover:bg-blue-400 group-focus-visible:bg-blue-500" />
+      <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-slate-300 transition-colors group-hover:bg-slate-900 group-focus-visible:bg-slate-900" />
     </div>
   );
 }

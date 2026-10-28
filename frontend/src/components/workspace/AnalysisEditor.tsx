@@ -186,7 +186,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={
-              "grid h-6 w-6 place-items-center rounded-full text-xs font-semibold text-white " +
+              "grid h-6 w-6 place-items-center rounded-full text-xs font-medium text-white " +
               (item.is_correct === true
                 ? "bg-emerald-600"
                 : item.is_correct === false
@@ -196,7 +196,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
           >
             {item.is_correct === true ? "✓" : item.is_correct === false ? "✗" : "–"}
           </span>
-          <h2 className="font-display text-lg tracking-tight text-slate-900">
+          <h2 className="text-lg tracking-tight text-slate-900">
             {t("Question {number}", { number: item.no })}
           </h2>
           <span className="text-xs text-slate-500">
@@ -216,7 +216,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
           </span>
         </div>
 
-        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+        <div className="mt-3 border-l-2 border-slate-200 bg-slate-50 p-3 text-sm">
           <p className="whitespace-pre-wrap font-medium text-slate-800">{item.stem}</p>
           {item.kind === "blank" ? (
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs">
@@ -246,7 +246,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
                   <li
                     key={letter}
                     className={
-                      "flex items-start gap-2 rounded px-2 py-1 text-xs " +
+                      "flex items-start gap-2 px-2 py-1 text-xs " +
                       (isCorrect
                         ? "bg-emerald-50 text-emerald-900"
                         : isChosen
@@ -274,7 +274,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
 
       {/* body: Markdown write / preview */}
       <div className="flex shrink-0 items-center gap-1 border-b border-slate-200 px-3 py-1.5">
-        <span className="mr-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+        <span className="mr-2 text-xs font-medium text-slate-500">
           {t("Analysis")}
         </span>
         {(["write", "preview"] as const).map((m) => (
@@ -283,8 +283,8 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
             type="button"
             onClick={() => setMode(m)}
             aria-pressed={mode === m}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize transition ${
-              mode === m ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-800"
+            className={`border-b-2 px-2.5 py-1 text-xs font-medium capitalize transition ${
+              mode === m ? "border-slate-900 text-slate-900" : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
             {t(m)}
@@ -294,7 +294,7 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
           type="button"
           onClick={() => void persist(draft)}
           disabled={!dirty || saving}
-          className="ml-auto rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+          className="ml-auto border-b border-slate-400 px-1 pb-0.5 text-xs font-medium text-slate-700 hover:border-slate-900 disabled:opacity-40"
         >
           {saving ? t("Saving…") : t("Save")}
         </button>
@@ -312,10 +312,10 @@ export default function AnalysisEditor({ docId, item, content, onSaved, loaded =
               "Why is the correct answer right — and why did you pick yours?\n\nMarkdown works here: **bold**, lists, $x^2$ formulas, ![figure](assets/name.png).",
             )}
             aria-label={t("Analysis")}
-            className="h-full min-h-[18rem] w-full resize-none border-0 px-5 py-4 font-mono text-[13px] leading-6 text-slate-800 focus:outline-none"
+            className="h-full min-h-[18rem] w-full resize-none border-0 px-5 py-4 font-mono text-sm leading-6 text-slate-800 focus:outline-none"
           />
         ) : (
-          <div className="px-5 py-4 text-[15px]">
+          <div className="px-5 py-4 text-base">
             {draft.trim() ? (
               <RichText text={draft} docId={docId} breaks />
             ) : (

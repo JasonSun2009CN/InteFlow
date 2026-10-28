@@ -58,14 +58,14 @@ export default function AiTutorPane({ docId, item, sessionId }: Props) {
           {t("Question {number}", { number: item.no })}
         </p>
         <p className="mt-1 line-clamp-3 text-xs leading-5 text-slate-500">{item.stem}</p>
-        <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
+        <p className="mt-3 border-l-2 border-slate-200 pl-3 text-xs leading-5 text-slate-500">
           {t(
             "The tutor sees this question, its correct answer and your choice — not your analysis notes. Explicit call: this may use tokens from your configured model.",
           )}
         </p>
 
         {item.answers.length === 0 ? (
-          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <p className="mt-3 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-xs text-amber-800">
             {t("No answer key for this question — fill it in on the answer page first.")}
           </p>
         ) : (
@@ -73,17 +73,17 @@ export default function AiTutorPane({ docId, item, sessionId }: Props) {
             type="button"
             onClick={() => void ask()}
             disabled={busy}
-            className="mt-3 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="mt-3 bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           >
             {busy ? t("Thinking…") : text ? t("Regenerate") : t("Explain with AI")}
           </button>
         )}
 
         {err && (
-          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
+          <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
         )}
         {text && (
-          <div className="mt-3 whitespace-pre-wrap rounded-lg border bg-white p-3 text-sm leading-6">
+          <div className="mt-3 whitespace-pre-wrap border-t border-slate-200 pt-3 text-sm leading-6">
             {text}
           </div>
         )}

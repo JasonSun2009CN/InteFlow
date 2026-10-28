@@ -33,7 +33,7 @@ export default function LibraryList({
 }: Props) {
   const { t, locale } = useI18n();
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border bg-white shadow-sm">
+    <ul className="divide-y divide-slate-200 border-y border-slate-200">
       {docs.map((doc) => (
         <li
           key={doc.id}
@@ -46,12 +46,12 @@ export default function LibraryList({
             <div className="flex flex-wrap items-center gap-2">
               <span className="truncate font-medium text-slate-800">{doc.title}</span>
               {doc.id === importedId && (
-                <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs text-emerald-800">
+                <span className="text-xs font-medium text-emerald-700">
                   {t("just imported")}
                 </span>
               )}
               {doc.needs_answers && (
-                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+                <span className="text-xs font-medium text-amber-700">
                   {t("needs answers")}
                 </span>
               )}
@@ -76,19 +76,19 @@ export default function LibraryList({
           <div className="flex shrink-0 flex-wrap gap-2 text-sm">
             <Link
               to={`/doc/${doc.id}/practice`}
-              className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 font-medium text-white hover:bg-blue-700"
+              className="btn btn-primary px-3 py-1.5 font-medium"
             >
               {t("Practice")}
             </Link>
             <Link
               to={`/doc/${doc.id}/answers`}
-              className="rounded-lg border px-3 py-1.5 font-medium hover:bg-slate-50"
+              className="btn btn-secondary px-3 py-1.5 font-medium no-underline"
             >
               {t("Answers")}
             </Link>
             <button
               onClick={() => onDelete(doc)}
-              className="rounded-lg border border-red-200 px-3 py-1.5 font-medium text-red-700 hover:bg-red-50"
+              className="border border-transparent px-3 py-1.5 font-medium text-red-700 hover:border-red-300"
             >
               {t("Delete")}
             </button>

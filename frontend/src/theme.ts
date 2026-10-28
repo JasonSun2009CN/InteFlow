@@ -32,32 +32,32 @@ export const THEMES: ThemeInfo[] = [
   {
     id: "clear-blue",
     label: "Clear Blue",
-    blurb: "Blue on white, crisp rules and square corners. The calm default.",
-    swatches: ["#f2f5f9", "#ffffff", "#0057b8", "#101c30"],
+    blurb: "Cool white paper with a quiet blue accent. The calm default.",
+    swatches: ["#f7f7f5", "#ffffff", "#2f5588", "#171715"],
   },
   {
     id: "paper-ink",
     label: "Paper & Ink",
-    blurb: "Warm paper, serif headings, seal-red accents. A printed booklet.",
-    swatches: ["#faf8f3", "#fffdf8", "#9a402c", "#1c1916"],
+    blurb: "Warm off-white paper and a single seal-red accent.",
+    swatches: ["#faf9f6", "#fffefb", "#9a402c", "#1b1916"],
   },
   {
     id: "minimal-light",
     label: "Minimal Light",
-    blurb: "Neutral greys, no decoration, near-black accents. Notion-quiet.",
-    swatches: ["#ffffff", "#fbfbfa", "#1f1f1f", "#191919"],
+    blurb: "Pure white, grey rules and full-ink accents. Nothing else.",
+    swatches: ["#ffffff", "#ffffff", "#191917", "#191917"],
   },
   {
     id: "midnight-navy",
     label: "Midnight Navy",
-    blurb: "Deep navy ground with a soft blue highlight. For late sessions.",
-    swatches: ["#0a1120", "#111a2c", "#7aa2f7", "#e8edf7"],
+    blurb: "Near-black ground with a pale blue accent. For late sessions.",
+    swatches: ["#131416", "#17181b", "#9db8dd", "#f0f1f3"],
   },
   {
     id: "warm-editorial",
     label: "Warm Editorial",
-    blurb: "Cream paper, terracotta accents, magazine-scale headings.",
-    swatches: ["#f7efe2", "#fffbf3", "#b4552b", "#241c15"],
+    blurb: "Cream paper and a restrained terracotta accent.",
+    swatches: ["#f8f5ee", "#fffdf8", "#a5512e", "#1d1a14"],
   },
 ];
 

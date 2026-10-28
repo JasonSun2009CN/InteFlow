@@ -73,7 +73,7 @@ export default function ImportPipeline({
   const cancelled = job.status === "cancelled";
 
   return (
-    <section className="mt-6 rounded-xl border bg-white p-6 shadow-sm">
+    <section className="mt-6 border-t-2 border-slate-900 pt-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
@@ -89,7 +89,7 @@ export default function ImportPipeline({
             {job.import_source && ` · ${t("source: {source}", { source: job.import_source })}`}
           </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+        <span className="text-xs font-medium text-slate-600">
           {t(STATUS_LABELS[job.status] ?? job.status)}
         </span>
       </div>
@@ -102,13 +102,13 @@ export default function ImportPipeline({
             <li key={stage.key} className="flex items-center gap-2">
               <span
                 className={
-                  "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold " +
+                  "flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium " +
                   (done
                     ? "bg-emerald-600 text-white"
                     : isActive && failed
                       ? "bg-red-600 text-white"
                       : isActive
-                        ? "bg-blue-600 text-white"
+                        ? "bg-slate-900 text-white"
                         : "bg-slate-200 text-slate-500")
                 }
               >
@@ -124,7 +124,7 @@ export default function ImportPipeline({
       </ol>
 
       {failed && job.error && (
-        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="mt-4 border-l-2 border-red-500 bg-red-50 px-4 py-3 text-sm text-red-800">
           {job.error}
         </p>
       )}
@@ -133,7 +133,7 @@ export default function ImportPipeline({
         <div className="mt-5">
           <div className="flex items-center justify-between text-sm text-slate-600">
             <span className="flex items-center gap-2">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-slate-900" />
               {t("Converting…")}
             </span>
             <span className="tabular-nums">
@@ -146,7 +146,7 @@ export default function ImportPipeline({
             </span>
           </div>
           <div
-            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100"
+            className="mt-2 h-px w-full overflow-hidden bg-slate-200"
             role="progressbar"
             aria-label={t("Conversion progress")}
             aria-valuemin={0}
@@ -155,7 +155,7 @@ export default function ImportPipeline({
           >
             <div
               className={
-                "h-full rounded-full bg-blue-600 transition-all duration-300 " +
+                "h-full bg-slate-900 transition-all duration-300 " +
                 (job.pages_total > 0 ? "" : "w-1/3 animate-pulse")
               }
               style={
@@ -173,7 +173,7 @@ export default function ImportPipeline({
           <button
             onClick={onCancel}
             disabled={busy}
-            className="mt-3 rounded-lg border px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="mt-3 border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:border-slate-900 disabled:opacity-50"
           >
             {t("Cancel")}
           </button>
@@ -188,7 +188,7 @@ export default function ImportPipeline({
               total: job.pages_total,
             })}
           </h3>
-          <ul className="mt-2 divide-y divide-slate-100 rounded-lg border">
+          <ul className="mt-2 divide-y divide-slate-200 border-y border-slate-200">
             {job.pages.map((page) => (
               <li key={page.no} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
                 <span className="text-slate-600">{t("Page {number}", { number: page.no })}</span>
@@ -198,7 +198,7 @@ export default function ImportPipeline({
                       {(page.confidence * 100).toFixed(0)}%
                     </span>
                   )}
-                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${pageTone(page.status)}`}>
+                  <span className={`text-xs font-medium ${pageTone(page.status)}`}>
                     {pageLabel(page, t)}
                   </span>
                 </span>
@@ -232,7 +232,7 @@ export default function ImportPipeline({
           <button
             onClick={onAiFallback}
             disabled={busy}
-            className="rounded-lg bg-violet-600 px-4 py-2 font-medium text-white hover:bg-violet-700 disabled:opacity-50 flex items-center gap-2"
+            className="flex items-center gap-2 bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           >
             {busy ? t("Running AI fallback…") : t("Run AI fallback on unreadable pages")}
           </button>
@@ -254,14 +254,14 @@ export default function ImportPipeline({
           <button
             onClick={onCommit}
             disabled={busy}
-            className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="btn btn-primary px-4 py-2 font-medium disabled:opacity-50"
           >
             {job.needs_review ? t("Looks good — import") : t("Import")}
           </button>
           <button
             onClick={onCancel}
             disabled={busy}
-            className="rounded-lg border px-4 py-2 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:border-slate-900 disabled:opacity-50"
           >
             {t("Cancel")}
           </button>
@@ -284,8 +284,8 @@ export default function ImportPipeline({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2">
-      <div className="text-xs uppercase tracking-wide text-slate-400">{label}</div>
+    <div className="border-l-2 border-slate-200 pl-3">
+      <div className="text-xs text-slate-500">{label}</div>
       <div className="text-sm font-medium text-slate-800">{value}</div>
     </div>
   );

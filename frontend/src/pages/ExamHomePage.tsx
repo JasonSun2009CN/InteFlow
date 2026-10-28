@@ -40,18 +40,16 @@ function Stat({
   label: string;
   value: number | null;
   format?: (n: number) => string;
-  tone?: "ink" | "seal";
+  tone?: "ink" | "accent";
 }) {
   const shown = useCountUp(value);
 
   return (
     <div>
-      <dt className="text-[10px] font-medium uppercase tracking-[0.2em] text-ink-400">
-        {label}
-      </dt>
+      <dt className="text-xs text-slate-500">{label}</dt>
       <dd
-        className={`mt-1 font-display text-3xl leading-none tabular-nums ${
-          tone === "seal" ? "text-seal-600" : "text-ink-900"
+        className={`mt-1 text-2xl leading-none font-semibold tabular-nums ${
+          tone === "accent" ? "text-seal-600" : "text-slate-900"
         }`}
       >
         {shown === null ? "—" : format(shown)}
@@ -64,8 +62,8 @@ function Stat({
  * Exams tab: pick an exam and start it — nothing else.
  *
  * Import / Library / Settings are management tools and live in the sidebar.
- * The visual language is paper-and-ink: serif display type, hairline rules and
- * numbered rows instead of cards.
+ * The layout is a single column: a quiet statement, then a list. No cards,
+ * no dividers, no ornament.
  */
 export default function ExamHomePage() {
   const { t, locale } = useI18n();
@@ -128,42 +126,36 @@ export default function ExamHomePage() {
     }) ?? [];
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
-      <section className="pb-10 sm:pb-14">
-        <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-ink-400">
-              {t("Local practice workspace")}
-            </p>
-            <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
-              {t("Select an exam")}
-            </h1>
-            <p className="mt-4 max-w-md text-sm leading-6 text-ink-500">
-              {t(
-                "Answers are graded when you submit. The timer starts when you begin — and everything stays on this machine.",
-              )}
-            </p>
-          </div>
+    <div className="mx-auto w-full max-w-4xl px-6 py-12 sm:py-16">
+      <header>
+        <p className="text-sm text-slate-500">{t("Local practice workspace")}</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+          {t("Select an exam")}
+        </h1>
+        <p className="mt-4 max-w-lg text-base leading-7 text-slate-600">
+          {t(
+            "Answers are graded when you submit. The timer starts when you begin — and everything stays on this machine.",
+          )}
+        </p>
 
-          <dl className="flex gap-8 border-t border-paper-200 pt-6 md:border-t-0 md:pt-0 md:text-right">
-            <Stat label={t("Exams")} value={docs ? examCount : null} format={pad} />
-            <Stat
-              label={t("Questions")}
-              value={docs ? questionCount : null}
-              format={(n) => n.toLocaleString(locale)}
-            />
-            <Stat
-              label={t("Needs keys")}
-              value={docs ? needsKeys : null}
-              format={pad}
-              tone={needsKeys > 0 ? "seal" : "ink"}
-            />
-          </dl>
-        </div>
-      </section>
+        <dl className="mt-10 flex gap-12">
+          <Stat label={t("Exams")} value={docs ? examCount : null} format={pad} />
+          <Stat
+            label={t("Questions")}
+            value={docs ? questionCount : null}
+            format={(n) => n.toLocaleString(locale)}
+          />
+          <Stat
+            label={t("Needs keys")}
+            value={docs ? needsKeys : null}
+            format={pad}
+            tone={needsKeys > 0 ? "accent" : "ink"}
+          />
+        </dl>
+      </header>
 
       {docs && docs.length > 0 && subjects.list.length > 0 && (
-        <div className="mb-6">
+        <div className="mt-12">
           <SubjectFilterBar
             subjects={subjects.list}
             value={effectiveFilter}
@@ -174,25 +166,22 @@ export default function ExamHomePage() {
         </div>
       )}
 
-      <section aria-labelledby="exam-list-heading" aria-busy={docs === null}>
-        <div className="flex items-baseline justify-between gap-4 border-b border-ink-900/80 pb-2">
-          <h2
-            id="exam-list-heading"
-            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-500"
-          >
+      <section aria-labelledby="exam-list-heading" aria-busy={docs === null} className="mt-12">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 id="exam-list-heading" className="text-base font-semibold text-slate-900">
             {t("Exams")}
           </h2>
-          <p className="text-[11px] text-ink-400">{t("Answers are graded when you submit")}</p>
+          <p className="text-xs text-slate-500">{t("Answers are graded when you submit")}</p>
         </div>
 
         {error && (
-          <div role="alert" className="my-8 border-l-2 border-seal-500 bg-seal-50 px-5 py-4">
+          <div role="alert" className="mt-6 bg-seal-50 px-5 py-4">
             <p className="font-medium text-seal-700">{t("Couldn't load your exams.")}</p>
-            <p className="mt-1 text-sm leading-6 text-ink-500">{error}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{error}</p>
             <button
               type="button"
               onClick={load}
-              className="mt-3 border-b border-ink-300 pb-0.5 text-xs font-medium text-ink-700 transition-colors hover:border-ink-900 hover:text-ink-900"
+              className="mt-3 cursor-pointer border-b border-slate-400 pb-0.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900"
             >
               {t("Try again")}
             </button>
@@ -201,18 +190,18 @@ export default function ExamHomePage() {
 
         {docs === null && !error && (
           <>
-            <ul className="divide-y divide-paper-200" aria-hidden="true">
+            <ul className="mt-2" aria-hidden="true">
               {[0, 1, 2].map((i) => (
                 <li
                   key={i}
-                  className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-4 gap-y-3 py-6 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
+                  className="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-4 gap-y-3 py-7 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
                 >
-                  <span className="mt-1 h-3 w-5 animate-pulse rounded-sm bg-paper-300/70" />
+                  <span className="mt-1 h-3 w-5 animate-pulse rounded-sm bg-slate-200" />
                   <div className="min-w-0">
-                    <div className="h-5 w-2/3 animate-pulse rounded-sm bg-paper-300/70" />
-                    <div className="mt-2 h-3 w-1/3 animate-pulse rounded-sm bg-paper-200" />
+                    <div className="h-5 w-2/3 animate-pulse rounded-sm bg-slate-200" />
+                    <div className="mt-2 h-3 w-1/3 animate-pulse rounded-sm bg-slate-100" />
                   </div>
-                  <div className="col-span-2 h-8 w-24 animate-pulse rounded-sm bg-paper-200 sm:col-span-1" />
+                  <div className="col-span-2 h-8 w-24 animate-pulse rounded-sm bg-slate-100 sm:col-span-1" />
                 </li>
               ))}
             </ul>
@@ -223,16 +212,18 @@ export default function ExamHomePage() {
         )}
 
         {docs?.length === 0 && (
-          <div className="border-b border-paper-200 py-14 text-center">
-            <p className="font-display text-3xl tracking-tight text-ink-900">{t("No exams yet.")}</p>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-ink-500">
+          <div className="py-20 text-center">
+            <p className="text-2xl font-semibold tracking-tight text-slate-900">
+              {t("No exams yet.")}
+            </p>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
               {t(
                 "Import a PDF, DOCX or InteFlow-MD file, or add a ready-made set from the built-in library.",
               )}
             </p>
             <Link
               to="/library"
-              className={buttonClasses({ className: "mt-6 whitespace-nowrap" })}
+              className={buttonClasses({ className: "mt-7 whitespace-nowrap" })}
             >
               {t("Open library")}
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -241,14 +232,14 @@ export default function ExamHomePage() {
         )}
 
         {docs && docs.length > 0 && visibleDocs.length === 0 && (
-          <div className="border-b border-paper-200 py-12 text-center">
-            <p className="font-display text-2xl tracking-tight text-ink-900">
+          <div className="py-16 text-center">
+            <p className="text-xl font-semibold tracking-tight text-slate-900">
               {t("No exams in this subject.")}
             </p>
             <button
               type="button"
               onClick={() => setSubjectFilter("all")}
-              className="mt-3 text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 hover:text-ink-900"
+              className="mt-4 cursor-pointer text-sm text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
             >
               {t("Show all exams")}
             </button>
@@ -256,7 +247,7 @@ export default function ExamHomePage() {
         )}
 
         {visibleDocs.length > 0 && (
-          <ol className="divide-y divide-paper-200">
+          <ol className="mt-2">
             {visibleDocs.map((doc, index) => {
               const needsKey =
                 doc.needs_answers && doc.answered_count < doc.question_count;
@@ -265,9 +256,9 @@ export default function ExamHomePage() {
               return (
                 <li
                   key={doc.id}
-                  className="group grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-4 gap-y-3 py-6 transition-colors hover:bg-paper-100/60 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
+                  className="group grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-4 gap-y-3 py-7 transition-colors hover:bg-slate-50 sm:grid-cols-[2.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-6"
                 >
-                  <span className="pt-1 font-mono text-[11px] tabular-nums text-ink-300 sm:pt-0">
+                  <span className="pt-1 font-mono text-xs tabular-nums text-slate-400 sm:pt-0">
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
@@ -275,12 +266,12 @@ export default function ExamHomePage() {
                     <h3 className="truncate">
                       <Link
                         to={`/doc/${doc.id}/practice`}
-                        className="font-display text-xl leading-snug tracking-tight text-ink-900 decoration-paper-300 underline-offset-4 hover:underline sm:text-2xl"
+                        className="text-xl font-medium leading-snug tracking-tight text-slate-900 underline-offset-4 hover:underline sm:text-2xl"
                       >
                         {doc.title}
                       </Link>
                     </h3>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-400">
+                    <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
                       {doc.subject && (
                         <>
                           <SubjectBadge subject={doc.subject} />
@@ -312,11 +303,11 @@ export default function ExamHomePage() {
                     </p>
                   </div>
 
-                  <div className="col-span-2 flex items-center justify-between gap-4 sm:col-span-1 sm:justify-end">
+                  <div className="col-span-2 flex items-center justify-between gap-6 sm:col-span-1 sm:justify-end">
                     {needsKey ? (
                       <Link
                         to={`/doc/${doc.id}/answers`}
-                        className="text-xs text-ink-500 underline decoration-paper-300 underline-offset-4 transition-colors hover:text-ink-900"
+                        className="text-xs text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors hover:text-slate-900"
                       >
                         {t("Enter answers")}
                       </Link>
@@ -325,10 +316,10 @@ export default function ExamHomePage() {
                     )}
                     <Link
                       to={`/doc/${doc.id}/practice`}
-                      className={buttonClasses({ className: "whitespace-nowrap" })}
+                      className={buttonClasses({ size: "sm", className: "whitespace-nowrap" })}
                     >
                       {t("Start")}
-                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </Link>
                   </div>
                 </li>

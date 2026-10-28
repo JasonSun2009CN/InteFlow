@@ -11,21 +11,24 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 type Variant = NonNullable<Props["variant"]>;
 type Size = NonNullable<Props["size"]>;
 
+/**
+ * Flat, decisive actions. Primary is solid ink; the accent is reserved for
+ * selection, focus and small state marks rather than large button fills.
+ */
 const BASE =
-  "btn inline-flex items-center justify-center font-medium rounded-lg border border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2";
+  "btn inline-flex cursor-pointer items-center justify-center rounded-sm border border-transparent font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring,#171715)]";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "btn-primary bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
-  secondary:
-    "btn-secondary bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 border border-slate-200",
-  ghost: "btn-ghost text-slate-700 hover:bg-slate-100 active:bg-slate-200",
+  primary: "btn-primary bg-slate-900 text-white hover:bg-slate-700 active:bg-slate-800",
+  secondary: "btn-secondary bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300",
+  ghost: "btn-ghost text-slate-600 hover:bg-slate-100 hover:text-slate-900",
   danger: "btn-danger bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800",
 };
 
 const SIZE_CLASSES: Record<Size, string> = {
-  sm: "px-3 py-1.5 text-sm gap-1.5",
-  md: "px-4 py-2 text-sm gap-2",
-  lg: "px-6 py-3 text-base gap-2",
+  sm: "gap-1.5 px-3 py-1.5 text-sm",
+  md: "gap-2 px-4 py-2 text-sm",
+  lg: "gap-2 px-5 py-3 text-base",
 };
 
 /**
@@ -69,7 +72,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(
       >
         {loading && (
           <svg
-            className="animate-spin h-4 w-4"
+            className="h-4 w-4 animate-spin"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"

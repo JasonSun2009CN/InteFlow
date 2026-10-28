@@ -253,7 +253,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
           type="button"
           onClick={addRow}
           disabled={grid.rows.length >= MAX_ROWS}
-          className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+          className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
         >
           {t("+ Row")}
         </button>
@@ -261,7 +261,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
           type="button"
           onClick={addColumn}
           disabled={grid.columns.length >= MAX_COLUMNS}
-          className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+          className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
         >
           {t("+ Column")}
         </button>
@@ -269,7 +269,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
           <button
             type="button"
             onClick={resetView}
-            className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-slate-900 hover:text-slate-900"
           >
             {t("Reset view")}
           </button>
@@ -282,7 +282,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
         </span>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto rounded-lg border bg-white">
+      <div className="min-h-0 flex-1 overflow-auto border border-slate-300 bg-white">
         <table className="border-collapse text-sm">
           <colgroup>
             {grid.columns.map((c) => (
@@ -302,14 +302,14 @@ export default function VocabGrid({ grid, onChange }: Props) {
                       value={col.name}
                       onChange={(e) => updateColumn(col.id, { name: e.target.value })}
                       aria-label={t("Column name")}
-                      className="w-full min-w-0 rounded border border-transparent bg-transparent px-1 py-0.5 text-xs font-semibold hover:border-slate-300 focus:border-blue-400 focus:outline-none"
+                      className="w-full min-w-0 rounded-sm border border-transparent bg-transparent px-1 py-0.5 text-xs font-semibold hover:border-slate-300 focus:border-slate-900 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => toggleSort(col.id)}
                       title={t("Sort column")}
                       aria-label={t("Sort by {column}", { column: col.name })}
-                      className="shrink-0 rounded px-1 text-xs text-slate-500 hover:bg-slate-200"
+                      className="shrink-0 px-1 text-xs text-slate-500 hover:text-slate-900"
                     >
                       {sortGlyph(col.id)}
                     </button>
@@ -319,7 +319,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
                       disabled={grid.columns.length <= 1}
                       title={t("Delete column")}
                       aria-label={t("Delete {column}", { column: col.name })}
-                      className="shrink-0 rounded px-1 text-xs text-slate-400 hover:bg-red-100 hover:text-red-600 disabled:opacity-30"
+                      className="shrink-0 px-1 text-xs text-slate-400 hover:text-red-600 disabled:opacity-30"
                     >
                       ✕
                     </button>
@@ -329,14 +329,14 @@ export default function VocabGrid({ grid, onChange }: Props) {
                     onChange={(e) => setFilter(col.id, e.target.value)}
                     placeholder={t("Filter…")}
                     aria-label={t("Filter {column}", { column: col.name })}
-                    className="mt-0.5 w-full rounded border border-slate-200 bg-white px-1 py-0.5 text-[11px] font-normal text-slate-600 focus:border-blue-400 focus:outline-none"
+                    className="mt-0.5 w-full rounded-sm border border-slate-200 bg-white px-1 py-0.5 text-xs font-normal text-slate-600 focus:border-slate-900 focus:outline-none"
                   />
                   <div
                     role="separator"
                     aria-orientation="vertical"
                     aria-label={t("Resize {column}", { column: col.name })}
                     onPointerDown={(e) => startResize(e, col)}
-                    className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none hover:bg-blue-400/40"
+                    className="absolute right-0 top-0 h-full w-1.5 cursor-col-resize touch-none hover:bg-slate-400/40"
                   />
                 </th>
               ))}
@@ -346,7 +346,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
                   onClick={addColumn}
                   disabled={grid.columns.length >= MAX_COLUMNS}
                   title={t("Add column")}
-                  className="rounded px-1.5 text-slate-500 hover:bg-slate-200 disabled:opacity-30"
+                  className="px-1.5 text-slate-500 hover:text-slate-900 disabled:opacity-30"
                 >
                   +
                 </button>
@@ -371,7 +371,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
                         column: col.name,
                         row: r + 1,
                       })}
-                      className="w-full rounded-none border-0 bg-transparent px-2 py-1 text-xs focus:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-blue-400"
+                      className="w-full rounded-none border-0 bg-transparent px-2 py-1 text-xs focus:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-slate-900"
                     />
                   </td>
                 ))}
@@ -381,7 +381,7 @@ export default function VocabGrid({ grid, onChange }: Props) {
                     onClick={() => deleteRow(row.id)}
                     title={t("Delete row")}
                     aria-label={t("Delete row {row}", { row: r + 1 })}
-                    className="w-full px-1 text-xs text-slate-300 hover:bg-red-100 hover:text-red-600 group-hover:text-slate-400"
+                    className="w-full px-1 text-xs text-slate-300 hover:text-red-600 group-hover:text-slate-400"
                   >
                     ✕
                   </button>

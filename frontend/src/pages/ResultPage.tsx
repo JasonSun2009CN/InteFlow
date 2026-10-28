@@ -35,10 +35,10 @@ export default function ResultPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <div className="border-l-2 border-red-500 bg-red-50 px-4 py-3 text-red-800">
           {error}
         </div>
-        <Link to="/" className="mt-4 inline-block text-blue-700 underline">
+        <Link to="/" className="mt-4 inline-block text-slate-900 underline underline-offset-4">
           {translate("Back to exams")}
         </Link>
       </div>

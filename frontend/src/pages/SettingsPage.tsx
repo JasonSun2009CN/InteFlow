@@ -42,11 +42,11 @@ function errText(err: unknown): string {
 }
 
 const INPUT_CLASS =
-  "w-full rounded-lg border border-paper-300 bg-white px-3 py-2 text-sm text-ink-900 shadow-sm transition-colors placeholder:text-ink-300 hover:border-ink-300 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20";
+  "w-full rounded-sm border border-paper-300 bg-transparent px-3 py-2 text-sm text-ink-900 transition-colors placeholder:text-ink-300 hover:border-ink-300 focus:border-ink-900 focus:outline-none";
 
-const HELP_CLASS = "mt-1.5 text-[11px] leading-5 text-ink-400";
+const HELP_CLASS = "mt-1.5 text-xs leading-5 text-ink-500";
 
-/** One block of the page: icon + title, a short lede, then the card. */
+/** One block of the page: title, a short lede, then the rows. */
 function SettingsSection({
   id,
   icon: Icon,
@@ -69,13 +69,11 @@ function SettingsSection({
   return (
     <section id={id} className="scroll-mt-28" aria-labelledby={`${id}-heading`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-paper-200 bg-white text-ink-500 shadow-sm">
-            <Icon className="h-4 w-4" aria-hidden="true" />
-          </span>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Icon className="h-4 w-4 shrink-0 text-ink-500" aria-hidden="true" />
           <h2
             id={`${id}-heading`}
-            className="font-display text-xl leading-none tracking-tight text-ink-900"
+            className="text-xl leading-none tracking-tight text-ink-900"
           >
             {title}
           </h2>
@@ -86,7 +84,7 @@ function SettingsSection({
         <p className="mt-2.5 max-w-2xl text-xs leading-5 text-ink-500">{description}</p>
       )}
       <div
-        className={`mt-4 divide-y divide-paper-200 overflow-hidden rounded-xl border border-paper-200 bg-white shadow-sm ${cardClassName}`}
+        className={`mt-4 divide-y divide-paper-200 border-y border-paper-200 ${cardClassName}`}
       >
         {children}
       </div>
@@ -108,12 +106,12 @@ function FieldRow({
   children: ReactNode;
 }) {
   return (
-    <div className="grid gap-2 px-5 py-4 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:gap-6">
+    <div className="grid gap-2 px-0 py-4 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:gap-6">
       <div className="sm:pt-1.5">
         <label htmlFor={id} className="text-sm font-medium text-ink-900">
           {label}
         </label>
-        {hint && <p className="mt-0.5 text-[11px] leading-4 text-ink-400">{hint}</p>}
+        {hint && <p className="mt-0.5 text-xs leading-4 text-ink-500">{hint}</p>}
       </div>
       <div className="min-w-0">{children}</div>
     </div>
@@ -144,11 +142,11 @@ function Switch({
       />
       <span
         aria-hidden="true"
-        className="h-6 w-11 rounded-full bg-paper-300 transition-colors duration-200 peer-checked:bg-primary-600 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-white"
+        className="h-5 w-9 rounded-sm border border-paper-300 bg-paper-100 transition-colors duration-200 peer-checked:border-ink-900 peer-checked:bg-ink-900"
       />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5"
+        className="pointer-events-none absolute left-[3px] top-[6px] h-3.5 w-3.5 rounded-[1px] bg-white transition-transform duration-200 peer-checked:translate-x-4"
       />
     </label>
   );
@@ -171,7 +169,7 @@ function ToggleRow({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-5 px-5 py-4 transition-colors hover:bg-paper-50/70">
+    <div className="flex items-start gap-5 px-0 py-4">
       <div className="min-w-0 flex-1">
         <label
           htmlFor={id}
@@ -484,11 +482,6 @@ export default function SettingsPage() {
             ? t("Saved")
             : t("Changes save automatically.");
 
-  const statusTone =
-    saveState === "error"
-      ? "border-danger-200 bg-danger-50 text-danger-700"
-      : "border-paper-200 bg-white text-ink-500";
-
   const statusDot =
     saveState === "saving"
       ? "bg-primary-500 animate-pulse"
@@ -503,10 +496,7 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
       <header className="border-b border-paper-200 pb-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-ink-400">
-          {t("Workspace")}
-        </p>
-        <h1 className="mt-2 font-display text-3xl leading-none tracking-tight text-ink-900 sm:text-4xl">
+        <h1 className="text-3xl leading-none tracking-tight text-ink-900 sm:text-4xl">
           {t("Settings")}
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-6 text-ink-500">
@@ -514,10 +504,8 @@ export default function SettingsPage() {
             "Everything on this page is stored on this machine. Changes are saved as you type.",
           )}
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px]">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium ${statusTone}`}
-          >
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+          <span className="inline-flex items-center gap-1.5 font-medium text-ink-600">
             <span className={`h-1.5 w-1.5 rounded-full ${statusDot}`} aria-hidden="true" />
             <span data-testid="settings-save-state" aria-live="polite">
               {saveLabel}
@@ -526,7 +514,7 @@ export default function SettingsPage() {
           <span className="text-ink-300" aria-hidden="true">
             ·
           </span>
-          <span className="font-medium tabular-nums text-ink-400">
+          <span className="font-medium tabular-nums text-ink-500">
             {t("Version {version}", { version: version || "…" })}
           </span>
         </div>
@@ -535,10 +523,10 @@ export default function SettingsPage() {
       {message && (
         <div
           role={message.kind === "err" ? "alert" : "status"}
-          className={`mt-5 flex items-start gap-2.5 rounded-lg border px-4 py-3 text-sm ${
+          className={`mt-5 flex items-start gap-2.5 border-l-2 px-4 py-3 text-sm ${
             message.kind === "ok"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-danger-200 bg-danger-50 text-danger-800"
+              ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+              : "border-danger-500 bg-danger-50 text-danger-800"
           }`}
         >
           {message.kind === "ok" ? (
@@ -560,7 +548,7 @@ export default function SettingsPage() {
             <li key={id} className="shrink-0">
               <a
                 href={`#${id}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-paper-200 bg-white px-3 py-1.5 text-[11px] font-medium text-ink-500 transition-colors hover:border-paper-300 hover:text-ink-900"
+                className="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium text-ink-500 transition-colors hover:text-ink-900"
               >
                 <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                 {label}
@@ -573,10 +561,10 @@ export default function SettingsPage() {
       <div className="mt-6 lg:mt-8 lg:grid lg:grid-cols-[12.5rem_minmax(0,1fr)] lg:gap-10">
         <nav aria-label={t("Settings sections")} className="hidden lg:block">
           <div className="sticky top-8">
-            <p className="px-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-ink-400">
+            <p className="px-2.5 text-xs font-medium text-ink-500">
               {t("On this page")}
             </p>
-            <ul className="mt-2 space-y-0.5">
+            <ul className="mt-2">
               {sections.map(({ id, label, icon: Icon }) => {
                 const active = id === activeSection;
                 return (
@@ -584,15 +572,15 @@ export default function SettingsPage() {
                     <a
                       href={`#${id}`}
                       aria-current={active ? "true" : undefined}
-                      className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors ${
+                      className={`flex items-center gap-2.5 border-l-2 px-2.5 py-2 text-sm transition-colors ${
                         active
-                          ? "bg-white font-medium text-ink-900 shadow-sm ring-1 ring-paper-200"
-                          : "text-ink-500 hover:bg-white/60 hover:text-ink-900"
+                          ? "border-ink-900 font-medium text-ink-900"
+                          : "border-transparent text-ink-500 hover:text-ink-900"
                       }`}
                     >
                       <Icon
                         className={`h-3.5 w-3.5 shrink-0 ${
-                          active ? "text-primary-600" : "text-ink-400"
+                          active ? "text-ink-900" : "text-ink-400"
                         }`}
                         aria-hidden="true"
                       />
@@ -602,7 +590,7 @@ export default function SettingsPage() {
                 );
               })}
             </ul>
-            <div className="mt-5 flex items-start gap-2 rounded-lg border border-paper-200 bg-white/60 px-3 py-2.5 text-[11px] leading-5 text-ink-400">
+            <div className="mt-5 flex items-start gap-2 border-t border-paper-200 px-2.5 pt-3 text-xs leading-5 text-ink-500">
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <p>
                 {t(
@@ -640,10 +628,10 @@ export default function SettingsPage() {
             title={t("Appearance")}
             description={t("Make the workspace feel like yours. Saved locally on this machine.")}
           >
-            <div className="px-5 py-5">
+            <div className="py-5">
               <ThemePicker />
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 py-4">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-ink-900">{t("Interface language")}</p>
                 <p className="mt-1 max-w-md text-xs leading-5 text-ink-500">
@@ -678,10 +666,10 @@ export default function SettingsPage() {
               probe && (
                 <div
                   role="status"
-                  className={`flex items-start gap-2 rounded-lg border px-3.5 py-2.5 text-xs leading-5 ${
+                  className={`flex items-start gap-2 border-l-2 px-3.5 py-2.5 text-xs leading-5 ${
                     probe.ok
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-danger-200 bg-danger-50 text-danger-800"
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-800"
+                      : "border-danger-500 bg-danger-50 text-danger-800"
                   }`}
                 >
                   {probe.ok ? (
@@ -762,7 +750,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => void onRemoveKey()}
                     disabled={busy !== null}
-                    className="shrink-0 rounded-lg border border-danger-300 px-3 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-50 disabled:opacity-50"
+                    className="shrink-0 border-b border-danger-400 px-1 pb-0.5 text-sm font-medium text-danger-700 transition-colors hover:border-danger-700 disabled:opacity-50"
                   >
                     {t("Remove")}
                   </button>
@@ -874,7 +862,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => setCustomOpen(true)}
-                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-md border border-paper-200 bg-white px-2.5 py-1 text-[11px] font-medium text-ink-600 transition-colors hover:border-paper-300 hover:bg-paper-50 hover:text-ink-900"
+                  className="mt-2.5 inline-flex items-center gap-1.5 border-b border-paper-300 pb-0.5 text-xs font-medium text-ink-600 transition-colors hover:border-ink-900 hover:text-ink-900"
                 >
                   <BookMarked className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("Manage my dictionary")}
@@ -898,7 +886,7 @@ export default function SettingsPage() {
             title={t("Writing")}
             description={t("What a fresh analysis page starts with.")}
           >
-            <div className="px-5 py-5">
+            <div className="py-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <label
                   htmlFor="analysis-template"
@@ -906,7 +894,7 @@ export default function SettingsPage() {
                 >
                   {t("Analysis template")}
                 </label>
-                <span className="rounded border border-paper-200 bg-paper-50 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-ink-400">
+                <span className="font-mono text-xs text-ink-500">
                   Markdown
                 </span>
               </div>
@@ -917,7 +905,7 @@ export default function SettingsPage() {
               </p>
               <textarea
                 id="analysis-template"
-                className={`${INPUT_CLASS} mt-3 min-h-[11rem] resize-y font-mono text-[13px] leading-6`}
+                className={`${INPUT_CLASS} mt-3 min-h-[11rem] resize-y font-mono text-sm leading-6`}
                 value={analysisTemplate}
                 placeholder={t(
                   "**Why the correct answer works**\n\n**Why I picked mine**\n\n**Takeaway**\n",
@@ -934,7 +922,7 @@ export default function SettingsPage() {
               title={t("Desktop")}
               description={t("Housekeeping for the installed app.")}
             >
-              <div className="flex flex-wrap items-start justify-between gap-4 bg-danger-50/50 px-5 py-4">
+              <div className="flex flex-wrap items-start justify-between gap-4 py-4">
                 <div className="min-w-0 max-w-xl">
                   <p className="text-sm font-medium text-danger-700">
                     {t("Reset local data")}
@@ -949,7 +937,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={() => void onResetData()}
                   disabled={resetting}
-                  className="shrink-0 rounded-lg border border-danger-300 bg-white px-3.5 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-50 disabled:opacity-50"
+                  className="shrink-0 border border-danger-400 px-3.5 py-2 text-sm font-medium text-danger-700 transition-colors hover:bg-danger-50 disabled:opacity-50"
                 >
                   {resetting ? t("Resetting…") : t("Reset local data…")}
                 </button>

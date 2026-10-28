@@ -149,7 +149,7 @@ export default function DictionaryPane() {
                 : t("Merriam-Webster · local, no tokens.")}
             </p>
           </div>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="text-xs text-slate-500">
             {t("0 tokens")}
           </span>
         </div>
@@ -161,12 +161,12 @@ export default function DictionaryPane() {
             placeholder={t("Look up a word…")}
             aria-label={t("Look up a word")}
             autoComplete="off"
-            className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+            className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
           />
           <button
             type="submit"
             disabled={!query.trim() || busy}
-            className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+            className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
           >
             {busy ? "…" : t("Look up")}
           </button>
@@ -175,7 +175,7 @@ export default function DictionaryPane() {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 [scrollbar-gutter:stable]">
         {status && !status.available && (
-          <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+          <p className="border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
             {t("Merriam-Webster is not installed. Put the Eudic .eudb file in the")}{" "}
             <code>dictionary/</code> {t("folder, then reload.")}
           </p>
@@ -188,16 +188,16 @@ export default function DictionaryPane() {
           </p>
         )}
         {err && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
+          <p className="border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
         )}
         {lookup?.warning && (
-          <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <p className="mt-2 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-xs text-amber-800">
             {lookup.warning}
           </p>
         )}
 
         {!query.trim() && !lookup && (
-          <div className="mt-6 rounded-xl border border-dashed bg-white px-4 py-6 text-center">
+          <div className="mt-6 border border-dashed border-slate-300 px-4 py-6 text-center">
             <p className="text-sm font-medium text-slate-700">
               {t("Look up any word from the question.")}
             </p>
@@ -209,7 +209,7 @@ export default function DictionaryPane() {
             <button
               type="button"
               onClick={() => openAdd()}
-              className="mt-3 text-xs font-medium text-blue-700 underline underline-offset-4"
+              className="mt-3 text-xs font-medium text-slate-700 underline underline-offset-4 hover:text-slate-900"
             >
               {t("Add my own definition")}
             </button>
@@ -238,26 +238,26 @@ export default function DictionaryPane() {
               return (
                 <article
                   key={`${entry.source}-${entry.id}`}
-                  className="rounded-xl border border-slate-200 bg-white p-3"
+                  className="border-t border-slate-200 pt-3"
                 >
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <h3 className="font-display text-lg font-semibold text-slate-900">
+                    <h3 className="text-lg font-semibold tracking-tight text-slate-900">
                       {entry.headword}
                     </h3>
                     {entry.pos && (
-                      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] italic text-slate-600">
+                      <span className="text-xs italic text-slate-600">
                         {entry.pos}
                       </span>
                     )}
                     <button
                       type="button"
                       onClick={() => openAdd(entry)}
-                      className="ml-auto rounded border bg-white px-2 py-0.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                      className="ml-auto border-b border-slate-400 pb-0.5 text-xs font-medium text-slate-600 hover:border-slate-900 hover:text-slate-900"
                     >
                       {t("Add my own definition")}
                     </button>
                   </div>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="mt-1 text-xs font-medium text-slate-500">
                     {label}
                   </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
@@ -269,7 +269,7 @@ export default function DictionaryPane() {
 
             {lookup.matches.length > 0 && (
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="text-xs font-medium text-slate-500">
                   {t("Suggestions")}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-1">
@@ -279,7 +279,7 @@ export default function DictionaryPane() {
                       type="button"
                       onClick={() => setQuery(entry.headword)}
                       title={entry.snippet}
-                      className="rounded-full border bg-white px-2.5 py-0.5 text-xs text-slate-600 hover:bg-slate-100"
+                      className="border border-slate-300 px-2 py-0.5 text-xs text-slate-700 hover:border-slate-900 hover:text-slate-900"
                     >
                       {entry.headword}
                     </button>
@@ -291,7 +291,7 @@ export default function DictionaryPane() {
             <button
               type="button"
               onClick={() => openAdd()}
-              className="text-xs font-medium text-blue-700 underline underline-offset-4"
+              className="text-xs font-medium text-slate-700 underline underline-offset-4 hover:text-slate-900"
             >
               {t("Can't find it? Add my own definition")}
             </button>
@@ -301,9 +301,9 @@ export default function DictionaryPane() {
         {addOpen && (
           <form
             onSubmit={(event) => void saveDefinition(event)}
-            className="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-3"
+            className="mt-4 border-t-2 border-slate-900 bg-slate-50 p-3"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-800">
+            <p className="text-xs font-semibold text-slate-900">
               {t("Add my own definition")}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -312,7 +312,7 @@ export default function DictionaryPane() {
                 <input
                   value={addWord}
                   onChange={(event) => setAddWord(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
                 />
               </label>
               <label className="text-xs text-slate-600">
@@ -320,7 +320,7 @@ export default function DictionaryPane() {
                 <input
                   value={addPos}
                   onChange={(event) => setAddPos(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                  className="mt-1 w-full border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
                 />
               </label>
             </div>
@@ -330,21 +330,21 @@ export default function DictionaryPane() {
                 value={addDefinition}
                 onChange={(event) => setAddDefinition(event.target.value)}
                 rows={3}
-                className="mt-1 w-full resize-y rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                className="mt-1 w-full resize-y border border-slate-300 bg-transparent px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
               />
             </label>
             <div className="mt-2 flex items-center gap-2">
               <button
                 type="submit"
                 disabled={addBusy || !addWord.trim() || !addDefinition.trim()}
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+                className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 {addBusy ? t("Saving…") : t("Save definition")}
               </button>
               <button
                 type="button"
                 onClick={() => setAddOpen(false)}
-                className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-slate-900"
               >
                 {t("Cancel")}
               </button>
@@ -352,14 +352,14 @@ export default function DictionaryPane() {
               {addErr && <span className="text-xs text-red-700">{addErr}</span>}
             </div>
             {!autoLookup && (
-              <p className="mt-2 text-[11px] leading-5 text-slate-500">
+              <p className="mt-2 text-xs leading-5 text-slate-500">
                 {t("Auto lookup is off — press Enter in the search box to look a word up.")}
               </p>
             )}
           </form>
         )}
 
-        <div className="mt-6 border-t border-slate-200 pt-3 text-[11px] leading-5 text-slate-500">
+        <div className="mt-6 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">
           {status && status.custom_dictionary.count > 0 ? (
             <p>
               {t("My dictionary: {count} words", {

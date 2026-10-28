@@ -387,10 +387,10 @@ export default function PracticePage() {
   if (error && !session) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
-        <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
+        <div className="border-l-2 border-red-500 bg-red-50 px-4 py-3 text-red-800">
           {error}
         </div>
-        <Link to="/" className="mt-4 inline-block text-blue-700 underline">
+        <Link to="/" className="mt-4 inline-block text-slate-900 underline underline-offset-4">
           {t("Back to exams")}
         </Link>
       </div>
@@ -404,13 +404,13 @@ export default function PracticePage() {
   if (!entered) {
     const countdownInvalid = timerMode === "countdown" && (!countdownTotal || countdownTotal <= 0);
     return (
-      <div className="grid min-h-screen place-items-center bg-slate-100 px-4 py-10">
-        <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
+      <div className="grid min-h-screen place-items-center bg-slate-50 px-4 py-10">
+        <div className="w-full max-w-md border border-slate-300 bg-white p-8">
           <div className="text-center">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-medium text-slate-500">
               {t("Ready to begin")}
             </div>
-            <h1 className="mt-2 text-2xl font-bold">{session.document.title}</h1>
+            <h1 className="mt-2 text-2xl tracking-tight">{session.document.title}</h1>
             <p className="mt-2 text-sm text-slate-600">
               {t("{count} questions · choose how the clock runs", {
                 count: session.questions.length,
@@ -419,13 +419,13 @@ export default function PracticePage() {
           </div>
 
           <div className="mt-6">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-medium text-slate-500">
               {t("Timer")}
             </div>
             <div
               role="group"
               aria-label={t("Timer mode")}
-              className="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1"
+              className="mt-2 grid grid-cols-2 border-b border-slate-200"
             >
               <button
                 type="button"
@@ -434,10 +434,10 @@ export default function PracticePage() {
                   timerTouchedRef.current = true;
                   setTimerMode("countup");
                 }}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
                   timerMode === "countup"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "border-slate-900 text-slate-900"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
                 }`}
               >
                 {t("Count up")}
@@ -449,10 +449,10 @@ export default function PracticePage() {
                   timerTouchedRef.current = true;
                   setTimerMode("countdown");
                 }}
-                className={`rounded-md px-3 py-2 text-sm font-medium transition ${
+                className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
                   timerMode === "countdown"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "border-slate-900 text-slate-900"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
                 }`}
               >
                 {t("Count down")}
@@ -484,7 +484,7 @@ export default function PracticePage() {
                     onFocus={() => {
                       timerTouchedRef.current = true;
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tabular-nums focus:border-blue-600 focus:outline-none"
+                    className="mt-1 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-2 text-center font-mono text-lg tabular-nums text-slate-900 focus:border-slate-900 focus:outline-none"
                   />
                 </label>
                 <span className="pb-2 text-lg font-semibold text-slate-400">:</span>
@@ -505,7 +505,7 @@ export default function PracticePage() {
                     onFocus={() => {
                       timerTouchedRef.current = true;
                     }}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-center font-mono text-lg tabular-nums focus:border-blue-600 focus:outline-none"
+                    className="mt-1 w-full rounded-sm border border-slate-300 bg-transparent px-3 py-2 text-center font-mono text-lg tabular-nums text-slate-900 focus:border-slate-900 focus:outline-none"
                   />
                 </label>
               </div>
@@ -531,13 +531,13 @@ export default function PracticePage() {
           <button
             onClick={() => void enter()}
             disabled={countdownInvalid}
-            className="mt-6 w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="mt-6 w-full bg-slate-900 px-4 py-3 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           >
             {t("Begin — enter fullscreen")}
           </button>
           <Link
             to={`/doc/${docId}/answers`}
-            className="mt-4 block text-center text-sm text-blue-700 underline"
+            className="mt-4 block text-center text-sm text-slate-700 underline underline-offset-4"
           >
             {t("Enter answers first (optional)")}
           </Link>
@@ -565,8 +565,8 @@ export default function PracticePage() {
       : seconds;
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-100">
-      <header className="sticky top-0 z-20 border-b bg-white">
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div className="min-w-0">
             <div className="truncate font-semibold">{session.document.title}</div>
@@ -582,10 +582,10 @@ export default function PracticePage() {
           </div>
           <div className="flex items-center gap-3">
             <span
-              className={`rounded-md px-2.5 py-1 font-mono text-sm tabular-nums ${
+              className={`px-1 py-1 font-mono text-sm tabular-nums ${
                 timerMode === "countdown" && clockValue <= 60
-                  ? "bg-red-50 text-red-700 ring-1 ring-red-200"
-                  : "bg-slate-100"
+                  ? "text-red-700"
+                  : "text-slate-700"
               }`}
               title={timerMode === "countdown" ? t("Time remaining") : t("Time elapsed")}
             >
@@ -593,13 +593,13 @@ export default function PracticePage() {
             </span>
             <button
               onClick={() => setLeaving(true)}
-              className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+              className="border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900"
             >
               {t("Exit")}
             </button>
             <button
               onClick={() => setConfirming(true)}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
             >
               {t("Submit")}
             </button>
@@ -608,13 +608,13 @@ export default function PracticePage() {
       </header>
 
       {error && (
-        <div className="mx-auto mt-3 max-w-6xl rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-800">
+        <div className="mx-auto mt-3 max-w-6xl border-l-2 border-red-500 bg-red-50 px-4 py-2 text-sm text-red-800">
           {error}
         </div>
       )}
 
       {timeUp && (
-        <div className="mx-auto mt-3 max-w-6xl rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+        <div className="mx-auto mt-3 max-w-6xl border-l-2 border-amber-500 bg-amber-50 px-4 py-2 text-sm text-amber-900">
           {t("Time's up — submitting your answers…")}
         </div>
       )}
@@ -623,39 +623,39 @@ export default function PracticePage() {
         <div className={material || material2 ? "grid gap-4 lg:grid-cols-2" : "mx-auto max-w-3xl"}>
           {(material || material2) && (
             <aside
-              className="max-h-[70vh] overflow-y-auto rounded-xl border bg-white p-5 [scrollbar-gutter:stable]"
+              className="max-h-[70vh] overflow-y-auto border border-slate-200 bg-white p-5 [scrollbar-gutter:stable]"
               data-testid="practice-passage"
             >
               <PassageText material={material} material2={material2} docId={docId} />
             </aside>
           )}
 
-          <section className={`rounded-xl border bg-white p-5 ${material || material2 ? "" : "p-6"}`}>
-            <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <section className={`border border-slate-200 bg-white p-5 ${material || material2 ? "" : "p-6"}`}>
+            <div className="mb-3 flex items-center justify-between text-xs font-medium text-slate-500">
               <span>
                 {t("Question {number}", { number: current.no ?? idx + 1 })}
                 {current.source ? ` · ${current.source}` : ""}
               </span>
               <button
                 onClick={() => toggleMark(current.id)}
-                className={`rounded px-2 py-1 normal-case tracking-normal ${
+                className={`px-1 py-1 ${
                   marked.has(current.id)
-                    ? "bg-amber-100 text-amber-800"
-                    : "text-slate-500 hover:bg-slate-100"
+                    ? "text-amber-700"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 {marked.has(current.id) ? `★ ${t("Starred")}` : `☆ ${t("Star for review")}`}
               </button>
             </div>
 
-            <div className="text-[15px]">
+            <div className="text-base">
               <RichText text={current.stem} docId={docId} />
             </div>
 
             <div className="mt-5 space-y-2.5">
               {current.kind === "blank" ? (
                 <label className="block">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span className="text-xs font-medium text-slate-500">
                     {t("Your answer")}
                   </span>
                   <input
@@ -664,7 +664,7 @@ export default function PracticePage() {
                     value={answers[current.id]?.[0] ?? ""}
                     onChange={(event) => setBlank(current.id, event.target.value)}
                     aria-label={t("Your answer")}
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-[15px] focus:border-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    className="mt-1 w-full border-b border-slate-400 bg-transparent px-0 py-2 text-base text-slate-900 focus:border-slate-900 focus:outline-none"
                   />
                 </label>
               ) : (
@@ -676,24 +676,24 @@ export default function PracticePage() {
                       key={letter}
                       onClick={() => choose(current, letter)}
                       aria-pressed={selected}
-                      className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition ${
+                      className={`flex w-full items-start gap-3 border px-4 py-3 text-left transition ${
                         selected
-                          ? "border-blue-600 bg-blue-50 ring-1 ring-blue-600"
-                          : "border-slate-300 bg-white hover:border-slate-400 hover:bg-slate-50"
+                          ? "border-slate-900 bg-slate-50"
+                          : "border-slate-300 bg-white hover:border-slate-400"
                       }`}
                     >
                       <span
-                        className={`grid h-7 w-7 shrink-0 place-items-center text-sm font-semibold ${
-                          current.multi ? "rounded-md border" : "rounded-full border"
+                        className={`grid h-7 w-7 shrink-0 place-items-center text-sm font-medium ${
+                          current.multi ? "rounded-sm border" : "rounded-full border"
                         } ${
                           selected
-                            ? "border-blue-600 bg-blue-600 text-white"
+                            ? "border-slate-900 bg-slate-900 text-white"
                             : "border-slate-400 text-slate-700"
                         }`}
                       >
                         {letter}
                       </span>
-                      <span className="min-w-0 flex-1 pt-0.5 text-[15px]">
+                      <span className="min-w-0 flex-1 pt-0.5 text-base">
                         <RichText text={text} docId={docId} />
                       </span>
                     </button>
@@ -708,12 +708,12 @@ export default function PracticePage() {
         </div>
       </main>
 
-      <footer className="sticky bottom-0 z-20 border-t bg-white">
+      <footer className="sticky bottom-0 z-20 border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <button
             onClick={() => setIdx((i) => Math.max(i - 1, 0))}
             disabled={idx === 0}
-            className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
+            className="border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
           >
             {t("Previous")}
           </button>
@@ -726,7 +726,7 @@ export default function PracticePage() {
               const tone = isMarked
                 ? "border-amber-500 bg-amber-400 text-slate-900"
                 : isAnswered
-                  ? "border-blue-600 bg-blue-600 text-white"
+                  ? "border-slate-900 bg-slate-900 text-white"
                   : "border-slate-300 bg-white text-slate-700";
               return (
                 <button
@@ -737,8 +737,8 @@ export default function PracticePage() {
                       ? t("Question {number} (starred)", { number: q.no ?? i + 1 })
                       : t("Question {number}", { number: q.no ?? i + 1 })
                   }
-                  className={`grid h-8 w-8 place-items-center rounded-md border text-xs font-semibold transition ${tone} ${
-                    isCurrent ? "ring-2 ring-slate-900 ring-offset-1" : ""
+                  className={`grid h-8 w-8 place-items-center rounded-sm border text-xs font-medium transition ${tone} ${
+                    isCurrent ? "ring-1 ring-slate-900 ring-offset-2" : ""
                   }`}
                 >
                   {i + 1}
@@ -750,7 +750,7 @@ export default function PracticePage() {
           <button
             onClick={() => setIdx((i) => Math.min(i + 1, questions.length - 1))}
             disabled={last}
-            className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
+            className="border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
           >
             {t("Next")}
           </button>
@@ -759,8 +759,8 @@ export default function PracticePage() {
 
       {confirming && (
         <div className="fixed inset-0 z-30 grid place-items-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold">{t("Submit your answers?")}</h2>
+          <div className="w-full max-w-md border border-slate-300 bg-white p-6">
+            <h2 className="text-lg font-semibold tracking-tight">{t("Submit your answers?")}</h2>
             <p className="mt-2 text-sm text-slate-600">
               {t("{answered} of {total} answered", {
                 answered,
@@ -773,14 +773,14 @@ export default function PracticePage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setConfirming(false)}
-                className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                className="border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900"
               >
                 {t("Keep working")}
               </button>
               <button
                 onClick={() => void doSubmit()}
                 disabled={submitting}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
               >
                 {submitting ? t("Grading…") : t("Submit")}
               </button>
@@ -790,8 +790,8 @@ export default function PracticePage() {
       )}
       {leaving && (
         <div className="fixed inset-0 z-30 grid place-items-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold">{t("Leave the exam?")}</h2>
+          <div className="w-full max-w-md border border-slate-300 bg-white p-6">
+            <h2 className="text-lg font-semibold tracking-tight">{t("Leave the exam?")}</h2>
             <p className="mt-2 text-sm text-slate-600">
               {t(
                 "This attempt will be left unfinished — your answers so far are not submitted and will not be graded. You can start a new attempt any time.",
@@ -800,13 +800,13 @@ export default function PracticePage() {
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => setLeaving(false)}
-                className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50"
+                className="border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900"
               >
                 {t("Keep working")}
               </button>
               <button
                 onClick={leaveExam}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                className="bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
               >
                 {t("Leave exam")}
               </button>

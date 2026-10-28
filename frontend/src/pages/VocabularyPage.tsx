@@ -42,12 +42,9 @@ function ExamIndex({
   );
 
   return (
-    <aside className="flex max-h-[42dvh] min-h-0 w-full shrink-0 flex-col border-b border-slate-200 bg-white lg:max-h-none lg:w-80 lg:border-b-0 lg:border-r">
-      <div className="shrink-0 border-b border-slate-200 px-4 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-          {t("Reference")}
-        </p>
-        <h1 className="mt-1 font-display text-2xl tracking-tight text-slate-900">
+    <aside className="flex max-h-[42dvh] min-h-0 w-full shrink-0 flex-col border-b border-slate-200 lg:max-h-none lg:w-80 lg:border-b-0 lg:border-r">
+      <div className="shrink-0 border-b border-slate-200 px-4 py-5">
+        <h1 className="text-2xl tracking-tight text-slate-900">
           {t("Vocabulary")}
         </h1>
         <p className="mt-1 text-xs text-slate-500">
@@ -63,16 +60,16 @@ function ExamIndex({
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("Filter exams…")}
           aria-label={t("Filter exams")}
-          className="mt-3 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+          className="mt-4 w-full border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+      <div className="min-h-0 flex-1 overflow-y-auto py-2">
         {filtered.length === 0 ? (
-          <p className="px-3 py-6 text-sm text-slate-400">
+          <p className="px-4 py-6 text-sm text-slate-500">
             {documents.length === 0 ? t("No exams yet.") : t("No exam matches that filter.")}
           </p>
         ) : (
-          <ul className="space-y-1">
+          <ul>
             {filtered.map((doc) => {
               const active = doc.document_id === selectedId;
               return (
@@ -81,27 +78,25 @@ function ExamIndex({
                     type="button"
                     onClick={() => onSelect(doc.document_id)}
                     aria-pressed={active}
-                    className={`w-full rounded-lg px-3 py-2 text-left transition-colors ${
+                    className={`w-full border-l-2 px-4 py-2.5 text-left transition-colors ${
                       active
-                        ? "bg-slate-100 ring-1 ring-inset ring-slate-300"
-                        : "hover:bg-slate-50"
+                        ? "border-slate-900 bg-slate-100"
+                        : "border-transparent hover:bg-slate-100"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
+                    <span className="flex items-baseline gap-2">
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-900">
                         {doc.title}
                       </span>
                       <span
-                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                          doc.word_count > 0
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-400"
+                        className={`shrink-0 text-xs tabular-nums ${
+                          doc.word_count > 0 ? "text-slate-600" : "text-slate-400"
                         }`}
                       >
                         {doc.word_count}
                       </span>
                     </span>
-                    <span className="mt-0.5 block truncate text-xs text-slate-400">
+                    <span className="mt-0.5 block truncate text-xs text-slate-500">
                       {doc.preview.length > 0
                         ? doc.preview.join(" · ")
                         : t("No words yet — add from the workspace")}
@@ -282,11 +277,11 @@ function VocabularyDetail({
   const dictionaryTitle = status?.title || status?.source_name || "Merriam-Webster";
 
   return (
-    <section className="min-h-0 w-full flex-1 overflow-y-auto bg-slate-50">
+    <section className="min-h-0 w-full flex-1 overflow-y-auto">
       <div className="w-full px-4 py-4 sm:px-6">
-        <header className="flex flex-wrap items-center gap-3">
+        <header className="flex flex-wrap items-center gap-3 border-b border-slate-200 pb-4">
           <div className="min-w-0 flex-1">
-            <h2 className="truncate font-display text-xl tracking-tight text-slate-900">
+            <h2 className="truncate text-xl tracking-tight text-slate-900">
               {doc.title}
             </h2>
             <p className="text-xs text-slate-500">
@@ -299,20 +294,20 @@ function VocabularyDetail({
               type="button"
               onClick={() => void save()}
               disabled={!dirty || busy}
-              className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+              className="btn btn-secondary px-3 py-1.5 text-sm"
             >
               {busy ? t("Saving…") : t("Save")}
             </button>
             <button
               type="button"
               onClick={() => void exportXlsx()}
-              className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+              className="btn btn-primary px-3 py-1.5 text-sm"
             >
               {t("Export .xlsx")}
             </button>
             <Link
               to={`/doc/${docId}/practice`}
-              className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
+              className="btn btn-secondary px-3 py-1.5 text-sm no-underline"
             >
               {t("Practice")}
             </Link>
@@ -322,13 +317,13 @@ function VocabularyDetail({
         {(msg || warning || err) && (
           <div className="mt-3 space-y-1">
             {msg && (
-              <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{msg}</p>
+              <p className="border-l-2 border-emerald-500 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{msg}</p>
             )}
             {warning && (
-              <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{warning}</p>
+              <p className="border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-xs text-amber-800">{warning}</p>
             )}
             {err && (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
+              <p className="border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">{err}</p>
             )}
           </div>
         )}
@@ -337,7 +332,7 @@ function VocabularyDetail({
           <div className="min-w-0">
             <form
               onSubmit={(event) => void addManual(event)}
-              className="grid gap-2 rounded-xl border bg-white p-3 sm:grid-cols-2 xl:grid-cols-4"
+              className="grid gap-2 border-b border-slate-200 pb-4 sm:grid-cols-2 xl:grid-cols-4"
               aria-label={t("Add a word")}
             >
               <input
@@ -346,33 +341,33 @@ function VocabularyDetail({
                 placeholder={t("Word")}
                 aria-label={t("Word")}
                 required
-                className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
               />
               <input
                 value={form.pos}
                 onChange={(event) => setForm({ ...form, pos: event.target.value })}
                 placeholder={t("POS (e.g. adj.)")}
                 aria-label={t("Part of speech")}
-                className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
               />
               <input
                 value={form.meaning}
                 onChange={(event) => setForm({ ...form, meaning: event.target.value })}
                 placeholder={t("Meaning")}
                 aria-label={t("Meaning")}
-                className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
               />
               <input
                 value={form.notes}
                 onChange={(event) => setForm({ ...form, notes: event.target.value })}
                 placeholder={t("Notes (optional)")}
                 aria-label={t("Notes")}
-                className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={!form.word.trim() || busy}
-                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40 sm:col-span-2 xl:col-span-4"
+                className="btn btn-primary justify-self-start px-4 py-1.5 text-sm disabled:opacity-40 sm:col-span-2 xl:col-span-4"
               >
                 {t("Add word")}
               </button>
@@ -380,7 +375,7 @@ function VocabularyDetail({
 
             <div className="mt-4 h-[30rem] min-h-[20rem]">
               {loading ? (
-                <p className="rounded-xl border bg-white p-6 text-sm text-slate-400">
+                <p className="py-6 text-sm text-slate-500">
                   {t("Loading words…")}
                 </p>
               ) : grid ? (
@@ -395,20 +390,20 @@ function VocabularyDetail({
                   }}
                 />
               ) : (
-                <p className="rounded-xl border bg-white p-6 text-sm text-red-600">
+                <p className="py-6 text-sm text-red-600">
                   {err ?? t("Could not load this word list.")}
                 </p>
               )}
             </div>
           </div>
 
-          <aside className="space-y-3">
+          <aside className="space-y-5">
             <form
               onSubmit={(event) => void runLookup(event)}
-              className="rounded-xl border bg-white p-3"
+              className="border-t-2 border-slate-900 pt-3"
               aria-label={t("Dictionary lookup")}
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="text-xs font-medium text-slate-900">
                 {t("Dictionary")}
               </p>
               <div className="mt-2 flex gap-1.5">
@@ -417,19 +412,19 @@ function VocabularyDetail({
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={t("Look up a word…")}
                   aria-label={t("Look up a word")}
-                  className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                  className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
                 />
                 <button
                   type="submit"
                   disabled={!query.trim() || lookupBusy}
-                  className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50 disabled:opacity-40"
+                  className="btn btn-secondary px-3 py-1.5 text-sm disabled:opacity-40"
                 >
                   {lookupBusy ? "…" : t("Look up")}
                 </button>
               </div>
 
               {status && !status.available && (
-                <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs leading-5 text-amber-800">
+                <p className="mt-2 border-l-2 border-amber-500 bg-amber-50 px-2 py-1.5 text-xs leading-5 text-amber-800">
                   {t(
                     "Merriam-Webster is not installed. Put the Eudic .eudb file in the",
                   )}{" "}
@@ -469,12 +464,12 @@ function VocabularyDetail({
                 </p>
               )}
               {lookupErr && (
-                <p className="mt-2 rounded-lg bg-red-50 px-2 py-1.5 text-xs text-red-700">
+                <p className="mt-2 border-l-2 border-red-500 bg-red-50 px-2 py-1.5 text-xs text-red-700">
                   {lookupErr}
                 </p>
               )}
               {lookup?.warning && (
-                <p className="mt-2 rounded-lg bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                <p className="mt-2 border-l-2 border-amber-500 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
                   {lookup.warning}
                 </p>
               )}
@@ -499,19 +494,19 @@ function VocabularyDetail({
                           ? t("Definition for English Learners")
                           : t("Collegiate definition");
                     return (
-                      <div key={`${entry.source}-${entry.id}`} className="rounded-lg border bg-slate-50 p-2">
+                      <div key={`${entry.source}-${entry.id}`} className="border-t border-slate-200 pt-2">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-800">{entry.headword}</span>
+                          <span className="font-semibold text-slate-900">{entry.headword}</span>
                           <button
                             type="button"
                             onClick={() => void addEntry(entry)}
                             disabled={busy}
-                            className="ml-auto rounded border bg-white px-2 py-0.5 text-xs font-medium hover:bg-slate-100 disabled:opacity-40"
+                            className="ml-auto border-b border-slate-400 pb-0.5 text-xs font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 disabled:opacity-40"
                           >
                             {t("Add")}
                           </button>
                         </div>
-                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="mt-1 text-xs font-medium text-slate-500">
                           {label}
                         </p>
                         <p className="mt-0.5 max-h-40 overflow-y-auto whitespace-pre-wrap text-xs leading-5 text-slate-600">
@@ -522,7 +517,7 @@ function VocabularyDetail({
                   })}
                   {lookup.matches.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                      <p className="text-xs font-medium text-slate-500">
                         {t("Suggestions")}
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1">
@@ -532,7 +527,7 @@ function VocabularyDetail({
                             type="button"
                             onClick={() => setQuery(entry.headword)}
                             title={entry.snippet}
-                            className="rounded-full border bg-white px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-100"
+                            className="border border-slate-300 px-2 py-0.5 text-xs text-slate-700 hover:border-slate-900 hover:text-slate-900"
                           >
                             {entry.headword}
                           </button>
@@ -544,8 +539,8 @@ function VocabularyDetail({
               )}
             </form>
 
-            <div className="rounded-xl border bg-white p-3 text-xs leading-5 text-slate-500">
-              <p className="font-medium text-slate-700">{t("How words get here")}</p>
+            <div className="border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">
+              <p className="font-medium text-slate-900">{t("How words get here")}</p>
               <p className="mt-1">
                 {t(
                   "Drag a word from a question or option onto the Vocabulary pane in the review workspace — the dictionary sense that fits the sentence is added. AI sense matching, English-learner definitions, and My dictionary can be toggled in Settings. You can also add words here or edit any cell above.",
@@ -615,7 +610,7 @@ export default function VocabularyPage() {
         </div>
       ) : selected ? (
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <div className="shrink-0 border-b border-slate-200 bg-white px-3 pt-1">
+          <div className="shrink-0 border-b border-slate-200 px-3 pt-1">
             <Tabs
               ariaLabel={t("Vocabulary views")}
               tabs={[
@@ -661,7 +656,7 @@ export default function VocabularyPage() {
       ) : (
         <div className="grid min-h-0 flex-1 place-items-center p-8 text-center">
           <div>
-            <p className="font-display text-2xl tracking-tight text-slate-700">
+            <p className="text-2xl tracking-tight text-slate-900">
               {t("No exams yet")}
             </p>
             <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
@@ -671,7 +666,7 @@ export default function VocabularyPage() {
             </p>
             <Link
               to="/library"
-              className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="btn btn-primary mt-5 inline-block px-4 py-2 text-sm no-underline"
             >
               {t("Go to Library")}
             </Link>

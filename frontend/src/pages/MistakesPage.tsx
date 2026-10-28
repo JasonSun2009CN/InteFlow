@@ -99,7 +99,7 @@ function ReviewRow({
 
   return (
     <li
-      className={`flex items-stretch gap-2 px-3 py-3 transition-colors ${
+      className={`flex items-stretch gap-2 px-2 py-4 transition-colors ${
         selected ? "bg-slate-100" : "hover:bg-slate-50"
       }`}
     >
@@ -115,7 +115,7 @@ function ReviewRow({
             <span className="text-sm font-semibold text-slate-800">
               {t("Question {number}", { number: item.no })}
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-xs text-slate-500">
               {t(sectionLabel(item.sec))}
               {item.source ? ` · ${item.source}` : ""}
             </span>
@@ -128,7 +128,7 @@ function ReviewRow({
           <span className="mt-1 line-clamp-2 block text-sm leading-5 text-slate-700">
             {item.stem}
           </span>
-          <span className="mt-1 block text-[11px] text-slate-400">
+          <span className="mt-1 block text-xs text-slate-500">
             {t("Correct: {answer}", { answer: answerText(item, item.answers) })}
             {item.chosen_answers.length > 0 && (
               <> · {t("Yours: {answer}", { answer: answerText(item, item.chosen_answers) })}</>
@@ -146,10 +146,10 @@ function ReviewRow({
         }
         aria-pressed={item.starred}
         title={item.starred ? t("Remove from Starred") : t("Add to Starred")}
-        className={`h-8 shrink-0 self-start rounded-md border px-2 text-sm ${
+        className={`h-8 shrink-0 cursor-pointer self-start rounded-sm px-2 text-base transition-colors ${
           item.starred
-            ? "border-amber-300 bg-amber-100 text-amber-800"
-            : "border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-amber-700"
+            ? "text-amber-700"
+            : "text-slate-400 hover:bg-slate-100 hover:text-amber-700"
         }`}
       >
         {item.starred ? "★" : "☆"}
@@ -288,27 +288,28 @@ export default function MistakesPage() {
     : [];
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="mx-auto w-full max-w-6xl px-6 py-12 sm:py-16">
+      <header className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-            {t("Review")}
-          </p>
-          <h1 className="mt-2 font-display text-3xl tracking-tight sm:text-4xl">
+          <p className="text-sm text-slate-500">{t("Review")}</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             {t("Review sets")}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
             {t(
               "Your latest wrong answers and the questions you starred, across every attempt. Read or write the analysis here — it is the same notebook as the review workspace.",
             )}
           </p>
         </div>
-        <Link to="/" className="text-sm text-blue-700 underline underline-offset-4">
+        <Link
+          to="/"
+          className="text-sm text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
+        >
           {t("Pick an exam")}
         </Link>
       </header>
 
-      <div className="mt-4">
+      <div className="mt-8">
         <SlidingTabs
           ariaLabel={t("Review sets")}
           tabs={[
@@ -328,20 +329,20 @@ export default function MistakesPage() {
         />
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-5 flex flex-wrap items-center gap-3">
         <input
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("Search papers, stems and options…")}
           aria-label={t("Search review sets")}
-          className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none sm:max-w-sm"
+          className="min-w-0 flex-1 rounded-sm border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none sm:max-w-sm"
         />
         <select
           value={exam}
           onChange={(event) => setExam(event.target.value)}
           aria-label={t("Filter by exam")}
-          className="max-w-[16rem] rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm focus:border-blue-400 focus:outline-none"
+          className="max-w-[16rem] cursor-pointer rounded-sm border border-slate-300 bg-transparent px-2.5 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
         >
           <option value="all">{t("All exams")}</option>
           {exams.map(([id, title]) => (
@@ -353,7 +354,7 @@ export default function MistakesPage() {
         <button
           type="button"
           onClick={() => setSort((current) => (current === "newest" ? "oldest" : "newest"))}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+          className="cursor-pointer rounded-sm px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
         >
           {sort === "newest" ? t("Newest first") : t("Oldest first")}
         </button>
@@ -362,7 +363,7 @@ export default function MistakesPage() {
       {error && (
         <div
           role="alert"
-          className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="mt-5 flex flex-wrap items-center gap-3 bg-red-50 px-4 py-3 text-sm text-red-800"
         >
           <span className="min-w-0 flex-1">{error}</span>
           <button
@@ -371,21 +372,21 @@ export default function MistakesPage() {
               setData((current) => ({ ...current, [tab]: null }));
               setReloadKey((key) => key + 1);
             }}
-            className="rounded-md border border-red-300 px-2.5 py-1 text-xs font-medium hover:bg-red-100"
+            className="cursor-pointer border-b border-red-300 pb-0.5 text-xs font-medium hover:border-red-700"
           >
             {t("Try again")}
           </button>
         </div>
       )}
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <section
           aria-label={
             tab === "mistakes" ? t("Mistakes") : t("Starred questions")
           }
         >
           {loading && data[tab] === null && !error && (
-            <p className="rounded-xl border bg-white px-4 py-8 text-center text-sm text-slate-500">
+            <p className="px-4 py-12 text-sm text-slate-500">
               {tab === "mistakes"
                 ? t("Loading mistakes…")
                 : t("Loading starred questions…")}
@@ -393,8 +394,8 @@ export default function MistakesPage() {
           )}
 
           {!loading && !error && filtered.length === 0 && (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-white/60 px-5 py-12 text-center">
-              <p className="font-display text-2xl tracking-tight text-slate-700">
+            <div className="px-5 py-16 text-center">
+              <p className="text-xl font-semibold tracking-tight text-slate-900">
                 {items.length === 0
                   ? tab === "mistakes"
                     ? t("No mistakes yet.")
@@ -416,7 +417,7 @@ export default function MistakesPage() {
           )}
 
           {filtered.length > 0 && (
-            <ul className="max-h-[70dvh] divide-y divide-slate-100 overflow-y-auto rounded-xl border bg-white shadow-sm">
+            <ul className="max-h-[70dvh] divide-y divide-slate-200 overflow-y-auto border-y border-slate-200">
               {filtered.map((item) => (
                 <ReviewRow
                   key={item.question_id}
@@ -432,7 +433,7 @@ export default function MistakesPage() {
 
         <aside className="min-w-0">
           {selected ? (
-            <div className="overflow-hidden rounded-xl border bg-white shadow-sm lg:sticky lg:top-4">
+            <div className="overflow-hidden border border-slate-200 bg-white lg:sticky lg:top-4">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-slate-200 px-4 py-2.5">
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
                   {selected.document_title}
@@ -476,16 +477,16 @@ export default function MistakesPage() {
 
               {others.length > 0 && (
                 <div className="max-h-52 overflow-y-auto border-t border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  <p className="text-xs font-medium text-slate-500">
                     {t("Earlier analyses")}
                   </p>
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-3 space-y-3">
                     {others.map((entry, index) => (
                       <article
                         key={`${entry.source}-${index}`}
-                        className="rounded-lg border bg-white px-3 py-2 text-sm"
+                        className="border-l-2 border-slate-200 pl-3 text-sm"
                       >
-                        <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                        <p className="text-xs text-slate-500">
                           {entry.source === "legacy"
                             ? t("Legacy analysis")
                             : t("Saved analysis")}
@@ -503,9 +504,9 @@ export default function MistakesPage() {
               )}
             </div>
           ) : (
-            <div className="grid min-h-[24rem] place-items-center rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 text-center">
+            <div className="grid min-h-[24rem] place-items-center border border-dashed border-slate-300 px-6 text-center">
               <div>
-                <p className="font-display text-xl tracking-tight text-slate-600">
+                <p className="text-xl tracking-tight text-slate-600">
                   {t("Pick a question")}
                 </p>
                 <p className="mt-2 text-sm text-slate-500">

@@ -8,12 +8,13 @@ interface Props {
 }
 
 const variantStyles = {
-  info: "bg-primary-50 border-primary-200 text-primary-800",
-  success: "bg-success-50 border-success-200 text-success-800",
-  warning: "bg-warning-50 border-warning-200 text-warning-800",
-  danger: "bg-danger-50 border-danger-200 text-danger-800",
+  info: "bg-slate-100 text-slate-800",
+  success: "bg-success-50 text-success-700",
+  warning: "bg-warning-50 text-warning-700",
+  danger: "bg-danger-50 text-danger-700",
 };
 
+/** A quiet notice: a change of ground, no border or shadow. */
 export function Banner({
   variant = "info",
   title,
@@ -22,12 +23,12 @@ export function Banner({
 }: Props) {
   return (
     <div
-      className={`flex gap-3 p-4 rounded-lg border ${variantStyles[variant]} ${className}`}
+      className={`flex gap-3 rounded-sm p-4 ${variantStyles[variant]} ${className}`}
       role="alert"
     >
       <div className="flex-1">
-        {title && <h4 className="font-semibold mb-1">{title}</h4>}
-        <div className="text-sm">{children}</div>
+        {title && <h4 className="mb-1 font-semibold">{title}</h4>}
+        <div className="text-sm leading-6">{children}</div>
       </div>
     </div>
   );

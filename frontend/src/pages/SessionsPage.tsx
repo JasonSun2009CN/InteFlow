@@ -89,16 +89,14 @@ export default function SessionsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
+    <div className="mx-auto w-full max-w-4xl px-6 py-12 sm:py-16">
+      <header className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-            {t("History")}
-          </p>
-          <h1 className="mt-2 font-display text-3xl tracking-tight sm:text-4xl">
+          <p className="text-sm text-slate-500">{t("History")}</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             {t("Sessions")}
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             {t("Every attempt you have submitted, newest first.")}
           </p>
         </div>
@@ -108,46 +106,49 @@ export default function SessionsPage() {
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("Search exams…")}
           aria-label={t("Search sessions")}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none sm:w-64"
+          className="w-full rounded-sm border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none sm:w-64"
         />
       </header>
 
       {error && (
-        <div role="alert" className="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div role="alert" className="mt-8 bg-red-50 px-5 py-4 text-sm text-red-800">
           {error}
         </div>
       )}
 
       {sessions === null && !error && (
-        <p className="mt-8 text-sm text-slate-500">{t("Loading sessions…")}</p>
+        <p className="mt-12 text-sm text-slate-500">{t("Loading sessions…")}</p>
       )}
 
       {sessions?.length === 0 && (
-        <div className="mt-10 rounded-xl border border-dashed border-slate-300 bg-white/60 px-6 py-14 text-center">
-          <p className="font-display text-2xl tracking-tight text-slate-700">
+        <div className="py-20 text-center">
+          <p className="text-2xl font-semibold tracking-tight text-slate-900">
             {t("No sessions yet.")}
           </p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
             {t("Finish an exam and it will show up here.")}
           </p>
-          <Link to="/" className="mt-5 inline-block text-sm text-blue-700 underline">
+          <Link
+            to="/"
+            className="mt-6 inline-block border-b border-slate-400 pb-0.5 text-sm text-slate-700 hover:border-slate-900 hover:text-slate-900"
+          >
             {t("Pick an exam")}
           </Link>
         </div>
       )}
 
       {sessions && sessions.length > 0 && visible.length === 0 && (
-        <p className="mt-8 text-sm text-slate-500">
+        <p className="mt-12 text-sm text-slate-500">
           {t("No sessions match “{query}”.", { query })}
         </p>
       )}
 
       {visible.length > 0 && (
-        <ul className="mt-4 divide-y divide-slate-200">
+        <ul className="mt-10">
           {visible.map((session) => (
             <li
               key={session.session_id}
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 py-4"
+              className="flex flex-wrap items-center gap-x-6 gap-y-2 px-1 py-5 transition-colors hover:bg-slate-50"
             >
               <div className="min-w-0 flex-1">
                 <Link
@@ -170,7 +171,7 @@ export default function SessionsPage() {
               </div>
 
               <div className="text-right">
-                <div className="text-sm font-semibold tabular-nums">
+                <div className="text-sm font-semibold tabular-nums text-slate-900">
                   {score(session, t("not graded"))}
                 </div>
                 <div className="text-xs text-slate-500">
@@ -184,7 +185,7 @@ export default function SessionsPage() {
                 disabled={deleting === session.session_id}
                 aria-label={t("Delete attempt {id}", { id: session.session_id })}
                 title={t("Delete this attempt")}
-                className="rounded-md border border-slate-200 p-2 text-slate-400 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
+                className="cursor-pointer rounded-sm p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-40"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>

@@ -157,7 +157,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
       <section className="min-h-0 w-full flex-1 overflow-y-auto bg-slate-50">
         <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
           <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-medium text-slate-500">
               {t("Question {current} of {total}", {
                 current: index + 1,
                 total: exam.questions.length,
@@ -168,14 +168,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             </p>
           </div>
           <div
-            className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200"
+            className="mt-2 h-px w-full overflow-hidden bg-slate-200"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={exam.questions.length}
             aria-valuenow={index + 1}
           >
             <div
-              className="h-full rounded-full bg-blue-600 transition-all"
+              className="h-full bg-slate-900 transition-all"
               style={{
                 width: `${((index + 1) / exam.questions.length) * 100}%`,
               }}
@@ -184,18 +184,18 @@ export default function WordExamPanel({ doc, onBack }: Props) {
 
           <form
             onSubmit={onAnswerSubmit}
-            className="mt-4 rounded-xl border bg-white p-4"
+            className="mt-4 border border-slate-200 bg-white p-4"
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-medium text-slate-500">
               {exam.mode === "en-zh"
                 ? t("Write its meaning")
                 : t("Spell the English word")}
             </p>
-            <p className="mt-2 whitespace-pre-wrap font-display text-xl leading-8 text-slate-900">
+            <p className="mt-2 whitespace-pre-wrap text-xl leading-8 tracking-tight text-slate-900">
               {question.prompt}
             </p>
             {question.pos && (
-              <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-500">
+              <span className="mt-2 inline-block text-xs font-medium text-slate-500">
                 {question.pos}
               </span>
             )}
@@ -215,7 +215,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                   exam.mode === "en-zh" ? t("Type the meaning…") : t("Type the word…")
                 }
                 aria-label={t("Your answer")}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                className="w-full border-b border-slate-400 bg-transparent px-0 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
               />
             </label>
 
@@ -224,14 +224,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 type="button"
                 onClick={() => setIndex((current) => Math.max(0, current - 1))}
                 disabled={index === 0}
-                className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+                className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
               >
                 {t("Previous")}
               </button>
               {index < exam.questions.length - 1 ? (
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+                  className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
                 >
                   {t("Next")}
                 </button>
@@ -239,7 +239,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-40"
+                  className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
                 >
                   {busy ? t("Grading…") : t("Submit test")}
                 </button>
@@ -248,7 +248,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 type="button"
                 onClick={() => void submit()}
                 disabled={busy}
-                className="ml-auto rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+                className="ml-auto border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
               >
                 {busy ? t("Grading…") : t("Submit now")}
               </button>
@@ -256,7 +256,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
           </form>
 
           {err && (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">
               {err}
             </p>
           )}
@@ -274,12 +274,12 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                   onClick={() => setIndex(itemIndex)}
                   aria-label={t("Question {number}", { number: itemIndex + 1 })}
                   aria-current={itemIndex === index ? "true" : undefined}
-                  className={`h-7 min-w-7 rounded-md px-1.5 text-xs font-medium transition-colors ${
+                  className={`h-7 min-w-7 border px-1.5 text-xs font-medium transition-colors ${
                     itemIndex === index
-                      ? "bg-slate-900 text-white"
+                      ? "border-slate-900 bg-slate-900 text-white"
                       : isAnswered
-                        ? "bg-emerald-100 text-emerald-800"
-                        : "bg-white text-slate-500 ring-1 ring-inset ring-slate-200 hover:bg-slate-100"
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-400"
                   }`}
                 >
                   {itemIndex + 1}
@@ -296,10 +296,10 @@ export default function WordExamPanel({ doc, onBack }: Props) {
     <section className="min-h-0 w-full flex-1 overflow-y-auto bg-slate-50">
       <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6">
         <header>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+          <p className="text-xs font-medium text-slate-500">
             {t("Vocabulary")}
           </p>
-          <h2 className="mt-1 font-display text-2xl tracking-tight text-slate-900">
+          <h2 className="mt-1 text-2xl tracking-tight text-slate-900">
             {t("Word test")}
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -311,8 +311,8 @@ export default function WordExamPanel({ doc, onBack }: Props) {
         </header>
 
         {!hasWords ? (
-          <div className="mt-5 rounded-xl border bg-white p-6 text-center">
-            <p className="font-display text-lg tracking-tight text-slate-700">
+          <div className="mt-5 border border-dashed border-slate-300 px-6 py-10 text-center">
+            <p className="text-lg tracking-tight text-slate-900">
               {t("This list is empty")}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
@@ -323,7 +323,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             <button
               type="button"
               onClick={onBack}
-              className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              className="mt-4 bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
             >
               {t("Back to word list")}
             </button>
@@ -331,7 +331,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
         ) : (
           <>
             <fieldset className="mt-5">
-              <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <legend className="text-xs font-medium text-slate-500">
                 {t("Mode")}
               </legend>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -343,10 +343,10 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                       type="button"
                       aria-pressed={active}
                       onClick={() => setMode(option.mode)}
-                      className={`rounded-xl border p-3 text-left transition-colors ${
+                      className={`border p-3 text-left transition-colors ${
                         active
-                          ? "border-blue-400 bg-blue-50 ring-1 ring-inset ring-blue-300"
-                          : "border-slate-200 bg-white hover:bg-slate-50"
+                          ? "border-slate-900 bg-slate-50"
+                          : "border-slate-200 bg-white hover:border-slate-400"
                       }`}
                     >
                       <span className="block text-sm font-medium text-slate-800">
@@ -362,7 +362,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
               {mode === "en-zh" &&
                 settings !== null &&
                 !settings.vocab_exam_ai_grading && (
-                  <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
                     {t(
                       "Local grading compares text, so an English definition from the list works best. Enable AI grading in Settings to accept a Chinese paraphrase.",
                     )}
@@ -371,10 +371,10 @@ export default function WordExamPanel({ doc, onBack }: Props) {
             </fieldset>
 
             <fieldset className="mt-4">
-              <legend className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <legend className="text-xs font-medium text-slate-500">
                 {t("How many words")}
               </legend>
-              <div className="mt-2 flex flex-wrap items-center gap-3 rounded-xl border bg-white p-3">
+              <div className="mt-2 flex flex-wrap items-center gap-3 border-b border-slate-200 pb-3">
                 <input
                   type="number"
                   min={1}
@@ -386,14 +386,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                     if (Number.isFinite(next)) setCount(Math.max(1, Math.round(next)));
                   }}
                   aria-label={t("Number of words")}
-                  className="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                  className="w-24 border-b border-slate-400 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none disabled:bg-slate-100 disabled:text-slate-400"
                 />
                 <label className="flex items-center gap-2 text-sm text-slate-700">
                   <input
                     type="checkbox"
                     checked={all}
                     onChange={(event) => setAll(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded-sm border-slate-300 text-slate-900 focus:ring-slate-900"
                   />
                   {t("All {count} words", { count: doc.word_count })}
                 </label>
@@ -403,7 +403,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
               </div>
             </fieldset>
 
-            <p className="mt-4 rounded-lg bg-white px-3 py-2 text-xs leading-5 text-slate-500 ring-1 ring-inset ring-slate-200">
+            <p className="mt-4 border-l-2 border-slate-200 px-3 py-2 text-xs leading-5 text-slate-500">
               {settings === null
                 ? t("Checking how this test will be graded…")
                 : settings.vocab_exam_ai_grading
@@ -415,7 +415,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                         "AI grading is on, but no model is configured yet, so grading stays local.",
                       )
                   : t("AI grading is off — grading is local and free.")}{" "}
-              <Link to="/settings" className="font-medium text-blue-600 hover:underline">
+              <Link to="/settings" className="font-medium text-slate-900 underline underline-offset-4">
                 {t("Settings")}
               </Link>
             </p>
@@ -425,14 +425,14 @@ export default function WordExamPanel({ doc, onBack }: Props) {
                 type="button"
                 onClick={() => void start()}
                 disabled={busy}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+                className="bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 {busy ? t("Building test…") : t("Start test")}
               </button>
               <button
                 type="button"
                 onClick={onBack}
-                className="rounded-lg border bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100"
+                className="border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900"
               >
                 {t("Back to word list")}
               </button>
@@ -441,7 +441,7 @@ export default function WordExamPanel({ doc, onBack }: Props) {
         )}
 
         {err && (
-          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">
             {err}
           </p>
         )}

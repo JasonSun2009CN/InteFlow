@@ -54,12 +54,13 @@ export function Tabs({
     }
   };
 
-  const baseTab = "flex-1 px-4 py-2.5 text-sm font-medium text-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2";
+  const baseTab =
+    "flex-1 cursor-pointer px-4 py-2.5 text-center text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2";
 
   const variants = {
-    line: "border-b-2 border-transparent text-slate-500 hover:text-slate-700 data-[active]:border-primary-600 data-[active]:text-primary-600",
-    enclosed: "rounded-lg text-slate-500 hover:bg-slate-100 data-[active]:bg-primary-50 data-[active]:text-primary-700",
-    soft: "rounded-lg text-slate-500 hover:bg-slate-100 data-[active]:bg-primary-100 data-[active]:text-primary-700",
+    line: "border-b border-transparent text-slate-500 hover:text-slate-900 data-[active]:border-slate-900 data-[active]:text-slate-900",
+    enclosed: "text-slate-500 hover:text-slate-900 data-[active]:bg-slate-100 data-[active]:text-slate-900",
+    soft: "text-slate-500 hover:text-slate-900 data-[active]:bg-slate-100 data-[active]:text-slate-900",
   };
 
   return (
@@ -75,7 +76,7 @@ export function Tabs({
           disabled={tab.disabled}
           onClick={() => !tab.disabled && onChange(tab.key)}
           onKeyDown={(e) => handleKeyDown(e, index)}
-          className={`${baseTab} ${variants[variant]} ${tab.disabled ? "opacity-40 cursor-not-allowed" : ""}`}
+          className={`${baseTab} ${variants[variant]} ${tab.disabled ? "cursor-not-allowed opacity-40" : ""}`}
           data-active={tab.key === activeKey}
         >
           {tab.label}

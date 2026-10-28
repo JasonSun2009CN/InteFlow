@@ -30,7 +30,7 @@ const FOOTER_ROUTES = [
  *
  * Practice and the review workspace render bare: a real test has no chrome, and
  * the split editor wants the full width. The practice screen also stays
- * unthemed on purpose — it keeps the original cool slate palette.
+ * unthemed on purpose — it keeps the neutral fallback palette.
  */
 export function AppShell({ children }: Props) {
   const { pathname } = useLocation();
@@ -54,7 +54,7 @@ export function AppShell({ children }: Props) {
     return (
       // `color-scheme: light` keeps native scrollbars and controls light even
       // when the stored theme is dark — this screen is always the light one.
-      <div className="min-h-screen bg-slate-100 [color-scheme:light]">
+      <div className="min-h-screen bg-paper-50 [color-scheme:light]">
         <main id="main-content">{children ?? <Outlet />}</main>
       </div>
     );
@@ -76,8 +76,8 @@ export function AppShell({ children }: Props) {
           </main>
 
           {showFooter && (
-            <footer className="border-t border-slate-200">
-              <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5 px-6 py-6 text-[11px] leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <footer className="px-6 py-12">
+              <div className="mx-auto flex w-full max-w-5xl flex-col gap-1.5 text-xs leading-5 text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                 <p>{t("InteFlow — local-first practice, review & vocabulary.")}</p>
                 <p>{t("No accounts. No cloud. Everything stays on this machine.")}</p>
               </div>

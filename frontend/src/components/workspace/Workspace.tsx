@@ -246,11 +246,11 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
   }, []);
 
   const questionPane = selected ? (
-    <article className="rounded-xl border border-slate-200 bg-white p-5">
+    <article className="border border-slate-200 bg-white p-5">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={
-            "grid h-6 w-6 place-items-center rounded-full text-xs font-semibold text-white " +
+            "grid h-6 w-6 place-items-center rounded-full text-xs font-medium text-white " +
             (selected.is_correct === true
               ? "bg-emerald-600"
               : selected.is_correct === false
@@ -272,10 +272,10 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             type="button"
             onClick={() => void toggleStar(selected.question_id)}
             aria-pressed={starred.has(selected.question_id)}
-            className={`rounded-lg border px-2.5 py-1 text-xs font-medium ${
+            className={`px-1 py-1 text-xs font-medium ${
               starred.has(selected.question_id)
-                ? "border-amber-300 bg-amber-100 text-amber-800"
-                : "border-slate-300 text-slate-600 hover:bg-slate-50"
+                ? "text-amber-700"
+                : "text-slate-600 hover:text-slate-900"
             }`}
           >
             {starred.has(selected.question_id)
@@ -286,7 +286,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             onClick={() => prevQ && setSelectedId(prevQ.question_id)}
             disabled={!prevQ}
             aria-label={t("Previous question")}
-            className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-50 disabled:opacity-40"
+            className="px-2 py-1 text-sm text-slate-600 hover:text-slate-900 disabled:opacity-40"
           >
             ←
           </button>
@@ -297,7 +297,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             onClick={() => nextQ && setSelectedId(nextQ.question_id)}
             disabled={!nextQ}
             aria-label={t("Next question")}
-            className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-50 disabled:opacity-40"
+            className="px-2 py-1 text-sm text-slate-600 hover:text-slate-900 disabled:opacity-40"
           >
             →
           </button>
@@ -305,7 +305,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
       </div>
 
       {(selected.material || selected.material2) && (
-        <div className="mt-3 rounded-lg border bg-slate-50 p-3 text-sm">
+        <div className="mt-3 border-l-2 border-slate-200 pl-3 text-sm">
           <PassageText
             material={selected.material}
             material2={selected.material2}
@@ -314,12 +314,12 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
           />
         </div>
       )}
-      <div className="mt-3 text-[15px]">
+      <div className="mt-3 text-base">
         <RichText text={selected.stem} docId={docId} />
       </div>
 
       {selected.kind === "blank" ? (
-        <dl className="mt-4 space-y-1.5 rounded-lg border border-slate-200 p-3 text-sm">
+        <dl className="mt-4 space-y-1.5 border-l-2 border-slate-200 pl-3 text-sm">
           <div className="flex gap-2">
             <dt className="w-24 shrink-0 text-slate-500">{t("Correct")}</dt>
             <dd className="font-medium text-emerald-700">
@@ -352,7 +352,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             return (
               <li
                 key={letter}
-                className={`flex items-start gap-3 rounded-lg border px-3 py-2 text-sm ${tone}`}
+                className={`flex items-start gap-3 border-l-2 px-3 py-2 text-sm ${tone}`}
               >
                 <span className="font-semibold">{letter}</span>
                 <span className="flex-1">
@@ -360,15 +360,15 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
                 </span>
                 {isChosen && (
                   <span
-                    className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ${
-                      isAnswer ? "bg-emerald-600 text-white" : "bg-red-500 text-white"
+                    className={`shrink-0 text-xs font-medium ${
+                      isAnswer ? "text-emerald-700" : "text-red-600"
                     }`}
                   >
                     {t("your answer")}
                   </span>
                 )}
                 {isAnswer && !isChosen && (
-                  <span className="shrink-0 rounded bg-emerald-600 px-1.5 py-0.5 text-xs font-medium text-white">
+                  <span className="shrink-0 text-xs font-medium text-emerald-700">
                     {t("correct")}
                   </span>
                 )}
@@ -379,7 +379,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
       )}
 
       {selected.answers.length === 0 && (
-        <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <p className="mt-3 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-sm text-amber-800">
           {t("No answer key for this question — fill it in on the")}{" "}
           <Link to={`/doc/${docId}/answers`} className="underline">
             {t("answer page")}
@@ -389,7 +389,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
       )}
     </article>
   ) : (
-    <p className="rounded-xl border bg-white p-6 text-center text-sm text-slate-500">
+    <p className="border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
       {filter === "wrong"
         ? t("Nothing wrong here — nice work.")
         : t("No questions to show.")}
@@ -416,7 +416,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             title={t("Select a word, then drag it onto the Vocabulary pane")}
           >
             {(leftTool === "vocabulary" || rightTool === "vocabulary") && (
-              <p className="mb-3 rounded-lg border border-dashed border-blue-300 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+              <p className="mb-3 border-l-2 border-slate-400 bg-slate-50 px-3 py-1.5 text-xs text-slate-600">
                 {t(
                   "Select a word here, then drag it onto the Vocabulary pane — the Merriam-Webster sense that fits the sentence is added.",
                 )}
@@ -439,9 +439,9 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
   const mobileTools: WorkspaceTool[] = [leftTool, rightTool];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-slate-100">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50">
       {/* ---- top bar -------------------------------------------------------- */}
-      <header className="flex shrink-0 items-center gap-3 border-b bg-white px-3 py-2">
+      <header className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-3 py-2">
         {isDesktop ? (
           <QuestionNav
             items={result.items}
@@ -458,14 +458,14 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
           <button
             onClick={() => setNavOpen(true)}
             aria-label={t("Open question list")}
-            className="rounded-lg border p-1.5 text-slate-600 hover:bg-slate-100"
+            className="border border-slate-300 p-1.5 text-slate-600 hover:border-slate-900 hover:text-slate-900"
           >
             <MenuIcon />
           </button>
         )}
 
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-base font-bold">{detail.document.title}</h1>
+          <h1 className="truncate text-base font-semibold tracking-tight">{detail.document.title}</h1>
           <p className="truncate text-xs text-slate-500">
             {secs !== null && `${clock(secs)} · `}
             {t("{total} questions · {graded} graded", {
@@ -476,7 +476,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
         </div>
 
         <div className="hidden text-right sm:block">
-          <div className="text-lg font-bold tracking-tight">
+          <div className="text-lg font-semibold tracking-tight tabular-nums">
             {correct} <span className="text-slate-400">/ {result.graded}</span>
           </div>
           <div className="text-xs text-slate-500">
@@ -488,13 +488,13 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
         <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={() => setNotebookOpen(true)}
-            className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+            className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
           >
             {t("Notebook")}
           </button>
           <button
             onClick={() => setExportOpen(true)}
-            className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+            className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
           >
             {t("Export")}
           </button>
@@ -509,7 +509,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
           </Link>
           <Link
             to="/sessions"
-            className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+            className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
           >
             {t("Back")}
           </Link>
@@ -517,12 +517,12 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
       </header>
 
       {loadError && (
-        <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
+        <p className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
           {t("Could not load the analysis notebook: {error}", { error: loadError })}
         </p>
       )}
       {starError && (
-        <p className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
+        <p className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
           {t("Could not update the star: {error}", { error: starError })}
         </p>
       )}
@@ -568,16 +568,16 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
         </div>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex shrink-0 gap-1 border-b bg-white px-2 py-1.5">
+          <div className="flex shrink-0 gap-1 border-b border-slate-200 bg-white px-2 py-1.5">
             {mobileTools.map((tool, index) => (
               <button
                 key={`${index}-${tool}`}
                 onClick={() => setMobileSide(index as 0 | 1)}
                 aria-pressed={mobileSide === index}
-                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium ${
+                className={`flex-1 border-b-2 px-2 py-1 text-xs font-medium ${
                   mobileSide === index
-                    ? "bg-slate-100 text-slate-900"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "border-slate-900 text-slate-900"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
                 }`}
               >
                 {toolLabel(tool, t)}
@@ -604,7 +604,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             onClick={() => setNavOpen(false)}
             className="absolute inset-0 scrim"
           />
-          <div className="relative z-10 mr-auto flex h-full w-[min(20rem,85vw)] flex-col bg-white p-3 shadow-xl">
+          <div className="relative z-10 mr-auto flex h-full w-[min(20rem,85vw)] flex-col border-r border-slate-300 bg-white p-3">
             <QuestionNav
               items={result.items}
               visible={visibleItems}

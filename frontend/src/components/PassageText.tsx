@@ -18,12 +18,11 @@ export default function PassageText({
   material,
   material2 = null,
   docId,
-  textClassName = "text-[15px]",
+  textClassName = "text-base",
 }: Props) {
   const { t } = useI18n();
   if (!material && !material2) return null;
-  const label =
-    "mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500";
+  const label = "mb-2 text-xs font-medium text-slate-500";
   return (
     <>
       <div className={label}>{material2 ? t("Text 1") : t("Passage")}</div>

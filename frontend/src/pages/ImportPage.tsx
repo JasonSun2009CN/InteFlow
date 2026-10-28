@@ -285,13 +285,13 @@ export default function ImportPage() {
   }));
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
-      <header className="mb-8 max-w-3xl">
-        <p className="text-[10px] font-medium uppercase tracking-[0.24em] text-slate-400">
-          {t("Question bank")}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{t("Library")}</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
+    <div className="mx-auto w-full max-w-4xl px-6 py-12 sm:py-16">
+      <header className="max-w-2xl">
+        <p className="text-sm text-slate-500">{t("Question bank")}</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+          {t("Library")}
+        </h1>
+        <p className="mt-4 text-base leading-7 text-slate-600">
           {t(
             "Import a question bank (PDF, Word .docx, or .ifmd.md), fill in the answers, then practice in an exam-style UI.",
           )}
@@ -299,14 +299,12 @@ export default function ImportPage() {
       </header>
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-800">
-          {error}
-        </div>
+        <div className="mt-8 bg-red-50 px-5 py-4 text-sm text-red-800">{error}</div>
       )}
 
-      <section className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold">{t("Import a document")}</h2>
-        <p className="mt-1 text-sm text-slate-600">
+      <section className="mt-10 bg-white p-6 sm:p-8">
+        <h2 className="text-lg font-semibold text-slate-900">{t("Import a document")}</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
           {t(
             "PDFs and Word .docx files are converted locally to InteFlow-MD — no tokens, no cloud. Questions must be numbered (1., 2., …) with two or more labelled options each.",
           )}
@@ -326,7 +324,7 @@ export default function ImportPage() {
             </p>
           ))}
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border bg-slate-50 px-3 py-2">
+        <div className="mt-5 flex flex-wrap items-center gap-3 bg-slate-50 px-4 py-3">
           <label className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-slate-600">
             <span>{t("Subject for this import")}</span>
             <select
@@ -336,7 +334,7 @@ export default function ImportPage() {
                   event.target.value === "" ? "" : Number(event.target.value),
                 )
               }
-              className="max-w-[16rem] rounded-md border border-slate-300 bg-white px-2 py-1 text-sm focus:border-blue-400 focus:outline-none"
+              className="max-w-[16rem] cursor-pointer rounded-sm border border-slate-300 bg-transparent px-2 py-1 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
             >
               <option value="">{t("No subject")}</option>
               {subjects.map((subject) => (
@@ -349,7 +347,7 @@ export default function ImportPage() {
           <button
             type="button"
             onClick={() => setManagerOpen(true)}
-            className="text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
+            className="cursor-pointer text-xs font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
           >
             {t("Manage subjects")}
           </button>
@@ -363,8 +361,8 @@ export default function ImportPage() {
           onDragLeave={() => setDragging(false)}
           onDrop={onDrop}
           className={
-            "mt-4 flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors " +
-            (dragging ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-slate-50")
+            "mt-5 flex flex-col items-center justify-center border border-dashed px-6 py-12 text-center transition-colors " +
+            (dragging ? "border-slate-900 bg-slate-100" : "border-slate-300 bg-transparent")
           }
         >
           <p className="text-sm text-slate-600">
@@ -373,7 +371,7 @@ export default function ImportPage() {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy}
-              className="font-medium text-blue-700 underline hover:text-blue-800 disabled:opacity-50"
+              className="cursor-pointer font-medium text-slate-900 underline decoration-slate-400 underline-offset-4 hover:decoration-slate-900 disabled:opacity-50"
             >
               {t("choose a file")}
             </button>
@@ -405,11 +403,11 @@ export default function ImportPage() {
       )}
 
       {imported && (
-        <section className="mt-6 rounded-xl border border-emerald-300 bg-emerald-50 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <section className="mt-8 bg-emerald-50 p-6 sm:p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-lg font-semibold text-emerald-900">{imported.title}</h2>
-              <p className="text-sm text-emerald-800">
+              <p className="text-sm leading-6 text-emerald-800">
                 {t("{count} questions imported from {file} · answers: {status}", {
                   count: imported.question_count,
                   file: imported.source_filename,
@@ -426,14 +424,14 @@ export default function ImportPage() {
               {imported.needs_answers && (
                 <Link
                   to={`/doc/${imported.id}/answers`}
-                  className="rounded-lg bg-amber-500 px-4 py-2 font-medium text-white hover:bg-amber-600"
+                  className="btn btn-secondary rounded-sm border border-slate-300 px-4 py-2 font-medium text-slate-900 hover:bg-white"
                 >
                   {t("Enter answers")}
                 </Link>
               )}
               <Link
                 to={`/doc/${imported.id}/practice`}
-                className="btn btn-primary rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                className="btn btn-primary rounded-sm bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
               >
                 {t("Start practice")}
               </Link>
@@ -442,11 +440,11 @@ export default function ImportPage() {
         </section>
       )}
 
-      <section className="mt-6 rounded-xl border bg-white p-5 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <section className="mt-8 bg-white p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold">{t("Question banks")}</h2>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
+            <h2 className="text-lg font-semibold text-slate-900">{t("Question banks")}</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
               {t(
                 "Import a bank ZIP: manifest.json + one folder per unit, or several .ifmd.md files. Imports stay local (0 tokens).",
               )}
@@ -468,19 +466,17 @@ export default function ImportPage() {
               type="button"
               onClick={() => bankFileRef.current?.click()}
               disabled={bankBusy}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="btn btn-primary cursor-pointer rounded-sm bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
             >
               {bankBusy ? t("Importing…") : t("Import bank")}
             </button>
           </div>
         </div>
         {bankMsg && (
-          <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-            {bankMsg}
-          </p>
+          <p className="mt-4 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{bankMsg}</p>
         )}
         {bankErr && (
-          <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{bankErr}</p>
+          <p className="mt-4 bg-red-50 px-4 py-3 text-sm text-red-700">{bankErr}</p>
         )}
       </section>
 
@@ -494,11 +490,11 @@ export default function ImportPage() {
           />
         ))}
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">{t("Your exams")}</h2>
+      <section className="mt-12">
+        <h2 className="text-lg font-semibold text-slate-900">{t("Your exams")}</h2>
 
         {docs && docs.length > 0 && (
-          <div className="mt-3">
+          <div className="mt-4">
             <SubjectFilterBar
               subjects={filters}
               value={subjectFilter}
@@ -510,12 +506,12 @@ export default function ImportPage() {
           </div>
         )}
 
-        {docs === null && <p className="mt-3 text-sm text-slate-500">{t("Loading…")}</p>}
+        {docs === null && <p className="mt-4 text-sm text-slate-500">{t("Loading…")}</p>}
         {docs?.length === 0 && (
-          <p className="mt-3 text-sm text-slate-500">{t("Nothing imported yet.")}</p>
+          <p className="mt-4 text-sm text-slate-500">{t("Nothing imported yet.")}</p>
         )}
         {docs && docs.length > 0 && filteredDocs.length === 0 && (
-          <p className="mt-3 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
+          <p className="mt-4 px-4 py-12 text-center text-sm text-slate-500">
             {t("No exams in this subject yet.")}
           </p>
         )}

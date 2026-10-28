@@ -14,10 +14,8 @@ interface Props {
 }
 
 /**
- * Segmented tabs with a sliding pill/indicator.
- *
- * The white thumb is absolutely positioned inside the padded track and moves
- * to the active tab; keyboard arrows/Home/End follow the usual tab pattern.
+ * Two (or more) peer views under one rule. The indicator is a thin underline
+ * that slides — no pill, no shadow, no filled track.
  */
 export function SlidingTabs({
   tabs,
@@ -54,15 +52,15 @@ export function SlidingTabs({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={`relative inline-grid rounded-full border border-slate-200 bg-slate-100 p-1 ${className}`}
+      className={`relative inline-grid border-b border-slate-200 ${className}`}
       style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
       <span
         data-testid="sliding-indicator"
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-1 left-1 top-1 rounded-full bg-white shadow-sm ring-1 ring-slate-200/70 transition-all duration-200 ease-out"
+        className="pointer-events-none absolute bottom-0 left-0 h-px bg-slate-900 transition-all duration-200 ease-out"
         style={{
-          width: `calc((100% - 0.5rem) / ${tabs.length})`,
+          width: `calc(100% / ${tabs.length})`,
           transform: `translateX(${activeIndex * 100}%)`,
         }}
       />
@@ -83,10 +81,8 @@ export function SlidingTabs({
             data-active={active}
             onClick={() => onChange(tab.key)}
             onKeyDown={(event) => onKeyDown(event, index)}
-            className={`relative z-10 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 ${
-              active
-                ? "text-slate-900"
-                : "text-slate-500 hover:text-slate-800"
+            className={`relative z-10 cursor-pointer whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+              active ? "text-slate-900" : "text-slate-500 hover:text-slate-900"
             }`}
           >
             {tab.label}

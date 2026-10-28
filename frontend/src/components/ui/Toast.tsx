@@ -49,33 +49,31 @@ export function useToast() {
 }
 
 function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: string) => void }) {
-  const variantStyles = {
-    info: "bg-primary-600 text-white",
-    success: "bg-success-600 text-white",
-    warning: "bg-warning-600 text-white",
-    danger: "bg-danger-600 text-white",
-  };
-
   return (
     <div
-      className="fixed bottom-4 right-4 z-[800] flex flex-col gap-2 pointer-events-none"
+      className="pointer-events-none fixed bottom-4 right-4 z-[800] flex flex-col gap-2"
       aria-live="polite"
       aria-atomic="true"
     >
       {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} variantStyles={variantStyles} onDismiss={onDismiss} />
+        <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}
     </div>
   );
 }
 
+const DOT_TONE: Record<ToastVariant, string> = {
+  info: "bg-slate-400",
+  success: "bg-emerald-400",
+  warning: "bg-amber-400",
+  danger: "bg-red-400",
+};
+
 function ToastItem({
   toast,
-  variantStyles,
   onDismiss,
 }: {
   toast: Toast;
-  variantStyles: Record<ToastVariant, string>;
   onDismiss: (id: string) => void;
 }) {
   const t = useT();
@@ -87,35 +85,41 @@ function ToastItem({
 
   return (
     <div
-      className={`flex items-start gap-3 p-4 rounded-xl shadow-xl min-w-[280px] max-w-md pointer-events-auto animate-slide-in ${variantStyles[toast.variant]}`}
+      className="pointer-events-auto min-w-[280px] max-w-md animate-slide-in rounded-sm bg-slate-900 p-4 text-white"
       role="alert"
     >
-      <div className="flex-1">
-        {toast.title && <p className="font-semibold mb-1">{toast.title}</p>}
-        <p className="text-sm opacity-90">{toast.message}</p>
-        {toast.action && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-2 text-white hover:bg-white/20"
-            onClick={() => {
-              toast.action?.onClick();
-              onDismiss(toast.id);
-            }}
-          >
-            {toast.action.label}
-          </Button>
-        )}
+      <div className="flex items-start gap-3">
+        <span
+          className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${DOT_TONE[toast.variant]}`}
+          aria-hidden="true"
+        />
+        <div className="flex-1">
+          {toast.title && <p className="mb-1 font-semibold">{toast.title}</p>}
+          <p className="text-sm leading-6 opacity-90">{toast.message}</p>
+          {toast.action && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2 text-white hover:bg-white/15"
+              onClick={() => {
+                toast.action?.onClick();
+                onDismiss(toast.id);
+              }}
+            >
+              {toast.action.label}
+            </Button>
+          )}
+        </div>
+        <button
+          onClick={() => onDismiss(toast.id)}
+          className="cursor-pointer text-white/70 transition-colors hover:text-white"
+          aria-label={t("Dismiss")}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <button
-        onClick={() => onDismiss(toast.id)}
-        className="text-white/70 hover:text-white transition-opacity"
-        aria-label={t("Dismiss")}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </button>
     </div>
   );
 }

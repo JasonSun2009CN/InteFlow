@@ -49,12 +49,12 @@ export function SubjectBadge({
   const t = useT();
   if (!subject) {
     return showEmpty ? (
-      <span className={`text-[11px] text-slate-400 ${className}`}>{t("No subject")}</span>
+      <span className={`text-xs text-slate-400 ${className}`}>{t("No subject")}</span>
     ) : null;
   }
   return (
     <span
-      className={`inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium ${subjectTone(subject.color).chip} ${className}`}
+      className={`inline-flex max-w-full items-center gap-1.5 text-xs font-medium text-slate-600 ${className}`}
     >
       <SubjectDot color={subject.color} />
       <span className="truncate">{subject.name}</span>
@@ -187,7 +187,7 @@ export function SubjectPicker({
           aria-label={
             title ? t("Subject for {title}", { title }) : t("Subject")
           }
-          className="min-w-0 max-w-[15rem] truncate rounded-md border border-transparent bg-transparent py-0.5 pl-0.5 pr-1 text-xs text-slate-600 hover:border-slate-300 focus:border-blue-400 focus:outline-none disabled:opacity-50"
+          className="min-w-0 max-w-[15rem] truncate border-b border-transparent bg-transparent py-0.5 pl-0.5 pr-1 text-xs text-slate-600 hover:border-slate-300 focus:border-slate-900 focus:outline-none disabled:opacity-50"
         >
           <option value="">{t("No subject")}</option>
           {subjects.map((subject) => (
@@ -202,7 +202,7 @@ export function SubjectPicker({
       {creating && (
         <form
           onSubmit={(event) => void create(event)}
-          className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border bg-slate-50 p-2"
+          className="mt-2 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-2"
         >
           <input
             autoFocus
@@ -211,13 +211,13 @@ export function SubjectPicker({
             placeholder={t("e.g. SAT Math")}
             aria-label={t("New subject name")}
             maxLength={40}
-            className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
+            className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1 text-xs text-slate-900 focus:border-slate-900 focus:outline-none"
           />
           <ColorSwatches value={color} onChange={setColor} disabled={busy} />
           <button
             type="submit"
             disabled={busy || !name.trim()}
-            className="rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+            className="bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40"
           >
             {busy ? t("Adding…") : t("Add")}
           </button>
@@ -227,14 +227,14 @@ export function SubjectPicker({
               setCreating(false);
               setError(null);
             }}
-            className="rounded-md border bg-white px-2 py-1 text-[11px] font-medium hover:bg-slate-100"
+            className="border border-slate-300 px-2 py-1 text-xs font-medium hover:border-slate-900"
           >
             {t("Cancel")}
           </button>
         </form>
       )}
 
-      {error && <p className="mt-1 text-[11px] text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -256,7 +256,7 @@ export function SubjectFilterBar({
 }) {
   const t = useT();
   const base =
-    "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors";
+    "inline-flex items-center gap-1.5 border-b px-0.5 py-1 text-xs font-medium transition-colors";
 
   return (
     <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("Filter by subject")}>
@@ -266,8 +266,8 @@ export function SubjectFilterBar({
         onClick={() => onChange("all")}
         className={`${base} ${
           value === "all"
-            ? "border-slate-900 bg-slate-900 text-white"
-            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            ? "border-slate-900 text-slate-900"
+            : "border-transparent text-slate-500 hover:text-slate-900"
         }`}
       >
         {t("All")}
@@ -276,7 +276,6 @@ export function SubjectFilterBar({
 
       {subjects.map((subject) => {
         const active = value === subject.id;
-        const tone = subjectTone(subject.color);
         return (
           <button
             key={subject.id}
@@ -285,8 +284,8 @@ export function SubjectFilterBar({
             onClick={() => onChange(subject.id)}
             className={`${base} ${
               active
-                ? `${tone.chip} ring-1 ring-inset ${tone.ring}`
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                ? "border-slate-900 text-slate-900"
+                : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
             <SubjectDot color={subject.color} />
@@ -303,8 +302,8 @@ export function SubjectFilterBar({
           onClick={() => onChange("none")}
           className={`${base} ${
             value === "none"
-              ? "border-slate-500 bg-slate-100 text-slate-700"
-              : "border-dashed border-slate-300 bg-white text-slate-500 hover:bg-slate-50"
+              ? "border-slate-900 text-slate-900"
+              : "border-transparent text-slate-500 hover:text-slate-900"
           }`}
         >
           {t("Uncategorized")}
@@ -434,13 +433,13 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
         aria-modal="true"
         aria-labelledby="subject-manager-title"
         onMouseDown={(event) => event.stopPropagation()}
-        className="flex max-h-full w-full max-w-xl flex-col overflow-hidden rounded-xl border bg-white shadow-xl"
+        className="flex max-h-full w-full max-w-xl flex-col overflow-hidden border border-slate-300 bg-white"
       >
-        <header className="flex items-start gap-3 border-b px-5 py-4">
+        <header className="flex items-start gap-3 border-b border-slate-200 px-5 py-4">
           <div className="min-w-0 flex-1">
             <h2
               id="subject-manager-title"
-              className="font-display text-xl tracking-tight text-slate-900"
+              className="text-xl tracking-tight text-slate-900"
             >
               {t("Subjects")}
             </h2>
@@ -454,15 +453,15 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
             type="button"
             onClick={onClose}
             aria-label={t("Close subjects")}
-            className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-slate-50"
+            className="border border-slate-300 px-2 py-1 text-xs font-medium hover:border-slate-900"
           >
             {t("Close")}
           </button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <form onSubmit={(event) => void add(event)} className="rounded-xl border bg-slate-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <form onSubmit={(event) => void add(event)} className="border-l-2 border-slate-200 pl-3">
+            <p className="text-xs font-medium text-slate-500">
               {t("Add subject")}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -472,13 +471,13 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                 placeholder={t("e.g. SAT Math")}
                 aria-label={t("New subject name")}
                 maxLength={40}
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
               />
               <ColorSwatches value={addColor} onChange={setAddColor} disabled={busy !== null} />
               <button
                 type="submit"
                 disabled={busy !== null || !addName.trim()}
-                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+                className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 {busy === "add" ? t("Adding…") : t("Add subject")}
               </button>
@@ -486,14 +485,14 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
           </form>
 
           {error && (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">
               {error}
             </p>
           )}
 
           <ul className="mt-3 space-y-2">
             {subjects.length === 0 && (
-              <li className="rounded-lg border border-dashed px-3 py-6 text-center text-sm text-slate-400">
+              <li className="border border-dashed border-slate-300 px-3 py-6 text-center text-sm text-slate-500">
                 {t("No subjects yet. Add your first one above.")}
               </li>
             )}
@@ -505,7 +504,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
               const dirty =
                 draft.name.trim() !== subject.name || draft.color !== subject.color;
               return (
-                <li key={subject.id} className="rounded-xl border bg-white p-3">
+                <li key={subject.id} className="border-b border-slate-200 py-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       value={draft.name}
@@ -517,13 +516,13 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       }
                       aria-label={t("Name for {name}", { name: subject.name })}
                       maxLength={40}
-                      className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                      className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={() => void save(subject)}
                       disabled={!dirty || busy !== null}
-                      className="rounded-lg border px-2.5 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
+                      className="border-b border-slate-400 px-1 py-1 text-xs font-medium hover:border-slate-900 disabled:opacity-40"
                     >
                       {busy === `save-${subject.id}` ? t("Saving…") : t("Save")}
                     </button>
@@ -531,7 +530,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       type="button"
                       onClick={() => void remove(subject)}
                       disabled={busy !== null}
-                      className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
+                      className="border-b border-transparent px-1 py-1 text-xs font-medium text-red-700 hover:border-red-400 disabled:opacity-40"
                     >
                       {busy === `delete-${subject.id}` ? t("Deleting…") : t("Delete")}
                     </button>
@@ -547,7 +546,7 @@ export function SubjectManager({ subjects, onClose, onChanged }: SubjectManagerP
                       }
                       disabled={busy !== null}
                     />
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-xs text-slate-500">
                       {t("{count} papers", { count: subject.document_count })}
                     </span>
                   </div>

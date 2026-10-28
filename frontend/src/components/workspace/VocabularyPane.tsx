@@ -179,8 +179,8 @@ export default function VocabularyPane({ docId, item }: Props) {
       data-testid="vocabulary-pane"
       aria-label={t("Vocabulary pane")}
       className={
-        "relative flex h-full min-h-0 flex-col bg-white transition-shadow " +
-        (dropActive ? "ring-2 ring-inset ring-blue-400" : "")
+        "relative flex h-full min-h-0 flex-col bg-white transition-colors " +
+        (dropActive ? "ring-1 ring-inset ring-slate-900" : "")
       }
       onDragOver={(event) => {
         event.preventDefault();
@@ -194,7 +194,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       }}
       onDrop={(event) => void handleDrop(event)}
     >
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b bg-slate-50 px-3 py-1.5">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-1.5">
         <span className="text-xs text-slate-500">
           {t("{count} words", { count })}
         </span>
@@ -207,32 +207,32 @@ export default function VocabularyPane({ docId, item }: Props) {
             type="button"
             onClick={() => void save()}
             disabled={!dirty || busy}
-            className="rounded-md border px-2.5 py-1 text-xs font-medium hover:bg-white disabled:opacity-40"
+            className="border-b border-slate-400 px-1 pb-0.5 text-xs font-medium hover:border-slate-900 disabled:opacity-40"
           >
             {t("Save")}
           </button>
           <button
             type="button"
             onClick={() => void exportXlsx()}
-            className="rounded-md border px-2.5 py-1 text-xs font-medium hover:bg-white"
+            className="border-b border-slate-400 px-1 pb-0.5 text-xs font-medium hover:border-slate-900"
           >
             {t("Export .xlsx")}
           </button>
         </div>
       </div>
 
-      <form onSubmit={(event) => void addManual(event)} className="flex shrink-0 gap-1.5 border-b px-3 py-1.5">
+      <form onSubmit={(event) => void addManual(event)} className="flex shrink-0 gap-1.5 border-b border-slate-200 px-3 py-1.5">
         <input
           value={word}
           onChange={(event) => setWord(event.target.value)}
           placeholder={t("Add a word manually…")}
           aria-label={t("Add a word manually")}
-          className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1 text-xs focus:border-blue-400 focus:outline-none"
+          className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1 text-xs text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
         />
         <button
           type="submit"
           disabled={!word.trim() || busy || dropping}
-          className="rounded-md border bg-white px-2.5 py-1 text-xs font-medium hover:bg-slate-50 disabled:opacity-40"
+          className="border-b border-slate-400 px-1 pb-0.5 text-xs font-medium hover:border-slate-900 disabled:opacity-40"
         >
           {t("Add")}
         </button>
@@ -260,7 +260,7 @@ export default function VocabularyPane({ docId, item }: Props) {
       </div>
 
       {(msg || warning || err) && (
-        <div className="shrink-0 space-y-1 border-t px-3 py-2 text-xs">
+        <div className="shrink-0 space-y-1 border-t border-slate-200 px-3 py-2 text-xs">
           {msg && <p className="text-emerald-700">{msg}</p>}
           {warning && <p className="text-amber-700">{warning}</p>}
           {err && <p className="text-red-700">{err}</p>}
@@ -268,8 +268,8 @@ export default function VocabularyPane({ docId, item }: Props) {
       )}
 
       {dropActive && (
-        <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-blue-50/80">
-          <p className="rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
+        <div className="pointer-events-none absolute inset-0 z-20 grid place-items-center bg-slate-50/90">
+          <p className="border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-900">
             {t("Drop to add · Merriam-Webster sense for this sentence")}
           </p>
         </div>
@@ -277,7 +277,7 @@ export default function VocabularyPane({ docId, item }: Props) {
 
       {dropping && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-white/80">
-          <p className="rounded-lg border bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
+          <p className="border border-slate-300 bg-white px-4 py-2 text-sm text-slate-600">
             {t("Looking up the word…")}
           </p>
         </div>

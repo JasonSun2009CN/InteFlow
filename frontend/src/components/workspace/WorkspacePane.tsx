@@ -73,12 +73,12 @@ export default function WorkspacePane({ side, tool, otherTool, onChoose, childre
                     })
                   : t(label)
               }
-              className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium transition-colors ${
+              className={`flex min-w-0 flex-1 items-center justify-center gap-1 border-b-2 px-1.5 py-1.5 text-xs font-medium transition-colors ${
                 active
-                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200"
+                  ? "border-slate-900 text-slate-900"
                   : elsewhere
-                    ? "text-slate-500 hover:bg-white hover:text-slate-800"
-                    : "text-slate-400 hover:bg-white hover:text-slate-700"
+                    ? "border-transparent text-slate-500 hover:text-slate-800"
+                    : "border-transparent text-slate-400 hover:text-slate-700"
               }`}
             >
               <Icon size={14} aria-hidden="true" focusable="false" className="shrink-0" />

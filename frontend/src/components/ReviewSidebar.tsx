@@ -30,7 +30,7 @@ function SectionToggle({
     <button
       onClick={onClick}
       aria-expanded={open}
-      className="flex w-full items-center gap-2 rounded-md bg-slate-200/70 px-2.5 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-200"
+      className="flex w-full items-center gap-2 border-b border-slate-200 px-0.5 py-1.5 text-left text-xs font-medium text-slate-700 hover:text-slate-900"
     >
       <span className="text-slate-500">{open ? "▾" : "▸"}</span>
       {label}
@@ -158,10 +158,10 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
 
   return (
     <aside className="w-full shrink-0 lg:w-[24rem]">
-      <div className="rounded-xl border bg-slate-50 shadow-sm">
-        <header className="flex items-center justify-between border-b bg-white px-3 py-2">
+      <div className="border border-slate-200">
+        <header className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
           <div className="min-w-0">
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-medium text-slate-500">
               {t("Workspace")}
             </div>
             <div className="truncate text-sm font-semibold">
@@ -176,7 +176,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           <button
             onClick={onClose}
             title={t("Hide panel")}
-            className="rounded-md border px-2 py-1 text-sm text-slate-500 hover:bg-slate-100"
+            className="px-2 py-1 text-sm text-slate-500 hover:text-slate-900"
           >
             «
           </button>
@@ -184,7 +184,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
 
         <div className="space-y-2 p-3">
           {/* ---- hand-written explanation ---- */}
-          <section className="rounded-md">
+          <section>
             <SectionToggle
               label={t("Explanation")}
               open={open === "explain"}
@@ -207,13 +207,13 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       placeholder={t(
                         "Why is the correct answer right? Write it in your own words…",
                       )}
-                      className="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                      className="w-full border border-slate-300 bg-transparent px-3 py-2 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
                     />
                     <div className="mt-2 flex items-center gap-2">
                       <button
                         onClick={() => void saveExplain()}
                         disabled={!dirty || saving}
-                        className="btn btn-primary rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+                        className="btn btn-primary px-3 py-1.5 text-sm font-medium disabled:opacity-40"
                       >
                         {saving ? t("Saving…") : t("Save")}
                       </button>
@@ -227,7 +227,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       )}
                     </div>
                     {explainErr && (
-                      <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">
+                      <p className="mt-2 border-l-2 border-red-500 bg-red-50 px-2 py-1.5 text-xs text-red-700">
                         {explainErr}
                       </p>
                     )}
@@ -238,7 +238,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           </section>
 
           {/* ---- vocabulary table ---- */}
-          <section className="rounded-md">
+          <section>
             <SectionToggle
               label={t("Vocabulary")}
               open={open === "words"}
@@ -253,13 +253,13 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       <button
                         onClick={() => void saveGrid()}
                         disabled={!gridDirty || gridBusy}
-                        className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-40"
+                        className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-40"
                       >
                         {gridBusy ? t("Saving…") : t("Save")}
                       </button>
                       <button
                         onClick={() => void exportXlsx()}
-                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+                        className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
                       >
                         {t("Export .xlsx")}
                       </button>
@@ -277,14 +277,14 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                   )
                 )}
                 {gridErr && (
-                  <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">{gridErr}</p>
+                  <p className="mt-2 border-l-2 border-red-500 bg-red-50 px-2 py-1.5 text-xs text-red-700">{gridErr}</p>
                 )}
               </div>
             )}
           </section>
 
           {/* ---- AI answer ---- */}
-          <section className="rounded-md">
+          <section>
             <SectionToggle
               label={t("AI Answer")}
               open={open === "ai"}
@@ -295,7 +295,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                 {!item ? (
                   <p className="text-sm text-slate-500">{t("Select a question in the list.")}</p>
                 ) : item.answer === null ? (
-                  <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                  <p className="border-l-2 border-amber-500 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
                     {t("No answer key for this question — enter the answers first.")}
                   </p>
                 ) : (
@@ -306,7 +306,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                     <button
                       onClick={() => void askAI()}
                       disabled={aiBusy}
-                      className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                      className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                     >
                       {aiBusy
                         ? t("Thinking…")
@@ -315,12 +315,12 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                           : t("Explain with AI")}
                     </button>
                     {aiErr && (
-                      <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">
+                      <p className="mt-2 border-l-2 border-red-500 bg-red-50 px-2 py-1.5 text-xs text-red-700">
                         {aiErr}
                       </p>
                     )}
                     {aiText && (
-                      <div className="mt-2 whitespace-pre-wrap rounded-lg border bg-white p-3 text-sm">
+                      <div className="mt-2 whitespace-pre-wrap border-t border-slate-200 pt-3 text-sm">
                         {aiText}
                       </div>
                     )}
@@ -331,7 +331,7 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
           </section>
 
           {/* ---- export ---- */}
-          <section className="rounded-md">
+          <section>
             <SectionToggle
               label={t("Export")}
               open={open === "export"}
@@ -348,14 +348,14 @@ export default function ReviewSidebar({ docId, item, onClose, onExplainSaved }: 
                       key={fmt}
                       href={api.exportUrl(docId, fmt)}
                       download
-                      className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
+                      className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
                     >
                       {t("Export .{format}", { format: fmt })}
                     </a>
                   ))}
                 </div>
                 {dirty && (
-                  <p className="mt-2 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                  <p className="mt-2 border-l-2 border-amber-500 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
                     {t("Save the explanation first — unsaved changes are not included.")}
                   </p>
                 )}

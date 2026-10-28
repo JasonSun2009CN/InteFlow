@@ -62,10 +62,10 @@ export default function ExportDrawer({ docId, sessionId, onClose }: Props) {
         onClick={onClose}
         className="scrim absolute inset-0"
       />
-      <div className="relative z-10 ml-auto flex h-full w-[min(26rem,92vw)] flex-col bg-white shadow-2xl">
-        <header className="flex shrink-0 items-center justify-between border-b px-4 py-3">
+      <div className="relative z-10 ml-auto flex h-full w-[min(26rem,92vw)] flex-col border-l border-slate-300 bg-white">
+        <header className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="text-xs font-medium text-slate-500">
               {t("Export")}
             </div>
             <div className="text-sm font-semibold">{t("Local files, no tokens")}</div>
@@ -73,7 +73,7 @@ export default function ExportDrawer({ docId, sessionId, onClose }: Props) {
           <button
             onClick={onClose}
             aria-label={t("Close export")}
-            className="rounded-md border p-1.5 text-slate-500 hover:bg-slate-100"
+            className="p-1.5 text-slate-500 hover:text-slate-900"
           >
             <CloseIcon size={16} />
           </button>
@@ -91,26 +91,26 @@ export default function ExportDrawer({ docId, sessionId, onClose }: Props) {
                 key={fmt}
                 onClick={() => void exportNotebook(fmt)}
                 disabled={exporting !== null}
-                className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
+                className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900 disabled:opacity-50"
               >
                 {exporting === fmt ? t("Exporting…") : t("Export .{format}", { format: fmt })}
               </button>
             ))}
           </div>
           {msg && (
-            <p className="mt-3 break-words rounded bg-emerald-50 px-2 py-1.5 text-xs text-emerald-800">
+            <p className="mt-3 break-words border-l-2 border-emerald-500 bg-emerald-50 px-2 py-1.5 text-xs text-emerald-800">
               {msg}
             </p>
           )}
           {err && (
-            <p className="mt-3 rounded bg-red-50 px-2 py-1.5 text-xs text-red-700">{err}</p>
+            <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-2 py-1.5 text-xs text-red-700">{err}</p>
           )}
 
-          <div className="mt-5 border-t pt-3">
+          <div className="mt-5 border-t border-slate-200 pt-3">
             <p className="text-xs text-slate-500">{t("Vocabulary sheet")}</p>
             <a
               href={api.wordsExportUrl(docId)}
-              className="mt-2 inline-block rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
+              className="mt-2 inline-block border border-slate-300 px-3 py-1.5 text-sm font-medium no-underline hover:border-slate-900"
             >
               {t("Export vocabulary .xlsx")}
             </a>

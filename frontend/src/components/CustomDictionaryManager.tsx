@@ -131,13 +131,13 @@ export default function CustomDictionaryManager({ onClose }: Props) {
         aria-modal="true"
         aria-labelledby="custom-dictionary-title"
         onMouseDown={(event) => event.stopPropagation()}
-        className="flex max-h-full w-full max-w-2xl flex-col overflow-hidden rounded-xl border bg-white shadow-xl"
+        className="flex max-h-full w-full max-w-2xl flex-col overflow-hidden border border-slate-300 bg-white"
       >
-        <header className="flex items-start gap-3 border-b px-5 py-4">
+        <header className="flex items-start gap-3 border-b border-slate-200 px-5 py-4">
           <div className="min-w-0 flex-1">
             <h2
               id="custom-dictionary-title"
-              className="font-display text-xl tracking-tight text-slate-900"
+              className="text-xl tracking-tight text-slate-900"
             >
               {t("My dictionary")}
             </h2>
@@ -150,14 +150,14 @@ export default function CustomDictionaryManager({ onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-slate-50"
+            className="border border-slate-300 px-2 py-1 text-xs font-medium hover:border-slate-900"
           >
             {t("Close")}
           </button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          <div className="rounded-xl border bg-slate-50 p-3">
+          <div className="border-l-2 border-slate-200 pl-3">
             <div className="flex flex-wrap items-center gap-2">
               <input
                 ref={fileRef}
@@ -174,18 +174,18 @@ export default function CustomDictionaryManager({ onClose }: Props) {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={busy}
-                className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+                className="bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
               >
                 {t("Import file")}
               </button>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-xs text-slate-500">
                 {t("CSV / TSV / JSON / TXT · columns: word, definition, pos")}
               </span>
             </div>
           </div>
 
-          <form onSubmit={(event) => void add(event)} className="mt-3 rounded-xl border p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <form onSubmit={(event) => void add(event)} className="mt-4 border-t border-slate-200 pt-4">
+            <p className="text-xs font-medium text-slate-500">
               {t("Add a word")}
             </p>
             <div className="mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_7rem]">
@@ -194,14 +194,14 @@ export default function CustomDictionaryManager({ onClose }: Props) {
                 onChange={(event) => setForm({ ...form, word: event.target.value })}
                 placeholder={t("Word")}
                 aria-label={t("Custom dictionary word")}
-                className="min-w-0 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="min-w-0 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
               />
               <input
                 value={form.pos}
                 onChange={(event) => setForm({ ...form, pos: event.target.value })}
                 placeholder={t("POS (optional)")}
                 aria-label={t("Custom dictionary part of speech")}
-                className="min-w-0 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+                className="min-w-0 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
               />
             </div>
             <textarea
@@ -210,24 +210,24 @@ export default function CustomDictionaryManager({ onClose }: Props) {
               placeholder={t("Definition / meaning")}
               aria-label={t("Custom dictionary definition")}
               rows={2}
-              className="mt-2 w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+              className="mt-2 w-full border border-slate-300 bg-transparent px-2.5 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
             />
             <button
               type="submit"
               disabled={busy || !form.word.trim() || !form.definition.trim()}
-              className="mt-2 rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-40"
+              className="mt-2 bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-40"
             >
               {busy ? t("Saving…") : t("Add word")}
             </button>
           </form>
 
           {error && (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            <p className="mt-3 border-l-2 border-red-500 bg-red-50 px-3 py-2 text-xs text-red-700">
               {error}
             </p>
           )}
           {message && (
-            <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+            <p className="mt-3 border-l-2 border-emerald-500 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
               {message}
             </p>
           )}
@@ -245,11 +245,11 @@ export default function CustomDictionaryManager({ onClose }: Props) {
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t("Filter my dictionary…")}
               aria-label={t("Filter my dictionary")}
-              className="min-w-0 flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm focus:border-blue-400 focus:outline-none"
+              className="min-w-0 flex-1 border-b border-slate-300 bg-transparent px-0 py-1.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-lg border px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+              className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
             >
               {t("Search")}
             </button>
@@ -259,12 +259,12 @@ export default function CustomDictionaryManager({ onClose }: Props) {
             <p className="mt-4 text-sm text-slate-500">{t("Loading…")}</p>
           )}
           {entries?.length === 0 && (
-            <p className="mt-4 rounded-lg border border-dashed px-4 py-8 text-center text-sm text-slate-500">
+            <p className="mt-4 border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
               {t("No words yet. Import a file above, or add one word at a time.")}
             </p>
           )}
           {entries && entries.length > 0 && (
-            <ul className="mt-3 divide-y divide-slate-100 rounded-xl border bg-white">
+            <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
               {entries.map((entry) => (
                 <li key={entry.id} className="flex items-start gap-3 px-3 py-2.5">
                   <div className="min-w-0 flex-1">
@@ -285,7 +285,7 @@ export default function CustomDictionaryManager({ onClose }: Props) {
                     onClick={() => void remove(entry)}
                     disabled={busy}
                     aria-label={t("Delete {word}", { word: entry.word })}
-                    className="shrink-0 rounded-md border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
+                    className="shrink-0 border-b border-transparent px-1 py-1 text-xs font-medium text-red-700 hover:border-red-400 disabled:opacity-40"
                   >
                     {t("Delete")}
                   </button>

@@ -49,7 +49,7 @@ export default function IfmdTemplate() {
   const downloadUrl = `data:text/markdown;charset=utf-8,${encodeURIComponent(SAT_MD_TEMPLATE)}`;
 
   return (
-    <details className="mt-4 rounded-lg border bg-slate-50 p-4">
+    <details className="mt-4 border-t border-slate-200 pt-4">
       <summary className="cursor-pointer text-sm font-medium text-slate-700">
         {t("Or start from the .ifmd.md template")}
       </summary>
@@ -61,19 +61,19 @@ export default function IfmdTemplate() {
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           onClick={copy}
-          className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
+          className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
         >
           {copied ? t("Copied ✓") : t("Copy template")}
         </button>
         <a
           href={downloadUrl}
           download="template.ifmd.md"
-          className="rounded-lg border bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-100"
+          className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
         >
           {t("Download .ifmd.md")}
         </a>
       </div>
-      <pre className="mt-3 max-h-72 overflow-auto rounded-lg bg-slate-900 p-3 text-xs leading-relaxed text-slate-100">
+      <pre className="mt-3 max-h-72 overflow-auto bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100">
         {SAT_MD_TEMPLATE}
       </pre>
     </details>

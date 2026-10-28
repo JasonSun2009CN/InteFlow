@@ -29,13 +29,13 @@ export const Input = forwardRef<HTMLInputElement, Props>(
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-slate-700 mb-1">
+          <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-slate-800">
             {label}
           </label>
         )}
         <div className="relative">
           {leadingIcon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
               {leadingIcon}
             </div>
           )}
@@ -43,21 +43,21 @@ export const Input = forwardRef<HTMLInputElement, Props>(
             ref={ref}
             id={inputId}
             className={`
-              w-full rounded-lg border bg-white text-slate-900 placeholder:text-slate-400
+              w-full rounded-sm border bg-transparent text-slate-900 placeholder:text-slate-400
               transition-colors duration-150
-              focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-              disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
-              ${leadingIcon ? "pl-10" : "pl-4"}
-              ${trailingIcon ? "pr-10" : "pr-4"}
+              focus:border-slate-900 focus:outline-none focus:ring-0
+              disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500
+              ${leadingIcon ? "pl-10" : "pl-3"}
+              ${trailingIcon ? "pr-10" : "pr-3"}
               py-2.5 text-sm
-              ${error ? "border-danger-500 focus:ring-danger-500" : "border-slate-300 hover:border-slate-400"}
+              ${error ? "border-danger-500" : "border-slate-300 hover:border-slate-400"}
             `}
             aria-invalid={error ? "true" : "false"}
             aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
             {...props}
           />
           {trailingIcon && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
               {trailingIcon}
             </div>
           )}
