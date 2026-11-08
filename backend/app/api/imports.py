@@ -146,6 +146,24 @@ def ai_fallback(job_id: str) -> dict:
     return _payload(jobs_repo.get(job_id))
 
 
+@router.post("/{job_id}/vision-figures")
+def vision_figures(job_id: str) -> dict:
+    job = jobs_repo.get(job_id)
+    if job is None:
+        _fail("import job not found", 404)
+        raise                                          # pragma: no cover
+    try:
+        imports_service.run_vision_figures(job_id)
+    except imports_service.ImportProblem as exc:
+        _fail(str(exc), exc.status)
+        raise                                          # pragma: no cover
+    except Exception as exc:  # pragma: no cover - unexpected errors
+        _fail(f"Vision figure fallback failed: {exc}", 500)
+        raise
+
+    return _payload(jobs_repo.get(job_id))
+
+
 @router.delete("/{job_id}")
 def delete_import(job_id: str) -> dict:
     if not jobs_repo.delete(job_id):

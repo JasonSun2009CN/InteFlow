@@ -1,3 +1,3 @@
-from app.llm.base import LLMError, complete, configured
+from app.llm.base import LLMError, complete, complete_vision, configured
 
-__all__ = ["LLMError", "complete", "configured"]
+__all__ = ["LLMError", "complete", "complete_vision", "configured"]

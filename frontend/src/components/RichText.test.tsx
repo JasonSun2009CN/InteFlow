@@ -31,4 +31,20 @@ describe("RichText", () => {
       "/api/documents/7/assets/q008.png",
     );
   });
+
+  it("renders imported source underlines and strike-throughs", () => {
+    const { container } = render(
+      <RichText text="The <u>underlined portion</u> and <s>crossed out</s> words." />,
+    );
+    expect(container.querySelector("u")?.textContent).toBe("underlined portion");
+    expect(container.querySelector("s")?.textContent).toBe("crossed out");
+    expect(container.textContent).toContain("The underlined portion");
+  });
+
+  it("sanitizes any other raw HTML in imported text", () => {
+    const { container } = render(
+      <RichText text={'safe <script>alert("x")</script> <b>bold</b>'} />,
+    );
+    expect(container.querySelector("script")).toBeNull();
+  });
 });

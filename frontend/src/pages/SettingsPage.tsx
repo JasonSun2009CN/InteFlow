@@ -201,6 +201,7 @@ export default function SettingsPage() {
   const [customDictionary, setCustomDictionary] = useState(true);
   const [showBuiltin, setShowBuiltin] = useState(false);
   const [dictionaryAuto, setDictionaryAuto] = useState(true);
+  const [visionFigures, setVisionFigures] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [stored, setStored] = useState<AppSettings | null>(null);
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
@@ -238,6 +239,7 @@ export default function SettingsPage() {
         setCustomDictionary(s.custom_dictionary_enabled);
         setShowBuiltin(s.show_builtin_library);
         setDictionaryAuto(s.dictionary_auto_lookup);
+        setVisionFigures(s.vision_figure_fallback ?? false);
         setProviders(list);
         setLoaded(true);
       })
@@ -310,6 +312,7 @@ export default function SettingsPage() {
       custom_dictionary_enabled: customDictionary,
       show_builtin_library: showBuiltin,
       dictionary_auto_lookup: dictionaryAuto,
+      vision_figure_fallback: visionFigures,
       ...(apiKey.trim() ? { api_key: apiKey.trim() } : {}),
     }),
     [
@@ -326,6 +329,7 @@ export default function SettingsPage() {
       customDictionary,
       showBuiltin,
       dictionaryAuto,
+      visionFigures,
       apiKey,
     ],
   );
@@ -794,6 +798,15 @@ export default function SettingsPage() {
               )}
               checked={llmFallback}
               onChange={setLlmFallback}
+            />
+            <ToggleRow
+              id="vision-figures"
+              title={t("Vision figure fallback")}
+              description={t(
+                "After a PDF import, allow the configured vision model to inspect charts or tables whose title or axis labels were clipped, then re-crop them with the full header. This is never automatic: it runs only when you press the repair button and it consumes tokens. Leave it off to keep every import fully offline.",
+              )}
+              checked={visionFigures}
+              onChange={setVisionFigures}
             />
             <ToggleRow
               id="show-builtin"

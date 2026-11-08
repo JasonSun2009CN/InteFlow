@@ -18,7 +18,7 @@ import threading
 import uuid
 from pathlib import Path
 
-from app import repos
+from app import llm, repos
 from app.convert.docx import convert_docx
 from app.convert.pdf import ConvertError, ProgressFn, convert_pdf
 from app.db import UPLOAD_TMP, jobs_dir
@@ -254,8 +254,16 @@ def save_result(job_id: str, result: ImportResult, original_pdf: Path | None = N
         for name, blob in result.assets.items():
             (assets / name).write_bytes(blob)
 
-    # Keep the original PDF for AI fallback if there are pages that might need it.
-    if original_pdf and original_pdf.is_file() and _has_ai_fallback_pages(result.pages):
+    # Keep the original PDF for AI/vision fallback. The vision path is opt-in
+    # (Settings → Vision figure fallback); OCR-damaged pages are always kept.
+    keep_pdf = bool(original_pdf and original_pdf.is_file()) and (
+        _has_ai_fallback_pages(result.pages)
+        or (
+            result.kind == "pdf"
+            and settings_repo.vision_figure_fallback_enabled()
+        )
+    )
+    if keep_pdf and original_pdf is not None:
         target = job_dir / "original.pdf"
         if not target.is_file():
             shutil.copy2(original_pdf, target)
@@ -470,3 +478,59 @@ def run_ai_fallback(job_id: str) -> ImportResult:
     merged.used_ai = True
     save_result(job_id, merged)
     return merged
+
+
+# --------------------------------------------------------------------------
+# Vision fallback for figures whose header/labels were lost in the crop
+# --------------------------------------------------------------------------
+
+
+def run_vision_figures(job_id: str) -> ImportResult:
+    """Re-crop doubtful figures with a vision model (explicit, token-burning)."""
+    result = load_result(job_id)
+    if result is None:
+        raise ImportProblem("staged result not found", 404)
+    if result.kind != "pdf":
+        raise ImportProblem("vision figure fallback only applies to PDF imports", 409)
+    if not settings_repo.vision_figure_fallback_enabled():
+        raise ImportProblem(
+            "Vision figure fallback is turned off — enable it in Settings", 409
+        )
+    if not llm.configured():
+        raise ImportProblem(
+            "no LLM API configured — add an API key and a model in Settings", 409
+        )
+
+    job_dir = jobs_dir(job_id)
+    pdf_path = job_dir / "original.pdf"
+    if not pdf_path.is_file():
+        raise ImportProblem(
+            "the original PDF is no longer staged; import the file again with "
+            "vision fallback enabled",
+            409,
+        )
+
+    from app.convert import vision_figures
+
+    warnings = list(result.warnings)
+    try:
+        ifmd, assets, used = vision_figures.enhance(
+            pdf_path, result.ifmd, dict(result.assets), warnings
+        )
+    except ValueError as exc:
+        raise ImportProblem(str(exc)) from exc
+
+    result.ifmd = ifmd
+    result.assets = assets
+    result.warnings = warnings
+    result.used_ai = result.used_ai or used
+    save_result(job_id, result)
+
+    job = jobs_repo.get(job_id)
+    if job is not None:
+        jobs_repo.update(
+            job_id,
+            used_ai=1 if result.used_ai else 0,
+            warnings_json=json.dumps(warnings),
+        )
+    return result

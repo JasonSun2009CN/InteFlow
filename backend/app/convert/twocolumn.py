@@ -32,6 +32,7 @@ from pathlib import Path
 import pymupdf
 
 from app.convert import images as _images
+from app.convert import text_marks as _marks
 from app.convert.model import BuiltQuestion, Item
 from app.convert.normalize import clean_text, guess_sec, is_chrome, join_lines, join_paragraph
 from app.convert.paired import split_paired_material
@@ -77,13 +78,12 @@ class TwoColumnResult:
 # --------------------------------------------------------------------------
 
 
-def _read_block(b: dict, page_no: int) -> Block | None:
+def _read_block(b: dict, page_no: int, marks: _marks.PageMarks) -> Block | None:
     texts: list[str] = []
     first_y, last_y, size, circled = None, None, 10.0, False
     for raw in b.get("lines", []):
-        text = ""
+        text = _marks.line_text(raw, marks)
         for span in raw.get("spans", []):
-            text += span.get("text", "")
             if "circled" in span.get("font", "").lower():
                 circled = True
             size = max(size, span.get("size", 10.0))
@@ -123,15 +123,16 @@ def _scan(page: pymupdf.Page, page_no: int) -> tuple[list[Block], str | None]:
     h = page.rect.height
     mid = page.rect.width / 2
     try:
-        pdict = page.get_text("dict", sort=False)
+        pdict = page.get_text("rawdict", sort=False)
     except Exception:
         return [], None
+    marks = _marks.collect(page)
     blocks: list[Block] = []
     sec: str | None = None
     for b in pdict["blocks"]:
         if b["type"] != 0:
             continue
-        blk = _read_block(b, page_no)
+        blk = _read_block(b, page_no, marks)
         if blk is None:
             continue
         if (

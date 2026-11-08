@@ -442,6 +442,32 @@ export interface ReviewItem {
   analyses: ReviewAnalysis[];
 }
 
+export type HighlightColor = "yellow" | "green" | "blue" | "pink";
+
+/** A text highlight in one passage/stem/option, plus an optional note. */
+export interface QuestionHighlight {
+  id: number;
+  document_id: number;
+  question_id: number;
+  /** material | material2 | stem | option:A */
+  field: string;
+  quote: string;
+  occurrence: number;
+  color: HighlightColor;
+  note: string;
+  start: number;
+  end: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Everything saved for one paper: highlights and per-question notes. */
+export interface DocumentAnnotations {
+  highlights: QuestionHighlight[];
+  /** question_id (as a string key) -> note text */
+  notes: Record<string, string>;
+}
+
 /** One saved attempt, as listed on the Sessions page. */
 export interface SessionSummary {
   session_id: number;
@@ -502,6 +528,8 @@ export interface AppSettings {
   custom_dictionary_enabled: boolean;
   show_builtin_library: boolean;
   dictionary_auto_lookup: boolean;
+  /** Optional on older payloads; treated as off when missing. */
+  vision_figure_fallback?: boolean;
 }
 
 /** A model-service provider from the curated catalog (a service, not a protocol). */
@@ -530,6 +558,7 @@ export interface SettingsInput {
   custom_dictionary_enabled?: boolean;
   show_builtin_library?: boolean;
   dictionary_auto_lookup?: boolean;
+  vision_figure_fallback?: boolean;
 }
 
 export class ApiError extends Error {
@@ -595,6 +624,10 @@ export const api = {
   /** Trigger AI fallback for pages that had OCR issues. */
   aiFallbackImport: (jobId: string) =>
     request<ImportJob>(`/api/imports/${jobId}/ai-fallback`, { method: "POST" }),
+
+  /** Re-crop figures that lost their header with a vision model (tokens). */
+  visionFigureFallback: (jobId: string) =>
+    request<ImportJob>(`/api/imports/${jobId}/vision-figures`, { method: "POST" }),
 
   getDocument: (id: number) => request<DocumentSummary>(`/api/documents/${id}`),
 
@@ -725,6 +758,50 @@ export const api = {
     request<{ question_id: number; starred: boolean }>(
       `/api/review/starred/${questionId}`,
       { method: "DELETE" },
+    ),
+
+  /** Highlights + per-question notes for one paper (0 token). */
+  getAnnotations: (docId: number) =>
+    request<DocumentAnnotations>(`/api/documents/${docId}/annotations`),
+
+  addHighlight: (
+    docId: number,
+    input: {
+      question_id: number;
+      field: string;
+      quote: string;
+      occurrence?: number;
+      color?: HighlightColor;
+      note?: string;
+      start?: number;
+      end?: number;
+    },
+  ) =>
+    request<QuestionHighlight>(`/api/documents/${docId}/annotations`, {
+      method: "POST",
+      ...json(input),
+    }),
+
+  updateHighlight: (
+    docId: number,
+    annotationId: number,
+    patch: { color?: HighlightColor; note?: string },
+  ) =>
+    request<QuestionHighlight>(
+      `/api/documents/${docId}/annotations/${annotationId}`,
+      { method: "PATCH", ...json(patch) },
+    ),
+
+  deleteHighlight: (docId: number, annotationId: number) =>
+    request<{ deleted: number }>(
+      `/api/documents/${docId}/annotations/${annotationId}`,
+      { method: "DELETE" },
+    ),
+
+  saveQuestionNote: (docId: number, questionId: number, content: string) =>
+    request<{ question_id: number; content: string }>(
+      `/api/documents/${docId}/questions/${questionId}/note`,
+      { method: "PUT", ...json({ content }) },
     ),
 
   /** Hand-written explanation — saved straight to the DB (0 token). */

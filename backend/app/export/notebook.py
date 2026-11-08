@@ -217,7 +217,11 @@ def render_notebook_markdown(notebook: Notebook) -> str:
 
 
 def _inline_md_to_html(text: str) -> str:
-    escaped = html.escape(text)
+    escaped = html.escape(html.unescape(text))
+    # Imported underlines/strike-throughs are the only raw HTML we keep.
+    for tag in ("u", "s", "del"):
+        escaped = escaped.replace(f"&lt;{tag}&gt;", f"<{tag}>")
+        escaped = escaped.replace(f"&lt;/{tag}&gt;", f"</{tag}>")
     escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
     escaped = re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<em>\1</em>", escaped)
     escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
@@ -258,9 +262,10 @@ def _md_blocks_to_html(text: str) -> str:
 def _plain_md(text: str) -> str:
     """Strip the small markdown subset for DOCX paragraphs."""
     text = re.sub(r"^#{1,4}\s+", "", text, flags=re.M)
+    text = re.sub(r"</?(?:u|s|del)>", "", text, flags=re.I)
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     text = re.sub(r"`([^`]+)`", r"\1", text)
-    return text.strip()
+    return html.unescape(text).strip()
 
 
 # --------------------------------------------------------------------------
@@ -298,6 +303,8 @@ body { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 10.5
 .analysis h4, .analysis h5, .analysis h6 { font-size: 11pt; margin: 4mm 0 1mm; }
 .bullet { margin-left: 4mm; }
 .muted { color: #8d8678; font-style: italic; }
+u { text-decoration: underline; text-underline-offset: 2px; }
+s, del { text-decoration: line-through; }
 img { max-width: 100%; margin: 2mm 0; }
 """
 

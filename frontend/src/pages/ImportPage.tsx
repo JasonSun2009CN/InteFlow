@@ -26,6 +26,7 @@ export default function ImportPage() {
   const [docs, setDocs] = useState<DocumentSummary[] | null>(null);
   const [banks, setBanks] = useState<BuiltinBank[] | null>(null);
   const [showBuiltin, setShowBuiltin] = useState(false);
+  const [visionEnabled, setVisionEnabled] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectFilter, setSubjectFilter] = useState<SubjectFilterValue>("all");
   const [importSubjectId, setImportSubjectId] = useState<number | "">("");
@@ -117,7 +118,10 @@ export default function ImportPage() {
     void refreshBanks();
     api
       .getSettings()
-      .then((s) => setShowBuiltin(s.show_builtin_library))
+      .then((s) => {
+        setShowBuiltin(s.show_builtin_library);
+        setVisionEnabled(s.vision_figure_fallback ?? false);
+      })
       .catch((err) => console.warn("settings unavailable:", err));
     api
       .health()
@@ -225,6 +229,19 @@ export default function ImportPage() {
     setBusy(true);
     try {
       const updated = await api.aiFallbackImport(job.id);
+      setJob(updated);
+    } catch (err) {
+      setError(errText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onVisionFallback() {
+    if (!job) return;
+    setBusy(true);
+    try {
+      const updated = await api.visionFigureFallback(job.id);
       setJob(updated);
     } catch (err) {
       setError(errText(err));
@@ -399,6 +416,8 @@ export default function ImportPage() {
           onCommit={onCommit}
           onCancel={onCancelJob}
           onAiFallback={onAiFallback}
+          onVisionFallback={onVisionFallback}
+          visionEnabled={visionEnabled}
         />
       )}
 

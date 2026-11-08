@@ -20,6 +20,7 @@ from app import llm
 from app.convert import twocolumn as _twocolumn
 from app.convert import images as _images
 from app.convert import ocr as _ocr
+from app.convert import text_marks as _marks
 from app.convert.model import BuiltQuestion, Item, PageReport
 from app.convert.paired import split_paired_material
 from app.convert.normalize import (
@@ -139,9 +140,12 @@ def _scan_page(
     """Extract ordered text lines plus figure PNGs for one page."""
     try:
         page_dict = page.get_text("dict", sort=False)
+        raw_dict = page.get_text("rawdict", sort=False)
     except Exception as exc:
         warnings.append(f"page {page_no}: text extraction failed ({exc})")
         return [], {}
+
+    decorations = _marks.collect(page)
 
     width, height = page.rect.width, page.rect.height
     mid = width / 2
@@ -153,7 +157,7 @@ def _scan_page(
     lines: list[Line] = []
     anchored: set[tuple[float, float]] = set()
 
-    for block in page_dict["blocks"]:
+    for block in raw_dict["blocks"]:
         if block["type"] != 0:
             rect = pymupdf.Rect(block["bbox"])
             if (rect.x1 - rect.x0) < 12 or (rect.y1 - rect.y0) < 12:
@@ -174,7 +178,7 @@ def _scan_page(
         texts: list[str] = []
         first_y, last_y, size = None, None, 10.0
         for raw in block["lines"]:
-            text = clean_text("".join(s.get("text", "") for s in raw.get("spans", [])))
+            text = clean_text(_marks.line_text(raw, decorations))
             if not text:
                 continue
             y0, y1 = raw["bbox"][1], raw["bbox"][3]

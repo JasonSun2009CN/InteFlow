@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 from io import BytesIO
 
@@ -46,16 +47,35 @@ def _svg_to_png(svg: str) -> tuple[bytes | None, float]:
     return (png, max(width_pt, 6.0))
 
 
+_MARK_RE = re.compile(r"(</?(?:u|s|del)>)", re.IGNORECASE)
+
+
+def _add_runs(para, text: str, underline: bool, strike: bool) -> None:
+    lines = html.unescape(text).split("\n")
+    for index, line in enumerate(lines):
+        if index:
+            para.add_run().add_break()
+        if not line:
+            continue
+        run = para.add_run(line)
+        run.underline = underline
+        run.font.strike = strike
+
+
 def _add_rich(document: Document, text: str, svgs: dict, **para_kwargs):
     para = document.add_paragraph(**para_kwargs)
+    underline = False
+    strike = False
     for kind, value in math_render.split_math(text or ""):
         if kind == "text":
-            lines = value.split("\n")
-            for i, line in enumerate(lines):
-                if i:
-                    para.add_run().add_break()
-                if line:
-                    para.add_run(line)
+            for piece in _MARK_RE.split(value):
+                tag = piece.lower()
+                if tag in ("<u>", "</u>"):
+                    underline = tag == "<u>"
+                elif tag in ("<s>", "</s>", "<del>", "</del>"):
+                    strike = tag in ("<s>", "<del>")
+                elif piece:
+                    _add_runs(para, piece, underline, strike)
             continue
         tex, _display = value
         svg = svgs.get(value)

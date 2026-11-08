@@ -53,7 +53,20 @@ th, td { border: 0.3mm solid #cbd5e1; padding: 1.5mm 2mm; text-align: left;
          vertical-align: top; }
 th { background: #f1f5f9; }
 .muted { color: #94a3b8; }
+u { text-decoration: underline; text-underline-offset: 2px; }
+s, del { text-decoration: line-through; }
 """
+
+
+def _inline_html(text: str) -> str:
+    """Escape text while preserving the two inline emphasis tags we import."""
+    # Importers store ``&`` as ``&amp;`` so Markdown renders it literally; undo
+    # that before applying this HTML layer's own escaping.
+    value = html.escape(html.unescape(text))
+    for tag in ("u", "s", "del"):
+        value = value.replace(f"&lt;{tag}&gt;", f"<{tag}>")
+        value = value.replace(f"&lt;/{tag}&gt;", f"</{tag}>")
+    return value
 
 
 def _data_uri(path: Path) -> str:
@@ -67,7 +80,7 @@ def _rich(text: str, svgs: dict) -> str:
     parts: list[str] = []
     for kind, value in math_render.split_math(text or ""):
         if kind == "text":
-            parts.append(html.escape(value).replace("\n", "<br/>"))
+            parts.append(_inline_html(value).replace("\n", "<br/>"))
             continue
         tex, display = value
         svg = svgs.get(value)

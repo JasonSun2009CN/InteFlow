@@ -22,6 +22,7 @@ ALLOWED_KEYS = (
     "show_builtin_library",
     "dictionary_auto_lookup",
     "vocab_auto_definition",
+    "vision_figure_fallback",
 )
 
 
@@ -79,3 +80,8 @@ def dictionary_auto_lookup_enabled() -> bool:
 def word_exam_ai_grading_enabled() -> bool:
     """Whether submitting a word test may ask the LLM to grade answers."""
     return get_all().get("vocab_exam_ai_grading", "0") == "1"
+
+
+def vision_figure_fallback_enabled() -> bool:
+    """Whether a figure/title crop may be repaired by a vision model (tokens)."""
+    return get_all().get("vision_figure_fallback", "0") == "1"

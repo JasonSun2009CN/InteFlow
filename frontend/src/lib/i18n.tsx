@@ -921,6 +921,41 @@ const MESSAGES: Record<string, string> = {
   "Midnight Navy": "Midnight Navy",
   "Warm Editorial": "Warm Editorial",
 
+  // --- study tools: highlights, notes, elimination ------------------------
+  "Highlight selection": "高亮选区",
+  Highlight: "高亮",
+  yellow: "黄色",
+  green: "绿色",
+  blue: "蓝色",
+  pink: "粉色",
+  "Highlight in {color}": "用{color}高亮",
+  Note: "笔记",
+  "Optional note for this highlight": "为这条高亮写备注（可选）",
+  "This paper": "本套试卷",
+  Highlights: "高亮",
+  "Select text in the passage or question, then pick a colour.":
+    "在文章或题目中选中文字，然后选择颜色。",
+  "Option {letter}": "选项 {letter}",
+  "Delete highlight": "删除高亮",
+  "Add a note…": "添加备注…",
+  "Question note": "题目笔记",
+  "Write anything that helps with this question…": "写下任何对这道题有帮助的内容…",
+  "Saved automatically": "自动保存",
+  "Cross out option {letter}": "划掉选项 {letter}",
+  "Restore option {letter}": "恢复选项 {letter}",
+  "Cross out option": "划掉选项",
+  "Restore option": "恢复选项",
+  "Could not update the highlight: {error}": "无法更新高亮：{error}",
+  "Repairing figures…": "正在修复图表…",
+  "Repair figure headers with a vision model": "用视觉模型修复图表标题",
+  "Re-crops charts/tables whose title or axis labels were lost. Uses the configured vision model and may consume tokens.":
+    "重新截取丢失标题或坐标轴标签的图表/表格。会调用已配置的视觉模型并可能消耗 token。",
+  "Enable Vision figure fallback in Settings to use this.":
+    "请先在设置中开启「图表视觉兜底」。",
+  "Vision figure fallback": "图表视觉兜底",
+  "After a PDF import, allow the configured vision model to inspect charts or tables whose title or axis labels were clipped, then re-crop them with the full header. This is never automatic: it runs only when you press the repair button and it consumes tokens. Leave it off to keep every import fully offline.":
+    "导入 PDF 后，允许已配置的视觉模型检查标题或坐标轴标签被裁掉的图表/表格，并重新截取完整版本。它绝不会自动运行：只有你点击修复按钮时才会调用，且会消耗 token。关闭后所有导入都完全离线。",
+
   // --- toasts / common ----------------------------------------------------
   "Copied": "已复制",
   "Something went wrong.": "出了点问题。",

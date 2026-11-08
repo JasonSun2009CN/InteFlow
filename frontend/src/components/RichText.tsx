@@ -3,6 +3,8 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import { api } from "../api/client";
 
 interface Props {
@@ -27,6 +29,22 @@ const BASE_COMPONENTS: Components = {
   h1: ({ children }) => <h3 className="my-2 text-lg font-semibold">{children}</h3>,
   h2: ({ children }) => <h3 className="my-2 text-base font-semibold">{children}</h3>,
   h3: ({ children }) => <h3 className="my-2 text-base font-semibold">{children}</h3>,
+  // Imported exam text uses <u>…</u> for source underlines. These tags are the
+  // only raw HTML we intentionally allow; rehype-sanitize drops everything else.
+  u: ({ children }) => <u className="underline decoration-1 underline-offset-2">{children}</u>,
+  s: ({ children }) => <s className="line-through">{children}</s>,
+  del: ({ children }) => <del className="line-through">{children}</del>,
+};
+
+const SANITIZE_SCHEMA = {
+  ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames ?? []), "u", "s", "mark"],
+  attributes: {
+    ...defaultSchema.attributes,
+    u: ["className"],
+    s: ["className"],
+    mark: ["className", "data-color"],
+  },
 };
 
 /** Markdown + `$math$` renderer shared by every question surface. */
@@ -50,7 +68,11 @@ function RichText({ text, docId, breaks = false }: Props) {
   return (
     <ReactMarkdown
       remarkPlugins={breaks ? [remarkMath, remarkBreaks] : [remarkMath]}
-      rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: false }]]}
+      rehypePlugins={[
+        rehypeRaw,
+        [rehypeSanitize, SANITIZE_SCHEMA],
+        [rehypeKatex, { throwOnError: false, strict: false }],
+      ]}
       components={components}
     >
       {text}

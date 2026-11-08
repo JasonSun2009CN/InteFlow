@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import zipfile
+from html import escape
 from io import BytesIO
 from pathlib import Path
 
@@ -89,17 +90,64 @@ def _to_png(blob: bytes) -> bytes | None:
         return None
 
 
+_OFF_VALUES = {"0", "false", "none", "off"}
+
+
+def _run_marks(run) -> tuple[bool, bool]:
+    """``(underline, strike)`` for one Word run."""
+    props = run.find(qn("w:rPr"))
+    if props is None:
+        return False, False
+    underline = props.find(qn("w:u"))
+    strike = props.find(qn("w:strike"))
+    if strike is None:
+        strike = props.find(qn("w:dstrike"))
+
+    def enabled(element) -> bool:
+        if element is None:
+            return False
+        value = (element.get(qn("w:val")) or "").strip().lower()
+        return value not in _OFF_VALUES
+
+    return enabled(underline), enabled(strike)
+
+
+def _wrap_marks(text: str, underline: bool, strike: bool) -> str:
+    """Wrap each visual line separately so tags never cross a `\\n`."""
+    if not text:
+        return text
+    out: list[str] = []
+    for line in text.split("\n"):
+        value = escape(line, quote=False)
+        if strike:
+            value = f"<s>{value}</s>"
+        elif underline:
+            value = f"<u>{value}</u>"
+        out.append(value)
+    return "\n".join(out)
+
+
 def _paragraph_text(paragraph: Paragraph) -> str:
-    """Paragraph text with manual line breaks (`Shift+Enter`) preserved as \\n."""
+    """Paragraph text with manual line breaks (`Shift+Enter`) preserved as \\n.
+
+    Word stores emphasis on runs (`w:rPr/w:u`, `w:rPr/w:strike`), so the text is
+    assembled run by run and wrapped in inline tags as it is read.
+    """
     parts: list[str] = []
-    for node in paragraph._p.iter():
-        tag = node.tag
-        if tag == qn("w:t"):
-            parts.append(node.text or "")
-        elif tag in (qn("w:br"), qn("w:cr")):
-            parts.append("\n")
-        elif tag == qn("w:tab"):
-            parts.append("\t")
+    for run in paragraph._p.iter(qn("w:r")):
+        underline, strike = _run_marks(run)
+        text: list[str] = []
+        for node in run.iter():
+            tag = node.tag
+            if tag == qn("w:t"):
+                text.append(node.text or "")
+            elif tag in (qn("w:br"), qn("w:cr")):
+                text.append("\n")
+            elif tag == qn("w:tab"):
+                text.append("\t")
+        value = "".join(text)
+        if value:
+            parts.append(_wrap_marks(value, underline, strike))
     return "".join(parts)
 
 

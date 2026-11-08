@@ -9,6 +9,8 @@ Harness rules (one transport for import fallback AND the in-app AI panel):
 
 from __future__ import annotations
 
+import base64
+
 import httpx
 
 from app.providers import (
@@ -66,6 +68,54 @@ def complete(system: str, messages: list[dict[str, str]]) -> str:
     if cfg["protocol"] == "anthropic":
         return _anthropic(cfg, system, messages)
     return _openai(cfg, system, messages)
+
+
+def complete_vision(
+    system: str,
+    prompt: str,
+    image_png: bytes,
+    *,
+    media_type: str = "image/png",
+) -> str:
+    """One vision completion with a single image (explicit, user-triggered only).
+
+    Both supported protocols accept the same base64 payload through a different
+    envelope; everything else (config, timeout, error handling) is shared with
+    :func:`complete`.
+    """
+    cfg = _config()
+    encoded = base64.b64encode(image_png).decode("ascii")
+    if cfg["protocol"] == "anthropic":
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": encoded,
+                        },
+                    },
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ]
+        return _anthropic(cfg, system, messages)  # type: ignore[arg-type]
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{media_type};base64,{encoded}"},
+                },
+            ],
+        }
+    ]
+    return _openai(cfg, system, messages)  # type: ignore[arg-type]
 
 
 def _post(url: str, headers: dict[str, str], payload: dict) -> httpx.Response:

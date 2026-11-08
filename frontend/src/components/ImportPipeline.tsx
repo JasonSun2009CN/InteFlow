@@ -55,6 +55,8 @@ interface Props {
   onCommit: () => void;
   onCancel: () => void;
   onAiFallback: () => void;
+  onVisionFallback?: () => void;
+  visionEnabled?: boolean;
 }
 
 export default function ImportPipeline({
@@ -63,6 +65,8 @@ export default function ImportPipeline({
   onCommit,
   onCancel,
   onAiFallback,
+  onVisionFallback = () => undefined,
+  visionEnabled = false,
 }: Props) {
   const { t } = useI18n();
   const activeIndex = Math.max(
@@ -245,6 +249,27 @@ export default function ImportPipeline({
                 ).length,
               },
             )}
+          </p>
+        </div>
+      )}
+
+      {job.status === "review" && job.kind === "pdf" && (
+        <div className="mt-4">
+          <button
+            onClick={onVisionFallback}
+            disabled={busy || !visionEnabled}
+            className="flex items-center gap-2 border border-slate-300 px-4 py-2 font-medium text-slate-700 hover:border-slate-900 disabled:opacity-50"
+          >
+            {busy
+              ? t("Repairing figures…")
+              : t("Repair figure headers with a vision model")}
+          </button>
+          <p className="mt-1 text-xs text-slate-500">
+            {visionEnabled
+              ? t(
+                  "Re-crops charts/tables whose title or axis labels were lost. Uses the configured vision model and may consume tokens.",
+                )
+              : t("Enable Vision figure fallback in Settings to use this.")}
           </p>
         </div>
       )}

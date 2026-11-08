@@ -51,6 +51,7 @@ class SettingsPayload(BaseModel):
     custom_dictionary_enabled: bool | None = None  # consult the user dictionary first
     show_builtin_library: bool | None = None  # show the bundled sample bank in Library
     dictionary_auto_lookup: bool | None = None  # Dictionary tool: look up while typing
+    vision_figure_fallback: bool | None = None  # AI re-crops figures that lost their header
 
 
 def _mask(key: str) -> str:
@@ -84,6 +85,7 @@ def _load() -> dict[str, str]:
         # visible; packaged builds contain no bundled bank and stay opt-in.
         "show_builtin_library": stored.get("show_builtin_library", _dev_default()),
         "dictionary_auto_lookup": stored.get("dictionary_auto_lookup", "1"),
+        "vision_figure_fallback": stored.get("vision_figure_fallback", "0"),
     }
 
 
@@ -105,6 +107,7 @@ def _view(s: dict[str, str]) -> dict:
         "custom_dictionary_enabled": s["custom_dictionary_enabled"] != "0",
         "show_builtin_library": s["show_builtin_library"] == "1",
         "dictionary_auto_lookup": s["dictionary_auto_lookup"] != "0",
+        "vision_figure_fallback": s["vision_figure_fallback"] == "1",
     }
 
 
@@ -170,6 +173,10 @@ def put_settings(payload: SettingsPayload) -> dict:
         updates["show_builtin_library"] = "1" if payload.show_builtin_library else "0"
     if payload.dictionary_auto_lookup is not None:
         updates["dictionary_auto_lookup"] = "1" if payload.dictionary_auto_lookup else "0"
+    if payload.vision_figure_fallback is not None:
+        updates["vision_figure_fallback"] = (
+            "1" if payload.vision_figure_fallback else "0"
+        )
     settings_repo.set_values(updates)
     return _view(_load())
 
