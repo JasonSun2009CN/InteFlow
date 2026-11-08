@@ -8,8 +8,9 @@ import {
   type SessionDetail,
   type SubmitResult,
 } from "../../api/client";
-import RichText from "../RichText";
 import PassageText from "../PassageText";
+import AnnotatableText from "../AnnotatableText";
+import StudyNotesDrawer from "../StudyNotesDrawer";
 import { buttonClasses } from "../ui";
 import AiTutorPane from "./AiTutorPane";
 import AnalysisEditor from "./AnalysisEditor";
@@ -25,6 +26,8 @@ import { useMediaQuery } from "./useMediaQuery";
 import { useWorkspaceLayout, type WorkspaceTool } from "./usePersistentLayout";
 import { sectionLabel } from "../../lib/sections";
 import { useI18n } from "../../lib/i18n";
+import { highlightsFor, useAnnotations } from "../../lib/useAnnotations";
+import { useEliminated } from "../../lib/useEliminated";
 
 const PANE_MIN = 22;
 const PANE_MAX = 78;
@@ -90,6 +93,18 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
   const [starred, setStarred] = useState<Set<number>>(new Set());
   const [loadError, setLoadError] = useState<string | null>(null);
   const [starError, setStarError] = useState<string | null>(null);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const {
+    highlights,
+    notes,
+    error: annotationError,
+    setError: setAnnotationError,
+    addHighlight,
+    updateHighlight,
+    deleteHighlight,
+    saveNote,
+  } = useAnnotations(docId);
+  const { toggle: toggleEliminated, eliminatedFor } = useEliminated(docId);
 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
@@ -230,6 +245,8 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
 
   const visibleItems = result.items.filter(matchesFilter);
   const selected = result.items.find((i) => i.question_id === selectedId) ?? null;
+  const currentHighlights = highlightsFor(highlights, selected?.question_id);
+  const currentNote = selected ? (notes[String(selected.question_id)] ?? "") : "";
   const vIdx = visibleItems.findIndex((i) => i.question_id === selectedId);
   const prevQ = vIdx > 0 ? visibleItems[vIdx - 1] : null;
   const nextQ = vIdx >= 0 && vIdx < visibleItems.length - 1 ? visibleItems[vIdx + 1] : null;
@@ -311,11 +328,23 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             material2={selected.material2}
             docId={docId}
             textClassName="text-sm"
+            questionId={selected.question_id}
+            highlights={highlights}
+            onCreateHighlight={addHighlight}
+            onHighlightError={setAnnotationError}
           />
         </div>
       )}
       <div className="mt-3 text-base">
-        <RichText text={selected.stem} docId={docId} />
+        <AnnotatableText
+          text={selected.stem}
+          docId={docId}
+          field="stem"
+          questionId={selected.question_id}
+          highlights={highlights}
+          onCreate={addHighlight}
+          onError={setAnnotationError}
+        />
       </div>
 
       {selected.kind === "blank" ? (
@@ -344,6 +373,7 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             const letter = optionLetter(option);
             const isAnswer = selected.answers.includes(letter);
             const isChosen = selected.chosen_answers.includes(letter);
+            const eliminated = eliminatedFor(selected.question_id).has(letter);
             const tone = isAnswer
               ? "border-emerald-500 bg-emerald-50"
               : isChosen
@@ -352,12 +382,40 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
             return (
               <li
                 key={letter}
-                className={`flex items-start gap-3 border-l-2 px-3 py-2 text-sm ${tone}`}
+                className={`flex items-start gap-3 border-l-2 px-3 py-2 text-sm ${tone} ${
+                  eliminated ? "opacity-50" : ""
+                }`}
               >
                 <span className="font-semibold">{letter}</span>
-                <span className="flex-1">
-                  <RichText text={option.replace(/^[A-Z][.)]\s*/, "")} docId={docId} />
+                <span
+                  className={`flex-1 ${eliminated ? "line-through decoration-2" : ""}`}
+                >
+                  <AnnotatableText
+                    text={option.replace(/^[A-Z][.)]\s*/, "")}
+                    docId={docId}
+                    field={`option:${letter}`}
+                    questionId={selected.question_id}
+                    highlights={highlights}
+                    onCreate={addHighlight}
+                    onError={setAnnotationError}
+                  />
                 </span>
+                <button
+                  type="button"
+                  onClick={() => toggleEliminated(selected.question_id, letter)}
+                  aria-pressed={eliminated}
+                  aria-label={
+                    eliminated
+                      ? t("Restore option {letter}", { letter })
+                      : t("Cross out option {letter}", { letter })
+                  }
+                  title={eliminated ? t("Restore option") : t("Cross out option")}
+                  className={`shrink-0 px-1 text-xs ${
+                    eliminated ? "text-red-600" : "text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  {eliminated ? "↺" : "×"}
+                </button>
                 {isChosen && (
                   <span
                     className={`shrink-0 text-xs font-medium ${
@@ -487,6 +545,13 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
 
         <div className="flex shrink-0 items-center gap-2">
           <button
+            onClick={() => setNotesOpen(true)}
+            className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
+          >
+            {t("Notes")}
+            {currentHighlights.length > 0 ? ` (${currentHighlights.length})` : ""}
+          </button>
+          <button
             onClick={() => setNotebookOpen(true)}
             className="border border-slate-300 px-3 py-1.5 text-sm font-medium hover:border-slate-900"
           >
@@ -524,6 +589,20 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
       {starError && (
         <p className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
           {t("Could not update the star: {error}", { error: starError })}
+        </p>
+      )}
+      {annotationError && (
+        <p className="flex shrink-0 items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-1.5 text-xs text-amber-900">
+          <span className="min-w-0 flex-1">
+            {t("Could not update the highlight: {error}", { error: annotationError })}
+          </span>
+          <button
+            type="button"
+            onClick={() => setAnnotationError(null)}
+            className="shrink-0 font-medium underline"
+          >
+            {t("Dismiss")}
+          </button>
         </p>
       )}
 
@@ -642,6 +721,20 @@ export default function Workspace({ detail, result, t: elapsedSeconds, sessionId
           onClose={() => setNotebookOpen(false)}
         />
       )}
+
+      <StudyNotesDrawer
+        open={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        questionNo={selected?.no ?? null}
+        highlights={currentHighlights}
+        note={currentNote}
+        onSaveNote={(content) => {
+          if (selected) return saveNote(selected.question_id, content);
+          return Promise.resolve();
+        }}
+        onUpdateHighlight={(id, patch) => updateHighlight(id, patch)}
+        onDeleteHighlight={(id) => deleteHighlight(id)}
+      />
     </div>
   );
 }

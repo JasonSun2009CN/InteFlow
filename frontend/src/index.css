@@ -178,6 +178,21 @@ h4 {
   background: var(--color-ink-300);
 }
 
+/* Study highlights: CSS Custom Highlight API ranges, so React stays in charge
+   of the Markdown tree and no DOM nodes are mutated behind its back. */
+::highlight(if-hl-yellow) {
+  background-color: rgb(253 224 71 / 0.55);
+}
+::highlight(if-hl-green) {
+  background-color: rgb(110 231 183 / 0.55);
+}
+::highlight(if-hl-blue) {
+  background-color: rgb(125 211 252 / 0.55);
+}
+::highlight(if-hl-pink) {
+  background-color: rgb(249 168 212 / 0.55);
+}
+
 ::selection {
   background: var(--t-accent-soft, #e9eef6);
   color: var(--t-text, #171715);

@@ -18,6 +18,11 @@ vi.mock("../api/client", async (importOriginal) => {
       listStarredIds: vi.fn(),
       starQuestion: vi.fn(),
       unstarQuestion: vi.fn(),
+      getAnnotations: vi.fn(),
+      addHighlight: vi.fn(),
+      updateHighlight: vi.fn(),
+      deleteHighlight: vi.fn(),
+      saveQuestionNote: vi.fn(),
     },
   };
 });
@@ -30,6 +35,7 @@ const deleteSession = vi.mocked(api.deleteSession);
 const listStarredIds = vi.mocked(api.listStarredIds);
 const starQuestion = vi.mocked(api.starQuestion);
 const unstarQuestion = vi.mocked(api.unstarQuestion);
+const getAnnotations = vi.mocked(api.getAnnotations);
 
 const doc: DocumentSummary = {
   id: 7,
@@ -93,6 +99,7 @@ describe("PracticePage sessions", () => {
     listStarredIds.mockResolvedValue({ question_ids: [] });
     starQuestion.mockResolvedValue({ question_id: 1, starred: true });
     unstarQuestion.mockResolvedValue({ question_id: 1, starred: false });
+    getAnnotations.mockResolvedValue({ highlights: [], notes: {} });
   });
 
   it("discards the provisional session when you leave without submitting", async () => {
@@ -102,6 +109,28 @@ describe("PracticePage sessions", () => {
     unmount();
 
     await waitFor(() => expect(deleteSession).toHaveBeenCalledWith(42));
+  });
+
+  it("crosses out an option without selecting it", async () => {
+    renderPage();
+    await screen.findByText("Ready to begin");
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Begin — enter fullscreen/ }));
+    });
+    await screen.findByText("Exit");
+
+    const crossOut = await screen.findByRole("button", {
+      name: "Cross out option A",
+    });
+    fireEvent.click(crossOut);
+
+    expect(
+      await screen.findByRole("button", { name: "Restore option A" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(window.localStorage.setItem).toHaveBeenCalledWith(
+      "inteflow.eliminated.7",
+      JSON.stringify({ "1": ["A"] }),
+    );
   });
 
   it("persists a starred question while practising", async () => {

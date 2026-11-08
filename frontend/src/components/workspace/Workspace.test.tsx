@@ -18,6 +18,11 @@ vi.mock("../../api/client", async (importOriginal) => {
       listStarredIds: vi.fn(),
       starQuestion: vi.fn(),
       unstarQuestion: vi.fn(),
+      getAnnotations: vi.fn(),
+      addHighlight: vi.fn(),
+      updateHighlight: vi.fn(),
+      deleteHighlight: vi.fn(),
+      saveQuestionNote: vi.fn(),
     },
   };
 });
@@ -120,6 +125,7 @@ describe("Workspace", () => {
     } as never);
     listStarredIds.mockResolvedValue({ question_ids: [] });
     starQuestion.mockResolvedValue({ question_id: 5, starred: true });
+    vi.mocked(api.getAnnotations).mockResolvedValue({ highlights: [], notes: {} });
   });
 
   it("opens the full notebook preview from the top bar", async () => {

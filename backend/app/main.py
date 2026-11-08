@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api import (
     ai,
     analysis,
+    annotations,
     builtin,
     custom_dictionary,
     dictionary,
@@ -61,6 +62,7 @@ app.include_router(word_exam.router)
 app.include_router(subjects.router)
 app.include_router(review.router)
 app.include_router(custom_dictionary.router)
+app.include_router(annotations.router)
 
 
 @app.get("/api/health")

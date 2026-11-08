@@ -8,10 +8,14 @@ import {
   type TimerMode,
   type TimerPreference,
 } from "../api/client";
+import AnnotatableText from "../components/AnnotatableText";
 import RichText from "../components/RichText";
 import PassageText from "../components/PassageText";
+import StudyNotesDrawer from "../components/StudyNotesDrawer";
 import { sectionLabel } from "../lib/sections";
 import { useI18n } from "../lib/i18n";
+import { highlightsFor, useAnnotations } from "../lib/useAnnotations";
+import { useEliminated } from "../lib/useEliminated";
 
 /** Last timer choice, remembered per paper and globally for docs without a record. */
 const TIMER_STORAGE_KEY = "inteflow.practice.timer";
@@ -99,6 +103,18 @@ export default function PracticePage() {
   const [confirming, setConfirming] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
+  const {
+    highlights,
+    notes,
+    error: annotationError,
+    setError: setAnnotationError,
+    addHighlight,
+    updateHighlight,
+    deleteHighlight,
+    saveNote,
+  } = useAnnotations(docId);
+  const { toggle: toggleEliminated, eliminatedFor } = useEliminated(docId);
 
   const answersRef = useRef<Record<number, string[]>>({});
   answersRef.current = answers;
@@ -559,6 +575,8 @@ export default function PracticePage() {
   const unanswered = questions.length - answered;
   const material = current.material;
   const material2 = current.material2;
+  const currentHighlights = highlightsFor(highlights, current.id);
+  const currentNote = notes[String(current.id)] ?? "";
   const clockValue =
     timerMode === "countdown" && countdownTotal !== null
       ? Math.max(0, countdownTotal - seconds)
@@ -613,6 +631,19 @@ export default function PracticePage() {
         </div>
       )}
 
+      {annotationError && (
+        <div className="mx-auto mt-3 flex max-w-6xl items-center gap-3 border-l-2 border-amber-500 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+          <span className="min-w-0 flex-1">{annotationError}</span>
+          <button
+            type="button"
+            onClick={() => setAnnotationError(null)}
+            className="shrink-0 text-xs font-medium underline"
+          >
+            {t("Dismiss")}
+          </button>
+        </div>
+      )}
+
       {timeUp && (
         <div className="mx-auto mt-3 max-w-6xl border-l-2 border-amber-500 bg-amber-50 px-4 py-2 text-sm text-amber-900">
           {t("Time's up — submitting your answers…")}
@@ -626,7 +657,15 @@ export default function PracticePage() {
               className="max-h-[70vh] overflow-y-auto border border-slate-200 bg-white p-5 [scrollbar-gutter:stable]"
               data-testid="practice-passage"
             >
-              <PassageText material={material} material2={material2} docId={docId} />
+              <PassageText
+                material={material}
+                material2={material2}
+                docId={docId}
+                questionId={current.id}
+                highlights={highlights}
+                onCreateHighlight={addHighlight}
+                onHighlightError={setAnnotationError}
+              />
             </aside>
           )}
 
@@ -636,20 +675,37 @@ export default function PracticePage() {
                 {t("Question {number}", { number: current.no ?? idx + 1 })}
                 {current.source ? ` · ${current.source}` : ""}
               </span>
-              <button
-                onClick={() => toggleMark(current.id)}
-                className={`px-1 py-1 ${
-                  marked.has(current.id)
-                    ? "text-amber-700"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                {marked.has(current.id) ? `★ ${t("Starred")}` : `☆ ${t("Star for review")}`}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setNotesOpen(true)}
+                  className="px-1 py-1 text-slate-500 hover:text-slate-900"
+                >
+                  {t("Notes")}
+                  {currentHighlights.length > 0 ? ` (${currentHighlights.length})` : ""}
+                </button>
+                <button
+                  onClick={() => toggleMark(current.id)}
+                  className={`px-1 py-1 ${
+                    marked.has(current.id)
+                      ? "text-amber-700"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {marked.has(current.id) ? `★ ${t("Starred")}` : `☆ ${t("Star for review")}`}
+                </button>
+              </div>
             </div>
 
             <div className="text-base">
-              <RichText text={current.stem} docId={docId} />
+              <AnnotatableText
+                text={current.stem}
+                docId={docId}
+                field="stem"
+                questionId={current.id}
+                highlights={highlights}
+                onCreate={addHighlight}
+                onError={setAnnotationError}
+              />
             </div>
 
             <div className="mt-5 space-y-2.5">
@@ -671,32 +727,59 @@ export default function PracticePage() {
                 current.options.map((option) => {
                   const { letter, text } = optionParts(option);
                   const selected = (answers[current.id] ?? []).includes(letter);
+                  const eliminated = eliminatedFor(current.id).has(letter);
                   return (
-                    <button
+                    <div
                       key={letter}
-                      onClick={() => choose(current, letter)}
-                      aria-pressed={selected}
-                      className={`flex w-full items-start gap-3 border px-4 py-3 text-left transition ${
+                      className={`flex items-stretch border transition ${
                         selected
                           ? "border-slate-900 bg-slate-50"
                           : "border-slate-300 bg-white hover:border-slate-400"
-                      }`}
+                      } ${eliminated ? "opacity-55" : ""}`}
                     >
-                      <span
-                        className={`grid h-7 w-7 shrink-0 place-items-center text-sm font-medium ${
-                          current.multi ? "rounded-sm border" : "rounded-full border"
-                        } ${
-                          selected
-                            ? "border-slate-900 bg-slate-900 text-white"
-                            : "border-slate-400 text-slate-700"
+                      <button
+                        onClick={() => choose(current, letter)}
+                        aria-pressed={selected}
+                        className="flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left"
+                      >
+                        <span
+                          className={`grid h-7 w-7 shrink-0 place-items-center text-sm font-medium ${
+                            current.multi ? "rounded-sm border" : "rounded-full border"
+                          } ${
+                            selected
+                              ? "border-slate-900 bg-slate-900 text-white"
+                              : "border-slate-400 text-slate-700"
+                          }`}
+                        >
+                          {letter}
+                        </span>
+                        <span
+                          className={`min-w-0 flex-1 pt-0.5 text-base ${
+                            eliminated ? "line-through decoration-2" : ""
+                          }`}
+                        >
+                          <RichText text={text} docId={docId} />
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleEliminated(current.id, letter)}
+                        aria-pressed={eliminated}
+                        aria-label={
+                          eliminated
+                            ? t("Restore option {letter}", { letter })
+                            : t("Cross out option {letter}", { letter })
+                        }
+                        title={eliminated ? t("Restore option") : t("Cross out option")}
+                        className={`shrink-0 border-l px-3 text-xs font-medium ${
+                          eliminated
+                            ? "border-red-200 bg-red-50 text-red-700"
+                            : "border-slate-200 text-slate-400 hover:text-slate-900"
                         }`}
                       >
-                        {letter}
-                      </span>
-                      <span className="min-w-0 flex-1 pt-0.5 text-base">
-                        <RichText text={text} docId={docId} />
-                      </span>
-                    </button>
+                        {eliminated ? "↺" : "×"}
+                      </button>
+                    </div>
                   );
                 })
               )}
@@ -814,6 +897,17 @@ export default function PracticePage() {
           </div>
         </div>
       )}
+
+      <StudyNotesDrawer
+        open={notesOpen}
+        onClose={() => setNotesOpen(false)}
+        questionNo={current.no ?? idx + 1}
+        highlights={currentHighlights}
+        note={currentNote}
+        onSaveNote={(content) => saveNote(current.id, content)}
+        onUpdateHighlight={(id, patch) => updateHighlight(id, patch)}
+        onDeleteHighlight={(id) => deleteHighlight(id)}
+      />
     </div>
   );
 }

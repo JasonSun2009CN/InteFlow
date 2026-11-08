@@ -167,6 +167,25 @@ CREATE TABLE IF NOT EXISTS notes (
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS question_annotations (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  document_id  INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  question_id  INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  field        TEXT NOT NULL,                 -- material|material2|stem|option:A
+  quote        TEXT NOT NULL,
+  occurrence   INTEGER NOT NULL DEFAULT 0,    -- which match of `quote` in the field
+  color        TEXT NOT NULL DEFAULT 'yellow',
+  note         TEXT NOT NULL DEFAULT '',
+  start        INTEGER NOT NULL DEFAULT 0,    -- visible-text offsets, best effort
+  "end"        INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_question_annotations_document
+  ON question_annotations(document_id);
+CREATE INDEX IF NOT EXISTS idx_question_annotations_question
+  ON question_annotations(question_id);
+
 CREATE TABLE IF NOT EXISTS word_grids (
   document_id  INTEGER PRIMARY KEY REFERENCES documents(id) ON DELETE CASCADE,
   headers      TEXT NOT NULL DEFAULT '["Word","Meaning","Notes"]',
@@ -298,6 +317,33 @@ def _migrate(conn: sqlite3.Connection) -> None:
         qcols = {row["name"] for row in conn.execute("PRAGMA table_info(questions)")}
         if "material2" not in qcols:
             conn.execute("ALTER TABLE questions ADD COLUMN material2 TEXT")
+
+    # study annotations (2026-11-01): highlights + per-question notes. The
+    # `notes` table already existed but was unused; highlights are new.
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS question_annotations ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " document_id INTEGER NOT NULL REFERENCES documents(id) ON DELETE CASCADE,"
+        " question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,"
+        " field TEXT NOT NULL,"
+        " quote TEXT NOT NULL,"
+        " occurrence INTEGER NOT NULL DEFAULT 0,"
+        " color TEXT NOT NULL DEFAULT 'yellow',"
+        " note TEXT NOT NULL DEFAULT '',"
+        " start INTEGER NOT NULL DEFAULT 0,"
+        " \"end\" INTEGER NOT NULL DEFAULT 0,"
+        " created_at TEXT NOT NULL DEFAULT (datetime('now')),"
+        " updated_at TEXT NOT NULL DEFAULT (datetime('now'))"
+        ")"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_question_annotations_document"
+        " ON question_annotations(document_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_question_annotations_question"
+        " ON question_annotations(question_id)"
+    )
 
     # user-managed dictionary (2026-10-20): plain word/pos/definition rows.
     conn.execute(
