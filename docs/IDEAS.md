@@ -303,7 +303,47 @@
   `desktop/InteFlow.spec`、`desktop/verify_bundle.py`、`ImportPage.tsx`、`BuiltinBankCard.tsx`；
   格式说明见 `docs/IFMD.md` §9，测试见 `tests/test_bank_import.py` / `test_bundle_guard.py`。
 
-### 🔜 后续（尚未实现）
+### ✅ 图表仍缺表头时的视觉模型兜底（2026-11-01）
 
-- 图表仍缺表头时的视觉模型兜底：检测图片 → 回报页码 → 支持图片的模型识别 + 截图。
-  会消耗 token，需要单独的设置开关，且不进入默认导入主链路。
+- 导入后增加 **Repair figure headers with a vision model** 按钮；只在 PDF 导入的
+  review 阶段出现，且必须先在 Settings → Importing 开启 **Vision figure fallback**。
+- 判定“可疑图片”：alt 为空 / 只有 `figure` / 太短 / 只有数字碎片。模型收到整页图片和
+  当前裁剪框，返回 `{caption, box}`（0–1 归一化坐标），按新框重新截图并更新 alt。
+- 不进入默认导入主链路，也不在转换时自动调用；失败只写 warning，不丢已解析的题目。
+  一次最多处理 8 张图，避免误操作产生大量 token。
+- 代码：`backend/app/convert/vision_figures.py`、`app/imports.py` 的
+  `run_vision_figures`、`POST /api/imports/{job}/vision-figures`；设置键
+  `vision_figure_fallback`（默认关）。测试 `tests/test_vision_figures.py`。
+
+### ✅ 原文划线（下划线/删除线）导入与渲染（2026-11-01）
+
+- 修复 SAT「画线部分」题目看不到划线：PDF 的 Underline / StrikeOut 注释、绘制的细横线，
+  以及 DOCX 的 `w:u` / `w:strike` 现在会转成 `<u>` / `<s>`；练习、复盘、Notebook、
+  错题分析和导出共用同一份 Markdown。
+- 页宽级别的横线（表格/边框）会被排除；行内标签不会跨换行。前端用 `rehype-raw` +
+  `rehype-sanitize` 只放行 `u` / `s` / `mark`，其余 HTML 被清洗。
+- **旧卷需要从源文件重新导入**：旧导入没有保存划线信息，本功能不会事后猜测。
+- 代码：`backend/app/convert/text_marks.py`、`convert/pdf.py`、`convert/twocolumn.py`、
+  `convert/docx.py`、`frontend/src/components/RichText.tsx`；测试
+  `tests/test_text_marks.py`、`RichText.test.tsx`。
+
+### ✅ 高亮 / 笔记 / 排除选项（2026-11-01）
+
+- **高亮**：在练习页或复盘工作台选中文章/题干/选项文字，浮出 4 色（黄/绿/蓝/粉）工具条；
+  可随手附一条备注。高亮按「试卷 + 题目 + 字段 + 引文 + 出现序号」存 SQLite，
+  换一次作答、重开应用都还在。前端用 CSS Custom Highlight API 画范围，不修改 React 的
+  Markdown DOM。
+- **笔记**：每道题一份自由笔记，自动保存（700ms 防抖）；与高亮备注一起在 Notes 抽屉里
+  查看、编辑、删除。使用已有 `notes` 表。
+- **排除选项**：练习页与复盘页每个选项右侧可一键划掉/恢复，仅在本机 `localStorage`
+  保存（`inteflow.eliminated.<docId>`），不写后端、不影响判分；重新作答仍保留。
+- API：`GET/POST /api/documents/{id}/annotations`、`PATCH/DELETE …/{annotation_id}`、
+  `PUT /api/documents/{id}/questions/{qid}/note`；0 token。
+- 代码：`backend/app/repos/annotations.py`、`app/api/annotations.py`；
+  `frontend/src/components/AnnotatableText.tsx`、`StudyNotesDrawer.tsx`、
+  `lib/highlightRanges.ts`、`lib/useAnnotations.ts`、`lib/useEliminated.ts`。
+- 测试：`tests/test_annotations_api.py`、`highlightRanges.test.ts`、`PracticePage.test.tsx`。
+
+### 💡 计算器（尚未实现）
+
+- 本轮只做排除选项；计算器留到后续单独设计（基础/科学模式与考试期间的可用范围）。

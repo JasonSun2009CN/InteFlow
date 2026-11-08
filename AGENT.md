@@ -29,11 +29,11 @@
 
 | 项 | 值 |
 |---|---|
-| 后端测试 | `pytest` **349 passed** |
+| 后端测试 | `pytest` **355 passed** |
 | 前端类型检查 + 构建 | `npm run build` **0 错误** |
-| 前端组件测试 | `npm test` **167 passed, 5 skipped** |
+| 前端组件测试 | `npm test` **174 passed, 5 skipped** |
 | 内置题库 | 44 单元 / 1186 题（`backend/app/builtin/sat2025-rw-b`）——**仅源码开发环境**，安装包不含 |
-| API 面 | 69 条（见 `docs/ARCHITECTURE.md`） |
+| API 面 | 74 条（见 `docs/ARCHITECTURE.md`） |
 | 本地词典 | 韦氏大学词典 92,006 条；首次查词自动建 `data/dictionary/mw.db`；支持词条内的 Definition for English Learners；另有用户自定义词典（SQLite） |
 
 > 复盘（分析模式）重构已落地：全屏复盘、左上角折叠题目导航、Pages 式分析编辑器（可保存/续写/导出）、
@@ -223,6 +223,27 @@
   `frontend/src/components/BuiltinBankCard.tsx`；测试 `tests/test_bank_import.py`、
   `tests/test_bundle_guard.py`、`test_settings_api.py`。
 
+## 3.2 最新：原文划线 + 高亮/笔记/排除选项 + 图表视觉兜底（2026-11-01）
+
+- **原文划线（下划线/删除线）**：PDF 的 Underline / StrikeOut 注释和绘制的细横线、DOCX 的
+  `w:u` / `w:strike` 在导入时转成 `<u>` / `<s>`。前端 `RichText` 用
+  `rehype-raw` + `rehype-sanitize` 只放行 `u` / `s` / `mark`；练习、复盘、Notebook、
+  错题分析、md/docx/pdf 导出共用同一份文本。**旧卷没有保存划线信息，必须从源文件重新导入**，
+  不做事后猜测。代码：`backend/app/convert/text_marks.py` + `pdf.py` / `twocolumn.py` / `docx.py`。
+- **高亮与笔记**：练习页、复盘工作台选中文章/题干/选项文字 → 4 色高亮工具条，可附备注；
+  Notes 抽屉列出本题高亮与一份自动保存（700ms）的题目笔记。高亮存 SQLite
+  `question_annotations`（按试卷 + 题目 + 字段 + 引文 + 出现序号），跨作答保留；笔记复用
+  已有 `notes` 表。前端用 CSS Custom Highlight API 画范围，不修改 React 管理的 DOM。
+  接口：`GET/POST /api/documents/{id}/annotations`、`PATCH/DELETE …/{annotation_id}`、
+  `PUT /api/documents/{id}/questions/{qid}/note`，0 token。
+- **排除选项**：练习页/复盘页选项右侧一键划掉/恢复；只存本机
+  `localStorage["inteflow.eliminated.<docId>"]`，不写后端、不影响判分。计算器仍未做。
+- **图表表头视觉模型兜底**：Settings → Importing 新增 `vision_figure_fallback`（默认**关**）。
+  开启后，PDF 导入的 review 阶段出现手动按钮；只处理 alt 为空/`figure`/碎片化的图片，
+  把整页 PNG + 当前裁剪框发给视觉模型，取回 `{caption, box}` 后重新截图并更新 alt。
+  最多 8 张；失败只写 warning；不会进入默认导入链路。`POST /api/imports/{job}/vision-figures`。
+- 测试：后端 **355 passed**；前端 **174 passed / 5 skipped**；`npm run build` 0 错误。
+
 ## 4. 迁移与改名映射（已执行）
 
 从 SATeacher 全量迁移（排除 `.venv` / `node_modules` / `dist` / `data` / `.env` / IDE 文件），并做了如下改名：
@@ -285,6 +306,8 @@
 | 桌面端分发（2026-10-24） | 官网主入口只用 Electron 安装包（`.github/workflows/desktop.yml`，macOS arm64/x64 + Windows x64）；旧 `InteFlow.app` / `InteFlow.command` 已删除。源码运行仅作为开发者选项保留在下载页与 README。`main` push 构建并上传 artifact，`v*` tag 发布 GitHub Release |
 | 新安装是纯空应用（2026-10-24） | 安装包不包含任何本地运行数据；`desktop/verify_bundle.py` 在 CI 校验资源目录（`app.db` / `mw.db` / `.eudb` / `data/`）。**内置 SAT 题库不再随包**（仅源码开发环境保留，spec 排除 + CI 校验）；`show_builtin_library` 在开发环境默认开、在安装包中无内置题库。桌面端 File 菜单与 Settings 提供 **Reset local data…**（清空 app-data + localStorage/cache 并重启，保留 `dictionary/*.eudb` 源文件） |
 | 题库导入（2026-10-27） | `POST /api/builtin/import` 接受 ZIP（manifest + units，或无 manifest 的多份 `.ifmd.md`）；安装到 `data/banks/`，Import 页“题库”区按需 Add / Add all；用户题库可删除。0 token；ZIP 安全校验 + 逐套 IFMD 解析后才落盘 |
+| 学习标注（2026-11-01） | 原文 `<u>`/`<s>` 由导入器识别；用户高亮 + 备注存 `question_annotations`，每道题的笔记存 `notes`；选项划掉仅存本机 localStorage。高亮按引文 + 出现序号定位，跨作答保留。0 token |
+| 图表视觉兜底（2026-11-01） | 设置键 `vision_figure_fallback` 默认关；只在 PDF review 阶段由用户点按钮触发；模型返回 caption + 归一化 bbox 后重新截图；最多 8 张，失败不阻断导入。会消耗 token |
 
 ## 6. 待办 / 已知缺口
 
@@ -298,8 +321,10 @@
 5. ~~**Mistakes 仍是占位页**~~ **已实现（2026-10-20）**：侧栏改名 **Review**，内含 **Mistakes**（按题去重保留最近作答）与 **Starred**（精选题集）；支持搜索、exam 过滤、时间排序、分析查看/编辑。Vocabulary 已完成；**单词考试**与**学科分类**均已完成。
 
 ### 已知缺口
-- 图表若仍缺表头/分类标签，后续可加**视觉模型兜底**（检测图片 → 回报页码 → 多模态模型识别 + 截图）；
-  会消耗 token，需单独开关，且不进入默认导入主链路。
+- 旧版导入的原文划线没有保存，只能从源 PDF/DOCX 重新导入恢复；内置题库同样需要在本地重新导入后
+  才会显示划线。
+- 计算器仍是后续项（本轮只做了排除选项）。
+- 图表视觉兜底需要用户手动点按钮，且模型返回的裁剪框会做包含原图中心点的校验；不保证每张图都变好。
 - 旧版导入的诗歌行已被合并，只能重新从源 PDF 导入恢复。
 - 内置「25年10月北美 · Harder B」第 7 题的图表 PNG 仍是旧裁剪（不含分类标签）；现已用文字按正确柱序
   标注（`self-dealing · undistributed income · taxable expenditures · excess business holdings`），
@@ -323,11 +348,11 @@
 ./scripts/dev.sh            # 或分别 uvicorn / vite
 
 # 后端测试（临时数据目录，不动 data/）
-cd backend && ../.venv/bin/python -m pytest -q     # 基线 339 passed
+cd backend && ../.venv/bin/python -m pytest -q     # 基线 355 passed
 
 # 前端
 cd frontend && npm run build    # tsc --noEmit + vite build，0 错误
-cd frontend && npm test         # 165 passed, 5 skipped
+cd frontend && npm test         # 174 passed, 5 skipped
 ```
 
 > 迁移时若 InteFlow 还没有 `.venv`，可临时借用 `SATeacher/.venv/bin/python` 跑 pytest 验证。

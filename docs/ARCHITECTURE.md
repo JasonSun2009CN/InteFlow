@@ -500,7 +500,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 
 ---
 
-## 7. 当前 API 面（69 条）
+## 7. 当前 API 面（74 条）
 
 | 方法 | 路径 | 作用 |
 |---|---|---|
@@ -510,6 +510,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | POST | `/api/imports/{id}/commit` | 提交暂存结果落库 |
 | POST | `/api/imports/{id}/cancel` | 取消任务 |
 | POST | `/api/imports/{id}/ai-fallback` | AI 兜底（仅失败页） |
+| POST | `/api/imports/{id}/vision-figures` | 视觉模型修复缺失表头的图表（需设置开关，消耗 token） |
 | DELETE | `/api/imports/{id}` | 删除任务 |
 | GET/POST | `/api/documents` | 列表 |
 | GET/DELETE | `/api/documents/{id}` | 详情 / 删除（级联） |
@@ -518,6 +519,9 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | GET | `/api/documents/{id}/history` | 练习历史 |
 | PUT | `/api/documents/{id}/answers` | 补录答案（多选/填空校验，同步 InteFlow-MD） |
 | PUT | `/api/documents/{id}/questions/{qid}/explain` | 手写解析（旧版单字段） |
+| PUT | `/api/documents/{id}/questions/{qid}/note` | 保存该题的自由笔记（0 token） |
+| GET/POST | `/api/documents/{id}/annotations` | 读取 / 新建原文高亮（含按题笔记快照） |
+| PATCH/DELETE | `/api/documents/{id}/annotations/{annotation_id}` | 修改颜色/备注 / 删除高亮 |
 | GET | `/api/documents/{id}/analysis` | 复盘笔记本全部页 |
 | GET | `/api/documents/{id}/analysis/{qid}` | 某题分析页 |
 | PUT | `/api/documents/{id}/analysis/{qid}` | 保存某题分析 |
@@ -561,7 +565,7 @@ DELETE /api/review/starred/{question_id}    -> 取消星标
 | GET | `/api/review/starred` | 精选题集（含最近作答与分析） |
 | GET | `/api/review/starred/ids` | 某套试卷的星标 question_id 列表 |
 | POST/DELETE | `/api/review/starred/{question_id}` | 加星 / 取消星标（幂等） |
-| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_auto_definition` / `vocab_learner_definitions` / `vocab_exam_ai_grading` / `show_builtin_library` / `dictionary_auto_lookup`） |
+| GET/PUT | `/api/settings` | 读写配置（Key 掩码；含 `user_name` / `llm_fallback` / `vocab_ai_sense` / `vocab_auto_definition` / `vocab_learner_definitions` / `vocab_exam_ai_grading` / `show_builtin_library` / `dictionary_auto_lookup` / `vision_figure_fallback`） |
 | GET | `/api/settings/providers` | Provider 目录 |
 | POST | `/api/settings/test` | 连通性测试 |
 | POST | `/api/ai/answer` | AI 讲解（显式） |
